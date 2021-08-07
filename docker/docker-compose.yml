@@ -1,0 +1,84 @@
+version: '3.0'
+services:
+  uribroker:
+    image: eclipse-mosquitto
+    container_name: uribroker
+    restart: unless-stopped
+    networks:
+      - isep_urisolve
+    ports:
+      - "18833:1883"
+    logging:
+      options:
+        max-size: 50m
+
+  mysql-server:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - ./data-mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - isep_urisolve
+
+  phpmyadmin:
+    depends_on:
+      - mysql-server
+    image: phpmyadmin/phpmyadmin:5.0.1
+    restart: always
+    environment:
+      PMA_HOST: mysql-server
+      PMA_USER: root
+      PMA_PASSWORD: secret
+    ports:
+      - "8080:80"
+    networks:
+      - isep_urisolve
+
+  urinodes:
+    image: nodered/node-red
+    container_name: urinodes
+    restart: unless-stopped
+    networks:
+      - isep_urisolve
+    ports:
+      - "18800:1880"
+    volumes:
+      - ./data/urinodes:/data
+    depends_on:
+      - uribroker
+    logging:
+      options:
+        max-size: 50m
+
+  urisolve:
+    image: docker.pkg.github.com/txroot/urisolve/webappx64:stable
+    container_name: urisolve
+    restart: unless-stopped
+    networks:
+      - isep_urisolve
+    ports:
+      - "80:80"
+    depends_on:
+      - uribroker
+    logging:
+      options:
+        max-size: 50m
+
+volumes:
+  data:
+  data-mysql:
+
+networks:
+  isep_urisolve:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.200.1.0/24
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: isep_urisolve

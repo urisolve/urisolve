@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>U=RIsolve Simulator</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="description" content="URIsolve APP is a circuit solver, providing a step by step analysis." />
+    <link rel='icon' href='img/favicon.ico' type='image/x-icon' sizes="16x16" />
+
+    <!-- Vendor Style Sheets -->
+    <link rel="stylesheet" href="vendor/katex/katex.min.css">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="vendor/jsonviewer/app/reset.css"/>
+    <link rel="stylesheet" href="vendor/jsonviewer/app/app.css"/>
+    <link rel="stylesheet" href="vendor/jsonviewer/jsonTree/jsonTree.css"/>
+    <link rel="stylesheet" href="vendor/OwlCarousel2/owl.carousel.min.css">
+    <link rel="stylesheet" href="vendor/OwlCarousel2/owl.theme.default.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-toggle.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="vendor/ldLoader/ldld.min.css"/>
+    
+
+    <link rel="stylesheet" href="css/animate.min.css">
+    <link rel="stylesheet" href="css/flag-icon.min.css">
+    
+
+    <!-- Custom Style Sheets -->
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/custom_theme.css">
+    <link rel="stylesheet" href="css/main_app.css">
+    <link rel="stylesheet" href="css/login-register.css">
+    
+
+    <!-- Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-4E16301EEH"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-4E16301EEH');
+      </script>
+    <!-- End Google Analytics -->
+
+
+    <!-- Libraries -->
+    <script type="text/javascript" src="vendor/mathjs/math.min.js"></script>
+    <script type="text/javascript" src="vendor/algebrajs/algebra-0.2.6.min.js"></script>
+    <script type="text/javascript" src="vendor/katex/katex.min.js"></script>
+    <script type="text/javascript" src="vendor/algebrite/algebrite.min.js"></script>
+    <script type="text/javascript" src="vendor/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <script type="text/javascript" src="vendor/ldLoader/ldld.min.js"></script>
+    <script type="text/javascript" src="vendor/JQuery/jquery.min.js"></script>
+    <script type="text/javascript" src="vendor/latexprinter/latexprinter.js"></script>
+    <script type="text/javascript" src="vendor/latexprinter/promisejs/promise.js"></script>
+    <script type="text/javascript" src="vendor/latexprinter/samples/base64data.js"></script>
+    <script type="text/javascript" src="vendor/latexprinter/samples/latexsample.js"></script>
+    <script type="text/javascript" src="vendor/latexprinter/texworker.js"></script>
+
+    <script type="text/javascript" src="js/includes.js"></script>
+    <script type="text/javascript" src="js/varproto.js"></script>
+    <script type="text/javascript" src="js/libMTN.js"></script>
+    <script type="text/javascript" src="js/localFiles.js"></script>
+    <script type="text/javascript" src="js/syseqsolver.js"></script>
+    <script type="text/javascript" src="js/prettify.js"></script>
+    <script type="text/javascript" src="js/contact-form.js"></script>
+    <script type="text/javascript" src="js/login-register.js"></script>
+    <script type="text/javascript" src="js/publications.js"></script>
+
+
+    <script type="text/javascript">
+    // Global Arrays
+    fileContents = new Array(2);
+    </script>
+
+    <script> $(window).on('load', function(){ 
+      $(".loader").fadeOut(2000); }); 
+    </script>
+
+    <style>
+
+      </style>
+
+  </head>
+
+    <body>
+        <div id="loadpage" class="loader"></div>
+        <!-- NAVIGATION
+            ==============-->
+            <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+              <div class="container">
+                <a class="navbar-brand js-scroll-trigger" href="http://isep.ipp.pt/Department/Department/13"><img src="img/logo.png" alt="" class="img-fluid"></a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                  Menu
+                  <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                  <ul class="navbar-nav text-uppercase ml-auto">
+                    <li class="nav-item">
+                      <a class="nav-link js-scroll-trigger" href="#contact"><i class="fas fa-envelope"></i>&nbsp;<span data-translate="_menu-contact"></span></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link js-scroll-trigger" href="#instructions"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-help"></span></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link js-scroll-trigger" href="#examples"><i class="fas fa-clipboard-check"></i>&nbsp;<span data-translate="_menu-examples"></span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openPublicationsModal();"><i class="fas fa-book"></i>&nbsp;<span data-translate="_menu-docs"></span></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link js-scroll-trigger" href="#topct"><i class="fas fa-arrow-up"></i>&nbsp;<span data-translate="_menu-movetop"></span></a>
+                    </li>
+                    <li class="nav-item" id="login-nav-item">
+                      <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openLoginModal();"><i class="fas fa-sign-in-alt"></i>&nbsp;<span>LOGIN</span></a>
+                    </li>
+                    <li class="nav-item hidden" id="login-user-data">
+                      <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openLogoutModal();"><i class="fas fa-user"></i>&nbsp;<span data-translate="_menu-account"></span></a>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span id="lang-sel-flag" class="flag-icon flag-icon-en"></span> <span id="lang-sel-txt">English</span></a>
+                      <div class="dropdown-menu" aria-labelledby="dropdown09">
+                          <a id="lang-en" class="dropdown-item" href="#en"><span class="flag-icon flag-icon-gb"> </span> <small>English</small></a>
+                          <a id="lang-pt" class="dropdown-item" href="#pt"><span class="flag-icon flag-icon-pt"> </span>  <small>Português</small></a>
+                      </div>
+                    </li>
+                  </ul>
+                  <!--<input id="paintbtn" type="checkbox" unchecked data-toggle="toggle" data-size="mini" data-style="android" data-on="<i class='fas fa-paint-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>" data-off="<i class='fas fa-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>">-->
+                </div>
+              </div>
+            </nav>
+
+        <!--APP HEADER
+            ================-->
+            <section id="topct" class="masthead">
+              <div class="container h-100">
+                <div class="row h-100">
+                  <div class="col-lg-7 my-auto">
+                    <div class="header-content mx-auto  animated wow zoomIn" data-wow-duration="0.3s" data-wow-delay=".1s">
+                      <h2 class="mx-auto" data-translate="_main-title_h1"></h2><h4 data-translate="_main-title_p1"></h4>
+                      <br>
+                      <h6 class="text-white-70" data-translate="_main-body_h1"></h6>
+                      <div class="card bg-transparent-80 justify-content-center align-items-center">
+                        <div class="card-body">
+                          <div id="drop_zone" style="margin-top: 20px;">
+                            <p class="text-justify font-weight-normal">
+                              <span data-translate="_main-body_p1"></span>
+                            </p>
+                            <p class="text-left font-weight-normal">
+                              <span data-translate="_main-body_p2"></span>
+                            </p>
+                            <div class="input-group mb-3" >
+                              <div class="custom-file">
+                                <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
+                                <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
+                              </div>
+                            </div>
+                            <div class="card-footer bg-transparent font-weight-light justify-content-center align-items-center">
+                              <span id="files-details" class="badge badge-dark"></span>
+                              <div id="files-img-det" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
+                                <div class="items-align-center img-fluid" id="image-holder" style="margin-top: 20px;"></div>
+                                <output id="list"></output>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+                      <div class="row justify-content-center" style="margin-top: 20px;">
+                        <!-- Botoes para analise-->
+                        <div class="col-md-4 d-flex justify-content-center" >
+                          <button id="btnMTN" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MTN')"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
+                        </div>
+
+                        <div class="col-md-4 d-flex justify-content-center" >
+                          <button id="btnMCR" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button" aria-disabled="true"> <span data-translate="_btn_mcr_p1"></span> <br> <span data-translate="_btn_mcr_p2"></span> </button>
+                        </div>
+
+                        <div class="col-md-4 d-flex justify-content-center" >
+                          <button id="btnMCM" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
+                        </div>
+                      </div>
+                      <br>
+                    </div>
+                  </div>
+                  <div class="col-lg-5 my-auto">
+                    <div class="device-container">
+                      <div class=" portrait white animated wow bounceInUp" data-wow-duration="1s" data-wow-delay=".5s">
+                        <div class="device text-center">
+                          <div class="screen">
+                            <img id="app-insight-en" src="img/app/steps.png" class="img-fluid" alt="" style="display: none">
+                            <img id="app-insight-pt" src="img/app/passos.png" class="img-fluid" alt="" style="display: none">
+                          </div>
+                          <small><span class="badge badge-secondary">v3.2.2</span></small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <div class="bg-banner-img">
+              <!-- <img src="img/bg-curve.png" alt=""> -->
+            </div>
+
+        <!-- INSTRUCTIONS
+            ================-->
+            <section id="instructions" class="gallery">
+              <div class="container">
+                <div class="row mb-5 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="col-md-12 text-center">
+                        <div class="heading">
+                            <h1 data-translate="_sect_instruct"></h1>
+                            <div class="bord-bot"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="owl-carousel owl-theme">
+                      <div class="item">
+                        <div class="container mb-2 p-1"><h5 class="text-black-50"><span data-translate="_instr-1"></span></h5></div>
+                        <hr class="mt-2 mb-3 bg-light" style="height: 2px;"/>
+                        <img src="img/help/Instruc_1.png" alt="" class="img-fluid">
+                      </div>
+                      <div class="item">
+                        <div class="container mb-2 p-1"><h5 class="text-black-50"><span data-translate="_instr-2"></span></h5></div>
+                        <img src="img/help/Instruc_2.png" alt="" class="img-fluid">
+                      </div>
+                      <div class="item">
+                        <div class="container mb-2 p-1"><h5 class="text-black-50"><span data-translate="_instr-3"></span></h5></div>
+                        <img src="img/help/Instruc_3.png" alt="" class="img-fluid">
+                      </div>
+                      <div class="item">
+                        <div class="container mb-2 p-1"><h5 class="text-black-50"><span data-translate="_instr-4"></span></h5></div>
+                        <img src="img/help/Instruc_4.png" alt="" class="img-fluid">
+                      </div>
+                      <div class="item">
+                        <div class="container mb-2 p-1"><h5 class="text-black-50"><span data-translate="_instr-5"></span></h5></div>
+                        <img src="img/help/Instruc_5.png" alt="" class="img-fluid">
+                      </div>
+                    </div>
+                    <div class="btns text-center">
+                      <div class="customPreviousBtn btn btn-sm btn-primary font-weight-normal"><span data-translate="_instr-btn-previous"></span></div>
+                      <div class="customNextBtn btn btn-sm btn-primary font-weight-normal"><span data-translate="_instr-btn-next"></span></div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 mt-5">
+                    <div class="container mb-2 p-1 text-center"><h4 class="text-black-50"><span data-translate="_instr-video"></span></h4></div>
+                    <div class="embed-responsive embed-responsive-16by9" id="video-section">
+                      <video controls="true" id="app-video-en" class="embed-responsive-item" src="img/help/demo-video-en.mp4" allowfullscreen></video>
+                      <video controls="true" id="app-video-pt" class="embed-responsive-item" src="img/help/demo-video-pt.mp4" allowfullscreen></video>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+        <!-- EXAMPLES
+            ================-->
+            <section id="examples" class="examples">
+              <div class="container">
+                <div class="row mb-5 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="col-md-12 text-center">
+                        <div class="heading">
+                            <h1 data-translate="_sect_examples"></h1>
+                            <div class="bord-bot"></div>
+                            <p class="wow fadeInUp" data-wow-delay="0.4s"><span data-translate="_examples_p1"></span></p>
+                        </div>
+                    </div>
+                </div>
+              </div>
+
+              <div class="container md-12">
+
+                  <div class="card ml-3 mr-3">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs pull-right"  id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#DC1" role="tab" aria-controls="home" aria-selected="true"><span data-translate="_exampleTxt"></span><span> 1 </span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#DC2" role="tab" aria-controls="profile" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 2 </span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#DC3" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 3 </span></a>
+                            </li>
+                            <li class="nav-item">
+                              <a class="nav-link" id="contact-tab" data-toggle="tab" href="#DC4" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 4 </span></a>
+                          </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="tab-content" id="myTabContent">
+                          <!--No. 1 DC Example-->
+                            <div class="tab-pane fade show active" id="DC1" role="tabpanel" aria-labelledby="home-tab">
+                              <div class="card">
+                                <div class="row no-gutters">
+                                    <div class="col-sm-5">
+                                        <img class="card-img img-max-ex" src="img/examples/dcLevel1.png">
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><span data-translate="_exampleTxt"></span><span> 1 </span></h5>
+                                            <p class="card-text"><span data-translate="_example1Desc"></span></p>
+                                            <div class="row mt-2">
+                                              <div class="container">
+                                                  <div class="row">
+                                                      <div class="col-md-12 col-lg-4 text-center float-left mb-2">
+                                                          <h1 class="rating-num">
+                                                              1.0</h1>
+                                                          <div class="rating">
+                                                              <i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star text-secondary">
+                                                              </i><i class="fas fa-star text-secondary"></i><i class="fas fa-star text-secondary">
+                                                              </i><i class="fas fa-star text-secondary"></i>
+                                                          </div>
+                                                          <div>
+                                                              <span data-translate="_difficulty"></span>
+                                                          </div>
+                                                      </div>
+                                                      <div class="col-lg-8 col-md-12">
+                                                          <div class="row rating-desc">
+                                                              <div class="col-xs-3 col-md-3 text-right">
+                                                                  <span data-translate="_barsComplexity"></span>
+                                                              </div>
+                                                              <div class="col-xs-8 col-md-9">
+                                                                  <div class="progress">
+                                                                      <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                          aria-valuemin="0" aria-valuemax="100" style="width: 25%;background-color: #10912e;">
+                                                                      <span class="ml-2">25%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsAnalysis"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 20%;background-color: #10912e;">
+                                                                      <span class="ml-2">20%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsEquations"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 25%;background-color: #10912e;">
+                                                                      <span class="ml-2">25%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="row mt-2">
+                                                              <div class="col-12">
+                                                              <a id="btnTest" class="nav-link js-scroll-trigger customNextBtn btn btn-sm btn-primary float-right examplesButton font-weight-normal" href="#drop_zone" onclick="localHandleFileSelect('D1')">
+                                                                <span data-translate="_buttonTry"></span>
+                                                              </a>
+                                                              </div>
+                                                          </div>
+                                                        </div>
+                                                  </div>
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                  <small class="text-muted"><span data-translate="_lastUpdated"></span><span> Oct 1 2020.</span></small>
+                              </div>
+                              </div>
+                            </div>
+
+                          <!--No. 2 DC Example-->
+                            <div class="tab-pane fade" id="DC2" role="tabpanel" aria-labelledby="profile-tab">
+                              <div class="card">
+                                <div class="row no-gutters">
+                                    <div class="col-sm-5">
+                                        <img class="card-img img-max-ex" src="img/examples/dcLevel2.png">
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><span data-translate="_exampleTxt"></span><span> 2 </span></h5>
+                                            <p class="card-text"><span data-translate="_example2Desc"></span></p>
+                                            <div class="row mt-2">
+                                              <div class="container">
+                                                  <div class="row">
+                                                      <div class="col-md-12 col-lg-4 text-center float-left mb-2">
+                                                          <h1 class="rating-num">
+                                                              2.0</h1>
+                                                          <div class="rating">
+                                                              <i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star" style="color:#FFC107;">
+                                                              </i><i class="fas fa-star text-secondary"></i><i class="fas fa-star text-secondary">
+                                                              </i><i class="fas fa-star text-secondary"></i>
+                                                          </div>
+                                                          <div>
+                                                              <span data-translate="_difficulty"></span>
+                                                          </div>
+                                                      </div>
+                                                      <div class="col-lg-8 col-md-12">
+                                                          <div class="row rating-desc">
+                                                              <div class="col-xs-3 col-md-3 text-right">
+                                                                  <span data-translate="_barsComplexity"></span>
+                                                              </div>
+                                                              <div class="col-xs-8 col-md-9">
+                                                                  <div class="progress">
+                                                                      <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                          aria-valuemin="0" aria-valuemax="100" style="width: 40%;background-color: #d7b01d;">
+                                                                      <span class="ml-2">40%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsAnalysis"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 30%;background-color: #10912e;">
+                                                                      <span class="ml-2">30%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsEquations"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 30%;background-color: #10912e;">
+                                                                      <span class="ml-2">30%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="row mt-2">
+                                                              <div class="col-12">
+                                                              <a id="btnTest" class="nav-link js-scroll-trigger customNextBtn btn btn-sm btn-primary float-right font-weight-normal" href="#drop_zone" onclick="localHandleFileSelect('D2')"><span data-translate="_buttonTry"></span></a>
+                                                              </div>
+                                                          </div>
+                                                        </div>
+                                                  </div>
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                  <small class="text-muted"><span data-translate="_lastUpdated"></span><span> Oct 1 2020.</span></small>
+                              </div>
+                              </div>
+
+                            </div>
+
+                          <!--No. 3 DC Example-->
+                            <div class="tab-pane fade" id="DC3" role="tabpanel" aria-labelledby="contact-tab">
+                              <div class="card">
+                                <div class="row no-gutters">
+                                    <div class="col-sm-5">
+                                        <img class="card-img img-max-ex" src="img/examples/dcLevel3.png">
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><span data-translate="_exampleTxt"></span><span> 3 </span></h5>
+                                            <p class="card-text"><span data-translate="_example3Desc"></span></p>
+                                            <div class="row mt-2">
+                                              <div class="container">
+                                                  <div class="row">
+                                                      <div class="col-md-12 col-lg-4 text-center float-left mb-2">
+                                                          <h1 class="rating-num">
+                                                              3.0</h1>
+                                                          <div class="rating">
+                                                              <i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star" style="color:#FFC107;">
+                                                              </i><i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star text-secondary">
+                                                              </i><i class="fas fa-star text-secondary"></i>
+                                                          </div>
+                                                          <div>
+                                                              <span data-translate="_difficulty"></span>
+                                                          </div>
+                                                      </div>
+                                                      <div class="col-lg-8 col-md-12">
+                                                          <div class="row rating-desc">
+                                                              <div class="col-xs-3 col-md-3 text-right">
+                                                                  <span data-translate="_barsComplexity"></span>
+                                                              </div>
+                                                              <div class="col-xs-8 col-md-9">
+                                                                  <div class="progress">
+                                                                      <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                          aria-valuemin="0" aria-valuemax="100" style="width: 50%;background-color: #d7b01d;">
+                                                                      <span class="ml-2">50%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsAnalysis"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 40%;background-color: #d7b01d;">
+                                                                      <span class="ml-2">40%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+
+                                                          <div class="row rating-desc mt-2">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsEquations"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 45%;background-color: #d7b01d;">
+                                                                      <span class="ml-2">45%</span>
+                                                                    </div>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                          <div class="row mt-2">
+                                                              <div class="col-12">
+                                                              <a id="btnTest" class="nav-link js-scroll-trigger customNextBtn btn btn-sm btn-primary float-right examplesButton font-weight-normal" href="#drop_zone" onclick="localHandleFileSelect('D3')"><span data-translate="_buttonTry"></span></a>
+                                                              </div>
+                                                          </div>
+                                                        </div>
+                                                  </div>
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                  <small class="text-muted"><span data-translate="_lastUpdated"></span><span> Oct 1 2020.</span></small>
+                              </div>
+                              </div>
+
+                            </div>
+
+                          <!--No. 4 DC Example-->
+                          <div class="tab-pane fade" id="DC4" role="tabpanel" aria-labelledby="contact-tab">
+                            <div class="card">
+                              <div class="row no-gutters">
+                                  <div class="col-sm-5">
+                                      <img class="card-img img-max-ex" src="img/examples/dcLevel4.png">
+                                  </div>
+                                  <div class="col-sm-7">
+                                      <div class="card-body">
+                                          <h5 class="card-title"><span data-translate="_exampleTxt"></span><span> 4 </span></h5>
+                                          <p class="card-text"><span data-translate="_example4Desc"></span></p>
+                                          <div class="row mt-2">
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-md-12 col-lg-4 text-center float-left mb-2">
+                                                        <h1 class="rating-num">
+                                                            4.0</h1>
+                                                        <div class="rating">
+                                                            <i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star" style="color:#FFC107;">
+                                                            </i><i class="fas fa-star" style="color:#FFC107;"></i><i class="fas fa-star" style="color:#FFC107;">
+                                                            </i><i class="fas fa-star text-secondary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span data-translate="_difficulty"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-8 col-md-12">
+                                                        <div class="row rating-desc">
+                                                            <div class="col-xs-3 col-md-3 text-right">
+                                                                <span data-translate="_barsComplexity"></span>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" aria-valuenow="20"
+                                                                        aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                                                    <span class="ml-2">80%</span>
+                                                                  </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row rating-desc mt-2">
+                                                          <div class="col-xs-3 col-md-3 text-right">
+                                                              <span data-translate="_barsAnalysis"></span>
+                                                          </div>
+                                                          <div class="col-xs-8 col-md-9">
+                                                              <div class="progress">
+                                                                  <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                      aria-valuemin="0" aria-valuemax="100" style="width: 60%;background-color: #d7b01d;">
+                                                                    <span class="ml-2">60%</span>
+                                                                  </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row rating-desc mt-2">
+                                                          <div class="col-xs-3 col-md-3 text-right">
+                                                              <span data-translate="_barsEquations"></span>
+                                                          </div>
+                                                          <div class="col-xs-8 col-md-9">
+                                                              <div class="progress">
+                                                                  <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="20"
+                                                                      aria-valuemin="0" aria-valuemax="100" style="width: 60%;background-color: #d7b01d;">
+                                                                    <span class="ml-2">60%</span>
+                                                                  </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
+                                                            <div class="col-12">
+                                                            <a id="btnTest" class="nav-link js-scroll-trigger customNextBtn btn btn-sm btn-primary float-right examplesButton font-weight-normal" href="#drop_zone" onclick="localHandleFileSelect('D4')"><span data-translate="_buttonTry"></span></a>
+                                                            </div>
+                                                        </div>
+                                                      </div>
+                                                </div>
+                                            </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="card-footer">
+                                <small class="text-muted"><span data-translate="_lastUpdated"></span><span> Oct 5 2020.</span></small>
+                            </div>
+                            </div>
+
+                          </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </section>
+
+        <!-- CONTACT US
+            ================-->
+            <section id="contact" class="contact">
+              <div class="container">
+
+                <div class="row mb-5 wow fadeInUp " data-wow-delay="0.3s">
+                  <div class="col-md-12 text-center">
+                      <div class="heading">
+                          <h1 data-translate="_sect_contact"></h1>
+                          <div class="bord-bot"></div>
+                          <p class="wow fadeInUp" data-wow-delay="0.4s"><span data-translate="_contact_p1"></span></p>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row ml-5 mr-5">
+                  <div class="col-sm-3 text-center">
+                    <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s">
+                      <a href="#">
+                        <img src="img/mjf.png" alt="" class="img-fluid">
+                        <h5>Mário Alves</h5>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-sm-3 text-center">
+                    <div class="contact-cont wow fadeInUp"  data-wow-delay="0.6s">
+                      <a href="#">
+                        <img src="img/fdp.png" alt="" class="img-fluid">
+                        <h5>Francisco Pereira</h5>
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-3 text-center">
+                    <div class="contact-cont wow fadeInUp"  data-wow-delay="0.6s">
+                      <a href="#">
+                        <img src="img/txr.png" alt="" class="img-fluid">
+                        <h5>André Rocha</h5>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-sm-3 text-center">
+                    <div class="contact-cont wow fadeInUp"  data-wow-delay="0.9s">
+                      <a href="#">
+                          <img src="img/lino.png" alt="" class="img-fluid">
+                          <h5>Lino Sousa</h5>
+                      </a>
+                    </div>
+                  </div>
+              </div>
+
+              <div class="container wow fadeInUp" data-wow-delay="0.6s">
+
+                <form role="form" method="post" id="reused_form" class="col-lg-6 offset-lg-3">
+                  <div class="row justify-content-center">
+                      <div class="col-sm-12 form-group text-center">
+                          <label for="message"> <span data-translate="_sect_contact_message"></span></label>
+                          <textarea class="form-control" type="textarea" name="message" id="message" maxlength="6000" rows="7"></textarea>
+                      </div>
+                  </div>
+                  <div class="row justify-content-center">
+                      <div class="col-sm-6 form-group">
+                          <label for="name"> <span data-translate="_sect_contact_name"></span></label>
+                          <input type="text" class="form-control" id="name" name="name" required>
+                      </div>
+                      <div class="col-sm-6 form-group">
+                          <label for="email"> <span data-translate="_sect_contact_email"></span></label>
+                          <input type="email" class="form-control" id="email" name="email" required>
+                          <small id="emailHelp" class="form-text text-muted"><span data-translate="_sect_contact_emaildisclaimer"></span></small>
+                      </div>
+                  </div>
+                  <div class="row justify-content-center">
+                      <div class="col-sm-8 form-group text-center">
+                          <button type="submit" class="btn btn-sm btn-primary font-weight-normal" ><span data-translate="_sect_contact_submit"></span></button>
+                      </div>
+                  </div>
+              </form>
+              <div class="container">
+                <div class="row justify-content-center text-center">
+                  <div id="success_message" style="display:none;"> <h4><span data-translate="_sect_contact_send_success_l1"></span></h4> <h4><span data-translate="_sect_contact_send_success_l2"></span> &nbsp; <i class="far fa-grin"></i> </h4>  </div>
+                  <div id="error_message" style="display:none;"> <h4><span data-translate="_sect_contact_send_error"></span> &nbsp; <i class="far fa-frown-open"></i></h4></div>
+                </div>
+
+
+              </div>
+            </section>
+            <a href="javascript:" id="return-to-top"><i class="icon-chevron-up"></i></a>
+
+        <!-- RESULTS ==============-->
+            <div id="editor"></div>
+            <section id="results" style="display: none">
+              <!-- Modal -->
+              <div class="modal fade bd-example-modal-lg" id="results-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
+                  <div class="modal-content border-dark no-print-border" id="modalcont">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLongTitle">URIsolve Analysis Results</h5>
+                      <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div id="results-board" class="modal-body"></div>
+                    <!-- <div id="results-json" class="modal-body"></div> -->
+                    <!-- User name box -->
+                    <div class="container" style="visibility: visible;">
+                      <form role="form" method="post" id="userform-temp" class="col-lg-6 offset-lg-3">
+                        <div class="row justify-content-center">
+                            <div class="col-4 form-group">
+                                <label for="name"> <span data-translate="_firstname"></span></label>
+                                <input type="text" class="form-control" id="output-name" name="name">
+                            </div>
+                            <div class="col-4 form-group">
+                                <label for="lastname"> <span data-translate="_lastname"></span></label>
+                                <input type="text" class="form-control" id="output-lastname" name="lastname">
+                                
+                            </div>
+                            <div class="col-4 form-group">
+                              <label for="number"> <span data-translate="_number"></span></label>
+                              <input type="text" class="form-control" id="output-number" name="number">
+                          </div>
+                        </div>
+                        <div class="row justify-content-center">
+                          <small id="output-info" class="form-text text-muted"><span data-translate="_user-info-text"></span></small>
+                        </div>
+                    </form>
+                    </div>
+
+                    <div class="modal-footer no-print">
+                      <fieldset class="w-100">
+                        <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
+                        <button id="pdfPrintButton" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+                          <i class="fas fa-file-pdf" aria-hidden="true"></i>&nbsp;&nbsp;Download PDF
+                          <div class="ldld bare em-1 light d-inline-block ml-1 align-middle" id="pdfLoader"></div>
+                        </button>
+                        <button id="json" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+                        <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
+                        <button id="tex" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+                        <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
+                        <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
+                          <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
+                      </fieldset>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </section>
+
+        <!-- LOGIN MODAL ==============-->
+            <div class="modal fade login" id="loginModal">
+              <div class="modal-dialog login animated">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                            <h4 class="modal-title text-center"><span data-translate="_login-welcome"></span></h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                          <div class="box">
+                                <div class="content">
+                                  <div class="social">
+                                    <img src="img/logo_350px.png" alt="" class="img-fluid" style="max-width: 200px;" id="login-logo">
+                                    <span id="register-text" data-translate="_login-register" class="text-black-50"></span>
+                                  </div>
+                                  <span id="inbox-text" data-translate="_login-verify" class="text-black-50"></span>
+                                  <div class="division">
+                                      <div class="line l"></div>
+                                        <span>&nbsp;</span>
+                                      <div class="line r"></div>
+                                  </div>
+                                  <div class="error"></div>
+                                  <!-- Login Box -->
+                                  <div class="form loginBox">
+                                      <form role="form" method="post" id="login-form" accept-charset="UTF-8">
+                                      <div style="width: 100%;">
+                                        <i class="fas fa-envelope pt-3 pl-2" style="position: absolute;"></i>
+                                        <input id="login-email" class="form-control" type="text" placeholder="Email" name="email-login" required>
+                                      </div>
+                                      <div style="width: 100%;">
+                                        <i class="fas fa-lock pt-3 pl-2" style="position: absolute;"></i>
+                                        <input id="login-password" class="form-control" type="password" placeholder="Password" name="password-login" required>
+                                      </div>
+                                      <button type="submit" class="btn btn-default btn-login" name="login" id="login-button">
+                                        <span>Login</span>
+                                        <div class="ldld bare em-1 dark d-inline-block ml-1 align-middle" id="loginLoader"></div>
+                                      </button>
+                                      <div id="loginMessage"></div>
+                                      </form>
+                                  </div>
+                                  <!-- Password Reset Box -->
+                                  <div class="form resetBox">
+                                    <div id="form-error-message"></div>
+                                    <span id="email-exist" data-translate="_login-email-exists" class="text-black-50"></span>
+                                    <input class="btn btn-default btn-login mt-3" type="button" value="Recover" id="recover-button" onclick="showResetForm();">
+                                  </div>
+                                </div>
+                          </div>
+                          <!-- Register Box Form -->
+                          <div class="box">
+                              <div class="content registerBox" style="display:none;">
+                                <div class="form">
+                                  <form role="form" method="post" id="register-form" accept-charset="UTF-8">
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-envelope pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="reg-email" class="form-control" type="text" placeholder="Email" name="email" onchange="validateEmail('reg-email.status');" required>
+                                    <div id="status"></div>
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-id-card pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="first-name" class="form-control" type="text" placeholder="First Name" name="first-name" maxlength="15" onkeyup="validateTxtOnly(this);" required>
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-id-card pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="last-name" class="form-control" type="text" placeholder="Last Name" name="last-name" maxlength="15" onkeyup="validateTxtOnly(this);" required>
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-user pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="mech-nr" class="form-control" type="text" placeholder="Mechanographic Nr." name="mech-nr" maxlength="10" onkeyup="validateNrOnly(this);">
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-university pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="institution" class="form-control" type="text" placeholder="Institution" name="institution" onkeyup = "validateTxtOnly(this)">
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-lock pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="password" class="form-control" type="password" placeholder="Password" name="password" minlength="4" maxlength="16" required>
+                                  </div>
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-lock pt-3 pl-2" style="position: absolute;"></i>
+                                  <input id="re-pass" class="form-control" type="password" placeholder="Repeat Password" name="re-pass" minlength="4" maxlength="16" onkeyup="validatePW(); return false;" required>
+                                  </div>
+                                  <div id="confirmMessage"></div>
+                                  <button type="submit" class="btn btn-default btn-register" name="commit" id="register-button">
+                                    <span data-translate="_login-regButton"></span>
+                                    <div class="ldld bare em-1 dark d-inline-block ml-1 align-middle" id="registerLoader"></div>
+                                  </button>
+                                  </form>
+                                </div>
+                              </div>
+                          </div>
+                          <!-- Password Reset Form -->
+                          <div class="box">
+                            <div class="content resetPWBox" style="display:none;">
+                              <div class="form">
+                                <form role="form" method="post" id="reset-data" accept-charset="UTF-8">
+                                  <div style="width: 100%;">
+                                    <i class="fas fa-envelope pt-3 pl-2" style="position: absolute;"></i>
+                                    <input id="resetpw-email" class="form-control" type="text" placeholder="Email" name="email" onchange="validateEmail('resetpw-email.reset-mail-status');" required>
+                                    <div id="reset-mail-status"></div>
+                                  </div>
+                                  <button type="submit" class="btn btn-default btn-login" name="commitnewpw" id="reset-button">
+                                    <span>Reset Password</span>
+                                    <div class="ldld bare em-1 dark d-inline-block ml-1 align-middle" id="resetLoader"></div>
+                                  </button>
+                                  <div id="newPwConfirm" class="mt-2"></div> 
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Login Modal Body End -->
+                      </div>
+                      <div class="modal-footer">
+                          <div class="forgot register-footer">
+                              <span data-translate="_login-noaccount"></span>
+                              <a href="javascript: showRegisterForm();" data-translate="_login-createaccount"></a>
+                          </div>
+                          <div class="forgot login-footer" style="display:none">
+                                <span data-translate="_login-alreadyhave"></span>
+                                <a href="javascript: showLoginForm();"><span data-translate="_login-enter"></span></a>
+                          </div>
+                          <div class="forgot reset-footer" style="display:none">
+                            <span data-translate="_login-forgotPw"></span>
+                            <a href="javascript: showResetForm();" data-translate="_login-resetPw"></a>
+                        </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        
+        <!-- PROFILE MODAL ==============-->
+        <div class="modal fade login" id="logoutModal">
+          <div class="modal-dialog login animated">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class=" text-center" id="logout-modal-title"><span data-translate="_hi-hello"></span></h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <div class="box">
+                    <div class="content">
+                      <div class="social">
+                        <img src="img/logo_350px.png" alt="" class="img-fluid" style="max-width: 200px;" id="login-logo-profile">
+                      </div>
+                      <a class="logoutBtn" href="./login-php/logout.php">
+                        <button class="btn btn-default btn-login mb-1 bg-success border-success" id="logout-button">
+                          <span>Logout</span>
+                          <div class="ldld bare em-1 dark d-inline-block ml-1 align-middle" id="logoutLoader"></div>
+                        </button>
+                      </a>
+                      <div class="division mb-0">
+                          <div class="line l"></div>
+                            <span>&nbsp;</span>
+                          <div class="line r"></div>
+                      </div>
+                      <span id="inbox-text" data-translate="_edit-acc-info" class="text-black-50"></span>
+                      <div class="form mt-2">
+                        <form role="form" method="post" id="edit-form" accept-charset="UTF-8">
+                          <h6 class="lead mb-1" style="font-size: 1.1rem;" data-translate="_firstname"></h6>
+                          <div style="width: 100%;">
+                            <i class="fas fa-id-card pt-3 pl-2" style="position: absolute;"></i>
+                            <input id="edit-first-name" class="form-control" type="text" name="edit-first-name" maxlength="15" onkeyup="validateTxtOnly(this);" required>
+                          </div>
+                          <h6 class="lead mb-1" style="font-size: 1.1rem;" data-translate="_lastname"></h6>
+                          <div style="width: 100%;">
+                            <i class="fas fa-id-card pt-3 pl-2" style="position: absolute;"></i>
+                            <input id="edit-last-name" class="form-control" type="text" name="edit-last-name" maxlength="15" onkeyup="validateTxtOnly(this);" required>
+                          </div>
+                          <h6 class="lead mb-1" style="font-size: 1.1rem;" data-translate="_mechanographic"></h6>
+                          <div style="width: 100%;">
+                            <i class="fas fa-user pt-3 pl-2" style="position: absolute;"></i>
+                            <input id="edit-mech-nr" class="form-control" type="text" name="edit-mech-nr" maxlength="10" onkeyup="validateNrOnly(this);">
+                          </div>
+                          <h6 class="lead mb-1" style="font-size: 1.1rem;" data-translate="_institution"></h6>
+                          <div style="width: 100%;">
+                            <i class="fas fa-university pt-3 pl-2" style="position: absolute;"></i>
+                            <input id="edit-institution" class="form-control" type="text" name="edit-institution" onkeyup = "validateTxtOnly(this)">
+                          </div>
+                          <button type="submit" class="btn btn-default btn-login" name="edit-button" id="edit-button">
+                            <span data-translate="_btn-edit-acc"></span>
+                            <div class="ldld bare em-1 dark d-inline-block ml-1 align-middle" id="editLoader"></div>
+                          </button>
+                          <div id="editConfirm" class="mt-2 hidden">
+                            <strong><span class='text-lead' style="color:#28a745" data-translate="_info-updated"></span></strong>
+                          </div> 
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- PUBLICATIONS MODAL ==============-->
+        <div class="modal fade" id="publicationsModal"> </div>
+
+        <!-- FOOTER ==============-->
+            <footer id="footer" class="footer">
+              <div class="container-fluid">
+                <div class="row top-footer">
+                  <div class="col-md-12 text-center">
+                    <p>&copy;&nbsp;&nbsp;&nbsp;2018 - 2020&nbsp;&nbsp;&nbsp;<span data-translate="_foot_copyrig"></span></p>
+                  </div>
+                </div>
+              </div>
+            </footer>
+
+        <script src="vendor/popper/popper.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap-toggle.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+        <script src="vendor/JQuery/jquery.easing.min.js"></script>
+        <script src="vendor/OwlCarousel2/owl.carousel.min.js"></script>
+        <script src="vendor/wow/wow.min.js"></script>
+        <script src="js/app.js"></script>
+
+        <script>
+          $(function() {
+            $('#paintbtn').change(function() {
+            if ($("#paintbtn").prop('checked')) {
+              $("#topct").addClass('red');
+              $("#topct").addClass("important");
+            }
+            else {
+              $("#topct").removeClass('red');
+            }
+          });
+        });
+        </script>
+
+        <script>
+          $(document).ready(function(){
+            var owl = $('.owl-carousel');
+            owl.owlCarousel({
+              loop:true,
+              margin:10,
+              nav:false,
+              items: 1,
+            });
+
+            // Custom Button
+            $('.customNextBtn').click(function() {
+              owl.trigger('next.owl.carousel');
+            });
+            $('.customPreviousBtn').click(function() {
+              owl.trigger('prev.owl.carousel');
+            });
+
+          });
+        </script>
+
+        <script type="text/javascript">
+          $(document).ready(function(){
+            $.ajax({
+              url: "./login-php/auth-check.php",
+              type: "POST",
+              success: function(response) {
+                  if(response != false && response != null){
+                    let fields = JSON.parse(response);
+                    console.log(fields);
+                    updateLogoutModal(fields);
+                    $("#login-user-data").removeClass("hidden");
+                    $("#login-nav-item").addClass("hidden");
+                  }
+                  else
+                  {
+                    $("#login-user-data").addClass("hidden");
+                    $("#login-nav-item").removeClass("hidden");
+                  }
+              }
+            });
+          });
+        </script>
+
+        <script>
+          $(document).ready(function(){
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+            document.getElementById('modal-btn-cancel').addEventListener('click', cleanModalResults);
+            $('#results-modal').modal('hide');
+          });
+        </script>
+
+        <script type="text/javascript" src="js/fileup.js"></script>
+        <script type="text/javascript" src="js/modalresults.js"></script>
+        <script type="text/javascript" src="js/language.js"></script>
+
+        <script type="text/javascript" src="code/mcr/algMCR.js"></script>
+        <script type="text/javascript" src="code/mtn/algMTN.js"></script>
+        <script type="text/javascript" src="code/mcm/algMCM.js"></script>
+        <script type="text/javascript" src="code/analyse.js"></script>
+
+        <script src="vendor/jsonviewer/app/App.js"></script>
+        <script src="vendor/jsonviewer/jsonTree/jsonTree.js"></script>
+
+  </body>
+</html>
