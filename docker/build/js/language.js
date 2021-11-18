@@ -193,6 +193,8 @@ $(function () {
             "_btn_mcr_p2": "Correntes nos Ramos",
             "_btn_mcm_p1": "Método das",
             "_btn_mcm_p2": "Correntes nas Malhas",
+            "_btn_msf_p1": "Exercícios",
+            "_btn_msf_p2": "MSF",
             "_btn-edit-acc":"Alterar perfil",
             "_sect_instruct": "Instruções",
             "_sect_examples": "Circuitos exemplo",

@@ -67,6 +67,28 @@ function analyseCircuit(analysismet) {
                 $("#loadpage").hide();
             }, 500);
         break;
+        case "MSF":
+            setTimeout(function() {
+                let retriesNumber = 5;
+                let successFlag = false;
+                for (let i = 0; i < retriesNumber; i++) {
+                    try {
+                        loadFileAsTextMSF();
+                        successFlag = true;
+                    } catch (error) {
+                        console.log("Error in MSF: " + error);
+                        successFlag = false;
+                    }
+                    if (successFlag) {
+                        break;
+                    }
+                    if(i== (retriesNumber-1)) {
+                        alert("An error occurred. Please try again!");
+                    }
+                }
+                $("#loadpage").hide();
+            }, 500);
+        break;
         default:
             $("#loadpage").hide();
             alert('Please select a valid analysis method.');
