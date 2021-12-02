@@ -665,7 +665,7 @@ function outSupernodes(supernodes, orderedEquations, equationsV1){
         let btnstr ='<button class="btn btn-primary btn-sm float-right" type="button" data-toggle="collapse" data-target="#' + collapsePanel;
         btnstr += '" aria-expanded="false" data-translate="_snStepsBtn"></button>';
         // Add Supernode ID
-        htmlstr += '<div class="card-body text-secondary"><h5 class="card-title">' + supernodes[i].ref + ' (' + snType + ') ' + btnstr +'</h5>';
+        htmlstr += '<div class="card-body text-secondary"><h5 class="card-title">' + supernodes[i].ref + ' (' + snType + ') ' + btnstr +'</h5>';    
         // Add nodes that belong to the supernode
         htmlstr += '<p class="card-text lead"><i class="fas fa-hand-point-right mr-2 ml-2"></i><span class="lead" data-translate="_snNodes"></span>';
         htmlstr += '{' + snNodes.join(',  ') + '}';

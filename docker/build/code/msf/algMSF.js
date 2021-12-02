@@ -1,5 +1,6 @@
 include('code/common/workNetlist.js');
 include('code/common/outPrint.js');
+include('docker/build/vendor/mathjs/math.min.js');
 
 /**
  * Count Nodes By Type (0 = Real, 1 - Virtual)
@@ -3744,6 +3745,38 @@ function loadFileAsTextMSF() {
 		}
 	}
 
+	//Fase1
+	let branchesFound = new Array ();
+	let nodesFound = new Array ();
+	for (let i=0;i<branches.length;i++){
+		branchesFound.push(branches[i].amperemeter.ref);
+		nodesFound.push(branches[i].currentData.noP);
+		nodesFound.push(branches[i].currentData.noN);
+	}
+	nodesFound = [...new Set(nodesFound)];
+	branchesFound = [...new Set(branchesFound)];
+	nodesFound.sort();
+	branchesFound.sort();
+	let branchesRef = branchesFound;
+	let nodesRef = nodesFound;
+	const adjMatrix = math.zeros(nodesRef.length, nodesRef.length);
+	const incMatrix = math.zeros(branchesRef.length, nodesRef.length);
+	for(let i = 0; i<branchesRef.length;i++){
+		for(let j = 0; j<nodesRef.length;j++){
+			if(nodesRef[j]==branches[i].currentData.noP){
+				for(k=0;k<nodesRef.length;k++){
+					if(nodesRef[k]==branches[i].currentData.noN){
+						adjMatrix.subset(math.index(j,k),1);
+						adjMatrix.subset(math.index(k,j),1);
+						incMatrix.subset(math.index(i,j),1);
+						incMatrix.subset(math.index(i,k),1);
+
+					}
+				}
+			}
+		}
+	}
+	
 	// Get Knl Currents Data
 	let knlCurrData = outCurrentsKNL(knlCurrEquations,supernodes);
 
