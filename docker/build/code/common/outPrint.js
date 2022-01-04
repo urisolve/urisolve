@@ -1854,6 +1854,7 @@ function outGndTip(bestGndPos){
     return htmlstr;
 }
 
+
 /**
  * Function to draw an arrow in HTML canvas
  * @param {number} fromx Start X coordinate
@@ -2113,6 +2114,11 @@ function outHTMLSections(){
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
 
+
+///TODO ver se funciona
+// Meshes data
+
+
     // Equivalent impedances
     htmlstr += '<div id="eqImpedances"></div>';
 
@@ -2185,4 +2191,6 @@ function resizeandgray(imgObj) {
     canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
     return canvas.toDataURL();
 }
+
+
 
