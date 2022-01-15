@@ -225,7 +225,7 @@ $(function () {
             "_snStepsBtn": "Ver Etapas",
             "_snEquat": "Equações: ",
             "_currents": "Correntes nos Ramos",
-//            "_meshes": "Malhas",
+//           "_meshes": "Malhas",
             "_meshes": "Malhas",
             "_knlNode": "Nó",
             "_knlTitle": "Equações das Correntes (Lei de Kirchhoff dos Nós - LKN)",

@@ -862,6 +862,51 @@ function outCurrentsInfo(currents, branches){
     
 }
 
+
+//TODO MSF try
+/**
+ * Function to output the meshes information
+ * @param {object} meshes currents object
+ * @returns {string} HTML string
+ */
+ function outMeshes(meshes){
+    // Create row div
+    let htmlstr = '<div class="row mt-3">';
+    // TEX Data
+    let TeXData = '';
+    // Add every current information
+    for( let i = 2; i < meshes.data.order.length; i++){
+        htmlstr += '<div class="col-6 col-sm-6 col-md-6 col-lg-4">';
+        htmlstr += '<div class="card text-white bg-secondary mb-3">';
+        htmlstr += '<div class="card-body">'
+        htmlstr += '<h5 class="card-title text-left"> Malhas de ordem '+ i + ':';
+        // Current Mesh
+        for(let j=0; j<i; j++){
+            for (let k=0; k<i;k++){
+                if (k==0 || k==i-1){
+                    if(k==0){
+                        htmlstr += '<h5 class="card-title text-left"> {'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +','; 
+                        }
+                    else{
+                        htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) + '}</h5>'; 
+                        }
+                 }  
+                else{
+                    htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +',';
+                }
+            
+        }
+    }  
+    
+        htmlstr += '</h5>';
+        htmlstr += '</div></div></div>';
+    }
+    htmlstr += '</div>';
+
+   
+    return htmlstr;
+    
+}
 /**
  * Function to output the equivalent impedances and voltages
  * @param {object} Zequiv equivalent impedance extracted from branches
@@ -2102,6 +2147,13 @@ function outHTMLSections(){
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_fundamentalsTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="fundamentalVars"></div><div class="container mt-3">';
 
+
+    //TODO see if it outputs MSF 
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_meshes"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="msf_finder"></div><div class="container mt-3">';
+
+
     // Circuit information
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
@@ -2113,11 +2165,6 @@ function outHTMLSections(){
     htmlstr += '<div class="container mt-3">';
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
-
-
-///TODO ver se funciona
-// Meshes data
-
 
     // Equivalent impedances
     htmlstr += '<div id="eqImpedances"></div>';
