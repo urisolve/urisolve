@@ -3,7 +3,7 @@
  * @param {array} errList error Codes
  * @returns {string} html String
  */
-function errorOutput(errList){
+ function errorOutput(errList){
 
     // Warnings html string
     let htmlstr = '';
@@ -863,7 +863,6 @@ function outCurrentsInfo(currents, branches){
 }
 
 
-//TODO MSF try
 /**
  * Function to output the meshes information
  * @param {object} meshes currents object
@@ -881,18 +880,18 @@ function outCurrentsInfo(currents, branches){
         htmlstr += '<div class="card-body">'
         htmlstr += '<h5 class="card-title text-left"> Malhas de ordem '+ i + ':';
         // Current Mesh
-        for(let j=0; j<i; j++){
+        for(let j=0; j<meshes.data.order[i].length; j++){
             for (let k=0; k<i;k++){
                 if (k==0 || k==i-1){
                     if(k==0){
-                        htmlstr += '<h5 class="card-title text-left"> {'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +','; 
+                        htmlstr += '<h5 class="card-title text-left"> {r_'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_'; 
                         }
                     else{
                         htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) + '}</h5>'; 
                         }
                  }  
                 else{
-                    htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +',';
+                    htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_';
                 }
             
         }
@@ -2147,13 +2146,6 @@ function outHTMLSections(){
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_fundamentalsTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="fundamentalVars"></div><div class="container mt-3">';
 
-
-    //TODO see if it outputs MSF 
-    htmlstr += '<div class="container mt-3">';
-    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_meshes"></h5></div></div>';
-    htmlstr += '<div class="container mt-3" id="msf_finder"></div><div class="container mt-3">';
-
-
     // Circuit information
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
@@ -2180,6 +2172,27 @@ function outHTMLSections(){
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_res"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="resultsVoltages"></div></div>';
     
+    return htmlstr;
+}
+
+/**
+ * Function to create the output html sections in MSF
+ * @returns {string} HTML string
+ */
+ function outHTMLSections_MSF(){
+
+    let htmlstr = '';
+
+    // Warnings section
+    htmlstr += '<div id="errors"></div><div id="warnings"></div><div id="circuitImage"></div>';
+    htmlstr += '<div id= "contResults">';  
+    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
+    
+   
+    // Output Meshes
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="container mt-3" id="msf_finder"></div><div class="container mt-3">';
+
     return htmlstr;
 }
 
@@ -2238,6 +2251,4 @@ function resizeandgray(imgObj) {
     canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
     return canvas.toDataURL();
 }
-
-
 
