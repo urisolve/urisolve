@@ -2437,7 +2437,7 @@ function loadFileAsTextMSF() {
 
 		}
 		// Re-run the function
-		loadFileAsTextMTN();
+		loadFileAsTextMSF();
 		return;
 	}
 
@@ -3605,6 +3605,16 @@ function loadFileAsTextMSF() {
 		}
 	});
 
+	
+	// Refresh fileContents
+	document.getElementById("fileInput").value = "";
+	
+	// Update Dictionary Language
+	let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+	if(language == "english")
+		set_lang(dictionary.english);
+	else	
+		set_lang(dictionary.portuguese);
 //final da função
 }
 

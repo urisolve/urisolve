@@ -44,6 +44,24 @@ var mtnErrorsEnum = {
     noGndNode:           4
 };
 
+
+/*
+ *  MSF Error Codes Table
+    ErrorNb 	ErrorDesc
+    1	MSF Error 1: Identification of Virtual Nodes as Real Nodes
+    2	MSF Error 2: Identification of Real Nodes as Virtual Nodes
+    3	MSF Error 3: Real Nodes without Identification
+    4	MSF Error 3: GND not detected
+*/
+var msfErrorsEnum = {
+    none:                0,
+    virtualAsReal:       1,
+    realAsVirtual:       2,
+    noNodeIdentif:       3,
+    noGndNode:           4
+};
+
+
 /*
  *  Netlist Components Reference
 */
