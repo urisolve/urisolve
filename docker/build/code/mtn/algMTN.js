@@ -3760,7 +3760,7 @@ function loadFileAsTextMTN() {
 	knlSimplified = knlSimplified.concat(knlSubstitutions);
 	math.type.Fraction.REDUCE = false;
 	for(let i = 0; i< knlSimplified.length; i++){
-		// Remove = 0
+		// Remove = 0 
 		knlSimplified[i] = knlSimplified[i].replace(/\s+/g, '');
 		knlSimplified[i] = knlSimplified[i].replace('=0', '');
 		knlSimplified[i] = math.parse(knlSimplified[i]);
