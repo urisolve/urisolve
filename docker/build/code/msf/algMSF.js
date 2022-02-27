@@ -1,7 +1,7 @@
 include('code/common/workNetlist.js');
 include('code/common/outPrint.js');
 include('vendor/mathjs/math.min.js');
-include('vendor/meshes-finder/src/meshes-finder-javascript.js');
+include('vendor/meshes-finder2/src/meshes-finder-javascript.js');
 
 /**
 * MSF Algorythm Implementation
