@@ -1162,3 +1162,64 @@
      </div>
    </div>
  </section>
+
+ //TODO Modal para Inserir respostas
+ <!-- MODAL Input Answers ==============-->
+ <div id="editor3"></div>
+ <section id="input3" style="display: none">
+   <!-- Modal -->
+   <div class="modal fade bd-example-modal-lg" id="input-modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+     <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
+       <div class="modal-content border-black no-print-border" id="modalcont">
+         <div class="modal-header">
+           <h5 class="modal-title" id="exampleModalLongTitle">MSF Analysis - Quiz</h5>
+           <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
+         </div>
+         <div id="input-board3" class="modal-body"></div>
+         <!-- <div id="results-json" class="modal-body"></div> -->
+         <!-- User name box -->
+         <div class="container" style="visibility: visible;">
+           <form role="form" method="post" id="userform-temp" class="col-lg-6 offset-lg-3">
+             <div class="row justify-content-center">
+                 <div class="col-4 form-group">
+                     <label for="name"> <span data-translate="_firstname"></span></label>
+                     <input type="text" class="form-control" id="output-name" name="name">
+                 </div>
+                 <div class="col-4 form-group">
+                     <label for="lastname"> <span data-translate="_lastname"></span></label>
+                     <input type="text" class="form-control" id="output-lastname" name="lastname">
+                     
+                 </div>
+                 <div class="col-4 form-group">
+                   <label for="number"> <span data-translate="_number"></span></label>
+                   <input type="text" class="form-control" id="output-number" name="number">
+               </div>
+             </div>
+             <div class="row justify-content-center">
+               <small id="output-info" class="form-text text-muted"><span data-translate="_user-info-text"></span></small>
+             </div>
+         </form>
+         </div>
+
+         <div class="modal-footer no-print">
+           <fieldset class="w-100">
+             <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
+             <button id="pdfPrintButton2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+               <i class="fas fa-file-pdf" aria-hidden="true"></i>&nbsp;&nbsp;Download PDF
+               <div class="ldld bare em-1 light d-inline-block ml-1 align-middle" id="pdfLoader"></div>
+             </button>
+             <button id="json2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+             <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
+             <button id="tex2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+             <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
+             <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
+               <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
+           </fieldset>
+         </div>
+       </div>
+     </div>
+     </div>
+   </div>
+ </section>
