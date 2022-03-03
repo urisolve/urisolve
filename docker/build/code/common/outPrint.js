@@ -876,7 +876,7 @@ function outCurrentsInfo(currents, branches){
     // Add every current information
     for( let i = 2; i < meshes.data.order.length; i++){
         htmlstr += '<div class="col-6 col-sm-6 col-md-6 col-lg-4">';
-        htmlstr += '<div class="card text-white bg-secondary mb-3">';
+        htmlstr += '<div class="card text-black bg-white mb-3">';
         htmlstr += '<div class="card-body">'
         htmlstr += '<h5 class="card-title text-left"> Malhas de ordem '+ i + ':';
         // Current Mesh
@@ -884,7 +884,7 @@ function outCurrentsInfo(currents, branches){
             for (let k=0; k<i;k++){
                 if (k==0 || k==i-1){
                     if(k==0){
-                        htmlstr += '<h5 class="card-title text-left"> {r_'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_'; 
+                        htmlstr += '<h5 class="card-title text-center"> {r_'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_'; 
                         }
                     else{
                         htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) + '}</h5>'; 
