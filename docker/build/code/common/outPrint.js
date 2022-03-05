@@ -884,14 +884,14 @@ function outCurrentsInfo(currents, branches){
             for (let k=0; k<i;k++){
                 if (k==0 || k==i-1){
                     if(k==0){
-                        htmlstr += '<h5 class="card-title text-center"> {r_'+ katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_'; 
+                        htmlstr += '<h5 class="card-title text-center"> {r_'+ katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) +', r_'; 
                         }
                     else{
-                        htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) + '}</h5>'; 
+                        htmlstr += katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) + '}</h5>'; 
                         }
                  }  
                 else{
-                    htmlstr += katex.renderToString(meshes.data.order[i][j][k].Branch, {throwOnError: false}) +', r_';
+                    htmlstr += katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) +', r_';
                 }
             
         }

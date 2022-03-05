@@ -1,0 +1,26 @@
+{
+  "name": "mesh-finder",
+  "version": "0.0.1",
+  "description": "",
+  "main": "const.js",
+  "scripts": {
+    "start": "echo \"Error: no start script is available\" && exit 1",
+    "example": "node examples/urisolve/exercise_uri4.js",
+    "examplev2": "node examples/v2/exercise.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txroot/meshes.git"
+  },
+  "keywords": [],
+  "author": "André Rocha aka anr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/urisolve/meshes-finder/issues"
+  },
+  "homepage": "https://github.com/urisolve/meshes-finder#readme",
+  "dependencies": {
+    "mathjs": "^9.4.2"
+  }
+}

@@ -1,0 +1,26 @@
+# Qucs 0.0.19  F:/MegaSync/DOCENCIA/PHD/UPorto/Curso/Special Topics/Grafos/Exemplo02/grafos2.sch
+
+.DC:DC1 Temp="26.85" reltol="0.001" abstol="1 pA" vntol="1 uV" saveOPs="no" MaxIter="150" saveAll="no" convHelper="none" Solver="CroutLU"
+
+R:R8 B A R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+Idc:I1 A B I="1 mA" Ri="0 Ohm"
+
+R:R6 A B R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R1 gnd B R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R7 gnd B R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R4 gnd C R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R2 A C R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+Vdc:V1 _net0_TEMP_V1 gnd U="1 V" Ri="0 Ohm"
+R:_R__net0_TEMP_V1 _net0_TEMP_V1 _net0 R="0 Ohm" Temp = "26.85" Tc1 = "0.0" Tc2 = "0.0" Tnom = "26.85"
+R:R5 _net0 A R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R9 B A R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+
+R:R3 B C R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
+

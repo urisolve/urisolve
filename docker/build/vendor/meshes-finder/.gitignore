@@ -1,0 +1,5 @@
+node_modules
+npm-debug.log
+meshes.json
+.vscode
+package-lock.json

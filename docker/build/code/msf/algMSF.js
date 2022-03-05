@@ -1,7 +1,7 @@
 include('code/common/workNetlist.js');
 include('code/common/outPrint.js');
 include('vendor/mathjs/math.min.js');
-include('vendor/meshes-finder2/src/meshes-finder-javascript.js');
+include('vendor/meshes-finder/src/meshes-finderv2.js');
 
 /**
 * MSF Algorythm Implementation
@@ -3470,8 +3470,8 @@ function loadFileAsTextMSF() {
 		// Fase 2
 		let meshesFinderObj = new MeshesFinder();
 	
-	  meshesFinderObj.initGraph(adjMatrix, incMatrix, nodesRef, branchesRef);
-	  meshes = meshesFinderObj.getLoops(1);
+	  meshesFinderObj.initGraph(adjMatrix._data, incMatrix._data, nodesRef, branchesRef);
+	  meshes = meshesFinderObj.getMeshes(1);
 		
 	  if(meshes.error.state == false) {}
 		else{
