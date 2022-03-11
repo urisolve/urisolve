@@ -7,6 +7,51 @@ include('code/common/outPrint.js');
  * @param {Int} type Desired type of node to return
  * @returns Number of Nodes
  */
+
+
+//global variables
+	// Math namespaces/prototypes
+	var Fraction = algebra.Fraction;
+	var Expression = algebra.Expression;
+	var Equation = algebra.Equation;
+
+	// Create arrays to store objects data
+	var resistors = new Array();
+	var coils = new Array();
+	var capacitors = new Array();
+	var dcVoltPs = new Array();
+	var acVoltPs = new Array();
+	var dcAmpsPs = new Array();
+	var acAmpsPs = new Array();
+	var ampsMeters = new Array();
+	var voltMeters = new Array();
+
+	var nodes = new Array();
+	var branches = new Array();
+	var currents = new Array();
+	var supernodes = new Array();
+	var connections = new Array();
+
+	// Tex Variable
+	let TeX;
+
+	var netlist;
+
+	// Circuit analysis counters
+	var circuitAnalCnt = {
+		node: 		0,
+		branch: 	0,
+		current:	0,
+		fsupernode:	0,
+		gsupernode:	0
+	};
+
+	// Circuit analysis global data
+	var circuitAnalData = {
+		frequency:	{value: 0, mult: ''}
+	};
+
+
 function countNodesByType(objArr, type) {
 	let cnt = 0;
 	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
@@ -16,11 +61,196 @@ function countNodesByType(objArr, type) {
 /**
 * MTN Algorythm Implementation
 */
+
+function loadFile(){
+	// Caso não tenha sido inserida uma Netlist
+	if (!fileContents[1]) {
+		alert("Upload Netlist file first!");
+		return 0;
+	}
+
+	// Inserir imagem se estiver disponível
+	TeX = getTexFileHeader();
+
+	// Print sections
+	document.getElementById('results-board').innerHTML = outHTMLSections();
+
+	if (fileContents[0]) { 
+		let htmlstring = '<div class="container mt-3"><div class="row bg-dark rounded text-light  p-2">';
+		htmlstring += '<h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+		htmlstring += '<div class="container mt-2 mb-2 text-center"><img style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
+		$('#circuitImage').html(htmlstring);
+		$('#circuitImage').show();
+		// Add Image to Tex
+		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
+		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
+		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+	}
+	else $('#circuitImage').hide();
+
+
+	// Validate submitted Netlist File
+	netlistTxt = validateNetlist(fileContents[1]);
+	// Check for previous ground alteration
+	if(fileContents[2])
+		netlistTxt.first.push(fileContents[2]);
+	// Deal With Netlist Error Codes
+	let warningsText
+	$('#errors').hide();
+	$('#warnings').hide();
+	if(netlistTxt.first.length > 0) {
+		if(foundCriticalErr(netlistTxt.first)){
+			$("#loadpage").fadeOut(1000);
+			$("#results").show();
+			$("#contResults").hide();
+			$('#warnings').hide();
+			$('#results-modal').modal('show');
+			$('#errors').html(errorOutput(netlistTxt.first));
+			$('#errors').show();
+			let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+			if(language == "english")
+				set_lang(dictionary.english);
+			else	
+				set_lang(dictionary.portuguese);
+			return 0;	
+		}
+		else{
+			warningsText = warningOutput(netlistTxt.first);
+			if(warningsText != 0){
+				$('#warnings').html(warningsText);
+				$('#errors').hide();
+				$('#warnings').show();
+			}
+		}
+	}
+	// Remove codigo de erro 14
+	if(fileContents[2]) netlistTxt.first.splice(netlistTxt.first.length-1);
+
+	return 1;
+}
+
+
+
+function importData(){
+	var netListLines = netlistTxt.second;
+
+	var netListLineCnt = {
+		Vdc: 	0,
+		Idc: 	0,
+		Vac: 	0,
+		Iac:	0,
+		R:		0,
+		L:		0,
+		C:		0,
+		Vprob: 	0,
+		Iprob:  0,
+	};
+
+	// Import data to local variables
+    for(var line = 0; line < netListLines.length; line++){
+		var cpData = acquireCpData(netListLines[line], netListLineCnt);
+
+		if(cpData.third){
+			connections.push(cpData.third);
+		}
+
+		if(!cpData.first) {
+			switch (cpData.second.type) {
+				case cpRefTest("Vdc"): {
+					var newDcVoltPs = new dcVoltPower(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.intRes, cpData.second.intResMult, null, null, null);
+					dcVoltPs.push(newDcVoltPs);
+					break;
+				}
+
+				case cpRefTest("Idc"): {
+					var newDcAmpsPs = new dcCurrPower(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.intRes, cpData.second.intResMult, null, null, null, null, null);
+					dcAmpsPs.push(newDcAmpsPs);
+					break;
+				}
+
+				case cpRefTest("Vac"): {
+					circuitAnalData.frequency.value = cpData.second.freq;
+					circuitAnalData.frequency.mult = cpData.second.freqMult;
+					var newAcVoltPs = new acVoltPower(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.intRes, cpData.second.intResMult, cpData.second.freq, cpData.second.freqMult, cpData.second.phase, cpData.second.theta, null, null, null);
+					acVoltPs.push(newAcVoltPs);
+					break;
+				}
+
+				case cpRefTest("Iac"): {
+					circuitAnalData.frequency.value = cpData.second.freq;
+					circuitAnalData.frequency.mult = cpData.second.freqMult;
+					var newAcAmpsPs = new acCurrPower(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.intRes, cpData.second.intResMult, cpData.second.freq, cpData.second.freqMult, cpData.second.phase, cpData.second.theta, null, null, null);
+					acAmpsPs.push(newAcAmpsPs);
+					break;
+				}
+
+				case cpRefTest("R"): {
+					var newResistor = new resistor(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.temp, null, null);
+					resistors.push(newResistor);
+					break;
+				}
+
+				case cpRefTest("L"): {
+					var newCoil = new coil(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.initValue, null, null, null);
+					coils.push(newCoil);
+					break;
+				}
+
+				case cpRefTest("C"): {
+					var newCapacitor = new capacitor(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.initValue, null, null, null);
+					capacitors.push(newCapacitor);
+					break;
+				}
+
+				case cpRefTest("VProbe"): {
+					var newVoltMeter = new voltmeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
+					voltMeters.push(newVoltMeter);
+					break;
+				}
+
+				case cpRefTest("IProbe"): {
+					var newAmpsMeter = new amperemeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
+					ampsMeters.push(newAmpsMeter);
+					break;
+				}
+
+				default: {
+
+					break;
+				}
+			}
+		}
+	}
+
+	// Verify and set circuit frequency
+	let errCodeIndex = netlistTxt.first.findIndex(item => item.errorCode == 10);
+	if(errCodeIndex > -1){
+		circuitAnalData.frequency.value = netlistTxt.first[errCodeIndex].chosenFreq;
+		circuitAnalData.frequency.mult = netlistTxt.first[errCodeIndex].chosenFreqUnit;
+	}
+	else{
+		for(var line = 0; line < netListLines.length; line++){
+			var cpData = acquireCpData(netListLines[line], netListLineCnt);
+
+			if(!cpData.first) {
+				if(cpData.second.value != null && cpData.second.type === 'acFreq') {
+					circuitAnalData.frequency.value = cpData.second.value;
+					circuitAnalData.frequency.mult = cpData.second.mult;
+				}
+			}
+		}
+	}
+}
+
 function loadFileAsTextMTN() {
+	if(!loadFile()) return;
+	importData();
+	/*
 	if (!fileContents[1]) {
 		alert("Upload Netlist file first!");
 		return;
 	}
+
 	// Math namespaces/prototypes
 	var Fraction = algebra.Fraction;
 	var Expression = algebra.Expression;
@@ -67,6 +297,8 @@ function loadFileAsTextMTN() {
 	else
 		$('#circuitImage').hide();
 
+	
+
 	// Validate submitted Netlist File
 	var netlistTxt = validateNetlist(fileContents[1]);
 	// Check for previous ground alteration
@@ -105,6 +337,7 @@ function loadFileAsTextMTN() {
 	// Remove errorCode 14
 	if(fileContents[2])
 		netlistTxt.first.splice(netlistTxt.first.length-1);
+
 
 	var netListLines = netlistTxt.second;
 
@@ -210,7 +443,7 @@ function loadFileAsTextMTN() {
 		}
 
 	}
-
+	
 	// Verify and set circuit frequency
 	let errCodeIndex = netlistTxt.first.findIndex(item => item.errorCode == 10);
 	if(errCodeIndex > -1){
@@ -229,12 +462,15 @@ function loadFileAsTextMTN() {
 			}
 		}
 	}
+	*/
 	// Manage Voltmeters (nothing to do, because they won't count for branches calculation)
 
 	// Store Amperemeters Nodes
 	var iProbeNodesLoc = new Array();
 	var iProbeNodesArr = new Array();
 	var iProbeLocVsAmpId = new Array();	// Store iProbe position related to Amperemeter Id
+
+	
 
 	for(var i=0; i<ampsMeters.length; i++) {
 		var newNodes = ampsMeters[i].getNodes();
@@ -252,6 +488,8 @@ function loadFileAsTextMTN() {
 		found = iProbeNodesArr.find(element => element == newNodes.toNode);
 		if (typeof found == 'undefined') iProbeNodesArr.push(newNodes.toNode);
 	}
+
+
 
 	// Get a copy of amperemeters reference and location
 	var iProbNodesLocFilled = iProbeNodesLoc.slice();
