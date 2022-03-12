@@ -51,6 +51,13 @@ include('code/common/outPrint.js');
 		frequency:	{value: 0, mult: ''}
 	};
 
+	//Manage ampmeters
+	var iProbeNodesLoc = new Array();
+	var iProbeNodesArr = new Array();
+	var iProbeLocVsAmpId = new Array();	// Store iProbe position related to Amperemeter Id
+
+	var iProbNodesLocFilled;
+	var iProbeNodesArrFilled;
 
 function countNodesByType(objArr, type) {
 	let cnt = 0;
@@ -242,9 +249,36 @@ function importData(){
 	}
 }
 
+function manageAmpmeters(){
+	for(var i=0; i<ampsMeters.length; i++) {
+		var newNodes = ampsMeters[i].getNodes();
+
+		var found = iProbeNodesLoc.find(element => element == newNodes);
+		if (typeof found == 'undefined') {
+			iProbeNodesLoc.push(newNodes);
+			// Save location of the amperemeter in the iProbeNodesLoc and next series connected component Reference
+			iProbeLocVsAmpId.push({iProbLocPos: (iProbeNodesLoc.length-1), ampId: ampsMeters[i].id, ampRef: ampsMeters[i].ref, serieConCpRef: '', branchId: '', jointNodeP: '', jointNodeN: ''});
+		}
+
+		found = iProbeNodesArr.find(element => element == newNodes.fromNode);
+		if (typeof found == 'undefined') iProbeNodesArr.push(newNodes.fromNode);
+
+		found = iProbeNodesArr.find(element => element == newNodes.toNode);
+		if (typeof found == 'undefined') iProbeNodesArr.push(newNodes.toNode);
+	}
+
+	// Get a copy of amperemeters reference and location
+	iProbNodesLocFilled = iProbeNodesLoc.slice();
+	iProbeNodesArrFilled = iProbeNodesArr.slice();
+
+}
+
+
+
 function loadFileAsTextMTN() {
 	if(!loadFile()) return;
 	importData();
+	manageAmpmeters();
 	/*
 	if (!fileContents[1]) {
 		alert("Upload Netlist file first!");
@@ -462,7 +496,7 @@ function loadFileAsTextMTN() {
 			}
 		}
 	}
-	*/
+	
 	// Manage Voltmeters (nothing to do, because they won't count for branches calculation)
 
 	// Store Amperemeters Nodes
@@ -492,10 +526,10 @@ function loadFileAsTextMTN() {
 
 
 	// Get a copy of amperemeters reference and location
-	var iProbNodesLocFilled = iProbeNodesLoc.slice();
-	var iProbeNodesArrFilled = iProbeNodesArr.slice();
+	iProbNodesLocFilled = iProbeNodesLoc.slice();
+	iProbeNodesArrFilled = iProbeNodesArr.slice();
 
-
+*/
 	// Create Nodes
 	// Remove Amperemeters
 	var foundNodes = new Array();
