@@ -107,6 +107,9 @@
                       <a class="nav-link js-scroll-trigger" href="#instructions"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-help"></span></a>
                     </li>
                     <li class="nav-item">
+                      <a class="nav-link js-scroll-trigger" data-toggle="modal" href="javascript:void(0)" onclick="trainChoice()"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-train"></span></a>
+                    </li>
+                    <li class="nav-item">
                       <a class="nav-link js-scroll-trigger" href="#examples"><i class="fas fa-clipboard-check"></i>&nbsp;<span data-translate="_menu-examples"></span></a>
                     </li>
                     <li class="nav-item">
@@ -1175,7 +1178,7 @@
     <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
       <div class="modal-content border-black no-print-border" id="modalcont">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Train Choice</h5>
+          <h5 class="modal-title" id="exampleModalLongTitle">Praticar</h5>
           <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -1183,19 +1186,18 @@
         <div id="train-board" class="modal-body"></div>
         <!-- <div id="results-json" class="modal-body"></div> -->
         <!-- User name box -->
-        <p><ul class="nav justify-content-center">
-          <li class="nav-item">
-            <a class="nav-link active" href="#">MTN</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">MSF</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">MCM</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">MCR</a>
-          </li>
+        <p><nav>
+          <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Praticar por método</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Praticar por tema</a>
+            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Exercícios aleatórios</a>
+          </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">Colocam-se aqui os métodos disponíveis</div>
+          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">Colocam-se os temas principais</div>
+          <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">Coloca-se só um botão com iniciar</div>
+        </div>
         </ul></p>
       </div>
       <div class="modal-footer">
