@@ -186,6 +186,9 @@
                         <div class="col-md-4 d-flex justify-content-center" >
                           <button id="btnMSF" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MSF')"> <span data-translate="_btn_msf_p1"></span> <br> <span data-translate="_btn_msf_p2"></span> </button>
                         </div>
+                        <div class="col-md-4 d-flex justify-content-center" >
+                          <button id="Treino" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="trainChoice()"> <span data-translate="_btn_train_p1"></span> <br> <span data-translate="_btn_train_p2"></span> </button>
+                        </div>
                       </div>
                       <br>
                     </div>
@@ -1095,14 +1098,14 @@
         <script type="text/javascript" src="code/mcm/algMCM.js"></script>
         <script type="text/javascript" src="code/msf/algMSF.js"></script>
         <script type="text/javascript" src="code/analyse.js"></script>
-
+        <script type="text/javascript" src="code/train.js"></script>
         <script src="vendor/jsonviewer/app/App.js"></script>
         <script src="vendor/jsonviewer/jsonTree/jsonTree.js"></script>
 
   </body>
 </html>
 
-//TODO Modal para MSF
+<!--TODO Modal para MSF-->
  <!-- MODAL MSF ==============-->
  <div id="editor2"></div>
  <section id="results2" style="display: none">
@@ -1163,63 +1166,42 @@
    </div>
  </section>
 
- //TODO Modal para Inserir respostas
- <!-- MODAL Input Answers ==============-->
- <div id="editor3"></div>
- <section id="input3" style="display: none">
-   <!-- Modal -->
-   <div class="modal fade bd-example-modal-lg" id="input-modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-     <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
-       <div class="modal-content border-black no-print-border" id="modalcont">
-         <div class="modal-header">
-           <h5 class="modal-title" id="exampleModalLongTitle">MSF Analysis - Quiz</h5>
-           <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
-             <span aria-hidden="true">&times;</span>
-           </button>
-         </div>
-         <div id="input-board3" class="modal-body"></div>
-         <!-- <div id="results-json" class="modal-body"></div> -->
-         <!-- User name box -->
-         <div class="container" style="visibility: visible;">
-           <form role="form" method="post" id="userform-temp" class="col-lg-6 offset-lg-3">
-             <div class="row justify-content-center">
-                 <div class="col-4 form-group">
-                     <label for="name"> <span data-translate="_firstname"></span></label>
-                     <input type="text" class="form-control" id="output-name" name="name">
-                 </div>
-                 <div class="col-4 form-group">
-                     <label for="lastname"> <span data-translate="_lastname"></span></label>
-                     <input type="text" class="form-control" id="output-lastname" name="lastname">
-                     
-                 </div>
-                 <div class="col-4 form-group">
-                   <label for="number"> <span data-translate="_number"></span></label>
-                   <input type="text" class="form-control" id="output-number" name="number">
-               </div>
-             </div>
-             <div class="row justify-content-center">
-               <small id="output-info" class="form-text text-muted"><span data-translate="_user-info-text"></span></small>
-             </div>
-         </form>
-         </div>
-
-         <div class="modal-footer no-print">
-           <fieldset class="w-100">
-             <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
-             <button id="pdfPrintButton2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
-               <i class="fas fa-file-pdf" aria-hidden="true"></i>&nbsp;&nbsp;Download PDF
-               <div class="ldld bare em-1 light d-inline-block ml-1 align-middle" id="pdfLoader"></div>
-             </button>
-             <button id="json2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
-             <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
-             <button id="tex2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
-             <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
-             <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
-               <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
-           </fieldset>
-         </div>
+ <!-- TODO Modal para Escolha da modalidade-->
+ <!-- MODAL Train Type ==============-->
+ <div id="editor_train"></div>
+ <section id="train" style="display: none">
+  <!-- Modal -->
+  <div class="modal fade bd-example-modal-lg" id="modal_train" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
+      <div class="modal-content border-black no-print-border" id="modalcont">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Train Choice</h5>
+          <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="train-board" class="modal-body"></div>
+        <!-- <div id="results-json" class="modal-body"></div> -->
+        <!-- User name box -->
+        <p><ul class="nav justify-content-center">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">MTN</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">MSF</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">MCM</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">MCR</a>
+          </li>
+        </ul></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
        </div>
-     </div>
-     </div>
-   </div>
+    </div>
+  </div>
+</div>
  </section>

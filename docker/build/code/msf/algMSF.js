@@ -3,6 +3,7 @@ include('code/common/outPrint.js');
 include('vendor/mathjs/math.min.js');
 include('vendor/meshes-finder/src/meshes-finderv2.js');
 
+
 /**
 * MSF Algorythm Implementation
 */
@@ -3424,15 +3425,6 @@ function loadFileAsTextMSF() {
 	}
 
 
-	
-
-	
-
-
-
-
-
-
 		//Fase1
 		let branchesFound = new Array ();
 		let nodesFound = new Array ();
@@ -3571,7 +3563,6 @@ function loadFileAsTextMSF() {
 
 	let jsonStr = JSON.stringify(outputJson);
 	
-
 
 	$('#msf_finder').html(outMeshes(meshes));
 
