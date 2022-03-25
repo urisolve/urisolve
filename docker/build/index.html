@@ -190,7 +190,7 @@
                           <button id="btnMSF" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MSF')"> <span data-translate="_btn_msf_p1"></span> <br> <span data-translate="_btn_msf_p2"></span> </button>
                         </div>
                         <div class="col-md-4 d-flex justify-content-center" >
-                          <button id="Treino" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="trainChoice()"> <span data-translate="_btn_train_p1"></span> <br> <span data-translate="_btn_train_p2"></span> </button>
+                          <button id="btnTreino" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="trainChoice()"> <span data-translate="_btn_train_p1"></span> <br> <span data-translate="_btn_train_p2"></span> </button>
                         </div>
                       </div>
                       <br>
@@ -1194,7 +1194,12 @@
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">Colocam-se aqui os métodos disponíveis</div>
+          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+            Escolha o método a estudar:<p></p><p></p>
+            <button id="btnMTN" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="methodChoice()"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
+            <button id="btnMCM" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
+            <button id="btnMCM" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
+            </div>
           <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">Colocam-se os temas principais</div>
           <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">Coloca-se só um botão com iniciar</div>
         </div>
@@ -1207,3 +1212,51 @@
   </div>
 </div>
  </section>
+
+
+<!-- MODAL Practice choosing method ==============-->
+<div id="editor_method"></div>
+<section id="method" style="display: none">
+ <!-- Modal -->
+ <div class="modal fade bd-example-modal-lg" id="modal_method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+   <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
+     <div class="modal-content border-black no-print-border" id="modalcont">
+       <div class="modal-header">
+         <h5 class="modal-title" id="exampleModalLongTitle">Praticar</h5>
+         <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+         </button>
+       </div>
+       <div id="method-board" class="modal-body"></div>
+       <!-- <div id="results-json" class="modal-body"></div> -->
+       <!-- User name box -->
+        <div id="drop_zone" style="margin-top: 20px;">
+         <p class="text-justify font-weight-normal">
+           <span data-translate="_main-body_p1"></span>
+         </p>
+         <p class="text-left font-weight-normal">
+            <span data-translate="_main-body_p2"></span>
+         </p>
+         <div class="input-group mb-3" >
+           <div class="custom-file">
+             <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
+             <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
+           </div>
+          </div>
+          <div class="card-footer bg-transparent font-weight-light justify-content-center align-items-center">
+           <span id="files-details" class="badge badge-dark"></span>
+           <div id="files-img-det" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
+              <div class="items-align-center img-fluid" id="image-holder" style="margin-top: 20px;"></div>
+              <output id="list"></output>
+         </div>
+        <div> <button id="btnMTN" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit()"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
+        <button id="btnRandom" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit()"> <span data-translate="_btn_random_p1"></span> <br> <span data-translate="_btn_random_p2"></span> </button> </div>
+          
+       </div>
+     <div class="modal-footer">
+       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+   </div>
+ </div>
+</div>
+</section>
