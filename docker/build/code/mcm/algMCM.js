@@ -9,6 +9,8 @@
 
 
 //global variables
+
+
 	// Math namespaces/prototypes
 	var Fraction = algebra.Fraction;
 	var Expression = algebra.Expression;
@@ -30,13 +32,6 @@
 	var currents = new Array();
 	var connections = new Array();
 
-    //Circuit Global Data
-    var globalCircuitData = {
-        branches:       0,
-        nodes:          0,
-        currentSource:  0
-    }
-
 	// Circuit analysis counters
 	var circuitAnalCnt = {
 		node: 		0,
@@ -57,19 +52,12 @@
 	var iProbNodesLocFilled;
 	var iProbeNodesArrFilled;
 
-    //retorno, erro, razão
-
-    function retorno() {
-        this.error = false;
-        this.reason = 0;
-        this.data;
-    }
-    let retornar = new retorno;
 /*
 ERROR LIST
 
 1 - Não foi inserida uma netlist
 2 - Erro Netlist
+3 - Erro a procurar malhas
 
 */
 	
@@ -79,15 +67,16 @@ function countNodesByType(objArr, type) {
 	return cnt;
 }
 
+
+//Carrega o ficheiro, valida a netlist
 function loadFile(){
-	retornar.error = false;
-	retornar.reason = 0;
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
-		retornar.error = true;
-		retornar.reason = 1;
-        retornar.data = "Submit netlist first!!";
-		return;
+		return{
+			first: true,
+			second: 1,
+			third: "Submit netlist first!!"
+		};
 	}
 
 	// Print sections
@@ -116,10 +105,11 @@ function loadFile(){
 				set_lang(dictionary.english);
 			else	
 				set_lang(dictionary.portuguese);
-			retornar.error = true;
-			retornar.reason = 2;
-            retornar.data = "Error";
-			return;	
+				return{
+					first: true,
+					second: 2,
+					third: "Error"
+				};	
 		}
 		else{
 			warningsText = warningOutput(netlistTxt.first);
@@ -132,12 +122,13 @@ function loadFile(){
 	}
 	// Remove codigo de erro 14
 	if(fileContents[2]) netlistTxt.first.splice(netlistTxt.first.length-1);
-    retornar.error = false;
-    retornar.reason = 0;
-    retornar.data = netlistTxt;
-	return;
+	return{
+		first: false,
+		second: 0,
+		third: netlistTxt
+	};
 }
-
+//Importa os dados do ficheiro para varáveis do script
 function importData(netlistTxt){
 	var netListLines = netlistTxt.second;
 
@@ -248,7 +239,7 @@ function importData(netlistTxt){
 		}
 	}
 }
-
+//Guarda a posição do amperímetro e o componente em série com ele
 function manageAmpmeters(){
 	for(var i=0; i<ampsMeters.length; i++) {
 		var newNodes = ampsMeters[i].getNodes();
@@ -267,12 +258,12 @@ function manageAmpmeters(){
 		if (typeof found == 'undefined') iProbeNodesArr.push(newNodes.toNode);
 	}
 
-	// Get a copy of amperemeters reference and location
+	// Get a copy of ammeters reference and location
 	iProbNodesLocFilled = iProbeNodesLoc.slice();
 	iProbeNodesArrFilled = iProbeNodesArr.slice();
 
 }
-
+//Encontra o nr e o tipo de nós (real ou virtual)
 function findNodes(){
 
 	//find nodes
@@ -1034,7 +1025,6 @@ function findNodes(){
 
 	}
 	foundNodes.sort();
-
 	let foundnodeInstances = [].concat(...connections);
 
 	// Push nodes data to nodes array
@@ -1046,8 +1036,12 @@ function findNodes(){
 		var newNode = new node(nodeId, foundNodes[i], [], nodeType, null);
 		nodes.push(newNode);
 	}
+	return{
+		first: false,
+		second: 0
+	}
 }
-
+//Encontra o nr e a composição dos ramos do circuito
 function makeBranches(){
 	// Insert components into branches and Count Branches
 
@@ -1539,7 +1533,7 @@ function makeBranches(){
 		}
 	}
 }
-
+//Dá sentidos a correntes nos ramos (amperímetro ou não)
 function branchCurrents(){
 
 	// Analyse Branches vs Amperemeters (Currents Names)
@@ -2019,7 +2013,7 @@ function branchCurrents(){
 	}
 
 }
-
+//limpa as variáveis globais necessárias para correr o códico múltiplas vezes
 function cleanData(){
 	resistors = [];
 	coils = [];
@@ -2057,618 +2051,135 @@ function cleanData(){
 	};	
 
 }
-
-
-function loadFileAsTextMCM() {
-	loadFile();
-	if(retornar.error){
-        alert(retornar.data);
-		return;
-	}
-	/*
-	cleanData();
-	importData(retornar.data);
-	manageAmpmeters();
-	findNodes();
-	makeBranches();
-	branchCurrents();
-    /*
-	// Aggregate Power Supplies in the same Branch
+//junta fontes de tensão em série
+function agregatePowerSupplies(){
 	for(let i=0; i<branches.length; i++) {
 		branches[i].setVoltPsEndNodes();
 		branches[i].setEquivVoltPs();
 		branches[i].setEquivImpedance(circuitAnalData.frequency.value, circuitAnalData.frequency.mult);
 	}
+}
+//testa se dois nós são adjacentes
+function adjNodes(real_nodes, a, b){
+	for(let i = 0; i<branches.length; i++){
+		if((real_nodes[a] == branches[i].startNode)&&(real_nodes[b] == branches[i].endNode) || (real_nodes[a] == branches[i].endNode)&&(real_nodes[b] == branches[i].startNode)) return true;
+	}
+	return false;
+}
+//testa se um ramo está ligado a um nó
+function nodeBranchCon(real_nodes, a, b){
+	if((branches[b].startNode == real_nodes[a]) || (branches[b].endNode == real_nodes[a])) return true;
+	return false;
+}
+//função do meshes finder
+function findMeshes(){
 
-
-	// Identify KNL Equations
-	var knlEquations = new Array();
-	var knlEquaCnt = branchcountNodesByType(nodes, 0) + 1 - (dcAmpsPs.length + acAmpsPs);
-
-	// Prepare Current Equations (without considering Super Nodes)
-	for(let i=0;i<nodes.length; i++) {
-		let arrElem = nodes[i];
-		if(arrElem.type == 0 && arrElem.ref != 'gnd') {
-			knlEquations.push({ node: arrElem.ref, currents: arrElem.getCurrents().second, plainEquation: arrElem.getCurrents().third });
-		}
+	const nr_nos = countNodesByType(nodes, 0);
+	const nr_ramos = branches.length;
+	let real_nodes = [];
+	for(let i = 0; i<nodes.length; i++){
+		if(nodes[i].type == 0) real_nodes.push(nodes[i].ref);
+	}
+	let branches_ids = [];
+	for(let i = 0; i<branches.length; i++){
+		branches_ids.push(branches[i].id);
+	}
+	//cria matriz de adjacencia
+	let matriz_adj = [];
+	for(let i = 0; i< nr_nos; i++){
+		matriz_adj[i] = [];
+	}
+	for(let i = 0; i < nr_nos; i++){
+		for(let j = 0; j < nr_nos; j++){
+			if(adjNodes(real_nodes, i, j)){
+				matriz_adj[i][j] = 1;
+			}
+			else{
+				matriz_adj[i][j] = 0;
+			}					
+		}			
+	}
+	
+	//cria matriz de incicendia
+	let matriz_inc = [];
+	for(let i = 0; i< nr_nos; i++){
+		matriz_inc[i] = [];
+	}
+	for(let i = 0; i < nr_nos; i++){
+		for(let j = 0; j < nr_ramos; j++){
+			if(nodeBranchCon(real_nodes, i, j)){
+				matriz_inc[i][j] = 1;
+			}
+			else{
+				matriz_inc[i][j] = 0;
+			}					
+		}			
 	}
 
-	// Save Equations
-	var knlEquationsReg = JSON.parse(JSON.stringify(knlEquations));
+	//Meshes finder
 
-
-	// Get Grounded SuperNode Nodes List (except GND)
-	supernodes.forEach(function(parentArrElem){
-		if(parentArrElem.type == 0) {
-			parentArrElem.nodes.forEach(function(childArrElem){
-				if(childArrElem.ref != 'gnd') nodesInGroundedSN.push(childArrElem.ref);
-			});
-		}
-		if(parentArrElem.type == 1) {
-			parentArrElem.nodes.forEach(function(childArrElem){
-				if(childArrElem.ref != 'gnd') nodesInFloatingSN.push(childArrElem.ref);
-			});
-		}
-	});
-
-	if(superNodesPreDataReg.length > 0) {
-		let ampIndex = superNodesPreDataReg.findIndex(item => item.sNodeType == 0);
-		if(ampIndex > -1) {
-			circuitType = 1;
-		}
-		else circuitType = 2;
+	let circuit = new MeshesFinder();
+	circuit.initGraph(matriz_adj, matriz_inc, real_nodes, branches_ids);
+	let meshes = circuit.getMeshes();
+	
+	if(meshes.error.state == true) {
+	  return{
+		  first: true,
+		  second: 3,
+		  third: meshes.error.reason
+	  };
 	}
-
-	switch (circuitType) {
-		case 1: {
-
-			// Get SuperNode Nodes Voltage
-			supernodes.forEach(function(arrElem){
-				arrElem.calcGroundedVoltage(isolatedPsReg);
-				arrElem.calcFloatingVoltage(isolatedPsReg);
-			});
-			// Is there any branch that has an isolated power supply?
-			// If so, remove all equations containing, at least one node, in such condition
-
-			// Remove equations for grounded super nodes
-			for(let i=0; i<knlEquations.length; i++) {
-				let ampIndex = superNodesPreDataReg.findIndex(item => item.sNodeType == 0);
-				if(ampIndex > -1) {
-					let objNode = knlEquations[i].node;
-					nodesInGroundedSN.forEach(function(childArrElem) {
-						if(objNode == childArrElem) { removedKnlEquat.push(knlEquations.splice(i, 1)); i--; }
-					});
-				}
-			}
-
-			// Get One equation per Floating Super Node
-			supernodes.forEach(function(parentArrElem){
-				if(parentArrElem.type == 1) {
-					for(let i=1; i<parentArrElem.nodes.length; i++) {
-						let nodeToRemove = parentArrElem.nodes[i].ref;
-						let ampIndex = knlEquations.findIndex(item => item.node == nodeToRemove);
-						if(ampIndex > -1) { removedKnlEquat.push(knlEquations.splice(ampIndex, 1)); }
-					}
-				}
-			});
-
-
-			break;
-		}
-		case 2: {
-
-			// Get SuperNode Nodes Voltage
-			supernodes.forEach(function(arrElem){
-				arrElem.calcFloatingVoltage(isolatedPsReg);
-			});
-
-			// Get One equation per Floating Super Node
-			supernodes.forEach(function(parentArrElem){
-				if(parentArrElem.type == 1) {
-					for(let i=1; i<parentArrElem.nodes.length; i++) {
-						let nodeToRemove = parentArrElem.nodes[i].ref;
-						let ampIndex = knlEquations.findIndex(item => item.node == nodeToRemove);
-						if(ampIndex > -1) { let eq = knlEquations.splice(ampIndex, 1); removedKnlEquat.push(eq[0]); }
-					}
-				}
-			});
-			break;
-		}
-		default: {
-			break;
-		}
+	
+	return{
+		first: false,
+		second: 0,
+		third: meshes.data
 	}
+}
 
-	// Fill each current with the data to calculate the Ohm's Law (Uequivalent / Zequivalent)
-	// If the branch has a current power supply, use that current value (direction has to be evaluated)
+//função principal
+function loadFileAsTextMCM() {
+	let retornar = loadFile();
+	if(retornar.first){
+        alert(retornar.third);
+		return;
+	}
+	
+	cleanData();
+	importData(retornar.third);
+	manageAmpmeters();
+	findNodes();
+	makeBranches();
+	branchCurrents();
+    agregatePowerSupplies();
+	
+	// Identify MCM Equations
+	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (dcAmpsPs.length + acAmpsPs.length);
 
-	// Produce Veq and Zeq
-	branches.forEach(function(branch, ix, obj){
-		branch.setCurrentOhmsLaw();
-	});
+	//Meshes finder
 
-	// Set ohmEquation or just the current value (if the branch has a current power supply)
-	currents.forEach(function(arrElem){
-		arrElem.setEquation();
-	});
-
-	// Produce final knl equations (for all equations)
-	knlEquationsReg.forEach(function(knlEq, index, obj) {
-		let arrNode = knlEq.node;
-		let nodeIndex;
-		let nextCurr;
-		let currIndex;
-		nodeIndex = nodes.findIndex(item => item.ref == arrNode);
-
-		// Produce in each current the pair of node equations (1 for the End Node and another for the Start Node)
-		knlEq.currents.forEach(function(currElem, currIndex, currObj) {
-
-			nextCurr = currElem.currentObj.ref;
-			currIndex = currents.findIndex(item => item.ref == nextCurr);
-			let iterCurrData = nodes[nodeIndex].getCurrentsInOrderTo(nextCurr);
-			let itDataFullPlainEq = iterCurrData.third;
-			let itDataPlainEq = iterCurrData.fourth;
-			let itDataObjEq = iterCurrData.fifth;
-			let itDataNodeRef = nodes[nodeIndex].ref;
-			currents[currIndex].pushNodeEquation({ nodeRef: itDataNodeRef, fullPlainEq: itDataFullPlainEq, plainEq: itDataPlainEq, eqObj: itDataObjEq });
-
+	let malhas = findMeshes();
+	if(malhas.first){
+		let erro = '';
+		malhas.third.forEach(e => {
+			erro = erro + '\n' + e;
+		});
+		alert("Erro ao criar malhas!\nErros:\n");
+		return;
+	}
+	let malhas_arr = [];
+	malhas.third.order.forEach(ordem => {
+		malhas.third.order[malhas.third.order.indexOf(ordem)].forEach(malha => {
+			malhas_arr.push(malha);
 		});
 	});
 
-	// Save first set of knl equations
-	var knlFilteredEquations = JSON.parse(JSON.stringify(knlEquations));
-	var stepSubstitutionsReg = new Array();
-
-	// Substitute supernodes currents in the knl equations system
-	knlEquations.forEach(function(knlEq, knlIndex, knlObj) {
-		let iterEquation;
-		let knlNode = knlEq.node;
-		let knlFixedCurrents = new Array();
-		let knlHasNoImpedance = new Array();
-		let pastEquations = new Array();
-		let stepSubstitutions = new Array();
-		let currSubst = new Array();
-
-		// If the knl equation doesn't have floating nodes, just put all terms in the left hand of the equation
-		let ndIndex = nodesInFloatingSN.indexOf(knlNode);
-		if(ndIndex < 0) {
-			iterEquation = knlObj[knlIndex].plainEquation;
-			let thisOldEq = algebra.parse(iterEquation);
-			let thisEq = new Expression(0);
-			thisOldEq.lhs.terms.forEach(function(termElem, termIndex, termObj) {
-				let smallEq = termElem.variables[0].variable;
-				thisEq = thisEq.add(smallEq);
-			});
-			thisOldEq.rhs.terms.forEach(function(termElem, termIndex, termObj) {
-				let smallEq = termElem.variables[0].variable;
-				thisEq = thisEq.subtract(smallEq);
-			});
-			thisEq = new Equation(thisEq, 0);
-			knlObj[knlIndex] = { node: knlNode, currents: null, plainEquation: iterEquation, eqObj: thisEq };
-		}
-		else {
-			let end = false;
-			let mcState = 1;
-			do {
-				switch (mcState) {
-					case 1: {
-						iterEquation = knlObj[knlIndex].plainEquation;
-						knlFixedCurrents = [];
-						knlHasNoImpedance = [];
-						knlObj[knlIndex].currents.forEach(function(currElem, currIndex, currObj) {
-							if(currElem.currentObj.fixed) { knlFixedCurrents.push(currElem.currentObj.ref); }
-							else {
-								if(currElem.currentObj.impedance.impedanceElem.length == 0) knlHasNoImpedance.push(currElem.currentObj.ref);
-							}
-						});
-						mcState++;
-						break;
-					}
-					case 2: {
-						if(knlHasNoImpedance.length == 0) { end = true; break;}
-						let expr = algebra.parse(iterEquation);
-
-						knlHasNoImpedance.forEach(function(currElem, currIndex, currObj) {
-							let solvForCurExpObj = expr.solveFor(currElem);
-							let solvForCurExp = expr.solveFor(currElem).toString();
-							let thisCurrIndex = currents.findIndex(item => item.ref == currElem);
-							if(thisCurrIndex > -1) {
-								let subs = null;
-								currents[thisCurrIndex].nodeEquations.forEach(function(ohmElm, ohmInd, ohmObj) {
-									let ohmEq = algebra.parse(ohmElm.fullPlainEq);
-									ohmEq = ohmEq.solveFor(currElem).toString();
-									pastEquations.push(algebra.parse(ohmElm.fullPlainEq).toString());
-									let compareExp = solvForCurExp;
-									if(stepSubstitutions.length) {
-										for(let i=0; i<stepSubstitutions.length; i++) {
-											try {
-												let exp1 = new Array();
-												let exp2 = new Array();
-
-												compareExp = algebra.parse(stepSubstitutions[i].oldFullEq);
-												compareExp = compareExp.solveFor(currElem);
-												let newEq = new algebra.Equation(compareExp, 0);
-
-												newEq.lhs.terms.forEach(function(currElem, currIndex, currObj) {
-													let currRef = currElem.variables[0].variable;
-													exp1.push(currRef);
-												});
-
-												let ohmEqTemp = algebra.parse(ohmElm.fullPlainEq);
-												ohmEqTemp = ohmEqTemp.solveFor(currElem);
-												newEq = new algebra.Equation(ohmEqTemp, 0);
-												newEq.lhs.terms.forEach(function(currElem, currIndex, currObj) {
-													let currRef = currElem.variables[0].variable;
-													exp2.push(currRef);
-												});
-												let len = exp1.length;
-												let found = 0;
-												if( len == exp2.length) {
-													for(let j=0; j<len; j++) {
-														index = exp2.indexOf(exp1[j]);
-														if (index > -1) found++;
-													}
-												}
-												let b='music';
-												if(len == found) { compareExp = ohmEq; break; }
-											} catch (error) {
-												compareExp = solvForCurExp;
-											}
-										}
-									}
-									if(compareExp == ohmEq && subs == null) {
-										let oposInd = 1;
-										if(ohmInd == 1) { oposInd = 0 };
-										ohmEq = algebra.parse(ohmObj[oposInd].fullPlainEq);
-										ohmEq = ohmEq.solveFor(currElem);
-										subs = { nodeRef: knlNode, currRef: currElem, plainEq: ohmEq.toString(), expEq: ohmEq, oldFullEq: ohmObj[oposInd].fullPlainEq, oldOrigEq: iterEquation };
-										currSubst.push(subs);
-										stepSubstitutions.push(subs);
-										stepSubstitutionsReg.push(subs);
-									}
-								});
-							}
-						});
-
-						currSubst.forEach(function(ohmElm, ohmInd, ohmObj) {
-							let solvForCurExpObj = expr.solveFor(ohmElm.currRef);
-							let solvForCurExp = expr.solveFor(ohmElm.currRef).toString();
-							let newEq = solvForCurExpObj.subtract(ohmElm.expEq);
-							let newEqStr = newEq.toString();
-
-							newEq = new algebra.Equation(newEq, 0);
-							newEqStr = newEq.toString();
-							expr = algebra.parse(newEqStr);
-						});
-						currSubst = [];
-
-						let currObjArr = new Array();
-						expr.lhs.terms.forEach(function(currElem, currIndex, currObj) {
-							let currRef = currElem.variables[0].variable;
-							let signal = currElem.coefficients[0].numer;
-							let thisCurrIndex = currents.findIndex(item => item.ref == currElem);
-							if(thisCurrIndex > -1) {
-								let dir = 'in';
-								if(signal == -1) dir = 'out';
-								let currObj = { direction: dir, currentObj: currents[thisCurrIndex] };
-								currObjArr.push(currObj);
-							}
-						});
-						knlObj[knlIndex] = { node: knlNode, currents: currObjArr, plainEquation: expr.toString(), eqObj: expr }
-						mcState--;
-						break;
-					}
-					default:
-						break;
-				}
-			} while (!end);
-		}
-	});
-
-	// Save first set of knl equations without all floating supernodes currents
-	var knlCurrEquations = JSON.parse(JSON.stringify(knlEquations));
-
-	var knlEquationsVl = new Array();
-	var knlOrderedCurrents = {
-		original: new Array(),
-		subs: new Array()};
-
-	// Substitute every current by the ohm equation or fixed current (current power supply)
-	knlEquations.forEach(function(knlEq, knlIndex, knlObj) {
-		let newEquat = '';
-		let newEquatVl = '';
-		let orderedOrig = '';
-		let orderedSubs = '';
-		let newterm = '';
-		let ohmEq = '';
-		let ohmEqVl = '';
-		knlEq.eqObj.lhs.terms.forEach(function(termElem, termIndex, termObj) {
-			let signal = termElem.coefficients[0].numer;
-			let variable = termElem.variables[0].variable;
-			currIndex = currents.findIndex(item => item.ref == variable);
-			if(currents[currIndex].fixed == 0) {
-				let num = currents[currIndex].ohmEquation.equatObj.num.toString();
-				let denum = currents[currIndex].ohmEquation.equatObj.denum.toString();
-				ohmEq = currents[currIndex].ohmEquation.plainEq;
-				ohmEq = math.parse(ohmEq);
-				ohmEq = ohmEq.toString();
-
-				ohmEqVl = currents[currIndex].ohmEquation.plainEqVl;
-
-				if(signal > 0) {
-					if(newEquat == '') { 
-						newEquat += ohmEq; 
-						newEquatVl += ohmEqVl; 
-						orderedSubs += variable; 
-						orderedOrig += variable; }
-					else { 
-						newEquat += ' + ' + ohmEq; 
-						newEquatVl += ' + ' + ohmEqVl; 
-						orderedSubs += ' + ' + variable; 
-						orderedOrig += ' + ' + variable;}
-				}
-				if(signal < 0) { 
-					newEquat += ' - ' + ohmEq; 
-					newEquatVl += ' - ' + ohmEqVl; 
-					orderedSubs += ' - ' + variable; 
-					orderedOrig += ' - ' + variable; 
-				};
-			}
-			else {
-				if(signal > 0) {
-					if(newEquat == '') { 
-						newEquat += currents[currIndex].value; 
-						newEquatVl += currents[currIndex].value; 
-						orderedSubs += currents[currIndex].value;
-						orderedOrig += variable;
-					}
-					else { 
-						newEquat += ' + ' + currents[currIndex].value; 
-						newEquatVl += ' + ' + currents[currIndex].value; 
-						orderedSubs += ' + ' + currents[currIndex].value;
-						orderedOrig += ' + ' + variable;
-					}
-				}
-				if(signal < 0) { 
-					newEquat += ' - ' + currents[currIndex].value; 
-					newEquatVl += ' - ' + currents[currIndex].value; 
-					orderedSubs += ' - ' + currents[currIndex].value;
-					orderedOrig += ' - ' + variable;
-				};
-			}
-		});
-		// Remove + - issue from the expression String.raw
-		let ex = math.parse(newEquat).toString();
-		ex = ex.split('+ -').join(' - ');
-		ex = ex.split('- -').join(' + ');
-		let exVl = math.parse(newEquatVl).toString();
-		exVl = exVl.split('+ -').join(' - ');
-		exVl = exVl.split('- -').join(' + ');
-		exVl = exVl.split('+0').join(' ');
-		let exCurr = math.parse(orderedSubs).toString();
-		exCurr = exCurr.split('+ -').join(' - ');
-		exCurr = exCurr.split('- -').join(' + ');
-		exCurr = exCurr.split('+0').join(' ');
-		let exOrig = math.parse(orderedOrig).toString();
-		exOrig = exOrig.split('+ -').join(' - ');
-		exOrig = exOrig.split('- -').join(' + ');
-		exOrig = exOrig.split('+0').join(' ');
-
-		// set right member of the equation
-		ex = math.parse(ex);
-		ex += ' = 0';
-		knlObj[knlIndex] = ex.toString();
-
-		exVl = math.parse(exVl);
-		exVl += ' = 0';
-		knlEquationsVl.push(exVl.toString());
-
-		exCurr = math.parse(exCurr);
-		exCurr += ' = 0';
-		knlOrderedCurrents.subs.push(exCurr.toString());
-
-		exOrig = math.parse(exOrig);
-		exOrig += ' = 0';
-		knlOrderedCurrents.original.push(exOrig.toString());
-	});
+	//Algoritmo de escolha de malhas	
 
 
-	// Create Equations for every Super Node nodes, related to the chosen node for the knl equations
-	superNodesEndPoints = new Array();
-
-	// Array of floating nodes Equations
-	superNodeFloatingVoltRelation = new Array();
-	var snRefs = new Array();
-
-	isolatedPsReg.forEach(function(isElem, isIndex, isObj) {
-		let psRef = isElem.ref;
-		let sNode = isElem.noP;
-		let eNode = isElem.noN;
-		let signal;
-		let nRef;
-		let psValue;
-
-		let psIndex = dcVoltPs.findIndex(item => item.ref == psRef);
-		if(psIndex > -1) {
-			nRef = dcVoltPs[psIndex].noP;
-			if(nRef == sNode) signal = ' + ';
-			else signal = ' - ';
-			psValue = dcVoltPs[psIndex].voltage;
-		}
-
-		psIndex = acVoltPs.findIndex(item => item.ref == psRef);
-		if(psIndex > -1) {
-			nRef = acVoltPs[psIndex].noP;
-			if(nRef == sNode) signal = ' + ';
-			else signal = ' - ';
-			psValue = acVoltPs[psIndex].voltage;
-		}
-
-		let rEq = eNode + signal + psRef;
-		let fullRefEq = sNode + ' = ' + eNode + ' ' + signal + ' ' + psRef;
-		let nEq = sNode + ' = ' + eNode + ' ' + signal + ' ' + psValue;
-
-		snRefs.push( { ref: nRef, numEquat: nEq , refEquat: rEq, fullRefEquat: fullRefEq } );
-
-		let ndIndex = nodesInGroundedSN.indexOf(nRef);
-		if(ndIndex < 0 && nRef != 'gnd') {
-			superNodeFloatingVoltRelation.push( { nodeRef: nRef, refEqu: fullRefEq, numEq: nEq, endNode: eNode, signal: signal, psRef: psRef, refEquat: rEq} );
-			//superNodeFloatingVoltRelation.push( { nodeRef: nRef, refEqu: fullRefEq, numEq: nEq } );
-			//ref: nRef, endNode: eNode, signal: signal, psRef: psRef, numEquat: nEq, refEquat: rEq, fullRefEquat: fullRefEq
-		}
-	});
-
-
-	supernodes.forEach(function(snElem, snIndex, snObj) {
-		if(snElem.type == 1) {
-			let snRefs = new Array();
-
-			snElem.nodes.forEach(function(nElem, nIndex, nObj) {
-				let nRef = nElem.ref;
-				let nEq = nElem.voltage.volteq;
-				let sNode = nElem.voltage.equivVoltPs.voltsElem[0].startNode;
-				let eNode = nElem.voltage.equivVoltPs.voltsElem[0].endNode;
-				if(eNode == nRef) { eNode = sNode; sNode = nRef; }
-				let psRef = nElem.voltage.equivVoltPs.voltsElem[0].ref;
-				let signal;
-				dcVoltPs.forEach(function(cpElem, cpIndex, cpObj) {
-					if(cpElem.ref == psRef) {
-						if(cpElem.noP == nRef) signal = ' + ';
-						else signal = ' - ';
-					}
-				});
-				acVoltPs.forEach(function(cpElem, cpIndex, cpObj) {
-					if(cpElem.ref == psRef) {
-						if(cpElem.noP == nRef) signal = ' + ';
-						else signal = ' - ';
-					}
-				});
-
-				let rEq = eNode + signal + psRef;
-				let fullRefEq = sNode + ' = ' + eNode + signal + psRef;
-				snRefs.push( { ref: nRef, endNode: eNode, signal: signal, psRef: psRef, numEquat: nEq, refEquat: rEq, fullRefEquat: fullRefEq } );
-				//superNodeFloatingVoltRelation.push( { sNodeRnodeRef: nRef, refEqu: fullRefEq, numEq: nRef + ' = ' + nEq } );
-
-			});
-			superNodesEndPoints.push( { superNodeElems: snRefs, superNodeObjs: snObj } );
-		}
-	});
-
-	// Add the bridge equation to the other branch of the first node
-
-
-	// Save nodes used as reference in Floating SuperNodes
-	var superNodeFloatingVoltRelationReg = JSON.parse(JSON.stringify(superNodeFloatingVoltRelation));
-
-	// Find and produce a list of nodes grouped in the Floating Super Nodes
-	var knlFloatingEqNodes = new Array();
-	knlFilteredEquations.forEach(function(knlEq, knlIndex, knlObj) {
-		let nodeRef = knlEq.node;
-		supernodes.forEach(function(snEl, snIndex, snObj) {
-			if(snEl.type == 1) {
-				nodeIndex = snEl.nodes.findIndex(item => item.ref == nodeRef);
-				if(nodeIndex > -1) knlFloatingEqNodes.push(knlEq.node);
-			}
-		});
-	});
-
-	// Remove equations of the nodes used as reference nodes for the floating Super Nodes
-	superNodeFloatingVoltRelation.forEach(function(snElem, snIndex, snObj) {
-		// remove nodes
-		let index = knlFloatingEqNodes.indexOf(snElem.nodeRef);
-		if (index > -1) { snObj.splice(snIndex, 1); }
-	});
-
-	// Save first set of knl system equations with all floating supernodes currents
-	var knlSystemEquationsReg = JSON.parse(JSON.stringify(knlEquations));
-
-	// Add Floating Super Nodes Voltage
-	superNodeFloatingVoltRelationReg.forEach(function(knlEq, knlIndex, knlObj) {
-		knlEquations.push(knlEq.refEqu);
-		knlEquationsVl.push(knlEq.numEq);
-	});
-
-
-	nodesInGroundedSN.forEach(function(snElem, snIndex, snObj) {
-		let index = nodes.findIndex(item => item.ref == snElem);
-		if (index > -1) {
-			let newEq = snElem + ' = ' + nodes[index].voltage;
-			knlEquations.push(newEq);
-		}
-	});
-
-	// Produce a list of the equation unknowns
-	var equationUnknowns = new Array();
-	knlFilteredEquations.forEach(function(tE, tI, tO) {
-		equationUnknowns.push(tE.node);
-	});
-
-	// Save the End Points of nodes used in the Floating SuperNodes
-	var superNodesEndPointsReg = JSON.parse(JSON.stringify(superNodesEndPoints));
-
-	var superNodesRelationToRef = new Array();
-
-	superNodesEndPoints.forEach(function(tE, tI, tO) {
-
-		let thisIndex = -1;
-		let nodeToFind;
-		let nodeEqRef;
-		let modEq;
-		let modEquations = new Array();
-		let len = tE.superNodeElems.length;
-
-		// Set reference node for the equations
-		equationUnknowns.forEach(function(eE, eI, eO) {
-			if(eE == tE.superNodeElems[0].ref) nodeEqRef = eE;
-		});
-
-		let end = false;
-		let mcs = 1;
-
-		do {
-			switch (mcs) {
-				case 1: {
-					thisIndex++;
-					if(thisIndex >= len) { end = true; break; }
-					nodeToFind = tE.superNodeElems[thisIndex].ref;
-
-					// If there is a supernode containing just 2 nodes, save equations and quit
-					if(len <= 2) {
-						if(nodeToFind == nodeEqRef) { break; }
-						modEq = {
-							ref: nodeToFind,
-							fullCasEq: tE.superNodeElems[thisIndex].fullRefEquat,
-							casEq: tE.superNodeElems[thisIndex].refEquat,
-							fullNumEq: nodeToFind + ' = ' + tE.superNodeElems[thisIndex].numEquat,
-							numEq: tE.superNodeElems[thisIndex].numEquat
-						};
-						superNodesRelationToRef.push( modEq );
-						break;
-					}
-
-					modEq = { casEq: tE.superNodeElems[thisIndex].fullRefEquat, numEq: nodeToFind + ' = ' + tE.superNodeElems[thisIndex].numEquat };
-					nodeToFind = tE.superNodeElems[thisIndex].endNode;
-
-					mcs++;
-					break;
-				}
-				case 2: {
-					let nextNodeIndex = tE.superNodeElems.findIndex(item => item.ref == nodeToFind);
-					if(nextNodeIndex > -1) {
-						modEq.casEq += ' + ' + tE.superNodeElems[nextNodeIndex].refEquat;
-						modEq.numEq += ' + ' + tE.superNodeElems[nextNodeIndex].numEquat;
-					}
-
-					mcs--;
-					break;
-				}
-				default:
-					break;
-			}
-		} while (!end);
-
-	});
-*/
+	
+	//var knlEquations = new Array();
+	//TODO Escrever as malhas
 
 	/** Rearrange equation system in order to the unkown variables
 	 * 1 - Get the Unknown Variables
@@ -2876,7 +2387,7 @@ function loadFileAsTextMCM() {
 			}
 		}
 	}
-*/
+
 	// Remove the " = 0" from the equations
 	var equationArray = new Array();
 	for(let i = 0; i < knlSubstitutions.length; i++){
