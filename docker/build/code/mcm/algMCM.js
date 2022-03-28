@@ -2080,9 +2080,9 @@ function findMeshes(){
 	for(let i = 0; i<nodes.length; i++){
 		if(nodes[i].type == 0) real_nodes.push(nodes[i].ref);
 	}
-	let branches_ids = [];
+	let branches_id = [];
 	for(let i = 0; i<branches.length; i++){
-		branches_ids.push(branches[i].id);
+		branches_id.push(branches[i].id);
 	}
 	//cria matriz de adjacencia
 	let matriz_adj = [];
@@ -2119,7 +2119,7 @@ function findMeshes(){
 	//Meshes finder
 
 	let circuit = new MeshesFinder();
-	circuit.initGraph(matriz_adj, matriz_inc, real_nodes, branches_ids);
+	circuit.initGraph(matriz_adj, matriz_inc, real_nodes, branches_id);
 	let meshes = circuit.getMeshes();
 	
 	if(meshes.error.state == true) {
@@ -2136,17 +2136,90 @@ function findMeshes(){
 		third: meshes.data
 	}
 }
+//funcção que escolhe as malhas necessárias
+function escolherMalhas(malhas, nr_malhas_principais){
+	let malhas_flags = [];
+	let ramos_fontecorrente_flags = [];
+	let ramos_flags = [];
+	for(let i = 0; i < malhas.length; i++){
+		malhas_flags[i] = 0;
+	}
+	for(let i = 0; i < branches.length; i++){
+		if(branches[i].dcAmpPwSupplies+branches[i].acAmpPwSupplies == 0){
+			ramos_fontecorrente_flags[i] = 0;
+		}
+		else{
+			ramos_fontecorrente_flags[i] = 1;
+		}
+	}
+	for(let i = 0; i < branches.length; i++){
+		ramos_flags[i] = 0;
+	}
+
+	let malhas_escolhidas = [];
+	//inutilizar malhas com mais que uma fonte de corrente
+	for(let i = 0; i < malhas.length; i++){
+		let count = 0;
+		for(let j = 0; j < malhas[i].length; j++){
+			if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1) count++;
+		}
+		if(count > 1) malhas_flags[i] = -1;
+	}
+
+	//Escolha de C malhas auxiliares
+	for(let i = 0; i < ramos_fontecorrente_flags.length; i++){  //para cada fonte de corrente
+		if(ramos_fontecorrente_flags[i] == 1){					//Se o ramo contém fonte de corrente
+			let escolhido = false;
+			while(!escolhido){
+				for(let j = 0; j < malhas.length; j++){			//percorrer o array das malhas
+					if(malhas_flags[j] == 0){					//se a malha estiver disponível
+						for(let k = 0; k < malhas[j].length; k++){ //para cada ramo da malha
+							if(malhas[j][k] == i+1){				//se tiver o ramo com a fonte de corrente em questão
+								for(let m = 0; m < malhas[j].length; m++){
+									ramos_flags[malhas[j][m]-1] = 1;
+								}
+								malhas_flags[j] = 1;
+								malhas_escolhidas.push(malhas[j]);
+								escolhido = true;
+								break;
+							}
+						}
+					}
+					if(escolhido) break;
+				}
+			}			
+		}
+	}
+	//inutilizar as restantes malhas com ramos com fontes de corrente
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas_flags[i] == 0){
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1){
+					malhas_flags[i] = -1;
+					break;
+				}
+			}
+		}
+	}
+	//TODO Escolher o número de malhas principais
+
+	return{
+		first: false,
+		second: 0,
+		third: malhas_escolhidas
+	};
+}
 
 //função principal
 function loadFileAsTextMCM() {
-	let retornar = loadFile();
-	if(retornar.first){
-        alert(retornar.third);
+
+	let load = loadFile();
+	if(load.first){
+        alert(load.third);
 		return;
 	}
-	
 	cleanData();
-	importData(retornar.third);
+	importData(load.third);
 	manageAmpmeters();
 	findNodes();
 	makeBranches();
@@ -2157,25 +2230,32 @@ function loadFileAsTextMCM() {
 	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (dcAmpsPs.length + acAmpsPs.length);
 
 	//Meshes finder
-
-	let malhas = findMeshes();
-	if(malhas.first){
+	let circuito_malhas = findMeshes();
+	if(circuito_malhas.first){
 		let erro = '';
-		malhas.third.forEach(e => {
+		circuito_malhas.third.forEach(e => {
 			erro = erro + '\n' + e;
 		});
-		alert("Erro ao criar malhas!\nErros:\n");
+		alert("Erro ao criar malhas!\nErros:\n" + erro);
 		return;
 	}
 	let malhas_arr = [];
-	malhas.third.order.forEach(ordem => {
-		malhas.third.order[malhas.third.order.indexOf(ordem)].forEach(malha => {
+	circuito_malhas.third.order.forEach(ordem => {
+		circuito_malhas.third.order[circuito_malhas.third.order.indexOf(ordem)].forEach(malha => {
 			malhas_arr.push(malha);
 		});
 	});
 
 	//Algoritmo de escolha de malhas	
+	let malhas_escolhidas = escolherMalhas(malhas_arr, MEquaCnt);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
 
+	malhas_escolhidas.third.forEach(malha => {
+		alert(malha);
+	});
 
 	
 	//var knlEquations = new Array();
