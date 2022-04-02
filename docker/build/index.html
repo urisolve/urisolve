@@ -104,19 +104,19 @@
                       <a class="nav-link js-scroll-trigger" href="#contact"><i class="fas fa-envelope"></i>&nbsp;<span data-translate="_menu-contact"></span></a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link js-scroll-trigger" href="#instructions"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-help"></span></a>
+                      <a class="nav-link js-scroll-trigger" href="javascript:void(0)" onclick="showAll(1);"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-help"></span></a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link js-scroll-trigger" data-toggle="modal" href="#academy"><i class="fas fa-info-circle"></i>&nbsp;<span data-translate="_menu-train"></span></a>
+                      <a class="nav-link js-scroll-trigger" href="javascript:void(0)" onclick="showAcademy();"><i class="fas fa-graduation-cap"></i>&nbsp;<span data-translate="_menu-train"></span></a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link js-scroll-trigger" href="#examples"><i class="fas fa-clipboard-check"></i>&nbsp;<span data-translate="_menu-examples"></span></a>
+                      <a class="nav-link js-scroll-trigger" href="javascript:void(0)" onclick="showAll(2);"><i class="fas fa-clipboard-check"></i>&nbsp;<span data-translate="_menu-examples"></span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openPublicationsModal();"><i class="fas fa-book"></i>&nbsp;<span data-translate="_menu-docs"></span></a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link js-scroll-trigger" href="#topct"><i class="fas fa-arrow-up"></i>&nbsp;<span data-translate="_menu-movetop"></span></a>
+                      <a class="nav-link js-scroll-trigger" href="javascript:void(0)" onclick="showAll(3);"><i class="fas fa-arrow-up"></i>&nbsp;<span data-translate="_menu-movetop"></span></a>
                     </li>
                     <li class="nav-item" id="login-nav-item">
                       <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openLoginModal();"><i class="fas fa-sign-in-alt"></i>&nbsp;<span>LOGIN</span></a>
@@ -188,9 +188,6 @@
 
                         <div class="col-md-4 d-flex justify-content-center" >
                           <button id="btnMSF" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MSF')"> <span data-translate="_btn_msf_p1"></span> <br> <span data-translate="_btn_msf_p2"></span> </button>
-                        </div>
-                        <div class="col-md-4 d-flex justify-content-center" >
-                          <button id="btnTreino" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="trainChoice()"> <span data-translate="_btn_train_p1"></span> <br> <span data-translate="_btn_train_p2"></span> </button>
                         </div>
                       </div>
                       <br>

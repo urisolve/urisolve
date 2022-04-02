@@ -2252,3 +2252,30 @@ function resizeandgray(imgObj) {
     return canvas.toDataURL();
 }
 
+
+//function to hide all sections but U=RIsolve Academy
+function showAcademy() {
+    document.getElementById("topct").style.display = "none";
+    document.getElementById("instructions").style.display = "none";
+    document.getElementById("examples").style.display = "none";
+    const element = document.getElementById("academy");
+    element.scrollIntoView();
+  //  document.getElementById("topct").style.display = "none";
+}
+
+function showAll (sec){
+    document.getElementById("topct").style.display = "block";
+    document.getElementById("instructions").style.display = "block";
+    document.getElementById("examples").style.display = "block";
+    if(sec==1){
+        const element = document.getElementById("instructions");
+        element.scrollIntoView();}
+    else if (sec==2){
+        const element = document.getElementById("examples");
+        element.scrollIntoView();}
+    else{
+        const element = document.getElementById("topct");
+        element.scrollIntoView();}
+
+}
+
