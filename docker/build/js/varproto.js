@@ -1467,6 +1467,17 @@ class acCurrPower {
     }
 }
 
+class mesh {
+    constructor(meshId, meshType, meshBranches, curBranch, equationDir){
+        this.id = meshId;
+        this.type = meshType;
+        this.branches = meshBranches;
+        this.branchWithCurSrc = curBranch;
+        this.direction = equationDir;
+        this.branchesDir = [];
+    }
+}
+
 // Generic CP
 class genericCp {
     constructor(cpId, cpRef, cpNoP, cpNoN, cpType, cpValue, cpUnitMult, cpIntRes, cpIntResMult, cpFreq, cpFreqMult, cpPhase, cpTheta, cpTemp, cpInitValue, cpPosX, cpPosY) {

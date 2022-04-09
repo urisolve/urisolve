@@ -2013,7 +2013,7 @@ function branchCurrents(){
 	}
 
 }
-//limpa as variáveis globais necessárias para correr o códico múltiplas vezes
+//limpa as variáveis globais necessárias para correr o código múltiplas vezes
 function cleanData(){
 	resistors = [];
 	coils = [];
@@ -2145,7 +2145,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
 		malhas_flags[i] = 0;
 	}
 	for(let i = 0; i < branches.length; i++){
-		if(branches[i].dcAmpPwSupplies+branches[i].acAmpPwSupplies == 0){
+		if(branches[i].dcAmpPwSupplies.length + branches[i].acAmpPwSupplies.length == 0){
 			ramos_fontecorrente_flags[i] = 0;
 		}
 		else{
@@ -2179,7 +2179,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
 									ramos_flags[malhas[j][m]-1] = 1;
 								}
 								malhas_flags[j] = 1;
-								malhas_escolhidas.push(malhas[j]);
+								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1,null));
 								escolhido = true;
 								break;
 							}
@@ -2190,6 +2190,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
 			}			
 		}
 	}
+
 	//inutilizar as restantes malhas com ramos com fontes de corrente
 	for(let i = 0; i < malhas.length; i++){
 		if(malhas_flags[i] == 0){
@@ -2201,15 +2202,90 @@ function escolherMalhas(malhas, nr_malhas_principais){
 			}
 		}
 	}
-	//TODO Escolher o número de malhas principais
 
+	//Escolher o número de malhas principais
+	let count = 0;
+	let add = false;
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas_flags[i] == 0){
+			add = false;
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_flags[malhas[i][j]-1] == 0){ //contem ramo novo
+					add = true;
+				}
+			}
+			if(add){
+				for(let j = 0; j < malhas[i].length; j++){
+					ramos_flags[malhas[i][j]-1] = 1;
+				}				
+				malhas_flags[i] = 1;
+				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null));
+				count++;
+			}
+			else{
+				malhas_flags[i] = 2;
+			}
+		}
+		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
+	}
+	if(count < nr_malhas_principais){	//malhas em falta
+		let count2 = 0;
+		for(let c = 0; c < ramos_flags.length; c++){
+			if(ramos_flags[c] == 1)	 count2++;
+		}
+		if(count2 == ramos_flags.length){ //ramos todos ocupados e malhas em falta
+			let count3 = 0;
+			for(let c = 0; c < malhas.length; c++){
+				if(malhas_flags[c] == 2){
+					malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[c], -1, null));
+					count3++;
+				}
+				if(count3 == nr_malhas_principais-count) break;
+			}
+		}
+	}
 	return{
 		first: false,
 		second: 0,
 		third: malhas_escolhidas
 	};
 }
+//função que determina a direção da malha e dos ramos
+function direcaoMalha(malhas){
+	malhas.forEach(malha => {
+		let auxNode = branches[malha.branches[0]-1].endNode;		//começa-se por arbitrar um nó 
+		if(auxNode != branches[malha.branches[1]-1].startNode && auxNode != branches[malha.branches[1]-1].endNode){  //se o primeiro ramo estiver invertido
+			auxNode = branches[malha.branches[0]-1].startNode;		//atualizar auxNode
+			malha.branchesDir.push(-1);								//marca-se a direção do nó com -1
+		}
+		else{
+			malha.branchesDir.push(1);								//caso contrário, marca se com 1
+		}
+		for(let i = 0; i < malha.branches.length-1; i++){			//percorrer os ramos
+			if(auxNode == branches[malha.branches[i+1]-1].startNode){	//caso o ramo tenha o sentido correto
+				auxNode = branches[malha.branches[i+1]-1].endNode;
+				malha.branchesDir.push(1);
+			}
+			else{
+				if(auxNode == branches[malha.branches[i+1]-1].endNode){	//caso o nó tenha o sentido contrário
+					auxNode = branches[malha.branches[i+1]-1].startNode;
+					malha.branchesDir.push(-1);
+				}
+			}
+		}
+		//o resultado neste momento é um array malha.branchesDir, preenchido com 1 e -1, que indica se o ramo está ou não invertido, no decorrer da malha
 
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+//função que constrói as equações
+function construirEq(malhas){
+
+}
 //função principal
 function loadFileAsTextMCM() {
 
@@ -2228,6 +2304,8 @@ function loadFileAsTextMCM() {
 	
 	// Identify MCM Equations
 	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (dcAmpsPs.length + acAmpsPs.length);
+
+	alert("São precisas " + MEquaCnt + " equações");
 
 	//Meshes finder
 	let circuito_malhas = findMeshes();
@@ -2253,13 +2331,16 @@ function loadFileAsTextMCM() {
 		return;
 	}
 
-	malhas_escolhidas.third.forEach(malha => {
-		alert(malha);
-	});
+	//atualizar direções de malha e ramos
+	malhas_escolhidas = direcaoMalha(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
 
-	
-	//var knlEquations = new Array();
-	//TODO Escrever as malhas
+
+	//Construir as equações
+	//let mcmEquations = construirEq(malhas_escolhidas.third);
 
 	/** Rearrange equation system in order to the unkown variables
 	 * 1 - Get the Unknown Variables
