@@ -1,4 +1,4 @@
-function loadFileAsTextMCR() {
+ function loadFileAsTextMCR() {
 	if (!fileContents[1]) {
 		alert("Upload Netlist file first!");
 
