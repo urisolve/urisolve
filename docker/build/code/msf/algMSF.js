@@ -3,7 +3,6 @@ include('code/common/outPrint.js');
 include('vendor/mathjs/math.min.js');
 include('vendor/meshes-finder/src/meshes-finderv2.js');
 
-
 /**
 * MSF Algorythm Implementation
 */
@@ -3425,6 +3424,15 @@ function loadFileAsTextMSF() {
 	}
 
 
+	
+
+	
+
+
+
+
+
+
 		//Fase1
 		let branchesFound = new Array ();
 		let nodesFound = new Array ();
@@ -3564,6 +3572,7 @@ function loadFileAsTextMSF() {
 	let jsonStr = JSON.stringify(outputJson);
 	
 
+
 	$('#msf_finder').html(outMeshes(meshes));
 
 	// Turn the viz. on
@@ -3580,7 +3589,6 @@ function loadFileAsTextMSF() {
 	apagarJSON.style.display = 'none';
 	const apagarTEX = document.getElementById("tex2");
 	apagarTEX.style.display = 'none';
-	
 	
 	// Toggle plus minus icon on show hide of collapse element
 	for(let i = 0; i<7; i++){
@@ -3608,6 +3616,12 @@ function loadFileAsTextMSF() {
 		set_lang(dictionary.portuguese);
 //final da função
 }
+
+
+
+
+
+
 
 
 

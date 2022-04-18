@@ -70,7 +70,7 @@
     <script type="text/javascript" src="js/contact-form.js"></script>
     <script type="text/javascript" src="js/login-register.js"></script>
     <script type="text/javascript" src="js/publications.js"></script>
-
+    
 
     <script type="text/javascript">
     // Global Arrays
@@ -661,53 +661,126 @@
 
          <!-- Academy 
           ================-->
-            <section id="academy" class="gallery">
+          <section id="academy" class="gallery" style="display:none">
+            <div class="container">
+              <div class="row mb-5 wow fadeInUp" data-wow-delay="0.3s">
+                  <div class="col-md-12 text-center">
+                      <div class="heading">
+                          <h1 data-translate="_sect_academy"></h1>
+                          <div class="bord-bot"></div>
+                      </div>
+                  </div>
+              </div>
               <div class="container">
-                <div class="row mb-5 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="col-md-12 text-center">
-                        <div class="heading">
-                            <h1 data-translate="_sect_academy"></h1>
-                            <div class="bord-bot"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="container">
-                  <div class="row ml-7 mr-7 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="col-md-4 text-center">
-                      <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s"></div>
-                        <br>
-                        <i class="fa fa-book fa-2x"></i>
-                        <div class="card-block">
-                          <h4 class="card-title">Praticar por Métodos</h4>
-                          <p class="card-text">Esta secção permite praticar todas as etapas de reolução de um circuito, sequencialmente e pelo método selecionado (MTN, MCM, MRC).</p>
-                          <a href="academy.html" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
-                        </div>
-                    </div>
-                   <div class="col-md-4 text-center">
+                <div class="row ml-7 mr-7 wow fadeInUp" data-wow-delay="0.3s">
+                  <div class="col-md-4 text-center">
                     <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s"></div>
-                       <br>
-                        <i class="fa fa-book fa-2x"></i>
-                        <div class="card-block">
-                          <h4 class="card-title">Praticar por Tema</h4>
-                          <p class="card-text">Esta secção permite praticar etapas específicas da resolução de circuitos, tais como: Nós, Ramos, Equações, Malhas, ...</p>
-                           <a href="#" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
-                        </div>
-                      
-                    </div>
-                    <div class="col-md-4 text-center">
-                      <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s"></div>
                       <br>
                       <i class="fa fa-book fa-2x"></i>
                       <div class="card-block">
-                        <h4 class="card-title">Exercícios Aleatórios</h4>
-                        <p class="card-text">Esta secção permite treinar etapas aleatórias da resolução de circuitos, escolhendo apenas o nível de dificuldade.</p>
-                        <a href="#" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
+                        <h4 class="card-title">Praticar por Métodos</h4>
+                        <p class="card-text">Esta secção permite praticar todas as etapas de reolução de um circuito, sequencialmente e pelo método selecionado (MTN, MCM, MRC).</p>
+                        <a href="javascript:void(0)" onclick="openAcademyCircuitChoice();" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
                       </div>
+                  </div>
+                 <div class="col-md-4 text-center">
+                  <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s"></div>
+                     <br>
+                      <i class="fa fa-book fa-2x"></i>
+                      <div class="card-block">
+                        <h4 class="card-title">Praticar por Tema</h4>
+                        <p class="card-text">Esta secção permite praticar etapas específicas da resolução de circuitos, tais como: Nós, Ramos, Equações, Malhas, ...</p>
+                         <a data-toggle="modal" href="javascript:void(0)" onclick="openAcademyThemeChoice();" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
+                      </div>
+                    
+                  </div>
+                  <div class="col-md-4 text-center">
+                    <div class="contact-cont wow fadeInUp"  data-wow-delay="0.3s"></div>
+                    <br>
+                    <i class="fa fa-book fa-2x"></i>
+                    <div class="card-block">
+                      <h4 class="card-title">Exercícios Aleatórios</h4>
+                      <p class="card-text">Esta secção permite treinar etapas aleatórias da resolução de circuitos, escolhendo apenas o nível de dificuldade.</p>
+                      <a href="#" class="btn btn-primary" style="color: #ffffff"><i class="fa fa-play"></i> Começar</a>
                     </div>
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
+          </section>
+
+<!----------------Train Method Section----------------->
+<section id="trainMethod" class="masthead" style="display:none">
+  <div class="container h-100">
+    <div class="row h-100">
+      <div class="col-lg-7 my-auto">
+        <div class="header-content mx-auto  animated wow zoomIn" data-wow-duration="0.3s" data-wow-delay=".1s">
+          <h2 class="mx-auto" data-translate="_main-title_h1"></h2><h4 data-translate="_main-title_p1"></h4>
+          <br>
+          <h6 class="text-white-70" data-translate="_main-body_h1"></h6>
+          <div class="card bg-transparent-80 justify-content-center align-items-center">
+            <div class="card-body">
+              <div id="drop_zone" style="margin-top: 20px;">
+                <p class="text-justify font-weight-normal">
+                  <span data-translate="_main-body_p1"></span>
+                </p>
+                <p class="text-left font-weight-normal">
+                  <span data-translate="_main-body_p2"></span>
+                </p>
+                <div class="input-group mb-3" >
+                  <div class="custom-file">
+                    <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
+                    <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent font-weight-light justify-content-center align-items-center">
+                  <span id="files-details" class="badge badge-dark"></span>
+                  <div id="files-img-det" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
+                    <div class="items-align-center img-fluid" id="image-holder" style="margin-top: 20px;"></div>
+                    <output id="list"></output>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="row justify-content-center" style="margin-top: 20px;">
+            <!-- Botoes para analise-->
+            <div class="col-md-4 d-flex justify-content-center" >
+              <button id="btnMTN" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MTN')"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
+            </div>
+
+            <div class="col-md-4 d-flex justify-content-center" >
+              <button id="btnMCR" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button" aria-disabled="true"> <span data-translate="_btn_mcr_p1"></span> <br> <span data-translate="_btn_mcr_p2"></span> </button>
+            </div>
+
+            <div class="col-md-4 d-flex justify-content-center" >
+              <button id="btnMCM" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
+            </div>
+
+            <div class="col-md-4 d-flex justify-content-center" >
+              <button id="btnMSF" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MSF')"> <span data-translate="_btn_msf_p1"></span> <br> <span data-translate="_btn_msf_p2"></span> </button>
+            </div>
+          </div>
+          <br>
+        </div>
+      </div>
+      <div class="col-lg-5 my-auto">
+        <div class="device-container">
+          <div class=" portrait white animated wow bounceInUp" data-wow-duration="1s" data-wow-delay=".5s">
+            <div class="device text-center">
+              <div class="screen">
+                <img id="app-insight-en" src="img/app/steps.png" class="img-fluid" alt="" style="display: none">
+                <img id="app-insight-pt" src="img/app/passos.png" class="img-fluid" alt="" style="display: none">
+              </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 
         <!-- CONTACT US
             ================-->
@@ -1154,8 +1227,7 @@
 
   </body>
 </html>
-
-<!--TODO Modal para MSF-->
+//TODO Modal para MSF
  <!-- MODAL MSF ==============-->
  <div id="editor2"></div>
  <section id="results2" style="display: none">
@@ -1216,94 +1288,63 @@
    </div>
  </section>
 
- <!-- TODO Modal para Escolha da modalidade-->
- <!-- MODAL Train Type ==============-->
- <div id="editor_train"></div>
- <section id="train" style="display: none">
-  <!-- Modal -->
-  <div class="modal fade bd-example-modal-lg" id="modal_train" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-    <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
-      <div class="modal-content border-black no-print-border" id="modalcont">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Praticar</h5>
-          <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div id="train-board" class="modal-body"></div>
-        <!-- <div id="results-json" class="modal-body"></div> -->
-        <!-- User name box -->
-        <p><nav>
-          <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Praticar por método</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Praticar por tema</a>
-            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Exercícios aleatórios</a>
-          </div>
-        </nav>
-        <div class="tab-content" id="nav-tabContent">
-          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-            Escolha o método a estudar:<p></p><p></p>
-            <button id="btnMTN" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="methodChoice()"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
-            <button id="btnMCM" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
-            <button id="btnMCM" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
-            </div>
-          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">Colocam-se os temas principais</div>
-          <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">Coloca-se só um botão com iniciar</div>
-        </div>
-        </ul></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-       </div>
-    </div>
-  </div>
-</div>
- </section>
-
-
-<!-- MODAL Practice choosing method ==============-->
-<div id="editor_method"></div>
-<section id="method" style="display: none">
- <!-- Modal -->
- <div class="modal fade bd-example-modal-lg" id="modal_method" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-   <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
-     <div class="modal-content border-black no-print-border" id="modalcont">
-       <div class="modal-header">
-         <h5 class="modal-title" id="exampleModalLongTitle">Praticar</h5>
-         <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-         </button>
-       </div>
-       <div id="method-board" class="modal-body"></div>
-       <!-- <div id="results-json" class="modal-body"></div> -->
-       <!-- User name box -->
-        <div id="drop_zone" style="margin-top: 20px;">
-         <p class="text-justify font-weight-normal">
-           <span data-translate="_main-body_p1"></span>
-         </p>
-         <p class="text-left font-weight-normal">
-            <span data-translate="_main-body_p2"></span>
-         </p>
-         <div class="input-group mb-3" >
-           <div class="custom-file">
-             <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
-             <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
-           </div>
-          </div>
-          <div class="card-footer bg-transparent font-weight-light justify-content-center align-items-center">
-           <span id="files-details" class="badge badge-dark"></span>
-           <div id="files-img-det" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
-              <div class="items-align-center img-fluid" id="image-holder" style="margin-top: 20px;"></div>
-              <output id="list"></output>
+ //TODO Modal para Inserir respostas
+ <!-- MODAL Input Answers ==============-->
+ <div id="editor3"></div>
+ <section id="input3" style="display: none">
+   <!-- Modal -->
+   <div class="modal fade bd-example-modal-lg" id="input-modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+     <div class="modal-dialog modal-lg" style="max-width:1250px" role="document">
+       <div class="modal-content border-black no-print-border" id="modalcont">
+         <div class="modal-header">
+           <h5 class="modal-title" id="exampleModalLongTitle">MSF Analysis - Quiz</h5>
+           <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
          </div>
-        <div> <button id="btnMTN" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit()"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
-        <button id="btnRandom" class ="btn btn-sm btn-primary btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit()"> <span data-translate="_btn_random_p1"></span> <br> <span data-translate="_btn_random_p2"></span> </button> </div>
-          
+         <div id="input-board3" class="modal-body"></div>
+         <!-- <div id="results-json" class="modal-body"></div> -->
+         <!-- User name box -->
+         <div class="container" style="visibility: visible;">
+           <form role="form" method="post" id="userform-temp" class="col-lg-6 offset-lg-3">
+             <div class="row justify-content-center">
+                 <div class="col-4 form-group">
+                     <label for="name"> <span data-translate="_firstname"></span></label>
+                     <input type="text" class="form-control" id="output-name" name="name">
+                 </div>
+                 <div class="col-4 form-group">
+                     <label for="lastname"> <span data-translate="_lastname"></span></label>
+                     <input type="text" class="form-control" id="output-lastname" name="lastname">
+                     
+                 </div>
+                 <div class="col-4 form-group">
+                   <label for="number"> <span data-translate="_number"></span></label>
+                   <input type="text" class="form-control" id="output-number" name="number">
+               </div>
+             </div>
+             <div class="row justify-content-center">
+               <small id="output-info" class="form-text text-muted"><span data-translate="_user-info-text"></span></small>
+             </div>
+         </form>
+         </div>
+
+         <div class="modal-footer no-print">
+           <fieldset class="w-100">
+             <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
+             <button id="pdfPrintButton2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+               <i class="fas fa-file-pdf" aria-hidden="true"></i>&nbsp;&nbsp;Download PDF
+               <div class="ldld bare em-1 light d-inline-block ml-1 align-middle" id="pdfLoader"></div>
+             </button>
+             <button id="json2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+             <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
+             <button id="tex2" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+             <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
+             <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
+               <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
+           </fieldset>
+         </div>
        </div>
-     <div class="modal-footer">
-       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+     </div>
+     </div>
    </div>
- </div>
-</div>
-</section>
+ </section>

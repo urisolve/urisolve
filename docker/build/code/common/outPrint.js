@@ -2253,20 +2253,22 @@ function resizeandgray(imgObj) {
 }
 
 
+
 //function to hide all sections but U=RIsolve Academy
 function showAcademy() {
     document.getElementById("topct").style.display = "none";
     document.getElementById("instructions").style.display = "none";
     document.getElementById("examples").style.display = "none";
+    document.getElementById("academy").style.display = "block";
     const element = document.getElementById("academy");
     element.scrollIntoView();
-  //  document.getElementById("topct").style.display = "none";
 }
 
 function showAll (sec){
     document.getElementById("topct").style.display = "block";
     document.getElementById("instructions").style.display = "block";
     document.getElementById("examples").style.display = "block";
+    document.getElementById("trainMethod").style.display = "none";
     if(sec==1){
         const element = document.getElementById("instructions");
         element.scrollIntoView();}
@@ -2279,3 +2281,8 @@ function showAll (sec){
 
 }
 
+function openAcademyCircuitChoice(){
+    
+    document.getElementById("trainMethod").style.display = "block";
+    document.getElementById("trainMethod").scrollIntoView();
+}
