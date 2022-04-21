@@ -75,6 +75,7 @@
     <script type="text/javascript">
     // Global Arrays
     fileContents = new Array(2);
+
     </script>
 
     <script> $(window).on('load', function(){ 
@@ -729,14 +730,14 @@
                 </p>
                 <div class="input-group mb-3" >
                   <div class="custom-file">
-                    <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
+                    <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput-a" multiple="multiple"/></form>
                     <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
                   </div>
                 </div>
                 <div class="card-footer bg-transparent font-weight-light justify-content-center align-items-center">
                   <span id="files-details" class="badge badge-dark"></span>
-                  <div id="files-img-det" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
-                    <div class="items-align-center img-fluid" id="image-holder" style="margin-top: 20px;"></div>
+                  <div id="files-img-det-a" class="card bg-transparent-80 justify-content-center align-items-center text-dark" style="display: none">
+                    <div class="items-align-center img-fluid" id="image-holder-a" style="margin-top: 20px;"></div>
                     <output id="list"></output>
                 </div>
               </div>
@@ -1212,6 +1213,13 @@
           });
         </script>
 
+<script>
+  $(document).ready(function(){
+    document.getElementById('fileInput-a').addEventListener('change', academyHandleFileSelect);
+   
+  });
+</script>
+
         <script type="text/javascript" src="js/fileup.js"></script>
         <script type="text/javascript" src="js/modalresults.js"></script>
         <script type="text/javascript" src="js/language.js"></script>
@@ -1227,7 +1235,7 @@
 
   </body>
 </html>
-//TODO Modal para MSF
+
  <!-- MODAL MSF ==============-->
  <div id="editor2"></div>
  <section id="results2" style="display: none">
@@ -1288,7 +1296,7 @@
    </div>
  </section>
 
- //TODO Modal para Inserir respostas
+ 
  <!-- MODAL Input Answers ==============-->
  <div id="editor3"></div>
  <section id="input3" style="display: none">
@@ -1348,3 +1356,6 @@
      </div>
    </div>
  </section>
+
+
+
