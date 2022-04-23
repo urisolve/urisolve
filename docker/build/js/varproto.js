@@ -764,6 +764,7 @@ class branch {
         this.equivVoltPs = cpEquivVoltPs,
         this.endVoltPsEndNodes = cpEndVoltPsEndNodes,
         this.currentData = cpCurrentData,
+        this.meshCurr = [];
         this.setEquivImpedance = function (freqV, freqM) {
             let errorCode = 0;
             let tImpedance = 0;
@@ -1378,6 +1379,12 @@ class dcCurrPower {
                 toNode:     this.noN,
             };
         };
+        this.getGlobalNodes = function () {
+            return {
+                fromNode:   this.globalNoP,
+                toNode:     this.globalNoN,
+            };
+        };
     }
 }
 
@@ -1464,17 +1471,27 @@ class acCurrPower {
                 toNode:     this.noN,
             };
         };
+        this.getGlobalNodes = function () {
+            return {
+                fromNode:   this.globalNoP,
+                toNode:     this.globalNoN,
+            };
+        };
     }
 }
 
 class mesh {
-    constructor(meshId, meshType, meshBranches, curBranch, equationDir){
+    constructor(meshId, meshType, meshBranches, curBranch, curSrc){
         this.id = meshId;
         this.type = meshType;
         this.branches = meshBranches;
         this.branchWithCurSrc = curBranch;
-        this.direction = equationDir;
+        this.currentSource = curSrc;
         this.branchesDir = [];
+        this.componentsLeft = [];
+        this.componentsRight = [];
+        this.equationData = [];
+        this.incognitoEq = '';
     }
 }
 

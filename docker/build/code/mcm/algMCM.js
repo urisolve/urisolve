@@ -58,6 +58,7 @@ ERROR LIST
 1 - Não foi inserida uma netlist
 2 - Erro Netlist
 3 - Erro a procurar malhas
+3 - Erro a construir equações
 
 */
 	
@@ -2179,7 +2180,10 @@ function escolherMalhas(malhas, nr_malhas_principais){
 									ramos_flags[malhas[j][m]-1] = 1;
 								}
 								malhas_flags[j] = 1;
-								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1,null));
+								let temp;
+								if(branches[i].dcAmpPwSupplies.length != 0) temp = branches[i].dcAmpPwSupplies[0];
+								else temp = branches[i].acAmpPwSupplies[0];
+								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1, temp));
 								escolhido = true;
 								break;
 							}
@@ -2219,7 +2223,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
 					ramos_flags[malhas[i][j]-1] = 1;
 				}				
 				malhas_flags[i] = 1;
-				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null));
+				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, []));
 				count++;
 			}
 			else{
@@ -2237,7 +2241,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
 			let count3 = 0;
 			for(let c = 0; c < malhas.length; c++){
 				if(malhas_flags[c] == 2){
-					malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[c], -1, null));
+					malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[c], -1, []));
 					count3++;
 				}
 				if(count3 == nr_malhas_principais-count) break;
@@ -2250,6 +2254,34 @@ function escolherMalhas(malhas, nr_malhas_principais){
 		third: malhas_escolhidas
 	};
 }
+//função que determina se um componente está no mesmo sentido  que o ramo
+/*function mesmoSentido(componente, ramo, componentesRamo){
+	let aux = componente.noP;
+	do{
+		if(aux.search("_net") == -1){		//o nó é real
+			if(aux == branches[ramo-1].endNode                    ){	//o sentido é o mesmo do ramo
+				return true;
+			}
+			else{												//o sentido é contrário ao do ramo
+				return false;
+			}
+		}
+		else{												//o nó é virtual, procurar próximo componente
+			for(let i = 0; i < componentesRamo.length; i++){
+				if(componentesRamo[i].noP == aux){
+					aux = componentesRamo[i].noN;
+					break;
+				}
+				else{
+					if(componentesRamo[i].noP == aux){
+						aux = componentesRamo[i].noP;
+						break;
+					}
+				}
+			}
+		}
+	}while(true);
+}*/
 //função que determina a direção da malha e dos ramos
 function direcaoMalha(malhas){
 	malhas.forEach(malha => {
@@ -2274,7 +2306,40 @@ function direcaoMalha(malhas){
 			}
 		}
 		//o resultado neste momento é um array malha.branchesDir, preenchido com 1 e -1, que indica se o ramo está ou não invertido, no decorrer da malha
+		if(malha.type == 0){		//caso a malha em questão tenha fonte de corrente
+			let trocar = false;
 
+			let aux = branches[malha.branchWithCurSrc-1];
+			let componentesRamo = [];
+			componentesRamo = componentesRamo.concat(aux.dcVoltPwSupplies, aux.acVoltPwSupplies, aux.resistors, aux.coils, aux.capacitors);
+			if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+
+			if(aux.dcAmpPwSupplies != 0){ 										//fonte de corrente é dc
+				if(aux.dcAmpPwSupplies[0].getGlobalNodes().fromNode == branches[malha.branchWithCurSrc-1].endNode){
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == -1) trocar = true;
+				}
+				else{
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == 1) trocar = true;	
+				}
+			}
+			else{																//fonte de corrente é ac
+				if(aux.acAmpPwSupplies[0].getGlobalNodes().fromNode == branches[malha.branchWithCurSrc-1].endNode){
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == -1) trocar = true;
+				}
+				else{
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == 1) trocar = true;	
+				}
+			}
+			if(trocar){
+				//trocar sentidos dos ramos
+				for(let i = 0; i < malha.branchesDir.length; i++){
+					malha.branchesDir[i] = malha.branchesDir[i] * -1;
+				}
+				//trocar ordem das malhas
+				malha.branchesDir.reverse();
+				malha.branches.reverse();
+			}
+		}
 	});
 	return{
 		first: false,
@@ -2282,9 +2347,165 @@ function direcaoMalha(malhas){
 		third: malhas
 	}
 }
-//função que constrói as equações
-function construirEq(malhas){
+//função que encontra que correntes de malha atravessam cada ramo
+function correntesMalhaRamos(malhas){
+	branches.forEach(ramo => {
+		malhas.forEach(malha => {
+			for(let i = 0; i < malha.branches.length; i++){
+				if(ramo.id == malha.branches[i]){
+					ramo.meshCurr.push(malha.id);
+					break;
+				}
+			}
+		});
+	});
+}
+//função que encontra os componentes da malha
+function getComponents(malhas){
+	malhas.forEach(malha => {		//para cada malha
+		if(malha.type == 1){			//se a malha for principal
+			malha.branches.forEach(ramo => {		//para cada ramo
+				let aux = branches[ramo-1];
+				let searchNode;
+				if(malha.branchesDir[malha.branches.indexOf(ramo)] == -1){		//caso a direção do ramo for -1, contrária
+					searchNode = aux.endNode;		//set do nó inicial a procurar
+				}
+				else{															//caso a direção do ramo seja 1, nao contrária
+					searchNode = aux.startNode;		//set do nó inicial a procurar
+				}
+				let componentesRamo = [];
+				componentesRamo = componentesRamo.concat(aux.dcAmpPwSupplies, aux.acAmpPwSupplies, aux.dcVoltPwSupplies, aux.acVoltPwSupplies, aux.resistors, aux.coils, aux.capacitors);
+				if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+				let cnt = componentesRamo.length;
+				for(let j = 0; j < cnt; j++){		//ciclo que corre tantas vezes quantos componentes houver no ramo
+					let add;
+					let i;
+					let ladoNegativo = false;
+					for(i = 0; i < componentesRamo.length; i++){	//ciclo que procura qual o componente que tem o searchNode como uma das extermidades
+						add = false;
+						if(componentesRamo[i].noP == searchNode){	//caso extermidade positiva
+							ladoNegativo = -1;
+							searchNode = componentesRamo[i].noN;	//próximo searchNode é o nó negativo
+							add = true;
+							break;
+						}
+						else if(componentesRamo[i].noN == searchNode){	//caso extermidade negativa
+							ladoNegativo = 1;
+							searchNode = componentesRamo[i].noP;	//próximo searchNode é o nó positivo
+							add = true;
+							break;
+						}						
+					}
+					if(add){	//caso seja para adicionar o componente
+						if(aux.dcVoltPwSupplies.includes(componentesRamo[i]) || aux.acVoltPwSupplies.includes(componentesRamo[i])){ //caso o componente seja uma fonte se tensão
+							malha.componentsLeft.push([componentesRamo[i], ladoNegativo]);		//adiciona ao lado esquerdo
+						}
+						else{																										//caso o componente não seja uma fonte de tensão
+							malha.componentsRight.push([componentesRamo[i], ramo]);						//adiciona ao lado direito
+						}
+						componentesRamo.splice(i, 1);											//remove o componente do array de componentes do ramo
+					}
+				}
+			});			
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+//função que junta a informação das equações
+function parseEqData(malhas){
+	malhas.forEach(malha => {	//para cada malha
+		if(malha.type == 1){	//se a malha é principal
+			let ladoEsq = [];
+			let ladoDir = [];
+			if(malha.componentsLeft.length == 0) ladoEsq = 0;	//se nao há fontes o lado esquerdo é 0
+			else{
+				for(let i = 0; i < malha.componentsLeft.length; i++){		//para cada fonte
+					ladoEsq.push([malha.componentsLeft[i][0].ref, malha.componentsLeft[i][0].value, malha.componentsLeft[i][0].unitMult, malha.componentsLeft[i][1]]); //adicionar componente ao lado esquerdo
+				}	
+			}
+			if(malha.componentsRight.length == 0){		//caso nao hajam componentes do lado direito da equação
+				return{									//erro
+					first: true,
+					second: 3,
+					third: "Sem componentes no ramo"
+				}
+			}
+			else{
+				for(let i = 0; i < malha.componentsRight.length; i++){		//para cada componente guardar a sua info
+					ladoDir.push([]);
+					componente = malha.componentsRight[i];
+					ladoDir[i][0] = componente[0].ref;
+					ladoDir[i][1] = componente[0].value;
+					ladoDir[i][2] = componente[0].unitMult;
+					ladoDir[i][3] = branches[componente[1]-1].meshCurr;
+					let sentidos = [];
+					let self = malha.branchesDir[malha.branches.indexOf(componente[1])];
+					ladoDir[i][3].forEach(curMalha => {
+						sentidos.push(self * malhas[curMalha-1].branchesDir[malhas[curMalha-1].branches.indexOf(componente[1])]);
+					});
+					ladoDir[i][4] = sentidos;
+				}					
+			}
+			malha.equationData = [ladoEsq, ladoDir];		//parse eq info
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+//função que constrói equações
+function buildEq(malhas){
+	malhas.forEach(malha => {
+		if(malha.type == 1){
+			if(malha.equationData[0] == 0) malha.incognitoEq = malha.incognitoEq.concat('0');
+			else{ 
+				for(let i = 0; i < malha.equationData[0].length; i++){
+					fonte = malha.equationData[0][i];
+					if(fonte[3] == -1){
+						malha.incognitoEq = malha.incognitoEq.concat('-');
+					}
+					else{
+						if(i != 0){
+							malha.incognitoEq = malha.incognitoEq.concat('+');
+						}
+					}
+					malha.incognitoEq = malha.incognitoEq.concat(fonte[0]);
+				}
+			}			
+			malha.incognitoEq = malha.incognitoEq.concat('=');
+			for(let i = 0; i < malha.equationData[1].length; i++){
+				componente = malha.equationData[1][i];
+				if(i != 0) malha.incognitoEq = malha.incognitoEq.concat('+');
+				malha.incognitoEq = malha.incognitoEq.concat(componente[0], '(');
+				for(let j = 0; j < componente[4].length; j++){
+					if(componente[4][j] == -1){
+						malha.incognitoEq = malha.incognitoEq.concat('-');
+					}
+					else{
+						if(j != 0){
+							malha.incognitoEq = malha.incognitoEq.concat('+');
+						}
+					}
+					malha.incognitoEq = malha.incognitoEq.concat('I', componente[3][j], componente[3][j]);
+				}
+				malha.incognitoEq = malha.incognitoEq.concat(')');
+			}
+		}
+		
 
+
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
 }
 //função principal
 function loadFileAsTextMCM() {
@@ -2338,10 +2559,32 @@ function loadFileAsTextMCM() {
 		return;
 	}
 
+	//correntes de malha que atravessam cada ramo
+	correntesMalhaRamos(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
 
-	//Construir as equações
-	//let mcmEquations = construirEq(malhas_escolhidas.third);
+	//encontrar componentes da malha
+	malhas_escolhidas = getComponents(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
 
+	//construir equações
+	malhas_escolhidas = parseEqData(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	malhas_escolhidas = buildEq(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
 	/** Rearrange equation system in order to the unkown variables
 	 * 1 - Get the Unknown Variables
 	 * 2 - Get the rest of the nodes
