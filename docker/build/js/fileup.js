@@ -18,6 +18,19 @@ function cleanFileHtmlOutput(){
     }
 };
 
+function cleanFileHtmlOutput(){
+    var imgThumb = $("#image-holder-a");
+    var filesListOut = $("#list");
+    var filesDetailsOut = $("#files-details");
+    var filesDet = $("#files-img-det-a");
+    imgThumb.empty();
+    filesListOut.empty();
+    filesDetailsOut.empty();
+    filesDet.hide();
+    while (fileContents.length > 0) {
+        fileContents.pop();
+    }
+};
 function handleFileSelect (e) {
     e.stopPropagation();
     e.preventDefault();

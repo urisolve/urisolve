@@ -1,0 +1,35 @@
+.masthead-a{
+    padding: 20% 5%;
+}
+
+.card-image-a{
+    background-color: gray;
+    border-color:gray;
+    padding:0;
+}
+
+.card-img-top-a{
+    padding:2%;
+    width:85%;
+    margin: 7.5%;
+    position:relative;
+    text-align: center;
+}
+.card-text-a, .card-title-a{
+    color: white;
+    padding:7% 7%;
+    margin:0;
+}
+
+.card-body{
+    padding-bottom:20%;
+}
+
+.col-a{
+    padding-bottom:10%;
+}
+
+.btn-a{
+    margin-bottom: 10%;
+    margin-left: 7%;
+}

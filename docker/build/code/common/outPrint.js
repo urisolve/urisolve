@@ -2286,3 +2286,9 @@ function openAcademyCircuitChoice(){
     document.getElementById("trainMethod").style.display = "block";
     document.getElementById("trainMethod").scrollIntoView();
 }
+
+function openAcademyThemeChoice(){
+    
+    document.getElementById("themeMethod").style.display = "block";
+    document.getElementById("themeMethod").scrollIntoView();
+}
