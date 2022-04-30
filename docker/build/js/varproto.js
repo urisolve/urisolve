@@ -1492,6 +1492,8 @@ class mesh {
         this.componentsRight = [];
         this.equationData = [];
         this.incognitoEq = '';
+        this.revealedCurrSrc = '';
+        this.revealedEq = '';
     }
 }
 
