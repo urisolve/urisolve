@@ -56,7 +56,7 @@ services:
         max-size: 50m
 
   urisolve:
-    image: docker.pkg.github.com/txroot/urisolve/webappx64:stable
+    image: docker.pkg.github.com/urisolve/urisolve/webappx64:main
     container_name: urisolve
     restart: unless-stopped
     networks:
