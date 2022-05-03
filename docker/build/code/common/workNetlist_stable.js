@@ -120,13 +120,8 @@ function validateNetlist(text) {
     lines = outFile.split('\n');
     // Check for empty lines once again
     for(let i = 0; i< lines.length; i++){
-        if(lines[i].length < 2) {
+        if(lines[i].length < 2)
             lines.splice(i,1);
-        }
-        else {
-            //Remove extra spaces
-            lines[i] = lines[i].replace(/\s+/g, ' ').trim()
-        }
     } 
 
     // Search and Remove Wire and Internal Resistances
@@ -1221,14 +1216,9 @@ function validateNetlist(text) {
                     phase: 0
                 }
                 vSrcData.push(obj);
-                //Remove from netlist if it belongs to a set of voltage sources
-                for(let set = 0; set < isolatedSets.length; set++) {
-                    if(isolatedSets[set].srcList.includes(obj.ref)){
-                        outLines.splice(i,1);
-                        i--;
-                    }
-                }
-               
+                //Remove from netlist
+                outLines.splice(i,1);
+                i--;
             }
             if(words[0].split(':')[0] == 'Vac'){
                 let obj = {
@@ -1241,12 +1231,8 @@ function validateNetlist(text) {
                     phase: words[7].split('"')[1]
                 }
                 vSrcData.push(obj);
-                for(let set = 0; set < isolatedSets.length; set++) {
-                    if(isolatedSets[set].srcList.includes(obj.ref)){
-                        outLines.splice(i,1);
-                        i--;
-                    }
-                }
+                outLines.splice(i,1);
+                i--;
             }
 
         }
