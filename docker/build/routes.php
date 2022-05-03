@@ -18,6 +18,6 @@ get('/academy/$method/$netlist', 'academy.php');
 // Both $analyse and $method will be available in product.php
 get('/circuit/$analyse/method/:mtn', 'analyse.php');
 
-// ## any method stands for GETs or POSTs
+// ## ANY method stands for GETs or POSTs
 // The error.php has access to $_GET and $_POST
 any('/error','views/error.php');
