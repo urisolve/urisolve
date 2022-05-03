@@ -15,7 +15,7 @@ get('/academy/$method/$netlist', 'academy.php');
 
 // ## Dynamic GET using 2 variables with static
 // In the URL -> http://domain/circuit/analyse/method/mtn
-// Both $analyse and $method will be available in product.php
+// Both $analyse and $method will be available in analyse.php
 get('/circuit/$analyse/method/:mtn', 'analyse.php');
 
 // ## ANY method stands for GETs or POSTs
