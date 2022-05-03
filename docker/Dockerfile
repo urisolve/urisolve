@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/urisolve/urisolve/webappx64:base
+FROM docker.pkg.github.com/urisolve/urisolve/webappx64:stable
 LABEL maintainer="André Rocha - anr@isep.ipp.pt"
 
 # Copy DB
