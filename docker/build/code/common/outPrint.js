@@ -870,15 +870,15 @@ function outCurrentsInfo(currents, branches){
  */
  function outMeshes(meshes){
     // Create row div
-    let htmlstr = '<div class="row mt-3">';
+    let htmlstr = '<div class="row_msf mt-3">';
     // TEX Data
     let TeXData = '';
     // Add every current information
     for( let i = 2; i < meshes.data.order.length; i++){
-        htmlstr += '<div class="col-6 col-sm-6 col-md-6 col-lg-4">';
+        htmlstr += '<div class="col-lg-12>';
         htmlstr += '<div class="card text-black bg-white mb-3">';
         htmlstr += '<div class="card-body">'
-        htmlstr += '<h5 class="card-title text-left"> Malhas de ordem '+ i + ':';
+        htmlstr += '<h5 class="card-title_msf text-left"> Malhas de ordem '+ i + ':';
         // Current Mesh
         for(let j=0; j<meshes.data.order[i].length; j++){
             for (let k=0; k<i;k++){
