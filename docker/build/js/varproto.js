@@ -765,6 +765,7 @@ class branch {
         this.endVoltPsEndNodes = cpEndVoltPsEndNodes,
         this.currentData = cpCurrentData,
         this.meshCurr = [];
+        this.meshCurrDir = [];
         this.setEquivImpedance = function (freqV, freqM) {
             let errorCode = 0;
             let tImpedance = 0;
@@ -1379,12 +1380,14 @@ class dcCurrPower {
                 toNode:     this.noN,
             };
         };
+        /*
         this.getGlobalNodes = function () {
             return {
                 fromNode:   this.globalNoP,
                 toNode:     this.globalNoN,
             };
         };
+        */
     }
 }
 
@@ -1481,12 +1484,13 @@ class acCurrPower {
 }
 
 class mesh {
-    constructor(meshId, meshType, meshBranches, curBranch, curSrc){
+    constructor(meshId, meshType, meshBranches, curBranch, curSrc, meshLetterId){
         this.id = meshId;
         this.type = meshType;
         this.branches = meshBranches;
         this.branchWithCurSrc = curBranch;
         this.currentSource = curSrc;
+        this.letterId = meshLetterId;
         this.branchesDir = [];
         this.componentsLeft = [];
         this.componentsRight = [];
@@ -1494,6 +1498,9 @@ class mesh {
         this.incognitoEq = '';
         this.revealedCurrSrc = '';
         this.revealedEq = '';
+        this.solverEq = "";
+        this.currValue;
+        this.currMult;
     }
 }
 

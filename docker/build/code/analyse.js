@@ -1,5 +1,8 @@
 
-//Carrega o ficheiro, valida a netlist
+/**
+ * Loads the file and validates the netlist
+ * @returns netlist
+ */
 function loadFile(){
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
@@ -59,7 +62,11 @@ function loadFile(){
 		third: netlistTxt
 	};
 }
-//Importa os dados do ficheiro para varáveis do script
+
+/**
+ * Imports data to local variables
+ * @param {String} netlistTxtnetlist validated file 
+ */
 function importData(netlistTxt){
 
 	var netListLines = netlistTxt.second;
@@ -171,6 +178,10 @@ function importData(netlistTxt){
 		}
 	}
 }
+
+/**
+ * Sabes the ammeter position and the component in series with it
+ */
 //Guarda a posição do amperímetro e o componente em série com ele
 function manageAmpmeters(){
 	for(var i=0; i<ampsMeters.length; i++) {
@@ -195,7 +206,10 @@ function manageAmpmeters(){
 	iProbeNodesArrFilled = iProbeNodesArr.slice();
 
 }
-//Encontra o nr e o tipo de nós (real ou virtual)
+
+/**
+ * Encounters the number and type of knots (real or virtual)
+ */
 function findNodes(){
 
 	//find nodes
@@ -973,7 +987,10 @@ function findNodes(){
 		second: 0
 	}
 }
-//Encontra o nr e a composição dos ramos do circuito
+
+/**
+ * Encouters the number and content of the branches of the circuit
+ */
 function makeBranches(){
 	// Insert components into branches and Count Branches
 
@@ -1465,7 +1482,10 @@ function makeBranches(){
 		}
 	}
 }
-//Dá sentidos a correntes nos ramos (amperímetro ou não)
+
+/**
+ * Gives direction to the currents in the branches
+ */
 function branchCurrents(){
 
 	// Analyse Branches vs Amperemeters (Currents Names)
@@ -1945,7 +1965,10 @@ function branchCurrents(){
 	}
 
 }
-//limpa as variáveis globais necessárias para correr o código múltiplas vezes
+
+/**
+ * Cleans the variables
+ */
 function cleanData(){
 	resistors = [];
 	coils = [];
@@ -1983,7 +2006,10 @@ function cleanData(){
 	};	
 
 }
-//junta fontes de tensão em série
+
+/**
+ * Agregates voltPowerSources in series
+ */
 function agregatePowerSupplies(){
 	for(let i=0; i<branches.length; i++) {
 		branches[i].setVoltPsEndNodes();
@@ -1991,9 +2017,13 @@ function agregatePowerSupplies(){
 		branches[i].setEquivImpedance(circuitAnalData.frequency.value, circuitAnalData.frequency.mult);
 	}
 }
+
+/**
+ * Builds json file for further method analisys
+ * @returns {String} stringyfied json file
+ */
 //builds json file for further method analisys
 function buildJson(){
-    	// Debug JSON Output
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
 	var probesObj = { amperemeters: ampsMeters, voltmeters: voltMeters };
@@ -2051,7 +2081,11 @@ function common(){
 	let load = loadFile();
 	if(load.first){
         alert(load.third);
-		return;
+		return{
+			first: true,
+			second: 1,
+			third: load.third
+		};
 	}
 	cleanData();
 	importData(load.third);
@@ -2123,6 +2157,7 @@ function analyseCircuit(analysismet) {
                         let data = common();
                         if(data.first){
                             alert(data.third);
+							break;
                         }
                         else loadFileAsTextMCM(data.third);
                         successFlag = true;
