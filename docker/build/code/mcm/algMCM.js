@@ -362,6 +362,7 @@ function correntesMalhaRamos(malhas){
 			for(let i = 0; i < malha.branches.length; i++){
 				if(ramo.id == malha.branches[i]){
 					ramo.meshCurr.push(malha.id);
+					ramo.meshCurrDir.push(malha.branchesDir[i]);
 					break;
 				}
 			}
@@ -638,11 +639,26 @@ function solver(malhas){;
 	malhas.forEach(malha => {
 		if(malha.type == 0){ 	//malha é auxiliar
 			malha.currValue = malha.currentSource.value;
-			malha.currMult = malha.currentSource.unitMult;
+			let temp;
+			switch(malha.currentSource.unitMult){
+				case "A":
+					temp = 1;
+					break;
+				case "mA":
+					temp = 0.001;
+					break;
+				case "uA":
+					temp = 0.000001;
+					break;
+				default:
+					temp = 1;
+					break;
+			}
+			malha.currMult = temp;
 		}
 		else{					//malha é principal
 			malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re;
-			malha.currMult = 'A';
+			malha.currMult = 1;
 
 		}
 	});
@@ -653,6 +669,63 @@ function solver(malhas){;
 		third: malhas
 	}
 
+}
+
+/**
+ * Solves for the branch currents
+ * @param {Array} ramos branches array
+ * @param {array} malhas meshes array
+ * @returns {Array} currents equations and values
+ */
+function getBranchCurrents(ramos, malhas){
+	let equations = [];
+	ramos.forEach(ramo => {												//para cada ramo
+		let value = 0;
+		if(!(ramo.startNode == ramo.currentData.noP)){					//se o ramo e a corrente têm sentidos difetentes
+			for(let i = 0; i < ramo.meshCurrDir.length; i++){			//trocar sentidos
+				ramo.meshCurrDir[i] = ramo.meshCurrDir[i] * -1;
+			}
+		}
+		let equation = "";
+		equation = equation.concat(ramo.currentData.ref, "=");			//lado esquerdo
+		for(let i = 0; i < ramo.meshCurr.length; i++){					//lado direito
+			if(ramo.meshCurrDir[i] == -1){
+				equation = equation.concat("-");
+			}
+			else{
+				if(i != 0){
+					equation = equation.concat("+");
+				}
+			}
+			equation = equation.concat("I", ramo.meshCurr[i], ramo.meshCurr[i]);
+			value = (value + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult);  //calcula o valor
+		}
+		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, val: value.toPrecision(3)});		//guarda corrente
+	});
+	return{
+		first: false,
+		second: 0,
+		third: equations
+	}
+}
+
+/**
+ * Solves for the branch currents
+ * @param {array} totalMalhas total circuit meshes
+ * @param {Array} malhas choosen mesh
+ * @param {array} correntesRamos branch currents array
+ * @param ficheiro json file to be updated
+ * @returns updates json file
+ */
+function saveToJson(totalMalhas, malhas, correntesRamos, ficheiro){
+
+	ficheiro.simulationInfo = {
+		totalMeshes: totalMalhas,
+		choosenMeshes: malhas.third,
+		branchCurrents: correntesRamos.third
+	};
+
+    return ficheiro;
 }
 
 //função principal
@@ -735,6 +808,17 @@ function loadFileAsTextMCM(data) {
 		alert(malhas_escolhidas.third);
 		return;
 	}
+
+	//computa as equações das correntes dos ramos
+	let branchCurrentEq = getBranchCurrents(branches, malhas_escolhidas.third);
+	if(branchCurrentEq.first){
+		alert(branchCurrentEq.third);
+		return;
+	}
+
+	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas, branchCurrentEq, jsonFile);
+
+
 
 	/*
 

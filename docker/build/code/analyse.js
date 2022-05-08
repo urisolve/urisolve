@@ -2024,6 +2024,7 @@ function agregatePowerSupplies(){
  */
 //builds json file for further method analisys
 function buildJson(){
+
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
 	var probesObj = { amperemeters: ampsMeters, voltmeters: voltMeters };
@@ -2042,7 +2043,6 @@ function buildJson(){
 	let jsonStr = JSON.stringify(outputJson);
     return jsonStr;
 }
-
 
 
 /**
