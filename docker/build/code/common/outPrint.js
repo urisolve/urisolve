@@ -2292,3 +2292,139 @@ function openAcademyThemeChoice(){
     document.getElementById("themeMethod").style.display = "block";
     document.getElementById("themeMethod").scrollIntoView();
 }
+
+
+//academy method train output
+
+/**
+ * Function to output the circuit fundamental variables
+ * @param {number} R Branches
+ * @param {number} N Nodes
+ * @param {number} T Isolated Voltage Sources
+ */
+ function outCircuitFundamentals_academy(R, N, T){
+    // Compute number of equations
+    let E = N-1-T;   
+
+    //Buttons  Variables
+    let accIDs = ["accBranches", "accNodes", "accSources", "accEquations"];
+    let btnStyle = ["btn-info", "btn-info", "btn-info", "btn-info"];
+    let panStyle = ["bg-info", "bg-info", "bg-info", "bg-info"];
+    let btncollapse = ["collapseR", "collapseN", "collapseT", "collapseE"];
+
+    let btnType = ["R", "N", "T", "E"];
+    let btnContent = new Array();
+    // TeX Content
+    let eqString = "\\small E = N - 1 - T \\Leftrightarrow \\\\ E = ";
+    btnContent.push(katex.renderToString("\\small R = " + R, {throwOnError: false}));
+    btnContent.push(katex.renderToString("\\small N = " + N, {throwOnError: false}));
+    btnContent.push(katex.renderToString("\\small T = " + T, {throwOnError: false}));
+    btnContent.push(katex.renderToString(eqString + E, {throwOnError: false}));
+
+    let htmlstr = '<div class="row">';
+    // Collapse Panels
+    for(let i = 0; i<4; i++){
+        htmlstr += '<div class="col-xl-3 col-lg-6 col-md-6 mb-2">'
+        htmlstr += '<div class="accordion" id="'+accIDs[i]+'"><div class="card">';
+
+        htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
+        htmlstr += '<div class="btn-group btn-block" role="group">';
+        htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_fundamentals_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
+        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
+
+       
+        htmlstr += '<div id="' + btncollapse[i] + '" class="collapse multi-collapse bg-light text-center" style="max-height: 300px;"';
+        htmlstr += 'aria-labelledby="headingOne" data-parent="#' + accIDs[i] + '">';
+        htmlstr += '<div class="card-body"><p class="lead"><form><label for="fundamental_vars" >Número:</label><input class="fVars" type="number" id="' +btnType[i] +'_number" onkeypress="return tableInputKeyPress(event)"></input><br><br><button id="number_'+btnType[i]+'" type="submit" value="Submit_a" onclick=compareResults();>submit</button></form></p>';
+        htmlstr += '</div></div></div></div></div>';
+        
+    }
+
+    htmlstr += '</div>';
+    return htmlstr;
+
+}
+
+
+function outacademy_method(meshes){
+    // Create row div
+    let htmlstr = '<div class="row_msf mt-3">';
+    // TEX Data
+    let TeXData = '';
+    // Add every current information
+    for( let i = 2; i < meshes.data.order.length; i++){
+        htmlstr += '<div class="col-lg-12>';
+        htmlstr += '<div class="card text-black bg-white mb-3">';
+        htmlstr += '<div class="card-body">'
+        htmlstr += '<h5 class="card-title_msf text-left"> Malhas de ordem '+ i + ':';
+        // Current Mesh
+        for(let j=0; j<meshes.data.order[i].length; j++){
+            for (let k=0; k<i;k++){
+                if (k==0 || k==i-1){
+                    if(k==0){
+                        htmlstr += '<h5 class="card-title text-center"> {r_'+ katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) +', r_'; 
+                        }
+                    else{
+                        htmlstr += katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) + '}</h5>'; 
+                        }
+                 }  
+                else{
+                    htmlstr += katex.renderToString(meshes.data.order[i][j][k], {throwOnError: false}) +', r_';
+                }
+            
+        }
+    }  
+    
+        htmlstr += '</h5>';
+        htmlstr += '</div></div></div>';
+    }
+    htmlstr += '</div>';
+
+   
+    return htmlstr;
+    }
+
+    function outHTMLSections_academy(){
+
+        let htmlstr = '';
+    
+        // Warnings section
+        htmlstr += '<div id="errors"></div><div id="warnings"></div><div id="circuitImage"></div>';
+        htmlstr += '<div id= "contResults">';  
+        htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll_a"></div></div></div>';
+        
+        // Fundamental variables
+        htmlstr += '<div class="container mt-3">';
+        htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_fundamentalsTitle"></h5></div></div>';
+        htmlstr += '<div class="container mt-3" id="fundamentalVars_a"></div><div class="container mt-3">';
+    
+        // Circuit information
+        htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
+        htmlstr += '<div class="container mt-3" id="circuitInfo_a"></div>';
+    
+        // Supernodes
+        htmlstr += '<div id="supernodes"></div>';
+    
+        // Currents data
+        htmlstr += '<div class="container mt-3">';
+        htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
+        htmlstr += '<div class="container mt-3" id="currentsInfo_a"></div>';
+    
+        // Equivalent impedances
+        htmlstr += '<div id="eqImpedances_a"></div>';
+    
+        // KNL equations
+        htmlstr += '<div id="KNLEquations_a"></div>';
+    
+        // Equation System
+        htmlstr += '<div id="eqSys_a"></div>';
+    
+        // Results
+        htmlstr += '<div class="container mt-3">';
+        htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_res"></h5></div></div>';
+        htmlstr += '<div class="container mt-3" id="resultsVoltages_a"></div></div>';
+        
+        return htmlstr;
+    }

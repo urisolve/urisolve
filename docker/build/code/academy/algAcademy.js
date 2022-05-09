@@ -1,12 +1,22 @@
 include('code/common/workNetlist.js');
 include('code/common/outPrint.js');
-include('vendor/mathjs/math.min.js');
-include('vendor/meshes-finder/src/meshes-finderv2.js');
 
 /**
-* MSF Algorythm Implementation
+ * Count Nodes By Type (0 = Real, 1 - Virtual)
+ * @param {Array} objArr Array of Nodes objects
+ * @param {Int} type Desired type of node to return
+ * @returns Number of Nodes
+ */
+function countNodesByType(objArr, type) {
+	let cnt = 0;
+	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
+	return cnt;
+  }
+
+/**
+* MTN Algorythm Implementation
 */
-function loadFileAsTextMSF() {
+function loadFileAsTextMTN_academy() {
 	if (!fileContents[1]) {
 		alert("Upload Netlist file first!");
 		return;
@@ -37,7 +47,7 @@ function loadFileAsTextMSF() {
 	let TeX = getTexFileHeader();
 
 	// Print sections
-	document.getElementById('results-board2').innerHTML = outHTMLSections_MSF();
+	document.getElementById('results-board').innerHTML = outHTMLSections_academy();
 
 
 	// Insert circuit image if available
@@ -2437,7 +2447,7 @@ function loadFileAsTextMSF() {
 
 		}
 		// Re-run the function
-		loadFileAsTextMSF();
+		loadFileAsTextMTN();
 		return;
 	}
 
@@ -3270,7 +3280,7 @@ function loadFileAsTextMSF() {
 		equationArray.push(aux[0]);
 	}
 
-		/* Agregate Equation Systems
+	/* Agregate Equation Systems
 		Put together the equations with common variables
 		Necessary for the math.js equation solver
 	*/
@@ -3356,31 +3366,31 @@ function loadFileAsTextMSF() {
 		}
 	}
 
-		// Get Supernodes remaining equations
-		var remainingSN = knlEquationsVl.slice(knlEquaCnt);
-		//Substitute the known node voltages
-		while(remainingSN.length > 0){
-			for(let i = 0; i < remainingSN.length; i++){
-				for(let k = 0; k < results.length; k++){
-					if(remainingSN[i].includes(results[k].node)){
-						remainingSN[i] = remainingSN[i].replace(results[k].node,results[k].value);
-						let varNode = getSNnode(remainingSN[i],realNodesReg);
-						let auxStr = parseDirectEquation(remainingSN[i],varNode);
-						let parser = math.parser();
-						let obj = {
-							node: varNode,
-							value: parser.evaluate(auxStr).toString(),
-							unit: "V"
-						}
-						results.push(obj);
-						remainingSN.splice(i,1);
-						i = remainingSN.length;
-						k = results.length;
+	// Get Supernodes remaining equations
+	var remainingSN = knlEquationsVl.slice(knlEquaCnt);
+	//Substitute the known node voltages
+	while(remainingSN.length > 0){
+		for(let i = 0; i < remainingSN.length; i++){
+			for(let k = 0; k < results.length; k++){
+				if(remainingSN[i].includes(results[k].node)){
+					remainingSN[i] = remainingSN[i].replace(results[k].node,results[k].value);
+					let varNode = getSNnode(remainingSN[i],realNodesReg);
+					let auxStr = parseDirectEquation(remainingSN[i],varNode);
+					let parser = math.parser();
+					let obj = {
+						node: varNode,
+						value: parser.evaluate(auxStr).toString(),
+						unit: "V"
 					}
-	
+					results.push(obj);
+					remainingSN.splice(i,1);
+					i = remainingSN.length;
+					k = results.length;
 				}
+
 			}
 		}
+	}
 
 	// Get currents results (For currents outside isolated VS branches)
 	let resultsCurr = new Array();
@@ -3423,63 +3433,317 @@ function loadFileAsTextMSF() {
 		resultsCurr.push(obj);
 	}
 
-
-	
-
-	
-
-
-
-
-
-
-		//Fase1
-		let branchesFound = new Array ();
-		let nodesFound = new Array ();
-		for (let i=0;i<branches.length;i++){
-			branchesFound.push(branches[i].currentData.ref);
-			nodesFound.push(branches[i].currentData.noP);
-			nodesFound.push(branches[i].currentData.noN);
-		}
-		nodesFound = [...new Set(nodesFound)];
-		branchesFound = [...new Set(branchesFound)];
-		nodesFound.sort();
-		branchesFound.sort();
-		let branchesRef = branchesFound;
-		let nodesRef = nodesFound;
-		const adjMatrix = math.zeros(nodesRef.length, nodesRef.length);
-	const incMatrix = math.zeros(nodesRef.length, branchesRef.length);
-	for(let l = 0; l<branchesRef.length;l++){
-		  for(let i = 0; i<branchesRef.length;i++){
-		  if(branches[l].currentData.ref==branchesRef[i])
-				for(let j = 0; j<nodesRef.length;j++){
-					if(nodesRef[j]==branches[l].currentData.noP){
-						for(k=0;k<nodesRef.length;k++){
-							if(nodesRef[k]==branches[l].currentData.noN){
-								adjMatrix.subset(math.index(j,k),1);
-								adjMatrix.subset(math.index(k,j),1);
-								incMatrix.subset(math.index(j,i),1);
-								incMatrix.subset(math.index(k,i),1);
-	
+	// Get the remaining currents (from SN branches)
+	while(resultsCurr.filter(function(item) {return  item.value === null;}).length > 0){
+		for(let i = 0; i< resultsCurr.length; i++){
+			if(resultsCurr[i].value == null){
+				//Find the current ID
+				let index = currents.findIndex(curr => curr.ref == resultsCurr[i].ref);
+				for(let k = 0; k< currents[index].nodeEquations.length; k++){
+					let nodeEq = currents[index].nodeEquations[k];
+					let isValid = true;
+					let neededCurrents = new Array();
+					let neededCurrValues = new Array();
+					for(let j = 0; j< nodeEq.eqObj.minusCurr.length; j++){
+						// Check if each current already has value
+						let currIndex = resultsCurr.findIndex(curr => curr.ref == nodeEq.eqObj.minusCurr[j]);
+						if(nodeEq.eqObj.minusCurr[j] != resultsCurr[i].ref){
+							neededCurrents.push(nodeEq.eqObj.minusCurr[j]);
+							neededCurrValues.push(resultsCurr[currIndex].value);
 						}
+						if(resultsCurr[currIndex].value == null && nodeEq.eqObj.minusCurr[j] != resultsCurr[i].ref){
+							isValid = false;
+							break;
+						}
+					}
+					for(let j = 0; j< nodeEq.eqObj.plusCurr.length; j++){
+						let currIndex = resultsCurr.findIndex(curr => curr.ref == nodeEq.eqObj.plusCurr[j]);
+						if(nodeEq.eqObj.plusCurr[j] != resultsCurr[i].ref){
+							neededCurrents.push(nodeEq.eqObj.plusCurr[j]);
+							neededCurrValues.push(resultsCurr[currIndex].value);
+						}
+						if(resultsCurr[currIndex].value == null && nodeEq.eqObj.plusCurr[j] != resultsCurr[i].ref){
+							isValid = false;
+							break;
+						}
+					}
+
+					// If the current is valid, assign the equation and compute value
+					if(isValid == true){
+						resultsCurr[i].eq = math.parse(nodeEq.fullPlainEq).toString();
+						let equation = nodeEq.plainEq;
+						let scope = {};
+						for(let j = 0; j< neededCurrents.length; j++){
+							// Create scope
+							//scope[neededCurrents[j]] = neededCurrValues[j];
+							equation = equation.replace(neededCurrents[j],'('+neededCurrValues[j]+')');
+						}
+						resultsCurr[i].value = math.evaluate(equation).toString();
+						resultsCurr[i].fromSN = true;
+						// Move to the last index
+						resultsCurr.push(resultsCurr.splice(i, 1)[0]);
+						break;
 					}
 				}
 			}
 		}
 	}
-		// Fase 2
-		let meshesFinderObj = new MeshesFinder();
+
+
+	// Set up a scale for node voltages results
+	let nodeVoltages = results.map(a => a.value);
+	// Remove parenthesis
+	for(let i = 0; i< nodeVoltages.length; i++){
+		nodeVoltages[i] = nodeVoltages[i].replace(/[()]/g, '');
+	}
+	let nodeUnits = new Array();
+	// Check the values magnitude
+	for(let i = 0; i < nodeVoltages.length; i++){
+		// Check number of zeros after comma
+		let value = Math.abs(parseFloat(nodeVoltages[i]));
+		let decimals = - Math.floor( Math.log(value) / Math.log(10) + 1);
+		if(decimals < 2 || value >= 1 || value == 0)
+			nodeUnits.push("V");
+		else if(decimals < 4 && value < 1)
+			nodeUnits.push("mV");
+		else
+			nodeUnits.push("uV");
+	}
+
+	// Get the most frequent unit in the results
+	let unit = findMode(nodeUnits);
+
+	// Do the conversion and round it to 3 decimal places
+	for(let i = 0; i < nodeVoltages.length; i++){
+		results[i].value = voltConversion(nodeVoltages[i],unit,3);
+		results[i].unit = unit;
+	}
+
+
+	// Set up a scale for currents results
+	nodeUnits = [];
+	// Check the values magnitude
+	for(let i = 0; i < resultsCurr.length; i++){
+		// Check number of zeros after comma
+		let value = Math.abs(parseFloat(resultsCurr[i].value));
+		let decimals = - Math.floor( Math.log(value) / Math.log(10) + 1);
+		if(decimals < 2 || value >= 1 || value == 0)
+			nodeUnits.push("A");
+		else if(decimals < 4 && value < 1)
+			nodeUnits.push("mA");
+		else
+			nodeUnits.push("uA");
+	}
+
+	// Get the most frequent unit in the results
+	unit = findMode(nodeUnits);
+
+	// Do the conversion and round it to 3 decimal places
+	for(let i = 0; i < resultsCurr.length; i++){
+		resultsCurr[i].value = ampConversion(resultsCurr[i].value.toString(),unit,3);
+		resultsCurr[i].unit = unit;
+	}	
 	
-	  meshesFinderObj.initGraph(adjMatrix._data, incMatrix._data, nodesRef, branchesRef);
-	  meshes = meshesFinderObj.getMeshes(1);
-		
-	  if(meshes.error.state == false) {}
-		else{
-			console.log("Impossible to continue with the Meshes Search. Error List: ");
-			meshes.error.reason.forEach(e => {
-				console.log(e);
-			});
+	// Prepare supernodes Equations for steps (Floating)
+	let snEquations = knlEquations.splice(knlEquaCnt);
+	let doneNodes = new Array();
+	let SNFobjects = new Array();
+	
+	for(let i = 0; i< supernodes.length; i++){
+		if(supernodes[i].type == 1){
+			supernodes[i].SNFs = new Array();
+			let nodesInSN = supernodes[i].nodes.map(item => item.ref);
+			// Get the Unknown Node
+			let unknown = nodesInSN.filter(element => equationUnknowns.includes(element));
+			unknown = unknown[0];
+			// Remove it from nodes
+			realNodes = realNodes.filter(e => e !== unknown);
+			while(doneNodes.length < supernodes[i].nodes.length-1){
+				for(let k = 0; k < snEquations.length; k++){
+					if(snEquations[k].includes(unknown)){
+						// Find the other node to solveFor
+						let node = realNodes[searchNode(snEquations[k],realNodes)];
+						let expr = algebra.parse(snEquations[k]);
+						let obj = {
+							ref: node,
+							equation: '('+expr.solveFor(node).toString()+')'
+						};
+						SNFobjects.push(obj);
+						doneNodes.push(node);
+						snEquations.splice(k,1);
+						k--;
+					}
+					else if(searchNode(snEquations[k],doneNodes) > -1){
+						let nodeindex = searchNode(snEquations[k],doneNodes);
+						snEquations[k] = snEquations[k].replace(doneNodes[nodeindex], SNFobjects[nodeindex].equation)
+					}
+				}
+			}
+
+			for(let j = 0; j<SNFobjects.length; j++){
+				let aux = math.parse(SNFobjects[j].equation);
+				SNFobjects[j].equation = math.simplify(aux,{}, {exactFractions: false}).toTex();
+				SNFobjects[j].equation = SNFobjects[j].equation.replace("+-","-");
+				SNFobjects[j].equation = SNFobjects[j].equation.replace("--","+");
+			}
+			supernodes[i].SNFs = SNFobjects;
+			SNFobjects = [];
+			doneNodes = [];
 		}
+	}
+
+	// Prepare supernodes Equations for steps (Grounded)
+	let SNGobjects = new Array();
+	let nodesToSearch = new Array();
+
+	for(let i = 0; i< supernodes.length; i++){
+		if(supernodes[i].type == 0){
+			supernodes[i].SNGs = new Array();
+			let foundNodes=new Array();
+			// Get all nodes
+			nodesToSearch = supernodes[i].nodes.map(item => item.ref);
+			// Start off with ground
+			let gndIndex = supernodes[i].nodes.findIndex(node => node.ref == "gnd");
+			nodesToSearch.splice(nodesToSearch.indexOf("gnd"),1);
+			let completeFlag = 0;
+			for(let k = 0; k< supernodes[i].nodes[gndIndex].branches.length; k++){
+				let branch = supernodes[i].nodes[gndIndex].branches[k];
+				if(nodesToSearch.includes(branch.startNode)){
+					foundNodes.push(branch.startNode);
+					let equation = "V_{" + branch.startNode + "} = 0";
+					for(let j = 0; j< branch.endVoltPsEndNodes.length; j++){
+						if(branch.endVoltPsEndNodes[j].endNode == branch.startNode){
+							equation += " + " + branch.endVoltPsEndNodes[j].voltPsRef;
+							completeFlag = 1;
+						}
+						else{
+							equation += " - " + branch.endVoltPsEndNodes[j].voltPsRef;
+							completeFlag = 1;
+						}
+
+					}
+					if(completeFlag == 1){
+						let obj = {
+							node: branch.startNode,
+							equation: equation
+						}
+						SNGobjects.push(obj);
+						completeFlag = 0;
+					}
+				}
+				else if( nodesToSearch.includes(branch.endNode)){
+					foundNodes.push(branch.endNode);
+					let equation = "V_{" + branch.endNode + "} = 0";
+					for(let j = 0; j<  branch.endVoltPsEndNodes.length; j++){
+						if( branch.endVoltPsEndNodes[j].endNode == branch.endNode){
+							equation += " + " +  branch.endVoltPsEndNodes[j].voltPsRef;
+							completeFlag = 1;
+						}
+						else{
+							equation += " - " +  branch.endVoltPsEndNodes[j].voltPsRef;
+							completeFlag = 1;
+						}
+					}
+					if(completeFlag == 1){
+						let obj = {
+							node: branch.endNode,
+							equation: equation
+						}
+						SNGobjects.push(obj)
+						completeFlag = 0;
+					}
+				}
+			}
+
+			// Remove the nodes with a equation already created
+			for(let k = 0; k<foundNodes.length; k++){
+				nodesToSearch.splice(nodesToSearch.indexOf(foundNodes[k]),1);
+			}
+			// Complete the grounded supernode remaining nodes
+			for(let k = 0; k<nodesToSearch.length; k++){
+				// Find node object
+				let nodeIndex = supernodes[i].nodes.findIndex(node => node.ref == nodesToSearch[k]);
+				for(let j = 0; j< supernodes[i].nodes[nodeIndex].branches.length; j++){
+					let branch = supernodes[i].nodes[nodeIndex].branches[j];
+					// Find a connection
+					let findNext = SNGobjects.findIndex(n => n.node == branch.startNode);
+					let foundisolPS = false;
+					if(branch.dcVoltPwSupplies.length > 0){
+						if(isolatedPsReg.findIndex(item => item.ref == branch.dcVoltPwSupplies[0].ref) > -1)
+							foundisolPS = true;
+					} 
+					if(branch.acVoltPwSupplies.length > 0 && foundisolPS == false){
+						if(isolatedPsReg.findIndex(item => item.ref == branch.acVoltPwSupplies[0].ref) > -1)
+							foundisolPS = true;
+					} 
+					if(findNext > -1 && foundisolPS == true){
+						let equation = "V_{" + nodesToSearch[k] + "} = V_{" + SNGobjects[findNext].node +"}";
+						for(let f = 0; f<  branch.endVoltPsEndNodes.length; f++){
+							if( branch.endVoltPsEndNodes[f].endNode == nodesToSearch[k])
+								equation += " + " +  branch.endVoltPsEndNodes[f].voltPsRef;
+							else
+								equation += " - " +  branch.endVoltPsEndNodes[f].voltPsRef;
+						}
+						let obj = {
+							node: nodesToSearch[k],
+							equation: equation
+						}
+						SNGobjects.push(obj);
+						break;
+					}
+					findNext = SNGobjects.findIndex(n => n.node == branch.endNode);
+					if(findNext > -1 && foundisolPS == true){
+						let equation = "V_{" + nodesToSearch[k] + "} = V_{" + SNGobjects[findNext].node +"}";
+						for(let f = 0; f<  branch.endVoltPsEndNodes.length; f++){
+							if( branch.endVoltPsEndNodes[f].endNode == nodesToSearch[k])
+								equation += " + " +  branch.endVoltPsEndNodes[f].voltPsRef;
+							else
+								equation += " - " +  branch.endVoltPsEndNodes[f].voltPsRef;
+						}
+						let obj = {
+							node: nodesToSearch[k],
+							equation: equation
+						}
+						SNGobjects.push(obj);
+						break;
+					}
+				}
+			}
+			supernodes[i].SNGs = SNGobjects;
+			SNGobjects = [];
+		}
+	}
+
+	// Compute any remaining equations
+	let leftNodes = new Array();
+	for(let i = 0; i< isolatedPsElemReg.length; i++){
+		if((inOrderEquations.findIndex(x => x.node == isolatedPsElemReg[i]) < 0) && 
+		   (!equationUnknowns.includes(isolatedPsElemReg[i])) && (isolatedPsElemReg[i]!="gnd"))
+				leftNodes.push(isolatedPsElemReg[i])
+	}
+
+	for(let j = 0; j< leftNodes.length; j++){
+		for(let i = 0; i< nodesEq.length; i++){
+			if(nodesEq[i].includes(leftNodes[j])){
+				for(let k = 0; k<inOrderEquations.length; k++){
+					if(nodesEq[i].includes(inOrderEquations[k].node)){
+						let strEquation = nodesEq[i];
+						strEquation = strEquation.replace(inOrderEquations[k].node, inOrderEquations[k].equation);
+						strEquation = algebra.parse(strEquation);
+						strEquation = strEquation.solveFor(leftNodes[j]).toString();
+						
+						let obj = {
+							node: leftNodes[j],
+							equation: strEquation
+						}
+						inOrderEquations.push(obj);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	// Get Knl Currents Data
 	let knlCurrData = outCurrentsKNL(knlCurrEquations,supernodes);
 
@@ -3571,24 +3835,82 @@ function loadFileAsTextMSF() {
 
 	let jsonStr = JSON.stringify(outputJson);
 	
+	/*var treeWrap = document.getElementById("results-json");
+	treeWrap.innerHTML='';
+	var tree = jsonTree.create({}, treeWrap);
+	var temp;
+	try {
+		temp = JSON.parse(jsonStr);
+	} catch(e) {
+		alert(e);
+	}
+	tree.loadData(temp);*/
 
 
-	$('#msf_finder').html(outMeshes(meshes));
+	// TeX Fundamental Vars
+	let N = nodeCnt-1-isolatedPsReg.length;
+	let I = acAmpsPs.length+dcAmpsPs.length;
+	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}}&&\\textbf{Equations {[}E{]}} \\\\\r\n";
+	TeX += "R="+branches.length+"&&N="+nodeCnt+"&&T="+isolatedPsReg.length+"&&E=N-T-1="+N+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Frequency {[}F{]}} &  & \\textbf{Current Sources {[}I{]}} &  & \\textbf{Ammeters {[}A{]}} &  & \\textbf{Simulation {[}AC\/DC{]}} \\\\\r\n";
+	TeX += "F="+circuitAnalData.frequency.value+"\\;"+circuitAnalData.frequency.mult+" & & I="+I;
+	TeX += " & & "+ampsMeters.length+"\/"+currents.length+" & &";
+	if(circuitAnalData.frequency.value == 0)
+	 	TeX += "DC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
+	else
+		TeX += "AC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
+	
+	let knlV1 = knlEquationsVl;
+	// Get Equation System Steps
+	let step1 = outStep1(knlOrderedCurrents.original);
+	let step2 = outStep2(knlOrderedCurrents.subs);
+	let step3 = outStep3(currents,knlCurrData.second);
+	let step4 = outStep4(knlEquations,realNodesReg);
+	let step5 = outStep5(knlV1.splice(0,knlEquations.length),realNodesReg);
+	let step6 = outStep6(supernodes,equationUnknowns);
+	
+	// Print Output Data
+	$('#fundamentalVars_a').html(outCircuitFundamentals_academy(branches.length, nodeCnt, isolatedPsReg.length));
+	$('#circuitInfo_a').html(outCircuitInfo(circuitAnalData.frequency,acAmpsPs.length+dcAmpsPs.length,ampsMeters.length,currents.length));
+	let supernodesOutput = outSupernodes(supernodes, inOrderEquations, knlV1);
+	$('#supernodes_a').html(supernodesOutput.first);
+	$('#KNLEquations_a').html(knlCurrData.first);
+	let canvasObjects = createCanvasCurrents(knlCurrData.second);
+	let currentsInfoOutput = outCurrentsInfo(currents, branches);
+	$('#currentsInfo_a').html(currentsInfoOutput.first);
+	let equivImpOutput = outEqImpedances(equivBranchesR,equivBranchesV,equivEndNodes);
+	$('#eqImpedances_a').html(equivImpOutput.first);
+	let equationSystemOutput = outEquationSystem(knlSimplified, step1.first, step2.first, step3.first, step4.first, step5.first, step6.first);
+	$('#eqSys_a').html(equationSystemOutput.first);
+	let resultsOutput = outResults(results, resultsCurr)
+	$('#resultsVoltages_a').html(resultsOutput.first);
+	$('#buttonShowAll_a').html(outShowAllBtn(supernodesOutput.second));
+
+	// TeX Data
+	if(supernodes.length>0)
+		TeX += "\\section{Supernodes}\r\n\r\n"+supernodesOutput.third+"\\pagebreak";
+	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
+	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+	TeX += currentsInfoOutput.second + "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+	TeX += equivImpOutput.second + "\\pagebreak";
+	TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Nodes Law (KNL)\r\n\r\n" + knlCurrData.third;
+	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} " + equationSystemOutput.second;
+	TeX += "Steps:\r\n\r\n" + step1.second + step2.second + step3.second + step4.second + step5.second + step6.second;
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
+	TeX += "\\end{document}\r\n";
+
+	let copyTeX = TeX;
 
 	// Turn the viz. on
 	$("#contResults").show();
 	$("#loadpage").fadeOut(1000);
-	$("#results2").show();
-	$('#results-modal2').modal('show');
-	
-	//Apagar botões de print
-	
-	const apagarPDF = document.getElementById("pdfPrintButton2");
-	apagarPDF.style.display = 'none';
-	const apagarJSON = document.getElementById("json2");
-	apagarJSON.style.display = 'none';
-	const apagarTEX = document.getElementById("tex2");
-	apagarTEX.style.display = 'none';
+    $("#results").show();
+	$('#results-modal').modal('show');
 	
 	// Toggle plus minus icon on show hide of collapse element
 	for(let i = 0; i<7; i++){
@@ -3604,9 +3926,74 @@ function loadFileAsTextMSF() {
 		}
 	});
 
+
+	// Export JSON File
+	$("#json").off().on('click', function() {
+		const filename = 'urisolve_results.json';
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
 	
+	// Export TeX File
+	$("#tex").off().on('click', function() {
+		const filename = 'urisolve_results.tex';
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
 
 
+	// Export PDF File
+	$("#pdfPrintButton").off().on('click', function() {
+		//Get User info
+		let studName = document.getElementById('output-name').value;
+		let studLastname = document.getElementById('output-lastname').value;
+		let studNumber = document.getElementById('output-number').value
+		// Get Simulation Time
+		let hourstr = new Date().getHours();
+		let minstr = new Date().getMinutes();
+		if(hourstr.toString().length < 2)
+			hourstr = "0" + hourstr;
+		if(minstr.toString().length < 2)
+			minstr = "0" + minstr;
+		hourstr = hourstr + ":" + minstr;
+		TeX = copyTeX;
+		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
+		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+			string += " at " + hourstr + "\r\n";
+			TeX = TeX.slice(0,1264) + string + TeX.slice(1265);
+		}
+		// Instanciate printer object
+        docToPrint = new latexprinter(null, 'printLnk', 'pdfPrintButton');
+        // Add the desired Latex Source Code
+        docToPrint.setTexFile(TeX);
+		// Add Logo Image
+		let sampleimg = base64imgselect("logo");
+		docToPrint.addImgFile('logo.jpg', sampleimg);
+		// Add Circuit Image
+		if(fileContents[0]){
+			let imageObj = new Image();
+			imageObj.src = fileContents[0];
+			sampleimg = resizeandgray(imageObj);
+			docToPrint.addImgFile('circuit.jpg', sampleimg);
+		}
+		// Add Canvas Images
+		for(let i = 0; i< canvasObjects.length; i++){
+			docToPrint.addImgFile(canvasObjects[i].id+'.jpg',canvasObjects[i].dataURL)
+		}
+		docToPrint.print();
+		
+	});
 
 	// Refresh fileContents
 	document.getElementById("fileInput").value = "";
@@ -3618,22 +4005,4 @@ function loadFileAsTextMSF() {
 	else	
 		set_lang(dictionary.portuguese);
 
-
-	
-
-
-
-
-//final da função
 }
-
-
-
-
-
-
-
-
-
-
-

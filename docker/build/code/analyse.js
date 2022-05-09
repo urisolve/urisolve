@@ -23,6 +23,28 @@ function analyseCircuit(analysismet) {
                 $("#loadpage").hide();
             }, 500);
         break;
+        case "MTN_a":
+            setTimeout(function() {
+                let retriesNumber = 5;
+                let successFlag = false;
+                for (let i = 0; i < retriesNumber; i++) {
+                    try {
+                        loadFileAsTextMTN_academy();
+                        successFlag = true;
+                    } catch (error) {
+                        console.log("Error in MTN: " + error);
+                        successFlag = false;
+                    }
+                    if (successFlag) {
+                        break;
+                    }
+                    if(i== (retriesNumber-1)) {
+                        alert("An error occurred. Please try again!");
+                    }
+                }
+                $("#loadpage").hide();
+            }, 500);
+        break;
         case "MCR":
             setTimeout(function() {
                 let retriesNumber = 5;

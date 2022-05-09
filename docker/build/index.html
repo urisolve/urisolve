@@ -748,7 +748,7 @@
           <div class="row justify-content-center" style="margin-top: 20px;">
             <!-- Botoes para analise-->
             <div class="col-md-4 d-flex justify-content-center" >
-              <button id="btnMTN" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MTN')"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
+              <button id="btnMTN" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MTN_a')"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
             </div>
 
             <div class="col-md-4 d-flex justify-content-center" >
@@ -1267,6 +1267,22 @@
   });
 </script>
 
+<script type="text/javascript">
+  function tableInputKeyPress(e){
+    e=e||window.event;
+    var key = e.keyCode;
+    if(key==13) {
+     return false; 
+    }
+  }
+
+
+  function compareResults(){
+    
+  }
+</script>
+  
+
         <script type="text/javascript" src="js/fileup.js"></script>
         <script type="text/javascript" src="js/modalresults.js"></script>
         <script type="text/javascript" src="js/language.js"></script>
@@ -1275,6 +1291,7 @@
         <script type="text/javascript" src="code/mtn/algMTN.js"></script>
         <script type="text/javascript" src="code/mcm/algMCM.js"></script>
         <script type="text/javascript" src="code/msf/algMSF.js"></script>
+        <script type="text/javascript" src="code/academy/algAcademy.js"></script>
         <script type="text/javascript" src="code/analyse.js"></script>
         <script type="text/javascript" src="code/train.js"></script>
         <script src="vendor/jsonviewer/app/App.js"></script>
