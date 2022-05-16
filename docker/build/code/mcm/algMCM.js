@@ -1,3 +1,4 @@
+include('code/common/outPrint.js');
 
 /*
 ERROR LIST
@@ -522,6 +523,8 @@ function buildEq(malhas){
 								unit = 0.001;
 								break;
 						}
+						malha.revealedEq = malha.revealedEq.concat(unit);
+						malha.solverEq = malha.solverEq.concat(unit);
 					}
 				}
 			}			
@@ -540,22 +543,25 @@ function buildEq(malhas){
 				malha.revealedCurrSrc = malha.revealedCurrSrc.concat(componente.ref, '*(');
 				malha.revealedEq = malha.revealedEq.concat(componente.value);
 				malha.solverEq = malha.solverEq.concat(componente.value);
-				
 				if(!(componente.uni.search("m") == -1) && (componente.uni != "Ohm")){
-					malha.revealedEq = malha.revealedEq.concat("*0.001");
-					malha.solverEq = malha.solverEq.concat("*0.001");
+					malha.revealedEq = malha.revealedEq.concat("*" + 0.001);
+					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 0.001);
+					malha.solverEq = malha.solverEq.concat("*" + 0.001);				
 				} 
 				else if(!(componente.uni.search("u") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*0.000001");
-					malha.solverEq = malha.solverEq.concat("*0.000001");	
+					malha.revealedEq = malha.revealedEq.concat("*" + 0.000001);
+					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 0.000001);
+					malha.solverEq = malha.solverEq.concat("*" + 0.000001);	
 				}
 				else if(!(componente.uni.search("k") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*1000");
-					malha.solverEq = malha.solverEq.concat("*1000");	
+					malha.revealedEq = malha.revealedEq.concat("*" + 1000);
+					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 1000);
+					malha.solverEq = malha.solverEq.concat("*" + 1000);
 				} 
 				else if(!(componente.uni.search("M") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*1000000");	
-					malha.solverEq = malha.solverEq.concat("*1000000");
+					malha.revealedEq = malha.revealedEq.concat("*" + 1000000);
+					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 1000000);
+					malha.solverEq = malha.solverEq.concat("*" + 1000000);
 				} 
 
 				malha.revealedEq = malha.revealedEq.concat('*(');
@@ -585,10 +591,12 @@ function buildEq(malhas){
 								break;
 							case "mA":
 								malha.revealedEq = malha.revealedEq.concat("*0.001");
+								malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*0.001");
 								malha.solverEq = malha.solverEq.concat("*0.001");
 								break;
 							case "uA":
 								malha.revealedEq = malha.revealedEq.concat("*0.000001");
+								malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*0.000001");
 								malha.solverEq = malha.solverEq.concat("*0.000001");
 								break;
 							default:
@@ -608,6 +616,9 @@ function buildEq(malhas){
 				malha.revealedEq = malha.revealedEq.concat(')');
 				malha.solverEq = malha.solverEq.concat(')');
 			}
+		}
+		else{
+			malha.incognitoEq = malha.incognitoEq.concat('Auxiliar mesh, no equation');
 		}
 	});
 	return{
@@ -657,7 +668,10 @@ function solver(malhas){;
 			malha.currMult = temp;
 		}
 		else{					//malha é principal
-			malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re;
+			if(!String(results.result._data[temp.indexOf(malha.letterId)][0].im).includes("0")) malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re.toPrecision(3) + results.result._data[temp.indexOf(malha.letterId)][0].im.toPrecision(3);
+			else{
+				malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re.toPrecision(3);
+			}
 			malha.currMult = 1;
 
 		}
@@ -698,7 +712,7 @@ function getBranchCurrents(ramos, malhas){
 				}
 			}
 			equation = equation.concat("I", ramo.meshCurr[i], ramo.meshCurr[i]);
-			value = (value + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult);  //calcula o valor
+			value = value + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor
 		}
 		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, val: value.toPrecision(3)});		//guarda corrente
 	});
@@ -719,13 +733,207 @@ function getBranchCurrents(ramos, malhas){
  */
 function saveToJson(totalMalhas, malhas, correntesRamos, ficheiro){
 
-	ficheiro.simulationInfo = {
-		totalMeshes: totalMalhas,
-		choosenMeshes: malhas.third,
-		branchCurrents: correntesRamos.third
-	};
+	ficheiro.analysisObj.totalMeshes = totalMalhas;
+	ficheiro.analysisObj.choosenMeshes = malhas;
+
+	for(let i = 0; i < correntesRamos.third.length; i++){
+		ficheiro.analysisObj.currents[i].value = correntesRamos.third[i].val;
+		ficheiro.analysisObj.currents[i].meshEquation = correntesRamos.third[i].eq;
+	}
+
+	let incogEq = [];
+	let currentRevEq = [];
+	let allRevEq = [];
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas[i].type == 1){
+			incogEq.push(malhas[i].incognitoEq);
+			currentRevEq.push(malhas[i].revealedCurrSrc);
+			allRevEq.push(malhas[i].revealedEq);			
+		}
+
+	}
+
+	ficheiro.equations = {
+		inc: incogEq,
+		currRev: currentRevEq,
+		allRev: allRevEq
+	}
 
     return ficheiro;
+}
+
+
+function safePrintOutput(jsonFile){
+	// Tex Variable
+	let TeX = getTexFileHeader();
+
+	// Print sections
+	document.getElementById('results-board').innerHTML = outHTMLSections();
+
+	// Insert circuit image if available
+	if (fileContents[0]) { 
+		let htmlstring = '<div class="container mt-3"><div class="row bg-dark rounded text-light  p-2">';
+		htmlstring += '<h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+		htmlstring += '<div class="container mt-2 mb-2 text-center"><img style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
+		$('#circuitImage').html(htmlstring);
+		$('#circuitImage').show();	
+		// Add Image to Tex
+		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
+		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
+		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";	
+	}
+	else
+		$('#circuitImage').hide();
+
+
+	// TeX Fundamental Vars
+	let N = branches.length-(countNodesByType(nodes, 0)-1)-(components.dcAmpsPs.length + components.acAmpsPs.length);
+	let I = components.dcAmpsPs.length + components.acAmpsPs.length;
+	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Equations {[}E{]}} \\\\\r\n";
+	TeX += "R="+branches.length+"&&N="+countNodesByType(nodes, 0)+"&&C="+I+"&&E=R-(N-1)-C="+N+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Frequency {[}F{]}} &  & \\textbf{Voltage Sources {[}VS{]}} &  & \\textbf{Ammeters {[}A{]}} &  & \\textbf{Simulation {[}AC\/DC{]}} \\\\\r\n";
+	TeX += "F="+jsonFile.analysisObj.circuitFreq.value+"\\;"+jsonFile.analysisObj.circuitFreq.mult+" & & VS="+(components.acVoltPs.length+components.dcVoltPs.length);
+	TeX += " & & "+jsonFile.probes.amperemeters.length+"\/"+jsonFile.analysisObj.currents.length+" & &";
+	if(jsonFile.analysisObj.circuitFreq == 0)
+			TeX += "DC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
+	else
+		TeX += "AC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
+
+
+	// Print Output Data
+	$('#buttonShowAll').html(outShowAllBtnMCM());
+	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length));
+	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile.analysisObj.circuitFreq, jsonFile.components.acVoltPs.length+ jsonFile.components.dcVoltPs.length,jsonFile.probes.amperemeters.length,jsonFile.analysisObj.currents.length));
+	let kmlCurrData = outCurrentsKML(jsonFile.analysisObj.choosenMeshes);
+	$('#KNLEquations').html(kmlCurrData.first);
+	//let canvasObjects = createCanvasMeshCurrentsMCM(jsonFile.analysisObj.choosenMeshes);
+	let currentsInfoOutput = outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches);
+	$('#currentsInfo').html(currentsInfoOutput.first);
+	let step1 = outStep1MCM(jsonFile.equations);
+	let step2 = outStep2MCM(jsonFile.equations);
+	let step3 = outStep3MCM(jsonFile.equations);
+	let equationSystemOutput = outEquationSystemMCM(jsonFile.equations, step1.first, step2.first, step3.first);
+	$('#eqSys').html(equationSystemOutput.first);
+	let resultsOutput = outResultsMCM(jsonFile.analysisObj.choosenMeshes, jsonFile.analysisObj.currents);
+	$('#resultsVoltages').html(resultsOutput.first);
+
+
+	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
+	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+	TeX += currentsInfoOutput.second + "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+	//TeX += equivImpOutput.second + "\\pagebreak";
+	TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Meshes Law (KML)\r\n\r\n" + kmlCurrData.second;
+	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} " + equationSystemOutput.second;
+	TeX += "Steps:\r\n\r\n" + step1.second + step2.second + step3.second;
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
+	TeX += "\\end{document}\r\n";
+
+	let copyTeX = TeX;
+
+	// Turn the viz. on
+	$("#contResults").show();
+	$("#loadpage").fadeOut(1000);
+    $("#results").show();
+	$('#results-modal').modal('show');
+	
+
+	// Toggle plus minus icon on show hide of collapse element
+	for(let i = 0; i<7; i++){
+		$( "#btn-"+i ).click(function() {
+			$(this).find("i").toggleClass("fas fa-plus fas fa-minus");
+		});
+	}
+
+	$( "#showALL").click(function() {
+		for(let i = 0; i<7; i++){
+			$("#btn-"+i).children('.fa-minus, .fa-plus').toggleClass("fas fa-minus fas fa-plus");
+
+		}
+	});
+
+	// Export JSON File
+	$("#json").off().on('click', function() {
+		const filename = 'urisolve_results.json';
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonFile)));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
+
+	// Export TeX File
+	$("#tex").off().on('click', function() {
+		const filename = 'urisolve_results.tex';
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
+
+
+	// Export PDF File
+	$("#pdfPrintButton").off().on('click', function() {
+		//Get User info
+		let studName = document.getElementById('output-name').value;
+		let studLastname = document.getElementById('output-lastname').value;
+		let studNumber = document.getElementById('output-number').value
+		// Get Simulation Time
+		let hourstr = new Date().getHours();
+		let minstr = new Date().getMinutes();
+		if(hourstr.toString().length < 2)
+			hourstr = "0" + hourstr;
+		if(minstr.toString().length < 2)
+			minstr = "0" + minstr;
+		hourstr = hourstr + ":" + minstr;
+		TeX = copyTeX;
+		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
+		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+			string += " at " + hourstr + "\r\n";
+			TeX = TeX.slice(0,1264) + string + TeX.slice(1265);
+		}
+		// Instanciate printer object
+        docToPrint = new latexprinter(null, 'printLnk', 'pdfPrintButton');
+        // Add the desired Latex Source Code
+        docToPrint.setTexFile(TeX);
+		// Add Logo Image
+		let sampleimg = base64imgselect("logo");
+		docToPrint.addImgFile('logo.jpg', sampleimg);
+		// Add Circuit Image
+		if(fileContents[0]){
+			let imageObj = new Image();
+			imageObj.src = fileContents[0];
+			sampleimg = resizeandgray(imageObj);
+			docToPrint.addImgFile('circuit.jpg', sampleimg);
+		}
+		// Add Canvas Images
+		//for(let i = 0; i< canvasObjects.length; i++){
+		//	docToPrint.addImgFile(canvasObjects[i].id+'.jpg',canvasObjects[i].dataURL)
+		//}
+		docToPrint.print();
+		
+	});	
+
+
+
+
+	// Update Dictionary Language
+	let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+	if(language == "english")
+		set_lang(dictionary.english);
+	else	
+		set_lang(dictionary.portuguese);
+	
 }
 
 //função principal
@@ -736,7 +944,6 @@ function loadFileAsTextMCM(data) {
 	branches = jsonFile.branches;
 	nodes = jsonFile.nodes;
 	components = jsonFile.components;
-	currents = jsonFile.currents;
 
 	// Identify MCM Equations
 	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (components.dcAmpsPs.length + components.acAmpsPs.length);
@@ -795,7 +1002,7 @@ function loadFileAsTextMCM(data) {
 		return;
 	}
 
-	//constrói três equações: com incógnitas, com as fontes de corrente reveladas, e com tudo revelado
+	//constrói quatro equações: com incógnitas, com as fontes de corrente reveladas, com tudo revelado, e uma para resolução
 	malhas_escolhidas = buildEq(malhas_escolhidas.third);
 	if(malhas_escolhidas.first){
 		alert(malhas_escolhidas.third);
@@ -816,277 +1023,10 @@ function loadFileAsTextMCM(data) {
 		return;
 	}
 
-	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas, branchCurrentEq, jsonFile);
+	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, jsonFile);
 
-
-
-	/*
-
-	// Get Knl Currents Data
-	let knlCurrData = outCurrentsKNL(knlCurrEquations,supernodes);
-
-	// Fix decimal places at substitutions
-	for(let i = 0; i< knlSubstitutions.length; i++)
-		knlSubstitutions[i] = fixDecimals(knlSubstitutions[i],3);
-	for(let i = 0; i< knlEquationsVl.length; i++)
-		knlEquationsVl[i] = fixDecimals(knlEquationsVl[i],3);
-	for(let i = 0; i< resultsCurr.length; i++)
-		resultsCurr[i].eq = fixDecimals(resultsCurr[i].eq,3);
+	safePrintOutput(jsonFile);
 	
-	// Get equation system
-	let knlSimplified = new Array();
-	knlSimplified = knlSimplified.concat(knlSubstitutions);
-	math.type.Fraction.REDUCE = false;
-	for(let i = 0; i< knlSimplified.length; i++){
-		// Remove = 0
-		knlSimplified[i] = knlSimplified[i].replace(/\s+/g, '');
-		knlSimplified[i] = knlSimplified[i].replace('=0', '');
-		knlSimplified[i] = math.parse(knlSimplified[i]);
-		knlSimplified[i] = math.simplify(knlSimplified[i]).toString();
-		knlSimplified[i] = fixEquation(knlSimplified[i]);
-		knlSimplified[i] = math.simplify(knlSimplified[i]).toTex();
-		knlSimplified[i] = fixEquation(knlSimplified[i]);
-		knlSimplified[i] = fixDecimals(knlSimplified[i],3);
-	}
-
-	// Substitute Node names with their Voltages
-	knlSimplified = nodesToVoltagesTex(knlSimplified,realNodesReg);
-
-	// Get Equivalent Impedances and Voltages
-	let equivBranchesR = branches.map(branch => branch.equivImpedance);
-	let equivBranchesV = branches.map(branch => branch.equivVoltPs);
-	let equivEndNodes = {
-		startNodes : branches.map(branch => branch.startNode),
-		endNodes   : branches.map(branch => branch.endNode)
-	};
-	
-	// Debug JSON Output
-	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
-	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
-	var probesObj = { amperemeters: ampsMeters, voltmeters: voltMeters };
-	var analysisObj = {
-		_00_circuitFreq: circuitFrequency,
-		_01_currents: currents,
-		_02_isolatedPs: isolatedPsReg,
-		_03_supernodes: {
-			_01_data: supernodes,
-			_02_floatingSnInfo: {
-				_01_endPoints: superNodesEndPointsReg,
-				_02_fullVoltRelat: superNodeFloatingVoltRelationReg,
-				_03_filteredVoltRelat: superNodeFloatingVoltRelation
-			}
-		},
-		_04_bestGndPos: bestSuperNodeGndPos,
-		_05_knlEquations: {
-			_01_equatCnt: {
-					_01_nodesCnt: realNodesElem.length,
-					_02_isolPsCnt: isolatedPsReg.length,
-					_03_calc: 'knlEq = ' + realNodesElem.length + ' - 1 - ' + isolatedPsReg.length,
-					_03_equatCnt: knlEquaCnt,
-					_04_eqUnknowns: equationUnknowns
-			},
-			_02_origEquatElem: knlFilteredEquations,
-			_03_allKnlEquations: knlEquationsReg,
-			_04_substitutions: stepSubstitutionsReg,
-			_05_workedEquationElem: knlCurrEquations,
-			_06_workedOhmEqSubsElem: knlSystemEquationsReg,
-			_07_fullKnlEquatSytem: knlEquations,
-			_08_knlEquationsVl: knlEquationsVl,
-			_09_substitutions: knlSubstitutions,
-
-		},
-		_06_resultsData: {
-			_01_orderedCurrents: knlOrderedCurrents,
-			_02_simplifiedEqSystem: knlSimplified,
-			_03_nodeVoltages:results,
-			_04_circuitCurrents: resultsCurr
-		}
-
-	};
-	var outputJson = {
-		_01_components: componentsObj,
-		_02_probes: probesObj,
-		_03_nodes: nodes,
-		_04_branches: branches,
-		_05_analysisObj: analysisObj
-	};
-
-	let jsonStr = JSON.stringify(outputJson);
-
-    */
-	
-	/*var treeWrap = document.getElementById("results-json");
-	treeWrap.innerHTML='';
-	var tree = jsonTree.create({}, treeWrap);
-	var temp;
-	try {
-		temp = JSON.parse(jsonStr);
-	} catch(e) {
-		alert(e);
-	}
-	tree.loadData(temp);*/
-
-    /*
-
-	// TeX Fundamental Vars
-	let N = nodeCnt-1-isolatedPsReg.length;
-	let I = acAmpsPs.length+dcAmpsPs.length;
-	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}}&&\\textbf{Equations {[}E{]}} \\\\\r\n";
-	TeX += "R="+branches.length+"&&N="+nodeCnt+"&&T="+isolatedPsReg.length+"&&E=N-T-1="+N+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
-
-	// TeX Circuit Information
-	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Frequency {[}F{]}} &  & \\textbf{Current Sources {[}I{]}} &  & \\textbf{Ammeters {[}A{]}} &  & \\textbf{Simulation {[}AC\/DC{]}} \\\\\r\n";
-	TeX += "F="+circuitAnalData.frequency.value+"\\;"+circuitAnalData.frequency.mult+" & & I="+I;
-	TeX += " & & "+ampsMeters.length+"\/"+currents.length+" & &";
-	if(circuitAnalData.frequency.value == 0)
-	 	TeX += "DC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
-	else
-		TeX += "AC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
-	
-	let knlV1 = knlEquationsVl;
-	// Get Equation System Steps
-	let step1 = outStep1(knlOrderedCurrents.original);
-	let step2 = outStep2(knlOrderedCurrents.subs);
-	let step3 = outStep3(currents,knlCurrData.second);
-	let step4 = outStep4(knlEquations,realNodesReg);
-	let step5 = outStep5(knlV1.splice(0,knlEquations.length),realNodesReg);
-	let step6 = outStep6(supernodes,equationUnknowns);
-	
-	// Print Output Data
-	$('#fundamentalVars').html(outCircuitFundamentals(branches.length, nodeCnt, isolatedPsReg.length));
-	$('#circuitInfo').html(outCircuitInfo(circuitAnalData.frequency,acAmpsPs.length+dcAmpsPs.length,ampsMeters.length,currents.length));
-	let supernodesOutput = outSupernodes(supernodes, inOrderEquations, knlV1);
-	$('#supernodes').html(supernodesOutput.first);
-	$('#KNLEquations').html(knlCurrData.first);
-	let canvasObjects = createCanvasCurrents(knlCurrData.second);
-	let currentsInfoOutput = outCurrentsInfo(currents, branches);
-	$('#currentsInfo').html(currentsInfoOutput.first);
-	let equivImpOutput = outEqImpedances(equivBranchesR,equivBranchesV,equivEndNodes);
-	$('#eqImpedances').html(equivImpOutput.first);
-	let equationSystemOutput = outEquationSystem(knlSimplified, step1.first, step2.first, step3.first, step4.first, step5.first, step6.first);
-	$('#eqSys').html(equationSystemOutput.first);
-	let resultsOutput = outResults(results, resultsCurr)
-	$('#resultsVoltages').html(resultsOutput.first);
-	$('#buttonShowAll').html(outShowAllBtn(supernodesOutput.second));
-
-	// TeX Data
-	if(supernodes.length>0)
-		TeX += "\\section{Supernodes}\r\n\r\n"+supernodesOutput.third+"\\pagebreak";
-	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
-	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
-	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
-	TeX += currentsInfoOutput.second + "\\end{tabular}\r\n\\end{table}\r\n\r\n";
-	TeX += equivImpOutput.second + "\\pagebreak";
-	TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Nodes Law (KNL)\r\n\r\n" + knlCurrData.third;
-	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} " + equationSystemOutput.second;
-	TeX += "Steps:\r\n\r\n" + step1.second + step2.second + step3.second + step4.second + step5.second + step6.second;
-	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
-	TeX += "\\end{document}\r\n";
-
-	let copyTeX = TeX;
-
-	// Turn the viz. on
-	$("#contResults").show();
-	$("#loadpage").fadeOut(1000);
-    $("#results").show();
-	$('#results-modal').modal('show');
-	
-	// Toggle plus minus icon on show hide of collapse element
-	for(let i = 0; i<7; i++){
-		$( "#btn-"+i ).click(function() {
-			$(this).find("i").toggleClass("fas fa-plus fas fa-minus");
-		});
-	}
-
-	$( "#showALL").click(function() {
-		for(let i = 0; i<7; i++){
-			$("#btn-"+i).children('.fa-minus, .fa-plus').toggleClass("fas fa-minus fas fa-plus");
-
-		}
-	});
-
-
-	// Export JSON File
-	$("#json").off().on('click', function() {
-		const filename = 'urisolve_results.json';
-		let element = document.createElement('a');
-		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr));
-		element.setAttribute('download', filename);
-		element.style.display = 'none';
-		document.body.appendChild(element);
-		element.click();
-		document.body.removeChild(element);
-	  });
-	
-	// Export TeX File
-	$("#tex").off().on('click', function() {
-		const filename = 'urisolve_results.tex';
-		let element = document.createElement('a');
-		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
-		element.setAttribute('download', filename);
-		element.style.display = 'none';
-		document.body.appendChild(element);
-		element.click();
-		document.body.removeChild(element);
-	  });
-
-
-	// Export PDF File
-	$("#pdfPrintButton").off().on('click', function() {
-		//Get User info
-		let studName = document.getElementById('output-name').value;
-		let studLastname = document.getElementById('output-lastname').value;
-		let studNumber = document.getElementById('output-number').value
-		// Get Simulation Time
-		let hourstr = new Date().getHours();
-		let minstr = new Date().getMinutes();
-		if(hourstr.toString().length < 2)
-			hourstr = "0" + hourstr;
-		if(minstr.toString().length < 2)
-			minstr = "0" + minstr;
-		hourstr = hourstr + ":" + minstr;
-		TeX = copyTeX;
-		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
-		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
-			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
-			string += " at " + hourstr + "\r\n";
-			TeX = TeX.slice(0,1264) + string + TeX.slice(1265);
-		}
-		// Instanciate printer object
-        docToPrint = new latexprinter(null, 'printLnk', 'pdfPrintButton');
-        // Add the desired Latex Source Code
-        docToPrint.setTexFile(TeX);
-		// Add Logo Image
-		let sampleimg = base64imgselect("logo");
-		docToPrint.addImgFile('logo.jpg', sampleimg);
-		// Add Circuit Image
-		if(fileContents[0]){
-			let imageObj = new Image();
-			imageObj.src = fileContents[0];
-			sampleimg = resizeandgray(imageObj);
-			docToPrint.addImgFile('circuit.jpg', sampleimg);
-		}
-		// Add Canvas Images
-		for(let i = 0; i< canvasObjects.length; i++){
-			docToPrint.addImgFile(canvasObjects[i].id+'.jpg',canvasObjects[i].dataURL)
-		}
-		docToPrint.print();
-		
-	});
-
-	// Refresh fileContents
-	document.getElementById("fileInput").value = "";
-	
-	// Update Dictionary Language
-	let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
-	if(language == "english")
-		set_lang(dictionary.english);
-	else	
-		set_lang(dictionary.portuguese);
-    */
-
 }
 
 

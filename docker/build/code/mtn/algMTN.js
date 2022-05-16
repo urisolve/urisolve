@@ -3949,7 +3949,7 @@ function loadFileAsTextMTN() {
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
-	  });
+	});
 
 
 	// Export PDF File
@@ -3991,8 +3991,7 @@ function loadFileAsTextMTN() {
 		for(let i = 0; i< canvasObjects.length; i++){
 			docToPrint.addImgFile(canvasObjects[i].id+'.jpg',canvasObjects[i].dataURL)
 		}
-		docToPrint.print();
-		
+		docToPrint.print();	
 	});
 
 	// Refresh fileContents

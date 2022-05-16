@@ -331,6 +331,10 @@ h6, .h6 {
   font-size: 1.25rem;
   font-weight: 300; }
 
+.small-lead {
+  font-size: 1rem;
+  font-weight: 300;}
+
 .display-1 {
   font-size: 6rem;
   font-weight: 300;
@@ -505,6 +509,15 @@ pre {
   min-height: 1px;
   padding-right: 15px;
   padding-left: 15px; }
+
+.col-lg-6-40 {
+    position: relative;
+    width: 100%;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px; }
+
+
 
 .col {
   flex-basis: 0;

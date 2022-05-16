@@ -1498,7 +1498,7 @@ class mesh {
         this.incognitoEq = '';
         this.revealedCurrSrc = '';
         this.revealedEq = '';
-        this.solverEq = "";
+        this.solverEq = '';
         this.currValue;
         this.currMult;
     }

@@ -495,6 +495,66 @@ function outCircuitFundamentals(R, N, T){
 }
 
 /**
+ * Function to output the circuit fundamental variables
+ * @param {number} R Branches
+ * @param {number} N Nodes
+ * @param {number} C Current scources
+ */
+ function outCircuitFundamentalsMCM(R, N, C){
+    // Compute number of equations
+    let E = R-(N-1)-C;   
+
+    //Buttons  Variables
+    let accIDs = ["accBranches", "accNodes", "accSources", "accEquations"];
+    let btnStyle = ["btn-info", "btn-info", "btn-info", "btn-info"];
+    let panStyle = ["bg-info", "bg-info", "bg-info", "bg-info"];
+    let btncollapse = ["collapseR", "collapseN", "collapseC", "collapseE"];
+
+    let btnType = ["R", "N", "C", "E"];
+    let btnContent = new Array();
+    
+    
+    // TeX Content
+    let eqString = "\\small E = R - (N - 1) - C \\Leftrightarrow \\\\ E = ";
+    btnContent.push(katex.renderToString("\\small R = " + R, {throwOnError: false}));
+    btnContent.push(katex.renderToString("\\small N = " + N, {throwOnError: false}));
+    btnContent.push(katex.renderToString("\\small C = " + C, {throwOnError: false}));
+    btnContent.push(katex.renderToString(eqString + E, {throwOnError: false}));
+    
+
+    let htmlstr = '<div class="row">';
+
+    // Collapse Panels
+    for(let i = 0; i<4; i++){
+        htmlstr += '<div class="col-xl-3 col-lg-6 col-md-6 mb-2">'
+        htmlstr += '<div class="accordion" id="'+accIDs[i]+'"><div class="card">';
+
+        htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
+        htmlstr += '<div class="btn-group btn-block" role="group">';
+        htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_fundamentals_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
+        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
+
+       
+        htmlstr += '<div id="' + btncollapse[i] + '" class="collapse multi-collapse bg-light text-center" style="max-height: 90px;"';
+        htmlstr += 'aria-labelledby="headingOne" data-parent="#' + accIDs[i] + '">';
+        if(i == 3){
+            htmlstr += '<div class="card-body"><p class="small-lead">'+ btnContent[i]+'</p>';
+        }else{
+            htmlstr += '<div class="card-body"><p class="lead">'+ btnContent[i]+'</p>';
+        }
+        
+        htmlstr += '</div></div></div></div></div>';
+        
+    }
+
+    htmlstr += '</div>';
+
+    return htmlstr;
+}
+
+/**
  * Function to output the circuit information
  * @param {object} F Frequency
  * @param {number} Asources Current Sources
@@ -578,6 +638,90 @@ function outCircuitInfo(F, Asources, Amps, totalCurrents){
     return htmlstr;
 }
 
+
+/**
+ * Function to output the circuit information
+ * @param {object} F Frequency
+ * @param {number} Vsources Voltage Sources
+ * @param {number} Amps Ammeters
+ * @param {number} totalCurrents Number of currents in the circuit
+ */
+ function outCircuitInfoMCM(F, Vsources, Amps, totalCurrents){
+    
+    //Buttons  Variables
+    let accIDs = ["accFreq", "accVsources", "accAmps", "accType"];
+    let btnStyle = ["btn-warning", "btn-warning", "btn-warning", "btn-warning"];
+    let btncollapse = ["collapseF", "collapseA", "collapseAmp", "collapseType"];
+    let btnType = ["F", "V", "A", "T"];
+    let panStyle = ["bg-warning", "bg-warning", "bg-warning", "bg-warning"];
+    let btnContent = new Array();
+    // TeX Content
+    let fstring = '';
+    if(F.value == 0)
+        fstring = "\\small F = " + F.value.toString()+ "\\; Hz";
+    else
+    fstring = "\\small F = " + F.value.toString()+ "\\;" + F.mult;
+
+    let ampstring = "\\small " + Amps.toString() + "\\;/\\;" + totalCurrents.toString();
+    let typestring = '';
+    if(F.value == 0) typestring = "DC"; else typestring = "AC";
+
+    // Currents Sources ID
+    let CSid = 'CS';
+    if(document.getElementById("lang-sel-txt").innerText.toLowerCase() == "português")
+        CSid = "FT"
+
+    btnContent.push(katex.renderToString(fstring, {throwOnError: false}));
+    btnContent.push(katex.renderToString('\\small ' + CSid + ' = ' + Vsources, {throwOnError: false}));
+    btnContent.push(katex.renderToString(ampstring, {throwOnError: false}));
+    btnContent.push(katex.renderToString("\\small "+ typestring, {throwOnError: false}));
+
+    let htmlstr = '<div class="row">';
+    // Collapse Panels
+    for(let i = 0; i<4; i++){
+
+        htmlstr += '<div class="col-xl-3 col-lg-6 col-md-6 mb-2">'
+        htmlstr += '<div class="accordion" id="'+accIDs[i]+'"><div class="card">';
+        
+        htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
+        htmlstr += '<div class="btn-group btn-block" role="group">';
+        htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_info_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
+        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
+
+       
+        htmlstr += '<div id="' + btncollapse[i] + '" class="collapse multi-collapse bg-light text-center" style="max-height: 90px;"';
+        htmlstr += 'aria-labelledby="headingOne" data-parent="#' + accIDs[i] + '">';
+        htmlstr += '<div class="card-body"><p class="lead">'+ btnContent[i]+'</p>';
+        htmlstr += '</div></div></div></div></div>';
+
+    }
+
+    htmlstr += '</div>';
+
+    if(Amps < totalCurrents){
+
+        let missing = totalCurrents-Amps;
+
+        htmlstr += '<div id="AmmeterTip">';
+        htmlstr += '<div class="alert alert-dismissible fade show" style="background-color: #D3FFBB; border-left: 6px solid #8CE85A;">';
+        htmlstr += '<i class="fas fa-lightbulb mr-2 ml-1"></i>';
+        htmlstr += '<strong><span class="mt-2 mb-2" style="display:inline-block" data-translate="_tip"></span>';
+        htmlstr += '<span class="mt-2 mb-2" style="display:inline-block">&nbsp; - ' + missing + '&nbsp;';
+        htmlstr += '<span data-translate="_tipAmm1"></span>&nbsp; ' + totalCurrents + '&nbsp;<span data-translate="_tipAmm2"></span>';
+        htmlstr += '</span></strong>';
+        htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button></div>';
+     
+
+        htmlstr += '</div>';
+    }
+
+    
+
+
+    return htmlstr;
+}
 
 /**
  * Function to output the supernode information
@@ -1054,6 +1198,48 @@ function outCurrentsKNL(knlCurrEquations,supernodes){
     return obj;
 }
 
+
+/**
+ * Function to output the KNL Current Equations
+ * @param {object} knlCurrEquations current equations object
+ * @param {number} supernodes supernodes object
+ * @returns {obj} first:HTML string second:Simplified equations obj
+ */
+function outCurrentsKML(malhas){
+
+    // Create string
+    let htmlstr = '';
+    let TeXData = "";
+
+    if(malhas.length > 0){
+        htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_kmlTitle"></h5></div></div>';
+        htmlstr += '<div class="container mt-3"><div class="row row-tile" id="currentsKNL">';
+    }
+
+    //Generate the cards and insert Node and Equation
+    for(let i = 0; i< malhas.length; i++){
+        htmlstr +='<div class="col-sm-12 col-md-6 mt-3"><div class="card bg-light mb-3">'
+        let canvasID = "currCanvas"+i;
+        htmlstr += '<div class="card-body text-secondary">';
+        htmlstr += '<h5 class="card-title ml-3 text-center border rounded-top"><span data-translate="_kmlMesh"></span> ';
+        htmlstr += '<span class="font-weight-bold text-dark"> &nbsp;&nbsp;'+malhas[i].id + '</span></h5>';
+        htmlstr += '<div class="d-flex justify-content-center square mb-3" id="img'+i+'"><canvas width="225" height="225" id="'+canvasID+'"></canvas></div>';
+        htmlstr += '<p class="text-center">';
+        htmlstr += katex.renderToString(malhas[i].incognitoEq, {throwOnError: false});
+        htmlstr += '</p></div></div></div>';
+
+        TeXData += "\\subsubsection{Mesh " + malhas[i].id + "}\r\n\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{";
+        TeXData += canvasID + "}}\r\n\\caption{Node " + malhas[i].id + " currents.}\r\n\\label{" + malhas[i].id + "currents}\r\n\\end{figure}\r\n";
+        TeXData += "\\begin{equation}\r\n \\textrm{Equation}: \\quad "+ malhas[i].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
+    }
+
+    htmlstr += '</div></div>';
+    return {
+        first: htmlstr,
+        second: TeXData
+    }
+
+}
 /**
  * Function to output currents directions canvas
  * @param {object} currentsData currents information object
@@ -1140,6 +1326,45 @@ function createCanvasCurrents(currentsData){
     return canvasObjects
 }
 
+
+/**
+ * Function to output currents directions canvas
+ * @param {object} currentsData currents information object
+ * @TODO Expand the canvas to allow more than 8 currents/angles
+ */
+ function createCanvasMeshCurrentsMCM(meshes){
+
+    //Canvas dataURL Object array
+    let canvasObjects = new Array();
+
+    for(let i = 0; i<meshes.length; i++){
+
+        // Get Canvas HTML ID
+        let canvasID = "currCanvas" + i;
+        let canvas = document.getElementById(canvasID);
+        let context = canvas.getContext('2d');
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        let radius  = 5;
+        let alignConfig = ["left","center","right","center","left","right","right","left"];
+
+        // Cycle through currents if less than 8
+        if(meshes[i].branches.length <= 8){
+            drawMesh(meshes[i],  canvas);
+        }
+
+        // Convert to Data URL
+        let canvasdataURL = {
+            dataURL: canvas.toDataURL(),
+            id: canvasID
+        }
+
+        canvasObjects.push(canvasdataURL);
+    }
+
+    return canvasObjects
+}
+
 /**
  * Function to output equation system STEP 1
  * @param {object} currents currents object
@@ -1175,6 +1400,40 @@ function outStep1(currents){
 }
 
 /**
+ * Function to output equation system STEP 1
+ * @param {object} currents currents object
+ * @returns {string} HTML string
+ */
+ function outStep1MCM(currents){
+    // Create HTML string
+    let htmlstr = '';
+    let TeXData = "";
+    // Generate the collapse panel
+    htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step1Panel">';
+    // Generate equation system
+    let str = '\\large \\begin{cases}';
+    for(let k = 0; k<currents.inc.length; k++){
+        str += currents.inc[k];
+        if(k<currents.inc.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeXData += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
+    TeXData += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Place the equations inside a scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+
+    let obj = {
+        first: htmlstr,
+        second: TeXData
+    }
+    return obj;
+}
+
+/**
  * Function to output equation system STEP 2
  * @param {object} currents currents object
  * @returns {string} HTML string
@@ -1194,6 +1453,42 @@ function outStep2(currents){
     }
     str += '\\end{cases}';
     TeXData += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the known currents\r\n";
+    TeXData += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Place the equations inside a scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+
+    let obj = {
+        first: htmlstr,
+        second: TeXData
+    }
+    return obj;
+
+}
+
+
+/**
+ * Function to output equation system STEP 2
+ * @param {object} currents currents object
+ * @returns {string} HTML string
+ */
+ function outStep2MCM(currents){
+    // Create HTML string
+    let htmlstr = '';
+    let TeXData = "";
+    // Generate the collapse panel
+    htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step2Panel">';
+    // Generate equation system
+    let str = '\\large \\begin{cases}';
+    for(let k = 0; k<currents.currRev.length; k++){
+        str += currents.currRev[k];
+        if(k<currents.currRev.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeXData += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
     TeXData += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
     // Render it to LaTeX
     str = katex.renderToString(str, {throwOnError: false});
@@ -1283,6 +1578,41 @@ function outStep3(allCurrents, varCurrents){
         second: TeXData
     }
     return obj;
+}
+
+/**
+ * Function to output equation system STEP 2
+ * @param {object} currents currents object
+ * @returns {string} HTML string
+ */
+ function outStep3MCM(currents){
+    // Create HTML string
+    let htmlstr = '';
+    let TeXData = "";
+    // Generate the collapse panel
+    htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step3Panel">';
+    // Generate equation system
+    let str = '\\large \\begin{cases}';
+    for(let k = 0; k<currents.allRev.length; k++){
+        str += currents.allRev[k];
+        if(k<currents.allRev.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeXData += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the circuit component values\r\n";
+    TeXData += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Place the equations inside a scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+
+    let obj = {
+        first: htmlstr,
+        second: TeXData
+    }
+    return obj;
+
 }
 
 /**
@@ -1627,6 +1957,171 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
 }
 
 /**
+ * Function to output the Final Equation System and every step
+ * @param {String Array} simpEquations simplified equation system
+ * @param {string} strStep1 HTML String for step 1
+ * @param {string} strStep2 HTML String for step 2
+ * @param {string} strStep3 HTML String for step 3
+ * @param {string} strStep4 HTML String for step 4
+ * @param {string} strStep5 HTML String for step 5
+ * @param {string} strStep6 HTML String for step 6
+ * @returns {string} first: HTML String with results
+ */
+ function outEquationSystemMCM(simpEquations, strStep1, strStep2, strStep3){
+
+    // HTML String
+    let htmlstr = '';
+    let TeXData = "";
+    if(simpEquations.inc.length > 0){
+
+        htmlstr += '<div class="container mt-3">';
+        htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_eqSystemTitle"></h5></div></div>';
+        htmlstr += '<div id="gndTip"></div>';
+        htmlstr += '<div class="container mt-3"><div class="row" id="equationSystem">';
+
+        // Add card
+        htmlstr += '<div class="col-sm-12"><div class="card bg-light mb-3">';
+        // Create Show Steps Collapse Button
+        let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-toggle="collapse" data-target="#collapseEquations"';
+        btnstr += ' aria-expanded="false" data-translate="_snStepsBtn"></button>';
+        // Add card body
+        htmlstr += '<div class="card-body text-secondary mt-2 mb-2">';
+        // Create TeX equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRev.length; k++){
+            str += simpEquations.allRev[k];
+            if(k < simpEquations.allRev.length-1)
+                str += '\\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeXData += " Equations:\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+        // Render to TeX
+        str = katex.renderToString(str, {throwOnError: false});
+        // Generate equation system
+        htmlstr += '<div class="row">';
+        htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+        // Add steps button
+        htmlstr += '<div class="row mb-2"><div class="card-text text-center">' + btnstr +'</div></div>';
+
+
+        //************** STEPS ****************
+
+        let plusIcon = '<i class="fas fa-plus ml-1"></i>';
+
+        // Create collapse panel
+        htmlstr += '<div class="collapse multi-collapse" id="collapseEquations">';
+        
+        // STEP #1 
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-1" data-toggle="collapse" data-target="#step1Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 1:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep1MCM"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += strStep1 +'</div>';
+
+        // STEP #2
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-2" data-toggle="collapse" data-target="#step2Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 2:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep2MCM"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += strStep2 +'</div>';
+
+        // STEP #3
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-3" data-toggle="collapse" data-target="#step3Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 3:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep3MCM"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += strStep3 +'</div>';
+/*
+        // STEP #4
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-4" data-toggle="collapse" data-target="#step4Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 4:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep4"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += strStep4 +'</div>';
+
+        // STEP #5
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-5" data-toggle="collapse" data-target="#step5Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 5:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep5"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += strStep5 +'</div>';
+
+        // STEP #6
+        if(strStep6.length > 1){
+
+            btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+            btnstr += 'id="btn-6" data-toggle="collapse" data-target="#step6Panel" ';
+            btnstr += 'aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+            // Add card
+            htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+            htmlstr += '<div class="row bg-success rounded">';
+            // Add step text
+            htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 6:';
+            htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep6.0"></small></h5></div>';
+            // Add button
+            htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+            // Add Step results
+            htmlstr += strStep6 +'</div>';
+        }
+*/
+        // Close collapse panel
+        htmlstr += "</div>";
+    
+        // Close card and card-body divs
+        htmlstr += '</div></div></div></div>';
+    }
+
+    let obj = {
+        first: htmlstr,
+        second: TeXData
+    }
+    return obj;
+
+}
+
+
+/**
  * Function to output circuit results: node voltages and currents
  * @param {object} results node voltages data
  * @param {object} currents currents data
@@ -1831,6 +2326,146 @@ function outResults(results, currents){
 }
 
 /**
+ * Function to output circuit results: node voltages and currents
+ * @param {object} results node voltages data
+ * @param {object} currents currents data
+ * @returns {string} HTML string
+ */
+ function outResultsMCM(meshes, currents){
+
+    // Create HTML String
+    let htmlstr = '';
+    let TeXData = "";
+
+    // Create Container
+    htmlstr += '<div class="container print-block"><div class="row print-block">';
+    
+    //********************************* MESH CURRENTS **************************************
+
+    // Add card for Mesh Currents
+  
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
+    htmlstr += '<h6 class="lead" data-translate="_meshCurrents"></h6></div>';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
+
+    // Add Equation system
+    let str = '\\large \\begin{cases}';
+    for(let k = 0; k<meshes.length; k++){
+        // Generate Equation
+        let unit;
+        switch(meshes[k].unitMult){
+            case 1:
+                unit = 'A';
+                break;
+            case 0.001:
+                unit = 'mA';
+                break;
+            case 0.000001:
+                unit = 'uA';
+                break;
+            case 1000:
+                unit = 'kA';
+                break;
+            default:
+                unit = 'A';
+                break;
+        }
+
+        if(String(meshes[k].currValue).includes('i')){
+            let complex = math.complex(meshes[k].currValue);
+            complex = complex.toPolar();
+            complex.phi = complex.phi * (180/Math.PI);
+            complex.phi = +complex.phi.toFixed(3);
+            complex.r = +complex.r.toFixed(3);
+            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + complex.r + "\\angle " + complex.phi + "^{\\circ}" + "\\\\" + unit;
+        }
+        else{
+        str += "I_{" + meshes[k].id + meshes[k].id + "} = " + meshes[k].currValue + unit + "\\\\";
+        }
+        if(k<results.length-1)
+            str += ' \\\\[0.7em] ';
+    }
+    str += '\\end{cases}';
+    // Parse system to TeX
+    TeXData += "\\subsection{Mesh Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+    str = katex.renderToString(str, {throwOnError: false});
+    TeXData += "\\subsection{Branch Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+    // Place system inside scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div>';
+    // Close Node Voltages Card
+    htmlstr += '</div></div></div>';
+
+    //********************************* CIRCUIT CURRENTS ************************************
+
+    // Add card for currents
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center no-page-break" style="opacity:0.9">';
+    htmlstr += '<h6 class="lead" data-translate="_currents"></h6></div>';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
+
+    if(currents.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currents.length; k++){
+            str += currents[k].meshEquation;
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currents.length; k++){
+
+            if(String(currents[k].value).includes('i')){
+                let complex = math.complex(currents[k].value);
+                complex = complex.toPolar();
+                complex.phi = complex.phi * (180/Math.PI);
+                complex.phi = +complex.phi.toFixed(3);
+                complex.r = +complex.r.toFixed(3);
+                str += currents[k].ref + complex.r + "\\angle " + complex.phi + "^{\\circ}" + "\\;" + "A";
+            }
+            else{
+                str += currents[k].ref + " = " + currents[k].value + "\\;" + 'A';
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        TeXData += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+        TeXData += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
+        TeXData += " The following currents were obtained by the mesh currents that exist in each branch.\r\n\\end{footnotesize}\r\n\r\n"
+        // Render System to TeX
+        str = katex.renderToString(str, {throwOnError: false});
+        // Add Notes
+        htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+        htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+        htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+        htmlstr += '<div class="ml-1"><strong><p data-translate="_currResNotes1MCM"></p></strong></div>';
+        htmlstr += '</div></div></div>'
+        // Add equations in a scroll menu
+        htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
+    }
+    // Close Currents Card
+    htmlstr += '</div></div></div>';
+
+    // Close results panel
+    htmlstr += '</div></div>';
+
+    return {
+        first: htmlstr,
+        second: TeXData
+    };
+}
+
+/**
  * Function to output a tip for the best ground position
  * @param {object} bestGndPos nodes for the best gnd position
  * @returns {string} HTML string
@@ -1904,6 +2539,24 @@ function drawArrow(fromx, fromy, tox, toy, style, elemID){
     ctx.fillStyle = style;
     // Fill the arrow
     ctx.fill();
+}
+
+
+function drawMesh(mesh, canvas){
+    // Access element context in HTML DOM
+    let ctx = canvas.getContext("2d");
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+    if(mesh.branches.length == 2){
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, canvas.width-canvas.width*0.2, canvas.height-0.5*canvas.height, 0, 0, 0);
+        ctx.fillStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.fill();
+    }
+    else if(mesh.branches.length == 3){
+
+    }
 }
 
 /**
@@ -2140,6 +2793,20 @@ function outShowAllBtn(supernodesCollapse){
     for(let i = 0; i< supernodesCollapse.length; i++){
         showAllbtn += supernodesCollapse[i] + ' ';
     }
+
+    showAllbtn += 'collapseEquations step1Panel step2Panel step3Panel step4Panel step5Panel step6Panel" ';
+    showAllbtn += '><i class="fas fa-expand-arrows-alt mr-2"></i><span data-translate="_showAllBtn"></span></button>';
+
+    return showAllbtn;
+
+}
+
+function outShowAllBtnMCM(){
+    
+    // Create Show All Collapse Button
+    let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-toggle="collapse" ';
+    showAllbtn += 'data-target=".multi-collapse" aria-expanded="false" ';
+    showAllbtn += 'aria-controls="collapseR collapseN collapseT collapseE collapseF collapseA collapseAmp collapseType ';
 
     showAllbtn += 'collapseEquations step1Panel step2Panel step3Panel step4Panel step5Panel step6Panel" ';
     showAllbtn += '><i class="fas fa-expand-arrows-alt mr-2"></i><span data-translate="_showAllBtn"></span></button>';
