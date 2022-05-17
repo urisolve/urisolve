@@ -1,4 +1,4 @@
-include('vendor/meshes-finder/meshes-f');
+include('vendor/meshes-finder/meshes-finder.js');
 
 //global variables
 
@@ -2067,45 +2067,193 @@ function loadFileAsTextMCR() {
 
 //bloco3 termina
 
+let analysisObj={
+	"equations": [],
+	"usedmeshes":[],
+	"meshMatrix":[],
+	"nodeMatrix":[],
+	"equationReal":[],
+
+};
+
+
 var branchesn=[];
 for(let i=0; i<currents.length;i++){
-	branchesn[i]=currents[i].current.ref;
+	branches[i].ref=currents[i].ref;
+	branches[i].ref = branches[i].ref.substring(1);
+	branchesn[i]=currents[i].ref;
+	branchesn[i]=branchesn[i].substring(1);
 	
 }
 
 var nodesn=[];
 for(let i=0;i<nodes.length;i++){
-	if(nodes[i].node.type==0){nodesn[i]=nodes[i].node.ref}
+	if(nodes[i].type==0){nodesn[i]=nodes[i].ref}
 	else{nodesn[i]=0;}
 }
 nodesn = nodesn.filter(function(item) {
     return item !== 0
 })
 
-var adjMatrix=[];
-for(let i=0;i<branchesn.length;i++){
-    adjMatrix[i]=[];
-        for(let j=0;j<nodesn.length;j++){
-        if((branches[i].branch.startNode==nodesn[j])||(branches[i].branch.endNode==nodesj[j])){
-			adjMatrix[i][j]=1;
+var incMatrix=[];
+for(let i=0;i<nodesn.length;i++){
+    incMatrix[i]=[];
+        for(let j=0;j<branchesn.length;j++){
+        if((branches[j].startNode==nodesn[i])||(branches[j].endNode==nodesn[i])){
+			incMatrix[i][j]=1;
 		}
-		else{adjMatrix[i][j]=0;}
+		else{incMatrix[i][j]=0;}
         }
 }
 
-var incMatrix=[];
-for(let i=0;i<nodes.length;i++){
-    incMatrix[i]=[];
+var adjMatrix=[];
+for(let i=0;i<nodesn.length;i++){
+    adjMatrix[i]=[];
         for(let j=0;j<nodesn.length;j++){
-            if(i==j){incMatrix[i][j]=0;}
+            //if(i==j){adjMatrix[i][j]=0;}
 				for(let k=0;k<branchesn.length;k++){
-					if(((branches[k].branch.startNode==nodesn[i])&&(branches[k].branch.endNode==nodesn[j]))||((branches[k].branch.startNode==nodesn[j])&&(branches[k].branch.endNode==nodesn[i]))){
-						incMatrix[i][j]=1;
+					if(((branches[k].startNode==nodesn[i])&&(branches[k].endNode==nodesn[j]))||((branches[k].startNode==nodesn[j])&&(branches[k].endNode==nodesn[i]))){
+						adjMatrix[i][j]=1;
 					}
-					else{incMatrix[i][j]=0;}
-				}
+					else{adjMatrix[i][j]=0;}
+					if(adjMatrix[i][j]==1){break;}}
         }
 }
+var currin="";
+var currout="";
+var Nodeequations=[];
+var sumDCAmp=0;
+var sumDCAmpReal="";
+var currinReal="";
+var curroutReal="";
+for(let i=0;i<nodesn.length-1;i++){
+	Nodeequations[i]=[];
+	analysisObj.nodeMatrix[i]=[];
+	for(let j=0;j<branchesn.length;j++){
+	
+	if((currents[j].noP==nodesn[i])&&(branches[j].dcAmpPwSupplies.length>0)){
+		sumDCAmp=sumDCAmp-parseFloat(branches[j].dcAmpPwSupplies[0].value);
+		sumDCAmpReal=sumDCAmpReal+" - "+branches[j].dcAmpPwSupplies[0].ref;
+
+		//Nodeequations[i][j]=0;
+		analysisObj.nodeMatrix[i][j]=0;
+	}
+	if((currents[j].noN==nodesn[i])&&(branches[j].dcAmpPwSupplies.length>0)){
+		sumDCAmp=sumDCAmp+parseFloat(branches[j].dcAmpPwSupplies[0].value);
+		sumDCAmpReal=sumDCAmpReal+" + "+branches[j].dcAmpPwSupplies[0].ref;
+
+		//Nodeequations[i][j]=0;
+		analysisObj.nodeMatrix[i][j]=0;
+	}
+	
+	if((currents[j].noP==nodesn[i])&&(currout!="")&&(branches[j].dcAmpPwSupplies.length==0)){
+		currout=currout+"("+currents[j].ref+")"+"/";
+		curroutReal=curroutReal+" + "+currents[j].ref;
+		//Nodeequations[i][j]=1;
+		analysisObj.nodeMatrix[i][j]=1;
+	}
+	
+	if((currents[j].noP==nodesn[i])&&(currout=="")&&(branches[j].dcAmpPwSupplies.length==0)){
+		currout=currout+"("+currents[j].ref+")"+"/";
+		curroutReal=curroutReal+currents[j].ref;
+		//Nodeequations[i][j]=1;
+		analysisObj.nodeMatrix[i][j]=1;
+	}
+
+
+	if((currents[j].noN==nodesn[i])&&(currin!="")&&(branches[j].dcAmpPwSupplies.length==0)){
+		currin=currin+"("+" - "+currents[j].ref+")"+"/";
+		currinReal=currinReal+" - "+currents[j].ref;
+		//Nodeequations[i][j]=-1;
+		analysisObj.nodeMatrix[i][j]=-1;
+	}
+
+	if((currents[j].noN==nodesn[i])&&(currin=="")&&(branches[j].dcAmpPwSupplies.length==0)){
+		currin=currin+"("+currents[j].ref+")"+"/";
+		currinReal=currinReal+" - "+currents[j].ref;
+		//Nodeequations[i][j]=-1;
+		analysisObj.nodeMatrix[i][j]=-1;
+	}
+
+	if((currents[j].noN!=nodesn[i])&&(currents[j].noP!=nodesn[i])){
+		//Nodeequations[i][j]=0;
+		analysisObj.nodeMatrix[i][j]=0;
+	}
+}
+
+if(sumDCAmpReal==""){
+	sumDCAmpReal=0;
+}
+
+if(currin==""){
+	
+	let equation={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": currout+"("+sumDCAmp+")",
+		}
+	analysisObj.equations.push(equation);
+
+	let equationReal={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": curroutReal +" = "+sumDCAmpReal,
+	}
+	analysisObj.equationReal.push(equationReal);
+}
+
+if(currout==""){
+
+	let equation={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": currin+"("+sumDCAmp+")",
+	}
+	analysisObj.equations.push(equation);
+
+	let equationReal={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": currinReal +" = "+sumDCAmpReal,
+	}
+	analysisObj.equationReal.push(equationReal);
+}
+	//equations1[i]="Nó "+nodesn[i]+ " : "+currin+" = 0";
+
+
+if((currin!="")&&(currout!="")){
+	let equation={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": currout +currin+"("+sumDCAmp+")",
+	}
+	analysisObj.equations.push(equation);
+
+	let equationReal={
+		"type": 0,
+		"node": nodesn[i],
+		"equation": curroutReal +currinReal+" = "+sumDCAmpReal,
+	}
+	analysisObj.equationReal.push(equationReal);
+}
+	
+	analysisObj.nodeMatrix[i].push(sumDCAmp);
+	Nodeequations[i].push(sumDCAmp);
+	currin="";
+	currout="";
+   sumDCAmp=0;
+   sumDCAmpReal="";
+   var currinReal="";
+	var curroutReal="";
+
+}
+
+
+
+var numMeshes;
+numMeshes=branches.length-dcAmpsPs.length-(nodesn.length-1);
+
+
 
 	let circuit = new MeshesFinder();
 	circuit.initGraph(adjMatrix,incMatrix, nodesn, branchesn);
@@ -2124,4 +2272,322 @@ for(let i=0;i<nodes.length;i++){
 	}
 
 
+
+var typebranches=[];
+	for(i=0;i<branches.length;i++){
+		if(branches[i].dcAmpPwSupplies.length<1){
+			
+			typebranches[i]=0;
+		}
+		if(branches[i].dcAmpPwSupplies.length>0){
+			typebranches[i]=1;
+			
+		}
+	}
+	
+	//var usedmeshes=[];
+	let meshestype0=0;
+	let meshestype2=0;
+	let meshestype1=0;
+	for(let i=0;i<meshes.data.order.length;i++){
+		for(let j=0;j<meshes.data.order[i].length;j++){
+			
+			for(let k=0;k<meshes.data.order[i][j].length;k++){
+				for(let l=0;l<branches.length;l++){
+					
+					if((branchesn[l]==meshes.data.order[i][j][k])&&(typebranches[l]==1))
+						{meshestype1=meshestype1+1;}
+						
+					if ((branchesn[l]==meshes.data.order[i][j][k])&&(typebranches[l]==0))
+						{meshestype0=meshestype0+1}
+					
+					if ((branchesn[l]==meshes.data.order[i][j][k])&&(typebranches[l]==2))
+						{meshestype2=meshestype2+1}
+
+				}
+				
+			}
+			if ((meshestype1==0)&&(meshestype0>0)&&(analysisObj.usedmeshes.length<numMeshes))
+			{
+				
+				//usedmeshes.push(meshes.data.order[i][j]);
+				//let usedmesh={
+				//	"mesh": meshes.data.order[i][j],
+				//}
+				analysisObj.usedmeshes.push(meshes.data.order[i][j]);
+				meshestype2=0;
+				meshestype0=0;
+				for(let o=0;o<meshes.data.order[i][j].length;o++){
+				for(let p=0;p<branches.length;p++){
+					if(branchesn[p]==meshes.data.order[i][j][o]){
+						typebranches[p]=2;
+					}
+				}
+				}
+			}
+			else{meshestype1=0;
+				 meshestype2=0;
+				 meshestype0=0;}
+				
+		
+		
+		}
+
+	}
+
+	var meshEquations=[];
+	for(let i=0;i<analysisObj.usedmeshes.length;i++){
+		meshEquations[i]=[];
+		analysisObj.meshMatrix[i]=[];
+		for(let j=0;j<branches.length;j++){
+			meshEquations[i][j]=0;
+			analysisObj.meshMatrix[i][j]=0;
+		}
+	}
+
+
+
+	let sumDC=0;
+	let sumResistors=0;
+	let s=0;
+	let eqs="";
+	let eq1="";
+	let equations1=[];
+	let kendNode=[];
+	let kstartNode=[];
+	let sumDCReal="";
+
+	for(let i=0;i<analysisObj.usedmeshes.length;i++){
+		 kendNode[i]=[];
+		 kstartNode[i]=[];
+		for(let j=0;j<analysisObj.usedmeshes[i].length;j++){
+			for(let k=0;k<branchesn.length;k++){
+
+					for(let p=0;p<branches[k].resistors.length;p++){
+						sumResistors=sumResistors+parseInt(branches[k].resistors[p].value);
+					}
+					
+
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j==0)){
+					
+					if(branches[k].resistors.length>0){
+						eqs="("+sumResistors+" * "+currents[k].ref+")/";
+						eq1=branches[k].ref+" * "+currents[k].ref;
+						//eq=eq+" + "+branches[k].resistors[0].value+"*"+currents[k].ref;
+						kendNode[i][j]=branches[k].endNode;
+						kstartNode[i][j]=branches[k].startNode;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					meshEquations[i][k]=sumResistors;
+				}
+				
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].startNode==kendNode[i][j-1])||(branches[k].endNode==kstartNode[i][j-1]))&&(s==-1)){
+
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" - "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
+						
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					meshEquations[i][k]=-sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					break;
+				}
+
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].endNode==kendNode[i][j-1])||(branches[k].startNode==kstartNode[i][j-1]))&&(s==-1)){
+					
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" + "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
+						
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+				
+					meshEquations[i][k]=sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					s=1;
+					break;
+				}
+
+
+				
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].startNode==kendNode[i][j-1])||(branches[k].endNode==kstartNode[i][j-1]))&&(s==1)){
+
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" + "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					meshEquations[i][k]=sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					break;
+
+				}
+
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].endNode==kendNode[i][j-1])||(branches[k].startNode==kstartNode[i][j-1]))&&(s==1)){
+
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" - "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+
+					meshEquations[i][k]=-sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					s=-1
+					break;
+				}
+
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].endNode==kendNode[i][j-1])||(branches[k].startNode==kstartNode[i][j-1]))&&(s==0)){
+
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" - "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					
+					meshEquations[i][k]=-sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					s=-1;
+					break;
+				}
+				
+				if((branchesn[k]==analysisObj.usedmeshes[i][j])&&(j>0)&&((branches[k].startNode==kendNode[i][j-1])||(branches[k].endNode==kstartNode[i][j-1]))&&(s==0)){
+
+					if(branches[k].resistors.length>0){
+						eqs=eqs+"("+" + "+sumResistors+" * "+currents[k].ref+")/";
+						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
+						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}
+					meshEquations[i][k]=sumResistors;
+					kendNode[i][j]=branches[k].endNode;
+					kstartNode[i][j]=branches[k].startNode;
+					s=1;
+					break;
+				}
+
+				
+				
+				
+				sumResistors=0;
+				
+			}
+			
+		}
+		meshEquations[i].push(sumDC);
+		equations1[i]=eqs+" = "+sumDC;
+
+		if(sumDCReal==""){
+			sumDCReal=0;
+		}
+
+		let equationReal={
+			"type": 1,
+			"mesh": analysisObj.usedmeshes[i],
+			"equation": eq1+" = "+sumDCReal,
+		}
+		analysisObj.equationReal.push(equationReal);
+		
+		let equation={
+			"type": 1,
+			"mesh": analysisObj.usedmeshes[i],
+			"equation": eqs+"("+sumDC+")",
+		}
+		analysisObj.equations.push(equation);
+
+		eqs="";
+		eq1="";
+		s=0;
+		sumDC=0;
+		sumDCReal="";
+	}
+		let index=0;
+		for(let j=branches.length-1;j>-1;j--){
+			if (branches[j].dcAmpPwSupplies.length>0){
+				index=j;
+				meshEquations.forEach(a => a.splice(index, 1));
+				Nodeequations.forEach(a => a.splice(index, 1));
+				analysisObj.nodeMatrix.forEach(a => a.splice(index, 1));
+			}
+		}
+		var eq=[];
+	for(let i=0;i<analysisObj.equations.length;i++){
+		eq[i]=analysisObj.equations[i].equation.replace("Ir1","a");
+		eq[i]=eq[i].replace("Ir2","b");
+		eq[i]=eq[i].replace("Ir3","c");
+		eq[i]=eq[i].replace("Ir4","d");
+		eq[i]=eq[i].replace("Ir5","f");
+		eq[i]=eq[i].replace("Ir6","g");
+		eq[i]=eq[i].replace("Ir7","h");
+		eq[i]=eq[i].replace("Ir8","j");
+		//eq[i]=eq[i].replace(/\s+/g, '');
+		//eq[i]=eq[i].replace(".", '');
+
+	}
+	
+	var ziq = new linearEqSystem();
+    var eq9="(40 * a)/ (- 50 * b)/(- 10* c)/0"
+	eq9=eq9.replace(/\s+/g, '');
+	ziq.addEquation(eq9);
+	
+    ziq.buildSystem();
+
+    var txr = solve(ziq.coefMatrix, ziq.consMatrix, ziq.varMatrix, 3);
+    console.log(txr);
 }
+
