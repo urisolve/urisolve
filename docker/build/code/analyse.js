@@ -2027,7 +2027,7 @@ function buildJson(){
 
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
-	var probesObj = { amperemeters: ampsMeters, voltmeters: voltMeters };
+	var probesObj = { ammeters: ampsMeters, voltmeters: voltMeters };
 	var analysisObj = {
 		circuitFreq: circuitFrequency,
 		currents: currents
@@ -2080,7 +2080,6 @@ function common(){
 
 	let load = loadFile();
 	if(load.first){
-        alert(load.third);
 		return{
 			first: true,
 			second: 1,
@@ -2156,7 +2155,6 @@ function analyseCircuit(analysismet) {
                     try {
                         let data = common();
                         if(data.first){
-                            alert(data.third);
 							break;
                         }
                         else loadFileAsTextMCM(data.third);

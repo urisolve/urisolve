@@ -1,4 +1,4 @@
-include('code/common/outPrint.js');
+include('code/common/outPrintMCM.js');
 
 /*
 ERROR LIST
@@ -372,6 +372,16 @@ function correntesMalhaRamos(malhas){
 }
 
 /**
+ * Encounters all the branch components
+ */
+function getBranchComponents(){
+	branches.forEach(ramo => {
+		ramo.components = ramo.components.concat(ramo.dcAmpPwSupplies, ramo.acAmpPwSupplies, ramo.dcVoltPwSupplies, ramo.acVoltPwSupplies, ramo.resistors, ramo.coils, ramo.capacitors);
+	});
+}
+
+
+/**
  * Encounters all the mesh components, in order
  * @param {Array} malhas meshes
  * @returns {Array} the same meshes array updated
@@ -388,8 +398,9 @@ function getComponents(malhas){
 				else{															//caso a direção do ramo seja 1, nao contrária
 					searchNode = aux.startNode;		//set do nó inicial a procurar
 				}
+				
 				let componentesRamo = [];
-				componentesRamo = componentesRamo.concat(aux.dcAmpPwSupplies, aux.acAmpPwSupplies, aux.dcVoltPwSupplies, aux.acVoltPwSupplies, aux.resistors, aux.coils, aux.capacitors);
+				componentesRamo = componentesRamo.concat(aux.components);
 				if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
 				let cnt = componentesRamo.length;
 				for(let j = 0; j < cnt; j++){		//ciclo que corre tantas vezes quantos componentes houver no ramo
@@ -444,7 +455,7 @@ function parseEqData(malhas){
 			if(malha.componentsLeft.length == 0) ladoEsq = 0;	//se nao há fontes o lado esquerdo é 0
 			else{
 				for(let i = 0; i < malha.componentsLeft.length; i++){		//para cada fonte
-					ladoEsq.push({ref: malha.componentsLeft[i][0].ref, value: malha.componentsLeft[i][0].value, uni: malha.componentsLeft[i][0].unitMult, sig: malha.componentsLeft[i][1]}); //adicionar componente ao lado esquerdo
+					ladoEsq.push({ref: malha.componentsLeft[i][0].ref, value: malha.componentsLeft[i][0].value, uni: malha.componentsLeft[i][0].unitMult, sig: malha.componentsLeft[i][1], valueRect: malha.componentsLeft[i][0].voltage, angle: malha.componentsLeft[i][0].phase}); //adicionar componente ao lado esquerdo
 				}	
 			}
 			if(malha.componentsRight.length == 0){		//caso nao hajam componentes do lado direito da equação
@@ -462,6 +473,32 @@ function parseEqData(malhas){
 					ladoDir[i].value = componente[0].value;
 					ladoDir[i].uni = componente[0].unitMult;
 					ladoDir[i].meshCurrents = branches[componente[1]-1].meshCurr;
+
+					let type;
+					let impedance;
+					for(let i = 0; i < components.resistors.length; i++) {
+						if (components.resistors[i].ref == componente[0].ref) {
+							type = 'R';
+							break;
+						}
+					}
+					for(let i = 0; i < components.capacitors.length; i++) {
+						if (components.capacitors[i].ref == componente[0].ref) {
+							type = 'C';
+							impedance = componente[0].impedance;
+							break;
+						}
+					}
+					for(let i = 0; i < components.coils.length; i++) {
+						if (components.coils[i].ref == componente[0].ref) {
+							type = 'L';
+							impedance = componente[0].impedance;
+							break;
+						}
+					}
+
+					ladoDir[i].type = type;
+					ladoDir[i].imp = impedance;
 					let sentidos = [];
 					let self = malha.branchesDir[malha.branches.indexOf(componente[1])];
 					ladoDir[i].meshCurrents.forEach(curMalha => {
@@ -489,136 +526,145 @@ function buildEq(malhas){
 	malhas.forEach(malha => {												//para cada malha
 		if(malha.type == 1){												//se a malha é principal
 			if(malha.equationData.left == 0){									//se nao houverem fontes de tensão
-				malha.incognitoEq = malha.incognitoEq.concat('0');
-				malha.revealedCurrSrc = malha.revealedCurrSrc.concat('0');
-				malha.revealedEq = malha.revealedEq.concat('0');
+				malha.incognitoEq += '0';
+				malha.revealedCurrSrc += '0';
+				malha.revealedEq += '0';
 			}
 			else{ 															//se houverem fontes de tensão
 				for(let i = 0; i < malha.equationData.left.length; i++){		//percorrer as fontes de tensão
 					let fonte = malha.equationData.left[i];					//fonte
 					if(fonte.sig == -1){										
-						malha.incognitoEq = malha.incognitoEq.concat('-');
-						malha.revealedCurrSrc = malha.revealedCurrSrc.concat('-');
-						malha.revealedEq = malha.revealedEq.concat('-');
+						malha.incognitoEq += '-';
+						malha.revealedCurrSrc += '-';
+						malha.revealedEq += '-';
 						if(i != 0){
-							malha.solverEq = malha.solverEq.concat("+");
+							malha.solverEq += '+';
 						}
 					}
 					else{
-						malha.solverEq = malha.solverEq.concat("-");
+						malha.solverEq += '-';
 						if(i != 0){
-							malha.incognitoEq = malha.incognitoEq.concat('+');
-							malha.revealedCurrSrc = malha.revealedCurrSrc.concat('+');
-							malha.revealedEq = malha.revealedEq.concat('+');
+							malha.incognitoEq += '+';
+							malha.revealedCurrSrc += '+';
+							malha.revealedEq += '+';
 						}
 					}
-					malha.incognitoEq = malha.incognitoEq.concat(fonte.ref);
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat(fonte.ref);
-					malha.revealedEq = malha.revealedEq.concat(fonte.value);
-					malha.solverEq = malha.solverEq.concat(fonte.value);
-					if(fonte.uni != "V"){
-						let unit;
-						switch(fonte.unit){
-							case "mV":
-								unit = 0.001;
-								break;
-						}
-						malha.revealedEq = malha.revealedEq.concat(unit);
-						malha.solverEq = malha.solverEq.concat(unit);
+					malha.incognitoEq  = fonte.ref;
+					malha.revealedCurrSrc += fonte.ref;
+					if(simInfo.circuitFreq.value != 0){
+						malha.revealedEq += ('(' + fonte.value + '∠' + fonte.angle + '°)');
+						malha.solverEq += ('(' + fonte.valueRect.split('i').join('*i') + ')');						
+					}
+					else{
+						malha.revealedEq += fonte.value;
+						malha.solverEq += fonte.value;						
+					}
+
+					if(fonte.uni != 'V'){
+						const getValUnits = multUnits.find(valUnit => valUnit.name === fonte.unit);
+						malha.revealedEq += getValUnits.value;
+						malha.solverEq += getValUnits.value;
 					}
 				}
 			}			
-			malha.incognitoEq = malha.incognitoEq.concat('=');						//igualdade
-			malha.revealedCurrSrc = malha.revealedCurrSrc.concat('=');
-			malha.revealedEq = malha.revealedEq.concat('=');
+			malha.incognitoEq += '=';						//igualdade
+			malha.revealedCurrSrc +='=';
+			malha.revealedEq += '=';
 			for(let i = 0; i < malha.equationData.right.length; i++){				//lado direito equação
-				if(malha.solverEq != "") malha.solverEq = malha.solverEq.concat("+");
+				if(malha.solverEq != "") malha.solverEq += "+";
 				componente = malha.equationData.right[i];
 				if(i != 0){
-					malha.incognitoEq = malha.incognitoEq.concat('+');
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat('+');
-					malha.revealedEq = malha.revealedEq.concat('+');
+					malha.incognitoEq += '+';
+					malha.revealedCurrSrc += '+';
+					malha.revealedEq += '+';
 				}
-				malha.incognitoEq = malha.incognitoEq.concat(componente.ref, '*(');
-				malha.revealedCurrSrc = malha.revealedCurrSrc.concat(componente.ref, '*(');
-				malha.revealedEq = malha.revealedEq.concat(componente.value);
-				malha.solverEq = malha.solverEq.concat(componente.value);
-				if(!(componente.uni.search("m") == -1) && (componente.uni != "Ohm")){
-					malha.revealedEq = malha.revealedEq.concat("*" + 0.001);
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 0.001);
-					malha.solverEq = malha.solverEq.concat("*" + 0.001);				
-				} 
-				else if(!(componente.uni.search("u") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*" + 0.000001);
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 0.000001);
-					malha.solverEq = malha.solverEq.concat("*" + 0.000001);	
-				}
-				else if(!(componente.uni.search("k") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*" + 1000);
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 1000);
-					malha.solverEq = malha.solverEq.concat("*" + 1000);
-				} 
-				else if(!(componente.uni.search("M") == -1)){
-					malha.revealedEq = malha.revealedEq.concat("*" + 1000000);
-					malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*" + 1000000);
-					malha.solverEq = malha.solverEq.concat("*" + 1000000);
-				} 
 
-				malha.revealedEq = malha.revealedEq.concat('*(');
-				malha.solverEq = malha.solverEq.concat('*(');
+				if(componente.type == 'R'){
+					malha.incognitoEq += (componente.ref);
+					malha.revealedCurrSrc += (componente.ref);					
+				}
+				else{
+					malha.incognitoEq += ('Z_{' + (componente.ref) + '}');
+					malha.revealedCurrSrc += ('Z_{' + (componente.ref) + '}');
+				}
+
+
+				let a = '';
+				let b = '';
+
+
+				const getValUnits = multUnits.find(valUnit => valUnit.name === componente.uni);
+
+				let equivalentValue;
+
+				if(componente.type == 'R')	equivalentValue = componente.value;
+				else if(componente.type == 'C') equivalentValue = componente.imp;
+				else if(componente.type == 'L') equivalentValue = componente.imp;
+				
+				malha.revealedEq += equivalentValue;
+				malha.solverEq += equivalentValue;
+
+				if(componente.type == 'R' && getValUnits.value != 1){
+					malha.revealedEq += String('*'+getValUnits.value);
+					malha.solverEq += String('*' + getValUnits.value);
+
+				}
+				 
+				malha.incognitoEq += '*(';
+				malha.revealedCurrSrc += '*(';
+				malha.revealedEq += '*(';
+				if(!(componente.type == 'R')) malha.solverEq += '*';
+				malha.solverEq += '(';
 
 				for(let j = 0; j < componente.meshCurrentSig.length; j++){
 					if(componente.meshCurrentSig[j] == -1){
-						malha.incognitoEq = malha.incognitoEq.concat('-');
-						malha.revealedCurrSrc = malha.revealedCurrSrc.concat('-');
-						malha.revealedEq = malha.revealedEq.concat('-');
-						malha.solverEq = malha.solverEq.concat('-');
+						malha.incognitoEq += '-';
+						malha.revealedCurrSrc += '-';
+						malha.revealedEq += '-';
+						malha.solverEq += '-';
 					}
 					else{
 						if(j != 0){
-							malha.incognitoEq = malha.incognitoEq.concat('+');
-							malha.revealedCurrSrc = malha.revealedCurrSrc.concat('+');
-							malha.revealedEq = malha.revealedEq.concat('+');
-							malha.solverEq = malha.solverEq.concat('+');
+							malha.incognitoEq += '+';
+							malha.revealedCurrSrc += '+';
+							malha.revealedEq += '+';
+							malha.solverEq += '+';
 						}
 					}
 					if(malhas[componente.meshCurrents[j]-1].type == 0){
-						malha.revealedCurrSrc = malha.revealedCurrSrc.concat(malhas[componente.meshCurrents[j]-1].currentSource.value);
-						malha.revealedEq = malha.revealedEq.concat(malhas[componente.meshCurrents[j]-1].currentSource.value);
-						malha.solverEq = malha.solverEq.concat(malhas[componente.meshCurrents[j]-1].currentSource.value);
-						switch(malhas[componente.meshCurrents[j]-1].currentSource.unitMult){
-							case "A":
-								break;
-							case "mA":
-								malha.revealedEq = malha.revealedEq.concat("*0.001");
-								malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*0.001");
-								malha.solverEq = malha.solverEq.concat("*0.001");
-								break;
-							case "uA":
-								malha.revealedEq = malha.revealedEq.concat("*0.000001");
-								malha.revealedCurrSrc = malha.revealedCurrSrc.concat("*0.000001");
-								malha.solverEq = malha.solverEq.concat("*0.000001");
-								break;
-							default:
-								break;
-
+						if(simInfo.circuitFreq.value != 0){
+							malha.revealedCurrSrc += malhas[componente.meshCurrents[j]-1].currentSource.value;
+							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '∠' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '°)');
+							malha.solverEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value*Math.cos(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)));
+							if(malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) != 0) malha.solverEq += (malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) + '*i)');
+							else malha.solverEq += ')';
 						}
+						else{
+							malha.revealedCurrSrc += malhas[componente.meshCurrents[j]-1].currentSource.value;
+							malha.revealedEq += malhas[componente.meshCurrents[j]-1].currentSource.value;
+							malha.solverEq += malhas[componente.meshCurrents[j]-1].currentSource.value;
+						}
+
+						const getValUnits = multUnits.find(valUnit => valUnit.name === malhas[componente.meshCurrents[j]-1].currentSource.unitMult);
+						if(getValUnits.value != 1){
+							malha.revealedEq += '*' + getValUnits.value;
+							malha.revealedCurrSrc += '*' + getValUnits.value;
+							malha.solverEq += '*' + getValUnits.value;						
+						}
+
 					}
 					else{
-						malha.revealedCurrSrc = malha.revealedCurrSrc.concat('I', componente.meshCurrents[j], componente.meshCurrents[j]);	
-						malha.revealedEq = malha.revealedEq.concat('I', componente.meshCurrents[j], componente.meshCurrents[j]);
-						malha.solverEq = malha.solverEq.concat(malhas[componente.meshCurrents[j]-1].letterId);
+						malha.revealedCurrSrc  += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");	
+						malha.revealedEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
+						malha.solverEq += malhas[componente.meshCurrents[j]-1].letterId;
 					}
-					malha.incognitoEq = malha.incognitoEq.concat('I', componente.meshCurrents[j], componente.meshCurrents[j]);
+					malha.incognitoEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
 				}
-				malha.incognitoEq = malha.incognitoEq.concat(')');
-				malha.revealedCurrSrc = malha.revealedCurrSrc.concat(')');
-				malha.revealedEq = malha.revealedEq.concat(')');
-				malha.solverEq = malha.solverEq.concat(')');
+				malha.incognitoEq += ')';
+				malha.revealedCurrSrc += ')';
+				malha.revealedEq += ')';
+				malha.solverEq += ')';
 			}
-		}
-		else{
-			malha.incognitoEq = malha.incognitoEq.concat('Auxiliar mesh, no equation');
 		}
 	});
 	return{
@@ -649,26 +695,28 @@ function solver(malhas){;
 
 	malhas.forEach(malha => {
 		if(malha.type == 0){ 	//malha é auxiliar
-			malha.currValue = malha.currentSource.value;
-			let temp;
-			switch(malha.currentSource.unitMult){
-				case "A":
-					temp = 1;
-					break;
-				case "mA":
-					temp = 0.001;
-					break;
-				case "uA":
-					temp = 0.000001;
-					break;
-				default:
-					temp = 1;
-					break;
+			if(simInfo.circuitFreq.value != 0){
+				let obj = new Object;
+				obj.re =malha.currentSource.value*Math.cos(malha.currentSource.phase*(Math.PI/180.0)).toPrecision(3);
+				obj.im =malha.currentSource.value*Math.sin(malha.currentSource.phase*(Math.PI/180.0)).toPrecision(3);
+				obj.string = 'complex';
+				malha.currValue = obj;			
 			}
-			malha.currMult = temp;
+			else{
+				malha.currValue = malha.currentSource.value;
+			}
+			let temp;
+			const getValUnits = multUnits.find(valUnit => valUnit.name === malha.currentSource.unitMult);
+			malha.currMult = getValUnits.value;
 		}
 		else{					//malha é principal
-			if(!String(results.result._data[temp.indexOf(malha.letterId)][0].im).includes("0")) malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re.toPrecision(3) + results.result._data[temp.indexOf(malha.letterId)][0].im.toPrecision(3);
+			if(simInfo.circuitFreq.value != 0){
+				let obj = new Object;
+				obj.re = results.result._data[temp.indexOf(malha.letterId)][0].re.toPrecision(3);
+				obj.im = results.result._data[temp.indexOf(malha.letterId)][0].im.toPrecision(3);
+				obj.string = results.texResult._data[temp.indexOf(malha.letterId)][0];
+				malha.currValue = obj;
+			}
 			else{
 				malha.currValue = results.result._data[temp.indexOf(malha.letterId)][0].re.toPrecision(3);
 			}
@@ -694,7 +742,8 @@ function solver(malhas){;
 function getBranchCurrents(ramos, malhas){
 	let equations = [];
 	ramos.forEach(ramo => {												//para cada ramo
-		let value = 0;
+		let valueRe = 0;
+		let valueIm = 0;
 		if(!(ramo.startNode == ramo.currentData.noP)){					//se o ramo e a corrente têm sentidos difetentes
 			for(let i = 0; i < ramo.meshCurrDir.length; i++){			//trocar sentidos
 				ramo.meshCurrDir[i] = ramo.meshCurrDir[i] * -1;
@@ -702,6 +751,7 @@ function getBranchCurrents(ramos, malhas){
 		}
 		let equation = "";
 		equation = equation.concat(ramo.currentData.ref, "=");			//lado esquerdo
+		let string;
 		for(let i = 0; i < ramo.meshCurr.length; i++){					//lado direito
 			if(ramo.meshCurrDir[i] == -1){
 				equation = equation.concat("-");
@@ -712,9 +762,18 @@ function getBranchCurrents(ramos, malhas){
 				}
 			}
 			equation = equation.concat("I", ramo.meshCurr[i], ramo.meshCurr[i]);
-			value = value + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor
+			if(simInfo.circuitFreq.value != 0){
+				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.re*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor real
+				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.im*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor real	
+			}
+			else{
+				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor real
+				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue*malhas[ramo.meshCurr[i]-1].currMult;  //calcula o valor real
+			}
+			string = false;
+			if(simInfo.circuitFreq.value != 0) string = true;
 		}
-		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, val: value.toPrecision(3)});		//guarda corrente
+		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, valRe: valueRe.toPrecision(3), valIm: valueIm.toPrecision(3), string: string});		//guarda corrente
 	});
 	return{
 		first: false,
@@ -735,10 +794,13 @@ function saveToJson(totalMalhas, malhas, correntesRamos, ficheiro){
 
 	ficheiro.analysisObj.totalMeshes = totalMalhas;
 	ficheiro.analysisObj.choosenMeshes = malhas;
+	ficheiro.branches = branches;
 
 	for(let i = 0; i < correntesRamos.third.length; i++){
-		ficheiro.analysisObj.currents[i].value = correntesRamos.third[i].val;
+		ficheiro.analysisObj.currents[i].valueRe = correntesRamos.third[i].valRe;
+		ficheiro.analysisObj.currents[i].valueIm = correntesRamos.third[i].valIm;
 		ficheiro.analysisObj.currents[i].meshEquation = correntesRamos.third[i].eq;
+		ficheiro.analysisObj.currents[i].complex = correntesRamos.third[i].string;
 	}
 
 	let incogEq = [];
@@ -754,21 +816,21 @@ function saveToJson(totalMalhas, malhas, correntesRamos, ficheiro){
 	}
 
 	ficheiro.equations = {
-		inc: incogEq,
-		currRev: currentRevEq,
-		allRev: allRevEq
+		allVariableEq: incogEq,
+		meshCurrRevealedEq: currentRevEq,
+		allRevealedEq: allRevEq
 	}
 
     return ficheiro;
 }
 
 
-function safePrintOutput(jsonFile){
+function Output(jsonFile){
 	// Tex Variable
 	let TeX = getTexFileHeader();
 
 	// Print sections
-	document.getElementById('results-board').innerHTML = outHTMLSections();
+	document.getElementById('results-board').innerHTML = outHTMLSectionsMCM();
 
 	// Insert circuit image if available
 	if (fileContents[0]) { 
@@ -797,7 +859,7 @@ function safePrintOutput(jsonFile){
 	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
 	TeX += "\\textbf{Frequency {[}F{]}} &  & \\textbf{Voltage Sources {[}VS{]}} &  & \\textbf{Ammeters {[}A{]}} &  & \\textbf{Simulation {[}AC\/DC{]}} \\\\\r\n";
 	TeX += "F="+jsonFile.analysisObj.circuitFreq.value+"\\;"+jsonFile.analysisObj.circuitFreq.mult+" & & VS="+(components.acVoltPs.length+components.dcVoltPs.length);
-	TeX += " & & "+jsonFile.probes.amperemeters.length+"\/"+jsonFile.analysisObj.currents.length+" & &";
+	TeX += " & & "+jsonFile.probes.ammeters.length+"\/"+jsonFile.analysisObj.currents.length+" & &";
 	if(jsonFile.analysisObj.circuitFreq == 0)
 			TeX += "DC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
 	else
@@ -806,20 +868,22 @@ function safePrintOutput(jsonFile){
 
 	// Print Output Data
 	$('#buttonShowAll').html(outShowAllBtnMCM());
-	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length));
-	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile.analysisObj.circuitFreq, jsonFile.components.acVoltPs.length+ jsonFile.components.dcVoltPs.length,jsonFile.probes.amperemeters.length,jsonFile.analysisObj.currents.length));
-	let kmlCurrData = outCurrentsKML(jsonFile.analysisObj.choosenMeshes);
-	$('#KNLEquations').html(kmlCurrData.first);
-	//let canvasObjects = createCanvasMeshCurrentsMCM(jsonFile.analysisObj.choosenMeshes);
-	let currentsInfoOutput = outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches);
-	$('#currentsInfo').html(currentsInfoOutput.first);
+	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length, jsonFile.components.acVoltPs.length+ jsonFile.components.dcVoltPs.length));
+	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile.analysisObj.circuitFreq,jsonFile.probes.ammeters.length,jsonFile.analysisObj.currents.length));
+	$('#meshEquations').html(outEquationCalcMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length));
+	outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.choosenMeshes);
+
 	let step1 = outStep1MCM(jsonFile.equations);
 	let step2 = outStep2MCM(jsonFile.equations);
 	let step3 = outStep3MCM(jsonFile.equations);
 	let equationSystemOutput = outEquationSystemMCM(jsonFile.equations, step1.first, step2.first, step3.first);
 	$('#eqSys').html(equationSystemOutput.first);
-	let resultsOutput = outResultsMCM(jsonFile.analysisObj.choosenMeshes, jsonFile.analysisObj.currents);
-	$('#resultsVoltages').html(resultsOutput.first);
+	let resultsMeshesOutput = outResultsMeshesMCM(jsonFile.analysisObj.choosenMeshes);
+	$('#resultsCurrentsMesh').html(resultsMeshesOutput.first);
+	let currentsInfoOutput = outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches);
+	$('#currentsInfo').html(currentsInfoOutput.first);
+	let resultsBranchesOutput = outResultsCurrentsMCM(jsonFile.analysisObj.currents);
+	$('#resultsCurrentsBranch').html(resultsBranchesOutput.first);
 
 
 	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
@@ -827,10 +891,10 @@ function safePrintOutput(jsonFile){
 	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
 	TeX += currentsInfoOutput.second + "\\end{tabular}\r\n\\end{table}\r\n\r\n";
 	//TeX += equivImpOutput.second + "\\pagebreak";
-	TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Meshes Law (KML)\r\n\r\n" + kmlCurrData.second;
+	//TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Meshes Law (KML)\r\n\r\n" + kmlCurrData.second;
 	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} " + equationSystemOutput.second;
 	TeX += "Steps:\r\n\r\n" + step1.second + step2.second + step3.second;
-	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
+	//TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
 	TeX += "\\end{document}\r\n";
 
 	let copyTeX = TeX;
@@ -944,6 +1008,7 @@ function loadFileAsTextMCM(data) {
 	branches = jsonFile.branches;
 	nodes = jsonFile.nodes;
 	components = jsonFile.components;
+	simInfo = jsonFile.analysisObj;
 
 	// Identify MCM Equations
 	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (components.dcAmpsPs.length + components.acAmpsPs.length);
@@ -988,6 +1053,8 @@ function loadFileAsTextMCM(data) {
 		return;
 	}
 
+	getBranchComponents();
+
 	//encontrar componentes da malha
 	malhas_escolhidas = getComponents(malhas_escolhidas.third);
 	if(malhas_escolhidas.first){
@@ -1025,11 +1092,6 @@ function loadFileAsTextMCM(data) {
 
 	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, jsonFile);
 
-	safePrintOutput(jsonFile);
+	Output(jsonFile);
 	
 }
-
-
-
-
-

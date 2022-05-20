@@ -766,6 +766,7 @@ class branch {
         this.currentData = cpCurrentData,
         this.meshCurr = [];
         this.meshCurrDir = [];
+        this.components = [];
         this.setEquivImpedance = function (freqV, freqM) {
             let errorCode = 0;
             let tImpedance = 0;
