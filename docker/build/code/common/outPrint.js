@@ -2337,7 +2337,9 @@ function openAcademyThemeChoice(){
        
         htmlstr += '<div id="' + btncollapse[i] + '" class="collapse multi-collapse bg-light text-center" style="max-height: 300px;"';
         htmlstr += 'aria-labelledby="headingOne" data-parent="#' + accIDs[i] + '">';
-        htmlstr += '<div class="card-body"><p class="lead"><form><label for="fundamental_vars" >Número:</label><input class="fVars" type="number" id="' +btnType[i] +'_number" onkeypress="return tableInputKeyPress(event)"></input><br><br><button id="number_'+btnType[i]+'" type="submit" value="Submit_a" onclick=compareResults("'+R+'","'+N+'","'+T+'","'+E+'");>submit</button></form></p>';
+        htmlstr += '<div class="card-body"><p class="lead"><form><label for="fundamental_vars" >Número:</label><input class="fVars" type="number" id="' +btnType[i] +'_number" onkeypress="return tableInputKeyPress(event)"></input><br><br><button id="number_'+btnType[i]+'" type="button" value="Submit_a" onclick="return compareResults('+i+','+R+','+N+','+T+','+E+');">submit</button></form></p>';
+        htmlstr +='<div id="true_'+btnType[i]+'" style="display:none"><i class="fa fa-check-circle" aria-hidden="true" style="color: green"></i></div>'
+        htmlstr +='<div id="false_'+btnType[i]+'" style="display:none"><i <i class="fa fa-times-circle" aria-hidden="true" style="color: red"></i></div>'
         htmlstr += '</div></div></div></div></div>';
         
         
@@ -2348,44 +2350,64 @@ function openAcademyThemeChoice(){
     return htmlstr;
 
 }
-function compareResults(R, N, T, E){
-    console.log(R);
-    console.log("Nós:"+N);
+function compareResults(type, R, N, T, E){
+    console.log(type);
+   
     console.log(document.getElementById("R_number").value);
     console.log(document.getElementById("N_number").value);
     const ramos = document.getElementById("R_number").value;
     const nodes = document.getElementById("N_number").value;
     const sources = document.getElementById("T_number").value;
     const equations = document.getElementById("E_number").value;
-    if(ramos>0){
+    if(ramos>0&&type==0){
+        
         if(R==ramos){
            console.log("parabéns");
             alert("Número de Ramos correto! Parabéns! :)");
+            document.getElementById("true_R").style.display = "block";
+            document.getElementById("false_R").style.display = "none";
             }else{console.log("wrong");
-            alert("Número de Ramos incorreto! Lembra-te que um ramo tem de estar compreendido entre dois nós")};}
+            alert("Número de Ramos incorreto! Lembra-te que um ramo tem de estar compreendido entre dois nós")
+            document.getElementById("true_R").style.display = "none";
+            document.getElementById("false_R").style.display = "block";};}
 
-    if(nodes>0){
+    if(nodes>0&&type==1){
+        
         if(N==nodes){
-             console.log("parabéns");
+            console.log("parabéns");
              alert("Número de Nós correto! Parabéns! :)");
+             document.getElementById("true_N").style.display = "block";
+             document.getElementById("false_N").style.display = "none";
              }else{console.log("wrong");
-             alert("Número de nós incorreto! Lembra-te que um nó tem de ter pelo menos três ramos a concorrer")};}
+             alert("Número de nós incorreto! Lembra-te que um nó tem de ter pelo menos três ramos a concorrer")
+             document.getElementById("true_N").style.display = "none";
+             document.getElementById("false_N").style.display = "block";};}
 
-     if(sources>0){
+     if(sources>0&&type==2){
+        
        if(T==sources){
             console.log("parabéns");
             alert("Número de Fontes Isoladas de Tensão correto! Parabéns! :)");
+            document.getElementById("true_T").style.display = "block";
+            document.getElementById("false_T").style.display = "none";
             }else{console.log("wrong");
-            alert("Número de Fontes Isoladas de Tensão incorreto! Tem em conta que uma Fonte de Tensão tem um símbolo específico e uma polaridade e que, para ser isolada, deve ser o único componente do ramo")};}
+            alert("Número de Fontes Isoladas de Tensão incorreto! Tem em conta que uma Fonte de Tensão tem um símbolo específico e uma polaridade e que, para ser isolada, deve ser o único componente do ramo")
+            document.getElementById("true_T").style.display = "none";
+            document.getElementById("false_T").style.display = "block";};}
 
-    if(equactions>0){
+    if(equations>0&&type==3){
+        
         if(E==equations){
              console.log("parabéns");
              alert("Número de Equações correto! Parabéns! :)");
+             document.getElementById("true_E").style.display = "block";
+             document.getElementById("false_E").style.display = "none";
              }else{console.log("wrong");
-             alert("Número de Equações incorreto! No método da tensão nos nós, o número de equações necessárias é determinado por uma fórmula que envolve Ramos, Nós e Fonstes de Tensão")};}
+             alert("Número de Equações incorreto! No método da tensão nos nós, o número de equações necessárias é determinado por uma fórmula que envolve Ramos, Nós e Fontes de Tensão")
+             document.getElementById("true_E").style.display = "none";
+             document.getElementById("false_E").style.display = "block";};}
         
-    
+   return false; 
   } 
 
 
