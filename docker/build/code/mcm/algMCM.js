@@ -126,7 +126,7 @@ function findMeshes(){
  * @param {Int} nr_malhas_principais Number of main meshes needed
  * @returns boolean, true if adjacent
  */
-function escolherMalhas(malhas, nr_malhas_principais){
+function chooseMeshes(malhas, nr_malhas_principais){
 	let malhas_flags = [];
 	let ramos_fontecorrente_flags = [];
 	let ramos_flags = [];
@@ -254,7 +254,7 @@ function escolherMalhas(malhas, nr_malhas_principais){
  * @param {Array} componentesRamo list of components in that branch
  * @returns boolean, true if adjacent
  */
-function mesmoSentido(componente, ramo, componentesRamo){
+function sameDirection(componente, ramo, componentesRamo){
 	let aux = componente.noP;
 	do{
 		if(aux.search("_net") == -1){		//o nó é real
@@ -287,7 +287,7 @@ function mesmoSentido(componente, ramo, componentesRamo){
  * @param {Array} malhas meshes
  * @returns {Array} the same meshes array updated
  */
-function direcaoMalha(malhas){
+function meshDirection(malhas){
 	malhas.forEach(malha => {
 		let auxNode = branches[malha.branches[0]-1].endNode;		//começa-se por arbitrar um nó 
 		if(auxNode != branches[malha.branches[1]-1].startNode && auxNode != branches[malha.branches[1]-1].endNode){  //se o primeiro ramo estiver invertido
@@ -357,7 +357,7 @@ function direcaoMalha(malhas){
  * @param {Array} malhas meshes
  * @returns {Array} the same meshes array updated
  */
-function correntesMalhaRamos(malhas){
+function meshCurrInBranches(malhas){
 	branches.forEach(ramo => {
 		malhas.forEach(malha => {
 			for(let i = 0; i < malha.branches.length; i++){
@@ -552,7 +552,7 @@ function buildEq(malhas){
 					malha.incognitoEq  = fonte.ref;
 					malha.revealedCurrSrc += fonte.ref;
 					if(simInfo.circuitFreq.value != 0){
-						malha.revealedEq += ('(' + fonte.value + '∠' + fonte.angle + '°)');
+						malha.revealedEq += ('(' + fonte.value + '\\angle' + fonte.angle + '^{\\circ})');
 						malha.solverEq += ('(' + fonte.valueRect.split('i').join('*i') + ')');						
 					}
 					else{
@@ -587,11 +587,6 @@ function buildEq(malhas){
 					malha.incognitoEq += ('Z_{' + (componente.ref) + '}');
 					malha.revealedCurrSrc += ('Z_{' + (componente.ref) + '}');
 				}
-
-
-				let a = '';
-				let b = '';
-
 
 				const getValUnits = multUnits.find(valUnit => valUnit.name === componente.uni);
 
@@ -633,8 +628,8 @@ function buildEq(malhas){
 					}
 					if(malhas[componente.meshCurrents[j]-1].type == 0){
 						if(simInfo.circuitFreq.value != 0){
-							malha.revealedCurrSrc += malhas[componente.meshCurrents[j]-1].currentSource.value;
-							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '∠' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '°)');
+							malha.revealedCurrSrc += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
+							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
 							malha.solverEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value*Math.cos(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)));
 							if(malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) != 0) malha.solverEq += (malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) + '*i)');
 							else malha.solverEq += ')';
@@ -782,52 +777,290 @@ function getBranchCurrents(ramos, malhas){
 	}
 }
 
+function getIsolatedVoltPS(){
+	// For each Volt PS, if has in its terminals 2 Real Nodes, it is Isolated
+	var isolatedPS = new Array();
+	// DC PS
+	for(let i=0; i<dcVoltPs.length; i++) {
+		let nodeNoP = dcVoltPs[i].noP.search('_net');
+		let nodeNoN = dcVoltPs[i].noN.search('_net');
+        if( (nodeNoP < 0) && (nodeNoN < 0) ) {
+			isolatedPS.push( { id: dcVoltPs[i].id, ref: dcVoltPs[i].ref, noP: dcVoltPs[i].noP, noN: dcVoltPs[i].noN } );
+		}
+	}
+	// AC PS
+	for(let i=0; i<acVoltPs.length; i++) {
+		let nodeNoP = acVoltPs[i].noP.search('_net');
+		let nodeNoN = acVoltPs[i].noN.search('_net');
+        if( (nodeNoP < 0) && (nodeNoN < 0) ) {
+			isolatedPS.push( { id: acVoltPs[i].id, ref: acVoltPs[i].ref, noP: acVoltPs[i].noP, noN: acVoltPs[i].noN } );
+		}
+	}
+	var isolatedPS = JSON.parse(JSON.stringify(isolatedPS));
+	return isolatedPS;
+}
+
 /**
  * Solves for the branch currents
- * @param {array} totalMalhas total circuit meshes
- * @param {Array} malhas choosen mesh
- * @param {array} correntesRamos branch currents array
- * @param ficheiro json file to be updated
+ * @param {array} totalMeshes total circuit meshes
+ * @param {Array} meshes choosen mesh
+ * @param {array} branchCurr branch currents array
+ * @param file json file to be updated
  * @returns updates json file
  */
-function saveToJson(totalMalhas, malhas, correntesRamos, ficheiro){
+function saveToJson(totalMeshes, meshes, branchCurr, isolatedPowerScr, file){
 
-	ficheiro.analysisObj.totalMeshes = totalMalhas;
-	ficheiro.analysisObj.choosenMeshes = malhas;
-	ficheiro.branches = branches;
+	file.analysisObj.totalMeshes = totalMeshes;
+	file.analysisObj.choosenMeshes = meshes;
+	file.branches = branches;
+	file.components.isolatedVPS = isolatedPowerScr;
 
-	for(let i = 0; i < correntesRamos.third.length; i++){
-		ficheiro.analysisObj.currents[i].valueRe = correntesRamos.third[i].valRe;
-		ficheiro.analysisObj.currents[i].valueIm = correntesRamos.third[i].valIm;
-		ficheiro.analysisObj.currents[i].meshEquation = correntesRamos.third[i].eq;
-		ficheiro.analysisObj.currents[i].complex = correntesRamos.third[i].string;
+	for(let i = 0; i < branchCurr.third.length; i++){
+		file.analysisObj.currents[i].valueRe = branchCurr.third[i].valRe;
+		file.analysisObj.currents[i].valueIm = branchCurr.third[i].valIm;
+		file.analysisObj.currents[i].meshEquation = branchCurr.third[i].eq;
+		file.analysisObj.currents[i].complex = branchCurr.third[i].string;
 	}
 
 	let incogEq = [];
 	let currentRevEq = [];
 	let allRevEq = [];
-	for(let i = 0; i < malhas.length; i++){
-		if(malhas[i].type == 1){
-			incogEq.push(malhas[i].incognitoEq);
-			currentRevEq.push(malhas[i].revealedCurrSrc);
-			allRevEq.push(malhas[i].revealedEq);			
+	for(let i = 0; i < meshes.length; i++){
+		if(meshes[i].type == 1){
+			incogEq.push(meshes[i].incognitoEq);
+			currentRevEq.push(meshes[i].revealedCurrSrc);
+			allRevEq.push(meshes[i].revealedEq);			
 		}
 
 	}
 
-	ficheiro.equations = {
+	file.analysisObj.equations = {
 		allVariableEq: incogEq,
 		meshCurrRevealedEq: currentRevEq,
 		allRevealedEq: allRevEq
 	}
 
-    return ficheiro;
+    return file;
+}
+
+
+function buildTeX(file){
+
+	let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let T = file.components.isolatedVPS.length;
+	let F = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
+	let simpEquations =  file.analysisObj.equations;
+	let meshes = file.analysisObj.choosenMeshes;
+
+	let currents = file.analysisObj.currents;
+	let branches =  file.branches;
+
+	// Tex Variable
+	let TeX = getTexFileHeaderMCM();
+
+	if(fileContents[0]){
+		// Add Image to Tex
+		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
+		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
+		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+	}
+
+	// TeX Fundamental Vars
+	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}} \\\\\r\n";
+	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
+	if(F.value == 0)
+			TeX += "DC";
+	else
+		TeX += "AC";
+
+
+	let aux;
+	if(F.value == 0){
+		aux = 'Hz';
+	}
+	else{
+		aux = F.mult;
+	}
+	TeX += "&&F="+F.value+"\\;"+aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
+
+	//meshes calculation
+    TeX += "\\section{Number of Meshes}\r\n\r\n\\subsection{Main Meshes}\r\n\r\n";
+    TeX += "\\paragraph{} General Expression:\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C\r\n\\end{gather*}\r\n\\par\r\n\r\n";
+    TeX += "\\paragraph{} Number of Main Meshes Calculation:\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}="+R+"-("+N+"-1)-"+C+"~\\Leftrightarrow~M_{p}="+E+"\r\n\\end{gather*}\r\n\\par\r\n\r\n";
+    TeX += "\r\n\\subsection{Auxiliar Meshes}\r\n\r\n";
+    TeX += "\\paragraph{} The number of Auxiliar Meshes it's the same as the number of Current Sources:\r\n";
+    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
+
+	//equation system
+	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} ";
+
+	let str = '\\large \\begin{cases}';
+	for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+		str += simpEquations.allRevealedEq[k];
+		if(k < simpEquations.allRevealedEq.length-1)
+			str += '\\\\[0.7em] ';
+
+	}
+	str += '\\end{cases}';
+	TeX += " Equations:\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+	TeX += "Steps:\r\n\r\n";
+	//step 1
+	 str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allVariableEq.length; k++){
+        str += simpEquations.allVariableEq[k];
+        if(k<simpEquations.allVariableEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+	//step 2
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.meshCurrRevealedEq.length; k++){
+        str += simpEquations.meshCurrRevealedEq[k];
+        if(k<simpEquations.meshCurrRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+	//step 3
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+        str += simpEquations.allRevealedEq[k];
+        if(k<simpEquations.allRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the circuit component values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+
+	// Add Equation system
+	str = '\\large \\begin{cases}';
+	for(let k = 0; k<meshes.length; k++){
+		// Generate Equation
+		const getValUnits = multUnits.find(valUnit => valUnit.value === meshes[k].currMult);
+
+		if(String(meshes[k].currValue.string).includes('angle')){
+			str += "I_{" + meshes[k].id + meshes[k].id + "} = " + meshes[k].currValue.string + getValUnits.name + "\\\\";
+		}
+		else if(meshes[k].currValue.string == 'complex'){
+			str += "I_{" + meshes[k].id + meshes[k].id + "} = " +  Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)).toFixed(3) + '\\angle{} ' + (Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795).toFixed(3) + '^{\\circ{}}\\;' + 'A' + '\\\\';
+		}
+		else{
+			str += "I_{" + meshes[k].id + meshes[k].id + "} = " + meshes[k].currValue + getValUnits.name + "\\\\";
+		}
+		if(k<results.length-1)
+			str += ' \\\\[0.7em] ';
+	}
+	str += '\\end{cases}';
+
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n";
+	TeX += "\\subsection{Mesh Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+
+	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
+	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+	for( let i = 0; i < currents.length; i++){
+		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+
+		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+
+		// Add Components
+		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+			TeX += branches[i].acAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+			TeX += branches[i].acVoltPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+			TeX += branches[i].dcAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+			TeX += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+			TeX += branches[i].capacitors[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].coils.length; k++){
+			TeX += branches[i].coils[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+			TeX += branches[i].resistors[k].ref + ', ';
+		}
+		
+		// Remove last comma
+		if(TeX[TeX.length-2] == ','){
+			TeX = TeX.slice(0,TeX.length-2);
+		}
+
+		TeX += "\\\\\r\n";
+	}
+
+	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	if(currents.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currents.length; k++){
+            str += currents[k].meshEquation;
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currents.length; k++){
+
+            if(currents[k].complex == true){
+                str += currents[k].ref + '=' +  Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)).toFixed(3) + '\\angle ' + (Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795).toFixed(3) + '^{\\circ}\\;' + 'A';
+            }
+            else{
+                str += currents[k].ref + '=' + currents[k].valueRe + '\\;' + 'A';
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n"
+
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+        TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
+        TeX += " The following currents were obtained by the mesh currents that exist in each branch.\r\n\\end{footnotesize}\r\n\r\n";
+	}
+
+	TeX += "\\end{document}\r\n";
+	return TeX;
 }
 
 
 function Output(jsonFile){
-	// Tex Variable
-	let TeX = getTexFileHeader();
 
 	// Print sections
 	document.getElementById('results-board').innerHTML = outHTMLSectionsMCM();
@@ -839,72 +1072,47 @@ function Output(jsonFile){
 		htmlstring += '<div class="container mt-2 mb-2 text-center"><img style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
 		$('#circuitImage').html(htmlstring);
 		$('#circuitImage').show();	
-		// Add Image to Tex
-		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
-		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
-		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";	
 	}
 	else
 		$('#circuitImage').hide();
 
 
-	// TeX Fundamental Vars
-	let N = branches.length-(countNodesByType(nodes, 0)-1)-(components.dcAmpsPs.length + components.acAmpsPs.length);
-	let I = components.dcAmpsPs.length + components.acAmpsPs.length;
-	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Equations {[}E{]}} \\\\\r\n";
-	TeX += "R="+branches.length+"&&N="+countNodesByType(nodes, 0)+"&&C="+I+"&&E=R-(N-1)-C="+N+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
-
-	// TeX Circuit Information
-	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Frequency {[}F{]}} &  & \\textbf{Voltage Sources {[}VS{]}} &  & \\textbf{Ammeters {[}A{]}} &  & \\textbf{Simulation {[}AC\/DC{]}} \\\\\r\n";
-	TeX += "F="+jsonFile.analysisObj.circuitFreq.value+"\\;"+jsonFile.analysisObj.circuitFreq.mult+" & & VS="+(components.acVoltPs.length+components.dcVoltPs.length);
-	TeX += " & & "+jsonFile.probes.ammeters.length+"\/"+jsonFile.analysisObj.currents.length+" & &";
-	if(jsonFile.analysisObj.circuitFreq == 0)
-			TeX += "DC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
-	else
-		TeX += "AC\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak";
-
-
-	// Print Output Data
+	// Output data Generation
 	$('#buttonShowAll').html(outShowAllBtnMCM());
-	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length, jsonFile.components.acVoltPs.length+ jsonFile.components.dcVoltPs.length));
-	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile.analysisObj.circuitFreq,jsonFile.probes.ammeters.length,jsonFile.analysisObj.currents.length));
-	$('#meshEquations').html(outEquationCalcMCM(jsonFile.branches.length, countNodesByType(jsonFile.nodes, 0), jsonFile.components.dcAmpsPs.length + jsonFile.components.acAmpsPs.length));
+
+	//circuit fundamental variables
+	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile));
+
+	//circuit info MCM
+	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile));
+
+	//circuit equations info
+	$('#meshEquations').html(outEquationCalcMCM(jsonFile));
+
+
 	outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.choosenMeshes);
 
-	let step1 = outStep1MCM(jsonFile.equations);
-	let step2 = outStep2MCM(jsonFile.equations);
-	let step3 = outStep3MCM(jsonFile.equations);
-	let equationSystemOutput = outEquationSystemMCM(jsonFile.equations, step1.first, step2.first, step3.first);
-	$('#eqSys').html(equationSystemOutput.first);
-	let resultsMeshesOutput = outResultsMeshesMCM(jsonFile.analysisObj.choosenMeshes);
-	$('#resultsCurrentsMesh').html(resultsMeshesOutput.first);
-	let currentsInfoOutput = outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches);
-	$('#currentsInfo').html(currentsInfoOutput.first);
-	let resultsBranchesOutput = outResultsCurrentsMCM(jsonFile.analysisObj.currents);
-	$('#resultsCurrentsBranch').html(resultsBranchesOutput.first);
+	let step1 = outStep1MCM(jsonFile.analysisObj.equations);
+	let step2 = outStep2MCM(jsonFile.analysisObj.equations);
+	let step3 = outStep3MCM(jsonFile.analysisObj.equations);
+	let equationSystemOutput = outEquationSystemMCM(jsonFile.analysisObj.equations, step1, step2, step3);
+	$('#eqSys').html(equationSystemOutput);
+
+	$('#resultsCurrentsMesh').html(outResultsMeshesMCM(jsonFile));
 
 
-	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
-	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
-	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
-	TeX += currentsInfoOutput.second + "\\end{tabular}\r\n\\end{table}\r\n\r\n";
-	//TeX += equivImpOutput.second + "\\pagebreak";
-	//TeX += "\\subsection{Equations}\r\nEquations using the Kirchhoff Meshes Law (KML)\r\n\r\n" + kmlCurrData.second;
-	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} " + equationSystemOutput.second;
-	TeX += "Steps:\r\n\r\n" + step1.second + step2.second + step3.second;
-	//TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n" + resultsOutput.second;
-	TeX += "\\end{document}\r\n";
+	$('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
 
-	let copyTeX = TeX;
+
+	$('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
+
 
 	// Turn the viz. on
 	$("#contResults").show();
 	$("#loadpage").fadeOut(1000);
     $("#results").show();
 	$('#results-modal').modal('show');
-	
+
 
 	// Toggle plus minus icon on show hide of collapse element
 	for(let i = 0; i<7; i++){
@@ -935,6 +1143,8 @@ function Output(jsonFile){
 	// Export TeX File
 	$("#tex").off().on('click', function() {
 		const filename = 'urisolve_results.tex';
+		let TeX = buildTeX(jsonFile);
+
 		let element = document.createElement('a');
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
 		element.setAttribute('download', filename);
@@ -959,7 +1169,7 @@ function Output(jsonFile){
 		if(minstr.toString().length < 2)
 			minstr = "0" + minstr;
 		hourstr = hourstr + ":" + minstr;
-		TeX = copyTeX;
+		let TeX = buildTeX(jsonFile);
 		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
 		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
 			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
@@ -1010,6 +1220,7 @@ function loadFileAsTextMCM(data) {
 	components = jsonFile.components;
 	simInfo = jsonFile.analysisObj;
 
+
 	// Identify MCM Equations
 	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (components.dcAmpsPs.length + components.acAmpsPs.length);
 
@@ -1033,21 +1244,21 @@ function loadFileAsTextMCM(data) {
 	});
 
 	//Algoritmo de escolha de malhas	
-	let malhas_escolhidas = escolherMalhas(malhas_arr, MEquaCnt);
+	let malhas_escolhidas = chooseMeshes(malhas_arr, MEquaCnt);
 	if(malhas_escolhidas.first){
 		alert(malhas_escolhidas.third);
 		return;
 	}
 
 	//atualizar direções de malha e ramos
-	malhas_escolhidas = direcaoMalha(malhas_escolhidas.third);
+	malhas_escolhidas = meshDirection(malhas_escolhidas.third);
 	if(malhas_escolhidas.first){
 		alert(malhas_escolhidas.third);
 		return;
 	}
 
 	//correntes de malha que atravessam cada ramo
-	correntesMalhaRamos(malhas_escolhidas.third);
+	meshCurrInBranches(malhas_escolhidas.third);
 	if(malhas_escolhidas.first){
 		alert(malhas_escolhidas.third);
 		return;
@@ -1090,7 +1301,9 @@ function loadFileAsTextMCM(data) {
 		return;
 	}
 
-	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, jsonFile);
+	let isolatedVPS = getIsolatedVoltPS();
+
+	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, isolatedVPS, jsonFile);
 
 	Output(jsonFile);
 	

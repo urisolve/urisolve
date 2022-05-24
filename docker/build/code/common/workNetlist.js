@@ -1740,6 +1740,7 @@ function acquireCpData(line, cnt) {
     
     // Critical Error Codes
     var critical = [0,2,4,5,6,7,11,15];
+
     for(let i = 0; i < errList.length; i++){
         // Find error code in the array
         if(critical.indexOf(errList[i].errorCode) >= 0)

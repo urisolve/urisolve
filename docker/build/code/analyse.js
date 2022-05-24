@@ -3,7 +3,7 @@
  * Loads the file and validates the netlist
  * @returns netlist
  */
-function loadFile(){
+function loadFile(method){
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
 		return{
@@ -32,7 +32,7 @@ function loadFile(){
 			$("#contResults").hide();
 			$('#warnings').hide();
 			$('#results-modal').modal('show');
-			$('#errors').html(errorOutput(netlistTxt.first));
+			$('#errors').html(errorOutput(netlistTxt.first, method));
 			$('#errors').show();
 			let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
 			if(language == "english")
@@ -2049,7 +2049,7 @@ function buildJson(){
  * commom - loads file and prepares info for all mehods
  * @returns stringyfied json file
  */
-function common(){
+function common(method){
 	resistors = new Array();
 	coils = new Array();
 	capacitors = new Array();
@@ -2078,7 +2078,7 @@ function common(){
 	iProbeNodesArr = new Array();
 	iProbeLocVsAmpId = new Array()
 
-	let load = loadFile();
+	let load = loadFile(method);
 	if(load.first){
 		return{
 			first: true,
@@ -2153,7 +2153,7 @@ function analyseCircuit(analysismet) {
                 let successFlag = false;
                 for (let i = 0; i < retriesNumber; i++) {
                     try {
-                        let data = common();
+                        let data = common(analysismet);
                         if(data.first){
 							break;
                         }

@@ -3,7 +3,7 @@
  * @param {array} errList error Codes
  * @returns {string} html String
  */
-function errorOutput(errList){
+function errorOutput(errList, method){
 
     // Warnings html string
     let htmlstr = '';
@@ -179,6 +179,10 @@ function errorOutput(errList){
             /* Error Code 15 */
             case 15:
                 warnString += header;
+                if(method == 'MCM'){
+                    warnString += '<div><span data-translate="_errCode15MCM"></span></div>';
+                }
+                else
                 warnString += '<div><span data-translate="_errCode15"></span></div>';
                 warnString += '</div></div>';
                 break;
@@ -1904,24 +1908,6 @@ function drawArrow(fromx, fromy, tox, toy, style, elemID){
     ctx.fillStyle = style;
     // Fill the arrow
     ctx.fill();
-}
-
-
-function drawMesh(mesh, canvas){
-    // Access element context in HTML DOM
-    let ctx = canvas.getContext("2d");
-    let centerX = canvas.width / 2;
-    let centerY = canvas.height / 2;
-    if(mesh.branches.length == 2){
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, canvas.width-canvas.width*0.2, canvas.height-0.5*canvas.height, 0, 0, 0);
-        ctx.fillStyle = 'blue';
-        ctx.lineWidth = 2;
-        ctx.fill();
-    }
-    else if(mesh.branches.length == 3){
-
-    }
 }
 
 /**
