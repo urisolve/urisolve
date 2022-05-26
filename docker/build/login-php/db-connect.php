@@ -2,7 +2,7 @@
 
 // Database credentials
 define('DB_SERVER', 'mysql-server');
-define('DB_USERNAME', 'lino');
+define('DB_USERNAME', 'youusername');
 define('DB_PASSWORD', 'secret');
 define('DB_NAME', 'urisolve');
 define("HTML_EOL", "<br>");
