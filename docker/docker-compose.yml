@@ -56,13 +56,15 @@ services:
         max-size: 50m
 
   urisolve:
-    image: docker.pkg.github.com/urisolve/urisolve/webappx64:main
+    build: .
     container_name: urisolve
     restart: unless-stopped
     networks:
       - isep_urisolve
     ports:
       - "80:80"
+    volumes:
+      - ./build:/var/www/html
     depends_on:
       - uribroker
     logging:
@@ -70,6 +72,7 @@ services:
         max-size: 50m
 
 volumes:
+  build:
   data:
   data-mysql:
 
