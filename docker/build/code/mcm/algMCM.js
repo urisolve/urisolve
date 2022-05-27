@@ -1,2714 +1,1342 @@
-function loadFileAsTextMCM() {
-	if (!fileContents[1]) {
-		alert("Upload Netlist file first!");
-		return;
+include('code/common/outPrintMCM.js');
+
+/*
+ERROR LIST
+
+1 - Não foi inserida uma netlist
+2 - Erro Netlist
+3 - Erro a procurar malhas
+3 - Erro a construir equações
+*/
+	
+/**
+ * Count Nodes By Type (0 = Real, 1 - Virtual)
+ * @param {Array} objArr Array of Nodes objects
+ * @param {Int} type Desired type of node to return
+ * @returns Number of Nodes
+ */
+
+function countNodesByType(objArr, type) {
+	let cnt = 0;
+	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
+	return cnt;
+}
+
+
+/**
+ * Test if nodes are adjacent to each other
+ * @param {Array} real_nodes Array of Real Nodes objects
+ * @param {Int} a Desired index of the first knot
+ * @param {Int} b Desired index of the second knot
+ * @param {Array} branches Braches array
+ * @returns boolean, true if adjacent
+ */
+function adjNodes(real_nodes, a, b){
+	for(let i = 0; i<branches.length; i++){
+		if((real_nodes[a] == branches[i].startNode)&&(real_nodes[b] == branches[i].endNode) || (real_nodes[a] == branches[i].endNode)&&(real_nodes[b] == branches[i].startNode)) return true;
 	}
+	return false;
+}
 
-	textFromFileLoaded = fileContents[1];
-	var leng = textFromFileLoaded.length;
+/**
+ * Test if a node is connected to a branch
+ * @param {Array} real_nodes Array of Real Nodes objects
+ * @param {Int} a Desired index of the knot
+ * @param {Int} b Desired index of the branch
+ * @param {Array} branches Braches array
+ * @returns boolean, true if adjacent
+ */
+function nodeBranchCon(real_nodes, a, b){
+	if((branches[b].startNode == real_nodes[a]) || (branches[b].endNode == real_nodes[a])) return true;
+	return false;
+}
 
-	function novajanela() {
-		if (flagError == 1) {
-			errorStr += "\nProcedimentos:\n1) Fazer refresh da página\n2) Corrigir circuito\n3) Submeter novo ficheiro"
-			alert(errorStr)
-		} else {
-			/*
-			var opened = window.open("");
-			var htmlCode1 = "<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"code/libs/KaTeX/katex.min.css\"><title>Resultados</title></head>";
-			var htmlCode2 = "<body style=\"background-color:#ffffff;\"> <div style=\"position: relative; margin-top: 5%; margin-left: 10%; margin-right: 20%;\">";
-			var htmlCode3 = "</div></body> </html>";
+/**
+ * Finds all circuit meshes
+ * @returns first: error; second: errorCode; third: array with all the meshes
+ */
+function findMeshes(){
 
-			opened.document.write(htmlCode1);
-			opened.document.write(htmlCode2);
-			//Print Results
-			opened.document.write(string_final)
-			opened.document.write(htmlCode3);
-			*/
-			var htmlstr = string_final;
-			outputModalResults(htmlstr);
-		}
-	};
-	var flagAC = 0;
-	//______________________resistors_________________________//
-	var Resistors = [];
-	var Pt1_resistors = [];
-	var Pt2_resistors = [];
-	var Ohm_resistors = [];
-	Resistors = fill_resistors(textFromFileLoaded);
-	Pt1_resistors = fill_pt1_resistors(textFromFileLoaded);
-	Pt2_resistors = fill_pt2_resistors(textFromFileLoaded);
-	Ohm_resistors = fill_ohm_resistors(textFromFileLoaded);
-	var Qtd_resistors = Resistors.length;
-
-	function fill_resistors(text) {
-		var i = 0;
-		var num_R = 0;
-		var nomes = [];
-		var ini_flag = 0;
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "R") {
-				i++;
-				if (text[i] == ":" && text[i + 1] == "R") {
-					i++;
-					while (text[i] != " ") {
-						if (ini_flag == 1) {
-							nomes[num_R] += text[i];
-							i++;
-						} else {
-							ini_flag = 1;
-							nomes[num_R] = text[i];
-							i++;
-						}
-					}
-					num_R++;
-					ini_flag = 0;
-				}
+	const nr_nos = countNodesByType(nodes, 0);
+	const nr_ramos = branches.length;
+	let real_nodes = [];
+	for(let i = 0; i<nodes.length; i++){
+		if(nodes[i].type == 0) real_nodes.push(nodes[i].ref);
+	}
+	let branches_id = [];
+	for(let i = 0; i<branches.length; i++){
+		branches_id.push(branches[i].id);
+	}
+	//cria matriz de adjacencia
+	let matriz_adj = [];
+	for(let i = 0; i< nr_nos; i++){
+		matriz_adj[i] = [];
+	}
+	for(let i = 0; i < nr_nos; i++){
+		for(let j = 0; j < nr_nos; j++){
+			if(adjNodes(real_nodes, i, j)){
+				matriz_adj[i][j] = 1;
 			}
-		}
-		return nomes;
+			else{
+				matriz_adj[i][j] = 0;
+			}					
+		}			
 	}
-
-	function fill_pt1_resistors(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "R") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "R") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
+	
+	//cria matriz de incicendia
+	let matriz_inc = [];
+	for(let i = 0; i< nr_nos; i++){
+		matriz_inc[i] = [];
+	}
+	for(let i = 0; i < nr_nos; i++){
+		for(let j = 0; j < nr_ramos; j++){
+			if(nodeBranchCon(real_nodes, i, j)){
+				matriz_inc[i][j] = 1;
 			}
-		}
-		return nomes_no;
+			else{
+				matriz_inc[i][j] = 0;
+			}					
+		}			
 	}
 
-	function fill_pt2_resistors(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "R") {
-				i++;
-				if (text[i] == ":" && text[i + 1] == "R") {
-					i++;
-					while (text[i] != " ") {
-						i++;
-					}
-					i++;
-					while (text[i] != " ") {
-						i++;
-					}
-					i++;
-					nomes_no[num_no] = text[i];
-					i++;
-					while (text[i] != " ") {
-						nomes_no[num_no] += text[i];
-						i++;
-					}
-					num_no++;
-				}
-			}
+	//Meshes finder
+
+	let circuit = new MeshesFinder();
+	circuit.initGraph(matriz_adj, matriz_inc, real_nodes, branches_id);
+	let meshes = circuit.getMeshes();
+	
+	if(meshes.error.state == true) {
+	  return{
+		  first: true,
+		  second: 3,
+		  third: meshes.error.reason
+	  };
+	}
+	
+	return{
+		first: false,
+		second: 0,
+		third: meshes.data
+	}
+}
+
+/**
+ * Chooses all meshes to use in the MCM method
+ * @param {Array} malhas Array of all circuit meshes
+ * @param {Int} nr_malhas_principais Number of main meshes needed
+ * @returns boolean, true if adjacent
+ */
+function chooseMeshes(malhas, nr_malhas_principais){
+	let malhas_flags = [];
+	let ramos_fontecorrente_flags = [];
+	let ramos_flags = [];
+	const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ"
+	for(let i = 0; i < malhas.length; i++){
+		malhas_flags[i] = 0;
+	}
+	for(let i = 0; i < branches.length; i++){
+		if(branches[i].dcAmpPwSupplies.length + branches[i].acAmpPwSupplies.length == 0){
+			ramos_fontecorrente_flags[i] = 0;
 		}
-		return nomes_no;
+		else{
+			ramos_fontecorrente_flags[i] = 1;
+		}
+	}
+	for(let i = 0; i < branches.length; i++){
+		ramos_flags[i] = 0;
 	}
 
-	function fill_ohm_resistors(text) {
-		var ohmSI = 0;
-		var num_R = 0;
-		var ohm = [];
-		var flag = 0;
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "R") {
-				i++;
-				if (text[i] == ":" && text[i + 1] == "R") {
-					i++;
-					while (text[i] != " ") {
-						i++;
-					}
-					i++;
-					while (text[i] != " ") {
-						i++;
-					}
-					i++;
-					while (text[i] != " ") {
-						i++;
-					}
-					i++;
-					if (text[i] == "R") {
-						i++;
-						if (text[i] == "=") {
-							i++;
-							i++;
-							ohm[num_R] = text[i];
-							i++;
-							while (text[i] != " ") {
-								ohm[num_R] += text[i];
-								i++;
-							}
-							i++
-							/*if(text[i] == "O" && ohm[num_R].includes("j") == false){
-								ohmSI = parseInt(ohm[num_R])
-								ohm[num_R] = ohmSI;
-							}*/
-							if (text[i] == "k" && ohm[num_R].includes("j") == false) {
-								ohmSI = parseInt(ohm[num_R])
-								ohmSI = ohmSI * Math.pow(10, 3)
-								ohm[num_R] = ohmSI;
-								flag = 1;
-							} else if (text[i] == "M" && ohm[num_R].includes("j") == false) {
-								ohmSI = parseInt(ohm[num_R])
-								ohmSI = ohmSI * Math.pow(10, 6)
-								ohm[num_R] = ohmSI;
-								flag = 1;
-							}
-							if (flag == 1) {
-								ohm[num_R] = ohmSI;
-							}
-							num_R++;
-						}
-					}
-				}
-			}
+	let malhas_escolhidas = [];
+	//inutilizar malhas com mais que uma fonte de corrente
+	for(let i = 0; i < malhas.length; i++){
+		let count = 0;
+		for(let j = 0; j < malhas[i].length; j++){
+			if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1) count++;
 		}
-		return ohm;
-	}
-	//___________________________________________________________//
-	//______________________CAPACITORS_________________________//
-	var Capacitors = [];
-	var Pt1_capacitors = [];
-	var Pt2_capacitors = [];
-	var Farad_capacitors = [];
-	Capacitors = fill_capacitors(textFromFileLoaded);
-	Pt1_capacitors = fill_pt1_capacitors(textFromFileLoaded);
-	Pt2_capacitors = fill_p2_capacitors(textFromFileLoaded);
-	Farad_capacitors = fill_farad_capacitors(textFromFileLoaded);
-	var Qtd_capacitors = Capacitors.length;
-
-	function fill_capacitors(text) {
-		var num_C = 0;
-		var names = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "C") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "C") {
-						names[num_C] = text[i]
-						i++;
-						while (text[i] != " ") {
-							names[num_C] += text[i]
-							i++;
-						}
-						num_C++;
-					}
-				}
-			}
-		}
-		return names;
+		if(count > 1) malhas_flags[i] = -1;
 	}
 
-	function fill_pt1_capacitors(text) {
-		var num_pt1 = 0;
-		var names_pt1 = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "C") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "C") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						names_pt1[num_pt1] = text[i]
-						i++;
-						while (text[i] != " ") {
-							names_pt1[num_pt1] += text[i]
-							i++
-						}
-						num_pt1++
-					}
-				}
-			}
-		}
-		return names_pt1;
-	}
-
-	function fill_p2_capacitors(text) {
-		var num_pt2 = 0;
-		var names_pt2 = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "C") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "C") {
-						while (text[i] != " ") {
-							i++
-						}
-						i++
-						while (text[i] != " ") {
-							i++
-						}
-						i++
-						names_pt2[num_pt2] = text[i]
-						i++
-						while (text[i] != " ") {
-							names_pt2[num_pt2] += text[i]
-							i++
-						}
-						num_pt2++
-					}
-				}
-			}
-		}
-		return names_pt2;
-	}
-
-	function fill_farad_capacitors(text) {
-		var faradSI = 0
-		var num_C = 0;
-		var farad = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "C" && text[i + 1] == "=") {
-				i += 3;
-				farad[num_C] = text[i]
-				i++
-				while (text[i] != " " && text[i] !== "\"") {
-					farad[num_C] += text[i]
-					i++
-				}
-				i++
-				if (text[i] == "F") {
-					faradSI = parseInt(farad[num_C])
-				} else if (text[i] == "p") {
-					faradSI = parseInt(farad[num_C])
-					faradSI = faradSI * Math.pow(10, -12)
-				} else if (text[i] == "n") {
-					faradSI = parseInt(farad[num_C])
-					faradSI = faradSI * Math.pow(10, -9)
-				} else if (text[i] == "u" || text[i] == "µ") {
-					faradSI = parseInt(farad[num_C])
-					faradSI = faradSI * Math.pow(10, -6)
-				} else if (text[i] == "m") {
-					faradSI = parseInt(farad[num_C])
-					faradSI = faradSI * Math.pow(10, -3)
-				}
-				farad[num_C] = faradSI
-				num_C++
-			}
-		}
-		return farad;
-	}
-	//___________________________________________________________//
-	//__________________________COILS____________________________//
-	var Coils = [];
-	var Pt1_coils = [];
-	var Pt2_coils = [];
-	var Henry_coils = [];
-	Coils = fill_coils(textFromFileLoaded);
-	Pt1_coils = fill_pt1_coils(textFromFileLoaded);
-	Pt2_coils = fill_p2_coils(textFromFileLoaded);
-	Henry_coils = fill_henry_coils(textFromFileLoaded);
-	var Qtd_coils = Coils.length;
-
-	function fill_coils(text) {
-		var num_C = 0;
-		var names = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "L") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					names[num_C] = text[i]
-					i++;
-					while (text[i] != " ") {
-						names[num_C] += text[i]
-						i++;
-					}
-					num_C++;
-				}
-			}
-		}
-		return names;
-	}
-
-	function fill_pt1_coils(text) {
-		var num_pt1 = 0;
-		var names_pt1 = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "L") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "L") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						names_pt1[num_pt1] = text[i]
-						i++;
-						while (text[i] != " ") {
-							names_pt1[num_pt1] += text[i]
-							i++
-						}
-						num_pt1++
-					}
-				}
-			}
-		}
-		return names_pt1;
-	}
-
-	function fill_p2_coils(text) {
-		var num_pt2 = 0;
-		var names_pt2 = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "L") {
-				i++;
-				if (text[i] == ":") {
-					i++;
-					if (text[i] == "L") {
-						while (text[i] != " ") {
-							i++
-						}
-						i++
-						while (text[i] != " ") {
-							i++
-						}
-						i++
-						names_pt2[num_pt2] = text[i]
-						i++
-						while (text[i] != " ") {
-							names_pt2[num_pt2] += text[i]
-							i++
-						}
-						num_pt2++
-					}
-				}
-			}
-		}
-		return names_pt2;
-	}
-
-	function fill_henry_coils(text) {
-		var henrySI = 0
-		var num_C = 0;
-		var henry = [];
-		for (var i = 0; i <= leng; i++) {
-			if (text[i] == "L" && text[i + 1] == "=") {
-				i += 3;
-				henry[num_C] = text[i]
-				i++
-				while (text[i] != " " && text[i] !== "\"") {
-					henry[num_C] += text[i]
-					i++
-				}
-				i++
-				if (text[i] == "F") {
-					henrySI = parseInt(henry[num_C])
-				} else if (text[i] == "p") {
-					henrySI = parseInt(henry[num_C])
-					henrySI = henrySI * Math.pow(10, -12)
-				} else if (text[i] == "n") {
-					henrySI = parseInt(henry[num_C])
-					henrySI = henrySI * Math.pow(10, -9)
-				} else if (text[i] == "u" || text[i] == "µ") {
-					henrySI = parseInt(henry[num_C])
-					henrySI = henrySI * Math.pow(10, -6)
-				} else if (text[i] == "m") {
-					henrySI = parseInt(henry[num_C])
-					henrySI = henrySI * Math.pow(10, -3)
-				}
-				henry[num_C] = henrySI
-				num_C++
-			}
-		}
-		return henry;
-	}
-	//___________________________________________________________//
-	//_________________FONTES DE TENSÃO DC_______________________//
-	var Sources_vdc = [];
-	var Pt1_vdc = [];
-	var Pt2_vdc = [];
-	var Volt_vdc = [];
-	Sources_vdc = fill_sources_vdc(textFromFileLoaded);
-	Pt1_vdc = fill_pt1_vdc(textFromFileLoaded);
-	Pt2_vdc = fill_pt2_vdc(textFromFileLoaded);
-	Volt_vdc = fill_volt_vdc(textFromFileLoaded);
-	var Qtd_sources_vdc = Sources_vdc.length;
-
-	function fill_sources_vdc(text) {
-		var i = 0;
-		var num_V = 0;
-		var nomes = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						i++;
-						i++;
-						nomes[num_V] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes[num_V] += text[i];
-							i++;
-						}
-						num_V++;
-					}
-				}
-			}
-		}
-		return nomes;
-	}
-
-	function fill_pt1_vdc(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						if (text[i] !== "_") {
-							while (text[i] != " ") {
-								nomes_no[num_no] += text[i];
-								i++;
-								if (text[i] == "_" && text[i + 1] == "T") {
-									break;
+	//Escolha de C malhas auxiliares
+	for(let i = 0; i < ramos_fontecorrente_flags.length; i++){  //para cada fonte de corrente
+		if(ramos_fontecorrente_flags[i] == 1){					//Se o ramo contém fonte de corrente
+			let escolhido = false;
+			while(!escolhido){
+				for(let j = 0; j < malhas.length; j++){			//percorrer o array das malhas
+					if(malhas_flags[j] == 0){					//se a malha estiver disponível
+						for(let k = 0; k < malhas[j].length; k++){ //para cada ramo da malha
+							if(malhas[j][k] == i+1){				//se tiver o ramo com a fonte de corrente em questão
+								for(let m = 0; m < malhas[j].length; m++){
+									ramos_flags[malhas[j][m]-1] = 1;
 								}
-							}
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_pt2_vdc(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_volt_vdc(text) {
-		var i = 0;
-		var voltSI = 0;
-		var num_v = 0;
-		var volt = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "U") {
-				i++;
-				if (text[i] == "=" && text[i + 1] == "\"") {
-					i++;
-					i++;
-					if (text[i] !== "\"") {
-						volt[num_v] = text[i];
-						i++;
-						while (text[i] != " ") {
-							volt[num_v] += text[i];
-							i++;
-						}
-						i++
-						if (text[i] == "V") {
-							voltSI = parseInt(volt[num_v])
-						} else if (text[i] == "p") {
-							voltSI = parseInt(volt[num_v])
-							voltSI = voltSI * Math.pow(10, -12)
-						} else if (text[i] == "n") {
-							voltSI = parseInt(volt[num_v])
-							voltSI = voltSI * Math.pow(10, -9)
-						} else if (text[i] == "u" || text[i] == "µ") {
-							voltSI = parseInt(volt[num_v])
-							voltSI = voltSI * Math.pow(10, -6)
-						} else if (text[i] == "m") {
-							voltSI = parseInt(volt[num_v])
-							voltSI = voltSI * Math.pow(10, -3)
-						}
-						volt[num_v] = voltSI;
-						num_v++;
-					}
-				}
-			}
-		}
-		return volt;
-	}
-	//___________________________________________________________//
-	//__________________FONTES DE TENSÃO AC______________________//
-	var Sources_vac = [];
-	var Pt1_vac = [];
-	var Pt2_vac = [];
-	var Volt_vac = [];
-	var circuitFreq = 0;
-	Sources_vac = fill_sources_vac(textFromFileLoaded);
-	Pt1_vac = fill_pt1_vac(textFromFileLoaded);
-	Pt2_vac = fill_pt2_vac(textFromFileLoaded);
-	Volt_vac = fill_volt_vac(textFromFileLoaded);
-	circuitFreq = fillCircuitFrequency(textFromFileLoaded);
-	var Qtd_sources_vac = Sources_vac.length;
-
-	function fill_sources_vac(text) {
-		var num_V = 0;
-		var nomes = [];
-		for (var i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						i++;
-						if (text[i] == ":") {
-							i++;
-							nomes[num_V] = text[i];
-							i++;
-							while (text[i] != " ") {
-								nomes[num_V] += text[i];
-								i++;
-							}
-							num_V++;
-							flagAC = 1;
-						}
-					}
-				}
-			}
-		}
-		return nomes;
-	}
-
-	function fill_pt1_vac(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-							if (text[i] == "_" && text[i + 1] == "T") {
-								break;
-							}
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_pt2_vac(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_volt_vac(text) {
-		var i = 0;
-		var voltSI = 0;
-		var num_v = 0;
-		var volt = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						if (text[i] == "U") {
-							i++;
-							if (text[i] == "=") {
-								i++;
-								i++;
-								if (text[i] !== "\"") {
-									volt[num_v] = text[i];
-									i++;
-									while (text[i] != " ") {
-										volt[num_v] += text[i];
-										i++;
-									}
-									i++
-									if (text[i] == "V") {
-										voltSI = parseInt(volt[num_v])
-									} else if (text[i] == "p") {
-										voltSI = parseInt(volt[num_v])
-										voltSI = voltSI * Math.pow(10, -12)
-									} else if (text[i] == "n") {
-										voltSI = parseInt(volt[num_v])
-										voltSI = voltSI * Math.pow(10, -9)
-									} else if (text[i] == "u" || text[i] == "µ") {
-										voltSI = parseInt(volt[num_v])
-										voltSI = voltSI * Math.pow(10, -6)
-									} else if (text[i] == "m") {
-										voltSI = parseInt(volt[num_v])
-										voltSI = voltSI * Math.pow(10, -3)
-									}
-									volt[num_v] = voltSI;
-									num_v++;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return volt;
-	}
-
-	function fillCircuitFrequency(text) {
-		var i = 0;
-		var freq = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "V") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != "f") {
-							i++;
-						}
-						if (text[i] == "f") {
-							i++;
-							if (text[i] == "=") {
-								i++;
-								i++;
-								if (text[i] !== "\"") {
-									freq = text[i];
-									i++;
-									while (text[i] != " ") {
-										freq += text[i];
-										i++;
-									}
-									i++;
-									freq = parseInt(freq)
-									if (text[i] == "H") {
-										return freq;
-									} else if (text[i] == "k" || text[i] == "K") {
-										return freq * Math.pow(10, 3);
-									} else if (text[i] == "M") {
-										return freq * Math.pow(10, 6);
-									} else if (text[i] == "G") {
-										return freq * Math.pow(10, 9);
-									}
-									flagAC = 1;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	//___________________________________________________________//
-	//_________________CURRENT SOURCES DC________________________//
-	var Sources_idc = [];
-	var Pt1_idc = [];
-	var Pt2_idc = [];
-	var Ampere_idc = [];
-	Sources_idc = fill_sources_idc(textFromFileLoaded);
-	Pt1_idc = fill_pt1_idc(textFromFileLoaded);
-	Pt2_idc = fill_pt2_idc(textFromFileLoaded);
-	Ampere_idc = fill_ampere_idc(textFromFileLoaded);
-	var Qtd_fontes_idc = Sources_idc.length;
-
-	function fill_sources_idc(text) {
-		var i = 0;
-		var num_I = 0;
-		var nomes = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						i++;
-						i++;
-						nomes[num_I] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes[num_I] += text[i];
-							i++;
-						}
-						num_I++;
-					}
-				}
-			}
-		}
-		return nomes;
-	}
-
-	function fill_pt1_idc(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_pt2_idc(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_ampere_idc(text) {
-		var i = 0;
-		var ampereSI = 0;
-		var num_I = 0;
-		var ampere = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "d") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						if (text[i] == "I") {
-							i++;
-							if (text[i] == "=") {
-								i++;
-								i++;
-								if (text[i] !== "\"") {
-									ampere[num_I] = text[i];
-									i++;
-									while (text[i] != " ") {
-										ampere[num_I] += text[i];
-										i++;
-									}
-									i++;
-									if (text[i] == "A") {
-										ampereSI = parseInt(ampere[num_I])
-									} else if (text[i] == "p") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -12)
-									} else if (text[i] == "n") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -9)
-									} else if (text[i] == "u" || text[i] == "µ") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -6)
-									} else if (text[i] == "m") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -3)
-									}
-									ampere[num_I] = ampereSI;
-									num_I++;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return ampere;
-	}
-	//___________________________________________________________//
-	//_________________FONTES DE CORRENTE AC_____________________//
-	var CurrentSources_iac = [];
-	var Pt1_iac = [];
-	var Pt2_iac = [];
-	var Ampere_iac = [];
-	CurrentSources_iac = fill_currentSources_iac(textFromFileLoaded);
-	Pt1_iac = fill_pt1_iac(textFromFileLoaded);
-	Pt2_iac = fill_pt2_iac(textFromFileLoaded);
-	Ampere_iac = fill_ampere_iac(textFromFileLoaded);
-	var Qtd_CurrentSources_iac = CurrentSources_iac.length;
-
-	function fill_currentSources_iac(text) {
-		var i = 0;
-		var num_I = 0;
-		var nomes = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						i++;
-						i++;
-						nomes[num_I] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes[num_I] += text[i];
-							i++;
-						}
-						num_I++;
-						flagAC = 1;
-					}
-				}
-			}
-		}
-		return nomes;
-	}
-
-	function fill_pt1_iac(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_pt2_iac(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						nomes_no[num_no] = text[i];
-						i++;
-						while (text[i] != " ") {
-							nomes_no[num_no] += text[i];
-							i++;
-						}
-						num_no++;
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_ampere_iac(text) {
-		var i = 0;
-		var num_I = 0;
-		var ampere = [];
-		for (i = 0; i < leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "a") {
-					i++;
-					if (text[i] == "c") {
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						while (text[i] != " ") {
-							i++;
-						}
-						i++;
-						if (text[i] == "I") {
-							i++;
-							if (text[i] == "=") {
-								i++;
-								i++;
-								if (text[i] !== "\"") {
-									ampere[num_I] = text[i];
-									i++;
-									while (text[i] != " ") {
-										ampere[num_I] += text[i];
-										i++;
-									}
-									i++;
-									if (text[i] == "A") {
-										ampereSI = parseInt(ampere[num_I])
-									} else if (text[i] == "p") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -12)
-									} else if (text[i] == "n") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -9)
-									} else if (text[i] == "u" || text[i] == "µ") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -6)
-									} else if (text[i] == "m") {
-										ampereSI = parseInt(ampere[num_I])
-										ampereSI = ampereSI * Math.pow(10, -3)
-									}
-									ampere[num_I] = ampereSI;
-									num_I++;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return ampere;
-	}
-	//___________________________________________________________//
-	//______________________AMPERIMETROS_________________________//
-	var Amperimetros = [];
-	var No1_amperimetro = [];
-	var No2_amperimetro = [];
-	Amperimetros = fill_amperimetros(textFromFileLoaded);
-	No1_amperimetro = fill_no1_amperimetro(textFromFileLoaded);
-	No2_amperimetro = fill_no2_amperimetro(textFromFileLoaded);
-	var Qtd_amperimetros = Amperimetros.length;
-
-	function fill_amperimetros(text) {
-		var i = 0;
-		var num_amp = 0;
-		var nomes = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "P") {
-					i++;
-					if (text[i] == "r") {
-						i++;
-						if (text[i] == "o") {
-							while (text[i] != ":") {
-								i++;
-							}
-							i++;
-							nomes[num_amp] = text[i];
-							i++;
-							while (text[i] != " ") {
-								nomes[num_amp] += text[i];
-								i++;
-							}
-							num_amp++;
-						}
-					}
-				}
-			}
-		}
-		return nomes;
-	}
-
-	function fill_no1_amperimetro(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "P") {
-					i++;
-					if (text[i] == "r") {
-						i++;
-						if (text[i] == "o") {
-							while (text[i] != ":") {
-								i++;
-							}
-							i++;
-							while (text[i] != " ") {
-								i++;
-							}
-							i++;
-							nomes_no[num_no] = text[i];
-							while (text[i] != " ") {
-								i++;
-								if (text[i] != " ") {
-									nomes_no[num_no] += text[i];
-								}
-							}
-							num_no++;
-						}
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function fill_no2_amperimetro(text) {
-		var i = 0;
-		var num_no = 0;
-		var nomes_no = [];
-		for (i = 0; i <= leng; i++) {
-			if (text[i] == "I") {
-				i++;
-				if (text[i] == "P") {
-					i++;
-					if (text[i] == "r") {
-						i++;
-						if (text[i] == "o") {
-							while (text[i] != ":") {
-								i++;
-							}
-							i++;
-							while (text[i] != " ") {
-								i++;
-							}
-							i++;
-							while (text[i] != " ") {
-								i++;
-							}
-							i++;
-							nomes_no[num_no] = text[i];
-							i++;
-							while (isLetter(text[i])) {
-								if (isLetter(text[i])) {
-									nomes_no[num_no] += text[i];
-								}
-								i++
-							}
-							num_no++;
-						}
-					}
-				}
-			}
-		}
-		return nomes_no;
-	}
-
-	function isLetter(str) {
-		return str.length === 1 && str.match(/[a-z]/i) || str.match(/[0-9]/i);
-	}
-	//___________________________________________________________//
-	//______________CRIAR MATRIZ DE COMPONENTES__________________//
-	var matriz = fill_matriz();
-
-	function fill_matriz() {
-		var k = 0;
-		var m = 0;
-		var w = 0;
-		var matriz = [4];
-		var Qtd_elementos = Qtd_resistors + Qtd_sources_vdc + Qtd_fontes_idc + Qtd_amperimetros + Qtd_capacitors + Qtd_coils + Qtd_CurrentSources_iac + Qtd_sources_vac;
-		for (k = 0; k < 4; k++) {
-			matriz[k] = [Qtd_elementos];
-		}
-		while (m < Qtd_resistors) {
-			matriz[0][m] = Resistors[m];
-			matriz[1][m] = Pt1_resistors[m];
-			matriz[2][m] = Pt2_resistors[m];
-			matriz[3][m] = Ohm_resistors[m];
-			m++;
-		}
-		while (w < Qtd_capacitors) {
-			matriz[0][m + w] = Capacitors[w];
-			matriz[1][m + w] = Pt1_capacitors[w];
-			matriz[2][m + w] = Pt2_capacitors[w];
-			matriz[3][m + w] = Farad_capacitors[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_coils) {
-			matriz[0][m + w] = Coils[w];
-			matriz[1][m + w] = Pt1_coils[w];
-			matriz[2][m + w] = Pt2_coils[w];
-			matriz[3][m + w] = Henry_coils[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_sources_vdc) {
-			matriz[0][m + w] = Sources_vdc[w];
-			matriz[1][m + w] = Pt1_vdc[w];
-			matriz[2][m + w] = Pt2_vdc[w];
-			matriz[3][m + w] = Volt_vdc[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_fontes_idc) {
-			matriz[0][m + w] = Sources_idc[w];
-			matriz[1][m + w] = Pt1_idc[w];
-			matriz[2][m + w] = Pt2_idc[w];
-			matriz[3][m + w] = Ampere_idc[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_sources_vac) {
-			matriz[0][m + w] = Sources_vac[w];
-			matriz[1][m + w] = Pt1_vac[w];
-			matriz[2][m + w] = Pt2_vac[w];
-			matriz[3][m + w] = Volt_vac[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_CurrentSources_iac) {
-			matriz[0][m + w] = CurrentSources_iac[w];
-			matriz[1][m + w] = Pt1_iac[w];
-			matriz[2][m + w] = Pt2_iac[w];
-			matriz[3][m + w] = Ampere_iac[w];
-			w++;
-		}
-		m += w
-		w = 0;
-		while (w < Qtd_amperimetros) {
-			matriz[0][m + w] = Amperimetros[w];
-			matriz[1][m + w] = No1_amperimetro[w];
-			matriz[2][m + w] = No2_amperimetro[w];
-			matriz[3][m + w] = "AMP";
-			w++;
-		}
-		return matriz;
-	}
-	console.table(matriz)
-	//___________________________________________________________//
-	function combinations(arr, k) {
-		var i,
-			subI,
-			ret = [],
-			sub,
-			next;
-		for (i = 0; i < arr.length; i++) {
-			if (k === 1) {
-				ret.push([arr[i]]);
-			} else {
-				sub = combinations(arr.slice(i + 1, arr.length), k - 1);
-				for (subI = 0; subI < sub.length; subI++) {
-					next = sub[subI];
-					next.unshift(arr[i]);
-					ret.push(next);
-				}
-			}
-		}
-		return ret;
-	}
-	var permutationsWithRepetition = function(n, as) {
-		return as.length > 0 ? (foldl1(curry(cartesianProduct)(as), replicate(n, as))) : [];
-	};
-	var cartesianProduct = function(xs, ys) {
-		return [].concat.apply([], xs.map(function(x) {
-			return [].concat.apply([], ys.map(function(y) {
-				return [
-					[x].concat(y)
-				];
-			}));
-		}));
-	};
-	var foldl1 = function(f, xs) {
-		return xs.length > 0 ? xs.slice(1).reduce(f, xs[0]) : [];
-	};
-	var replicate = function(n, a) {
-		var v = [a],
-			o = [];
-		if (n < 1) return o;
-		while (n > 1) {
-			if (n & 1) o = o.concat(v);
-			n >>= 1;
-			v = v.concat(v);
-		}
-		return o.concat(v);
-	};
-	var curry = function(f) {
-		return function(a) {
-			return function(b) {
-				return f(a, b);
-			};
-		};
-	};
-	2[0, 1, 2]
-
-	function allCombinations(numNos, vetorRamos) {
-		for (var i = 2; i <= numNos; i++) {
-			var aux = combinations(vetorRamos, i)
-			perm = perm.concat(aux)
-			aux = [];
-		}
-		if (numNos < 6 && numNos > 3) {
-			for (i = 4; i <= numNos; i++) {
-				aux = permutationsWithRepetition(i, vetorRamos)
-				perm = perm.concat(aux)
-				aux = [];
-			}
-		} else if (numNos >= 6) {
-			for (i = 4; i < 6; i++) {
-				aux = permutationsWithRepetition(i, vetorRamos)
-				perm = perm.concat(aux)
-				aux = [];
-			}
-			for (i = 4; i <= 5; i++) {
-				aux = permutationsWithRepetition(i, arrBranchesWithoutCurrentSources)
-				perm = perm.concat(aux)
-				aux = [];
-			}
-		}
-	}
-
-	//___________________________________________________________//
-	//__________________FILTRAR AMPERIMETROS_____________________//
-	ammeterFilter();
-
-	function ammeterFilter() {
-		var i = 0;
-		var k = 0;
-		var ampIndex; // Guardar linha em que se encontra o amperimetro
-		var nodeToRemove; // Guardar nó a remover da matriz
-		var nodeToSub; // Guardar nó a substituir noutro componente da matriz
-		var coluna_nos = 1; // Alterará entre o valor 1 e 2 (colunas da matriz com os nos existentes)
-		var vetor_remove = [];
-		var indice_vetor_remove = 0;
-		for (i = 0; i < matriz[3].length; i++) {
-			if (matriz[3][i] == "AMP") {
-				ampIndex = i;
-				if (matriz[1][i] != "gnd" && matriz[1][i].includes("_net") == false) {
-					nodeToRemove = matriz[1][i];
-					nodeToSub = matriz[2][i];
-				} else if (matriz[2][i].includes("_net") == true) {
-					nodeToRemove = matriz[2][i];
-					nodeToSub = matriz[1][i];
-				} else if (matriz[1][i].includes("_net") == true) {
-					nodeToRemove = matriz[1][i];
-					nodeToSub = matriz[2][i];
-				}
-				for (coluna_nos = 1; coluna_nos < 3; coluna_nos++) {
-					while ((k < matriz[coluna_nos].length)) {
-						if ((matriz[coluna_nos][k] == nodeToRemove) && (k != ampIndex)) {
-							matriz[coluna_nos][k] = nodeToSub;
-						}
-						k++;
-					}
-					k = 0;
-				}
-				vetor_remove[indice_vetor_remove] = i;
-				indice_vetor_remove++;
-			}
-		}
-		var m = 0;
-		var indice_removidos = vetor_remove[m];
-		for (m = 0; m < vetor_remove.length; m++) {
-			matriz[0].splice(indice_removidos, 1);
-			matriz[1].splice(indice_removidos, 1);
-			matriz[2].splice(indice_removidos, 1);
-			matriz[3].splice(indice_removidos, 1);
-		}
-	}
-	console.table(matriz)
-	//___________________________________________________________//
-	//_____________________CALCULAR NOS__________________________//
-	var vetor_nos = [];
-	var vetor_ocorrencias = [];
-	var num_nos = 0;
-	var vetor_nos_reais = [];
-	var vetor_nos_virtuais = [];
-	var flagError = 0;
-	var flagMissGND = 0;
-	var errorStr = `Erros de identificação:\n`
-	console.table(matriz)
-	calcular_ocorrencia_de_nos();
-
-	function calcular_ocorrencia_de_nos() {
-		var n = 1;
-		var i = 0;
-		var nos_detetados = [];
-		var nos_ocorrencias = new Array(150).fill(0);
-		for (n = 1; n < 3; n++) {
-			var linha_matriz = 0;
-			var no_ja_existente = 0;
-			while (linha_matriz < matriz[n].length) {
-				for (i = 0; i < nos_detetados.length; i++) {
-					if (matriz[n][linha_matriz] == nos_detetados[i]) {
-						nos_ocorrencias[i] += 1;
-						no_ja_existente = 1;
-					}
-				}
-				if (no_ja_existente == 1) {
-					no_ja_existente = 0;
-					linha_matriz++;
-				} else {
-					nos_detetados[nos_detetados.length] = matriz[n][linha_matriz];
-					nos_ocorrencias[nos_detetados.length] += 1;
-					linha_matriz++;
-				}
-			}
-		}
-		var m = 0;
-		while (nos_ocorrencias[m] != 0) {
-			m++;
-		}
-		nos_ocorrencias[0] = nos_ocorrencias[0] + nos_ocorrencias[m - 1];
-		nos_ocorrencias[m - 1] = 0;
-		m = 0;
-		while (nos_ocorrencias[m] != 0) {
-			vetor_ocorrencias[m] = nos_ocorrencias[m];
-			m++;
-		}
-		vetor_nos = nos_detetados;
-		calcular_nos_reais();
-	}
-
-	function calcular_nos_reais() {
-		var i = 0;
-		var real_cnt = 0;
-		var virt_cnt = 0;
-		while (i < vetor_ocorrencias.length) {
-			if (vetor_ocorrencias[i] > 2) {
-				vetor_nos_reais[real_cnt] = vetor_nos[i];
-				real_cnt++;
-			}
-			if (vetor_ocorrencias[i] < 3) {
-				vetor_nos_virtuais[virt_cnt] = vetor_nos[i];
-				virt_cnt++;
-			}
-			i++;
-		}
-		for (let k in vetor_nos_reais) {
-			if (vetor_nos_reais[k].includes("_net") == true) {
-				flagError = 1;
-				errorStr += `Nó ${vetor_nos_reais[k]} mal identificado!\n`
-			}
-			if (vetor_nos_reais[k].includes("gnd") == true) {
-				flagMissGND = 1;
-			}
-		}
-		for (let k = 0; k < vetor_nos_virtuais.length; k++) {
-			if (vetor_nos_virtuais[k].includes("gnd") == true) {
-				flagMissGND = 1;
-			}
-		}
-		num_nos = vetor_nos_reais.length;
-		if (num_nos == 0) {
-			flagError = 1;
-			errorStr += `O circuito só tem uma malha possível!\n`
-		}
-		if (flagMissGND == 0) {
-			flagError = 1
-			errorStr += `Massa não identificada!\n`
-		}
-		if (flagError == 1) {
-			errorStr += "\nProcedimentos:\n1) Fazer refresh da página\n2) Corrigir circuito\n3) Submeter novo ficheiro"
-			alert(errorStr)
-		}
-	}
-
-	function validar_no(pos) {
-		var i = 0;
-		while (i < vetor_nos_reais.length) {
-			if (vetor_nos_reais[i] == pos) {
-				return 1;
-			}
-			i++;
-		}
-		return 0;
-		//Retorna 1 se a posição recebida corresponder a um nó real
-		//Retorna 0 se a posiçao recebida corresponder a um ponto intermedio de um qualquer ramo
-	}
-	//___________________________________________________________//
-	//_____________________CALCULAR RAMOS________________________//
-	var linhas_matriz = matriz[0].length;
-	//var colunas_matriz = matriz.length; // Sempre "4"
-	var ramos_comp = [];
-	var ramos_coord = [];
-	var branchesAbsoluteCoord = []
-	var arrCurrentSourcesBranches = []
-	var arrCurrentSourcesLines = []
-	var num_CurrentSources = 0
-	var num_componentes = 0;
-	var num_ramos = 0;
-	calcular_ramos();
-
-	function calcular_ramos() {
-		var i = 0;
-		var no_inicial = "";
-		var comp_analizados = [];
-		var num_comp_analizados = 0;
-		var coluna = 1;
-		var linha = 0;
-		var vetor_aux = [];
-		while (i < 10) {
-			linha = 0;
-			coluna = trocar_coluna(coluna);
-			while (linha < linhas_matriz) {
-				if ((validar_no(matriz[coluna][linha]) == 1) && (comp_analizados.indexOf(linha) == -1)) {
-					num_componentes = 0;
-					ramos_comp[num_ramos] = [];
-					ramos_comp[num_ramos][num_componentes] = linha;
-					if (matriz[0][linha].includes("I") == true) {
-						arrCurrentSourcesBranches.push(num_ramos)
-					}
-					ramos_coord[num_ramos] = [];
-					ramos_coord[num_ramos][0] = matriz[coluna][linha];
-					branchesAbsoluteCoord[num_ramos] = [];
-					branchesAbsoluteCoord[num_ramos].push(matriz[coluna][linha])
-					if (coluna == 1) {
-						branchesAbsoluteCoord[num_ramos].push(matriz[2][linha])
-					} else {
-						branchesAbsoluteCoord[num_ramos].push(matriz[1][linha])
-					}
-					num_componentes++;
-					coluna = trocar_coluna(coluna);
-					comp_analizados[num_comp_analizados] = linha;
-					num_comp_analizados++;
-					while ((validar_no(matriz[coluna][linha]) != 1)) {
-						no_inicial = matriz[coluna][linha];
-						vetor_aux = encontrar_ponto_comum(no_inicial, comp_analizados);
-						coluna = vetor_aux[1];
-						linha = vetor_aux[0];
-						ramos_comp[num_ramos][num_componentes] = linha;
-						num_componentes++;
-						if (matriz[0][linha].includes("I") == true) {
-							arrCurrentSourcesBranches.push(num_ramos)
-						}
-						branchesAbsoluteCoord[num_ramos].push(matriz[coluna][linha])
-						if (coluna == 1) {
-							branchesAbsoluteCoord[num_ramos].push(matriz[2][linha])
-						} else {
-							branchesAbsoluteCoord[num_ramos].push(matriz[1][linha])
-						}
-						comp_analizados[num_comp_analizados] = vetor_aux[0];
-						num_comp_analizados++;
-						coluna = trocar_coluna(coluna);
-					}
-					ramos_coord[num_ramos][1] = matriz[coluna][linha];
-					num_ramos++;
-				}
-				linha++;
-			}
-			i++;
-		}
-		num_CurrentSources = arrCurrentSourcesBranches.length
-		return num_ramos;
-	}
-	currentLineCapture();
-
-	function currentLineCapture() {
-		for (let i = 0; i < matriz[0].length; i++) {
-			let linha = i;
-			if (matriz[0][linha].includes("I") == true) {
-				arrCurrentSourcesLines.push(linha)
-			}
-		}
-	}
-	//___________________________________________________________//
-	//____________________CALCULAR MALHAS________________________//
-	//------------------------------------------------------//
-	//Cria N vetores com o numero da malha correspondente ao nó//
-	var groupArray = [];
-	agroupBranchesNodes();
-
-	function agroupBranchesNodes() {
-		var i = 0;
-		var j = 0;
-		for (i = 0; i < num_nos; i++) {
-			groupArray[i] = [];
-			for (j = 0; j < num_ramos; j++) {
-				if (ramos_coord[j][0] == vetor_nos_reais[i] || ramos_coord[j][1] == vetor_nos_reais[i]) {
-					groupArray[i].push(j);
-				}
-			}
-		}
-	}
-	var QtdMalhas = 0;
-	QtdMalhas = num_ramos - (num_nos - 1); // - num_CurrentSources;
-	apresenta_ramos();
-
-	function apresenta_ramos() {
-		for (var i = 0; i < ramos_comp.length; i++) {
-			if (ramos_comp[i].length > 1) {
-				if (ramos_comp[i].length == 2) {
-					console.log(ramos_coord[i] + " - Ramo " + i + ":" + matriz[0][ramos_comp[i][0]] + " " + matriz[3][ramos_comp[i][0]] + " | " + matriz[0][ramos_comp[i][1]] + " " + matriz[3][ramos_comp[i][0]])
-				}
-				if (ramos_comp[i].length == 3) {
-					console.log(ramos_coord[i] + " - Ramo " + i + ":" + matriz[0][ramos_comp[i][0]] + " " + matriz[3][ramos_comp[i][0]] + " | " + matriz[0][ramos_comp[i][1]] + " | " + matriz[0][ramos_comp[i][2]] + " " + matriz[3][ramos_comp[i][0]])
-				}
-			} else {
-				console.log(ramos_coord[i] + " - Ramo " + i + ": " + matriz[0][ramos_comp[i][0]] + " " + matriz[3][ramos_comp[i][0]])
-			}
-		}
-	}
-	console.log("")
-	console.log("Número de ramos: " + num_ramos + " || Número de nós: " + num_nos + " || Número de fontes de corrente: " + num_CurrentSources + " || Numero de malhas necessárias: " + QtdMalhas + "|| Nós do circuito: " + vetor_nos_reais)
-	console.log("")
-	//--------------//
-	var mesh = [];
-	var meshForCurrentSources = []
-	var num_malhas = 0;
-	var vetor_ramos_numeros = []
-	numeros_ramos()
-
-	function numeros_ramos() {
-		var i = 0;
-		for (i = 0; i < num_ramos; i++) {
-			vetor_ramos_numeros[i] = i;
-		}
-	}
-	var arrBranchesWithoutCurrentSources = []
-	branchesWithoutCurrentSources()
-
-	function branchesWithoutCurrentSources() {
-		var i = 0;
-		for (i = 0; i < num_ramos; i++) {
-			if (arrCurrentSourcesBranches.includes(i) == false) {
-				arrBranchesWithoutCurrentSources[arrBranchesWithoutCurrentSources.length] = i;
-			}
-		}
-	}
-
-	function nos_do_ramo(ramo) {
-		//função que devolve nós do ramo
-		var nos = [];
-		for (var i = 0; i < groupArray.length; i++) {
-			if (groupArray[i].includes(ramo) === true) {
-				nos = nos + i
-			}
-		}
-		return nos;
-	}
-
-	function teste_1(combinacao) {
-		//verifica se primeiro e último ramo têem 1,2 ou nenhum nó em comum
-		var nos_primeiro; //nos do primeiro ramo
-		nos_primeiro = nos_do_ramo(combinacao[0]); //envia primeiro ramo da malha
-		var nos_ultimo; //nos do ultimo ramo
-		nos_ultimo = nos_do_ramo(combinacao[combinacao.length - 1]); //envia ultimo ramo da malha
-		var numero_nos_comum = 0;
-		if (nos_primeiro.includes(nos_ultimo[0]) === true) {
-			numero_nos_comum += 1;
-		}
-		if (nos_primeiro.includes(nos_ultimo[1]) === true) {
-			numero_nos_comum += 1;
-		}
-		return numero_nos_comum;
-	}
-
-	function intersect(nos_ramo1, nos_ramo2) {
-		if (nos_ramo1.includes(nos_ramo2[0]) === true) {
-			return nos_ramo2[0];
-		}
-		if (nos_ramo1.includes(nos_ramo2[1]) === true) {
-			return nos_ramo2[1];
-		} else return -1;
-	}
-	var todasMalhas = [];
-	var maxPossibleMeshes = todasMalhas.length
-	var perm = [];
-	allCombinations(num_nos, vetor_ramos_numeros)
-	testa_malha(perm);
-
-	function testa_malha() {
-		var nos_comum = [];
-		var nos_caminho = [];
-		var combinacoes = perm
-		var nos_ramo_atual;
-		var nos_ramo_seguinte;
-		var no_comum;
-		for (var i = 0; i < combinacoes.length; i++) {
-			nos_comum = teste_1(combinacoes[i]);
-			if (combinacoes[i].length == 2 && nos_comum == 2 && combinacoes[i][0] != combinacoes[i][1]) {
-				todasMalhas.push(combinacoes[i])
-				/*
-						if (blackList.indexOf(combinacoes[i][0]) == -1 && doNotRepeatBranchesMoreThanTwoTimes(combinacoes[i]) == 1) {
-						mesh[num_malhas] = [];
-						mesh[num_malhas] = combinacoes[i]
-						num_malhas++;
-
-						adicionaGreyList(combinacoes[i])
-						}
-				*/
-			} else {
-				nos_caminho = [];
-				for (var j = 0; j < combinacoes[i].length; j++) {
-					if (j < combinacoes[i].length - 1) //se ainda não tiver chegado ao último nó
-					{
-						nos_ramo_atual = nos_do_ramo(combinacoes[i][j]);
-						nos_ramo_seguinte = nos_do_ramo(combinacoes[i][j + 1]);
-						no_comum = intersect(nos_ramo_atual, nos_ramo_seguinte)
-						if (no_comum === -1) {
-							break;
-						}
-						if (nos_caminho.includes(no_comum) === false) //se não incluir adiciona
-						{
-							if (j > 0) {
-								nos_caminho.push(no_comum)
-							}
-							if (j === 0) {
-								nos_caminho[j + 1] = nos_caminho + no_comum;
-								if (nos_caminho.includes(nos_ramo_atual[0]) === false) {
-									nos_caminho[0] = nos_ramo_atual[0]
-								} else nos_caminho[0] = nos_ramo_atual[1]
-							}
-						} else if (nos_caminho.includes(no_comum) === true) {
-							if (j != combinacoes[i].length - 1) {
+								malhas_flags[j] = 1;
+								let temp;
+								if(branches[i].dcAmpPwSupplies.length != 0) temp = branches[i].dcAmpPwSupplies[0];
+								else temp = branches[i].acAmpPwSupplies[0];
+								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1, temp, null));
+								escolhido = true;
 								break;
 							}
 						}
 					}
-					if (j == combinacoes[i].length - 1) {
-						nos_ramo_atual = nos_do_ramo(combinacoes[i][j]);
-						nos_ramo_seguinte = nos_do_ramo(combinacoes[i][0]);
-						no_comum = intersect(nos_ramo_atual, nos_ramo_seguinte);
-						if (no_comum == nos_caminho[0]) {
-							todasMalhas.push(combinacoes[i])
-						}
-					}
+					if(escolhido) break;
 				}
-			}
-		}
-	}
-	apagar_repetidos();
-
-	function apagar_repetidos() {
-		for (var i = 0; i < todasMalhas.length; i++) {
-			for (var j = 0; j < todasMalhas.length; j++) {
-				var array1 = todasMalhas[i]
-				var array2 = todasMalhas[j]
-				if (i !== j && todasMalhas[i].length > 3 && todasMalhas[j].length > 3 && array1.length === array2.length) {
-					var array11 = array1.slice()
-					var array22 = array2.slice()
-					array11.sort()
-					array22.sort()
-					if (JSON.stringify(array11) === JSON.stringify(array22)) {
-						todasMalhas.splice(j, 1)
-						j--
-					}
-				}
-			}
-		}
-		maxPossibleMeshes = todasMalhas.length
-	}
-	// ----------------------------------------------------------- //
-	// Repetir a operação para garantir a melhor escolha de malhas
-	num_malhas = 0;
-	mesh = [];
-	var meshCurrentSources = [];
-	todasMalhas = []
-	var UsedBranches = []
-	var notUsed = []
-	testa_malha(todasMalhas);
-	apagar_repetidos();
-	filterMeshesWithCurrentSources();
-
-	function filterMeshesWithCurrentSources() {
-		for (var i = todasMalhas.length - 1; i >= 0; --i) {
-			for (var j = 0; j < num_CurrentSources; j++) {
-				if (todasMalhas[i].includes(arrCurrentSourcesBranches[j]) == true) {
-					meshForCurrentSources.push(todasMalhas[i])
-					todasMalhas.splice(i, 1)
-					j = num_CurrentSources
-				}
-			}
-		}
-		meshForCurrentSources.sort(function(a, b) {
-			return a.length - b.length
-		})
-		if (arrCurrentSourcesBranches.length == 1) {
-			var contComp = 0;
-			var meshWithLessComps = 0;
-			for (i = 0; i < meshForCurrentSources.length; i++) {
-				var contAux = 0;
-				for (j = 0; j < meshForCurrentSources[i].length; j++) {
-					var brancheAux = meshForCurrentSources[i][j]
-					contAux += ramos_comp[brancheAux].length
-				}
-				if (i !== 0) {
-					if (contAux < contComp) {
-						contComp = contAux;
-						meshWithLessComps = i;
-					}
-				} else {
-					contComp = contAux;
-					meshWithLessComps = i
-				}
-			}
-			meshForCurrentSources.splice(0, 0, meshForCurrentSources[meshWithLessComps])
-			meshForCurrentSources.splice(1, meshForCurrentSources.length - 1)
-		}
-	}
-	if (num_CurrentSources < QtdMalhas) {
-		if (QtdMalhas == 2 && num_CurrentSources > 0) {
-			mesh = []
-			mesh.push(todasMalhas[0])
-		} else {
-			chooseMeshes();
+			}			
 		}
 	}
 
-	function chooseMeshes() {
-		mesh = []
-		todasMalhas.reverse();
-		console.log(todasMalhas.length)
-		for (var i = 0; i < num_ramos; i++) {
-			for (var j = todasMalhas.length - 1; j >= 0; j--) {
-				if (todasMalhas[j].includes(i) == true) {
-					//console.log(todasMalhas[j],i,mesh.length)
-					mesh.push(todasMalhas[j])
-					todasMalhas.splice(j, 1)
+	//inutilizar as restantes malhas com ramos com fontes de corrente
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas_flags[i] == 0){
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1){
+					malhas_flags[i] = -1;
 					break;
 				}
 			}
 		}
-		console.log(mesh, " Mesh LENGTH:", mesh.length, " || QTD:", QtdMalhas)
-		var flag_todos_ramos = 0;
-		var flagFiveChoices = 0;
-		var maxAt = 0;
-		var longestMeshes = [];
-		var tempMeshes = [];
-		var flagImpossible = 0;
-		while (flag_todos_ramos == 0 || flagImpossible !== 30) {
-			var meshAux = mesh.slice()
-			shuffle(meshAux)
-			meshAux.splice(QtdMalhas, meshAux.length - QtdMalhas)
-			if (allBranchesUsed(meshAux) == 1) {
-				flagFiveChoices++;
-				let auxa = 0
-				for (let inter in mesh) {
-					auxa += mesh[inter].length
-				}
-				longestMeshes.push(auxa)
-				tempMeshes.push(meshAux)
-				if (flagFiveChoices == 5) {
-					for (let i = 0; i < longestMeshes.length; i++) {
-						maxAt = longestMeshes[i] > longestMeshes[maxAt] ? i : maxAt;
-					}
-					mesh = tempMeshes[maxAt]
-					num_malhas = mesh.length
-					flag_todos_ramos = 1
-				}
-			} else {
-				flag_todos_ramos = 0
-			}
-			flagImpossible++;
-		}
-		if (flagImpossible == 20) {
-			document.write("Impossível gerar malhas!")
-		}
 	}
 
-	function allBranchesUsed(mesh) {
-		UsedBranches = []
-		notUsed = []
-		for (var i = 0; i < mesh.length; i++) {
-			for (var j = 0; j < mesh[i].length; j++) {
-				if (UsedBranches.includes(mesh[i][j]) == false) {
-					UsedBranches.push(mesh[i][j])
-					//document.write("Mesh legnth:",mesh.length,QtdMalhas,"||",mesh[0],"||",mesh[1],"||",mesh[2],"||",mesh[3],"||",mesh[4],"||",mesh[5])
+	//Escolher o número de malhas principais
+	let count = 0;
+	let add = false;
+	let index = 0;
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas_flags[i] == 0){
+			add = false;
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_flags[malhas[i][j]-1] == 0){ //contem ramo novo
+					add = true;
 				}
 			}
-		}
-		for (var k = 0; k < num_ramos; k++) {
-			if (UsedBranches.includes(k) == false) {
-				if (arrCurrentSourcesBranches.includes(k) == false) {
-					notUsed.push(k)
-				}
+			if(add){
+				for(let j = 0; j < malhas[i].length; j++){
+					ramos_flags[malhas[i][j]-1] = 1;
+				}				
+				malhas_flags[i] = 1;
+				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null, substitutions.charAt(index)));
+				index++;
+				count++;
+			}
+			else{
+				malhas_flags[i] = 2;
 			}
 		}
-		verifyMeshesCompability()
-		if (notUsed.length == 0) {
-			return 1
-		} else {
-			return -1
+		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
+	}
+	if(count < nr_malhas_principais){	//malhas em falta
+		let count2 = 0;
+		for(let c = 0; c < ramos_flags.length; c++){
+			if(ramos_flags[c] == 1)	 count2++;
+		}
+		if(count2 == ramos_flags.length){ //ramos todos ocupados e malhas em falta
+			let count3 = 0;
+			for(let c = 0; c < malhas.length; c++){
+				if(malhas_flags[c] == 2){
+					malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[c], -1, [], substitutions.charAt(index)));
+					index++;
+					count3++;
+				}
+				if(count3 == nr_malhas_principais-count) break;
+			}
 		}
 	}
+	return{
+		first: false,
+		second: 0,
+		third: malhas_escolhidas
+	};
+}
 
-	function verifyMeshesCompability() {
-		for (var i = 0; i < mesh.length; i++) {
-			var branchesUsedAux = []
-			var flag_notUsed = 0
-			for (var aux = 0; aux < mesh.length; aux++) {
-				if (i !== aux) {
-					//branchesUsedAux.push(...mesh[aux])
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					for (var run = 0; run < mesh[aux].length; run++) {
-						branchesUsedAux.push(mesh[aux][run])
-					}
-				}
+/**
+ * Determines if a component is in the same way of his branch
+ * @param {Array} componente component to determine
+ * @param {Int} ramo branch
+ * @param {Array} componentesRamo list of components in that branch
+ * @returns boolean, true if adjacent
+ */
+function sameDirection(componente, ramo, componentesRamo){
+	let aux = componente.noP;
+	do{
+		if(aux.search("_net") == -1){		//o nó é real
+			if(aux == branches[ramo-1].endNode                    ){	//o sentido é o mesmo do ramo
+				return true;
 			}
-			for (var k = 0; k < mesh[i].length; k++) {
-				if (branchesUsedAux.includes(mesh[i][k]) == false) {
-					flag_notUsed++
-				} else if (branchesUsedAux.includes(mesh[i][k]) == true) {
+			else{												//o sentido é contrário ao do ramo
+				return false;
+			}
+		}
+		else{												//o nó é virtual, procurar próximo componente
+			for(let i = 0; i < componentesRamo.length; i++){
+				if(componentesRamo[i].noP == aux){
+					aux = componentesRamo[i].noN;
 					break;
 				}
-			}
-			if (flag_notUsed == mesh[i].length) {
-				chooseMeshes();
-			}
-		}
-	}
-
-	function shuffle(array) {
-		var currentIndex = array.length,
-			temporaryValue, randomIndex;
-		// Enquanto há elementos por fazer shuffle...
-		while (0 !== currentIndex) {
-			// Seleciona-se um elemento não processado aleatóriamente...
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex -= 1;
-			// E troca-se pela elemento atual.
-			temporaryValue = array[currentIndex];
-			array[currentIndex] = array[randomIndex];
-			array[randomIndex] = temporaryValue;
-		}
-		return array;
-	}
-	addCurrentSourceMeshes();
-
-	function addCurrentSourceMeshes() {
-		for (var i = 0; i < num_CurrentSources; i++) {
-			for (var j = 0; j < num_CurrentSources; j++) {
-				if (meshForCurrentSources[i].includes(arrCurrentSourcesBranches[j]) == true) {
-					var tam = meshCurrentSources.length
-					console.log("1 - " + meshCurrentSources)
-					meshCurrentSources.splice(tam, 0, meshForCurrentSources[i])
-					console.log("2 - " + meshCurrentSources)
-				}
-			}
-		}
-		tam = meshCurrentSources.length
-		for (i = 0; i < tam; i++) {
-			mesh.splice(i, 0, meshCurrentSources[i])
-		}
-	}
-	//console.log("Numero de possiveis malhas no circuito: ", todasMalhas.length, todasMalhas)
-	//console.log("Malhas:", mesh)
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	var meshComps = []
-	var compOnMeshesArr = []
-	var current = [];
-	var current_path = [];
-	var current_path_without_duplicates = []
-	var currentWithoutNet = []
-	criar_correntes_para_malhas();
-
-	function criar_correntes_para_malhas() {
-		for (var i = 0; i < QtdMalhas; i++) {
-			current.push("i" + i)
-		}
-	}
-	criar_sentidos_para_correntes();
-
-	function criar_sentidos_para_correntes() {
-		for (var i = 0; i < current.length; i++) {
-			current_path[i] = [];
-			meshComps[i] = []
-			for (var j = 0; j < mesh[i].length; j++) {
-				var ramo_auxilio = mesh[i][j];
-				//console.log(ramos_comp[ramo_auxilio])
-				var ramo_caminho = branchesAbsoluteCoord[ramo_auxilio]
-				var ramo_comp = ramos_comp[ramo_auxilio]
-				var auxRev = ramo_caminho.slice()
-				auxRev.reverse()
-				var auxRevComp = ramo_comp.slice()
-				auxRevComp.reverse()
-				if (j == 0) {
-					for (var run = 0; run < ramo_caminho.length; run++) {
-						current_path[i].push(ramo_caminho[run])
-					}
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					//current_path[i].push(...ramo_caminho)
-					if (matriz[1][ramo_comp[0]] == current_path[i][0] || matriz[2][ramo_comp[0]] == current_path[i][0]) {
-						//meshComps[i].push(...ramo_comp)
-						for (run = 0; run < ramo_comp.length; run++) {
-							meshComps[i].push(ramo_comp[run])
-						}
-					} else {
-						//meshComps[i].push(...auxRevComp)
-						for (run = 0; run < auxRevComp.length; run++) {
-							meshComps[i].push(auxRevComp[run])
-						}
-					}
-				}
-				if (j != 0) {
-					if (ramo_caminho[0] == current_path[i][current_path[i].length - 1]) {
-						//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-						//current_path[i].push(...ramo_caminho)
-						//meshComps[i].push(...ramo_comp)
-						for (run = 0; run < ramo_caminho.length; run++) {
-							current_path[i].push(ramo_caminho[run])
-						}
-						for (run = 0; run < ramo_comp.length; run++) {
-							meshComps[i].push(ramo_comp[run])
-						}
-					} else if (ramo_caminho[ramo_caminho.length - 1] == current_path[i][current_path[i].length - 1]) {
-						//current_path[i].push(...auxRev)
-						//meshComps[i].push(...auxRevComp)
-						for (run = 0; run < auxRev.length; run++) {
-							current_path[i].push(auxRev[run])
-						}
-						for (run = 0; run < auxRevComp.length; run++) {
-							meshComps[i].push(auxRevComp[run])
-						}
-					} else {
-						//Se a ordem do primeiro ramo não é compativel com a ordem da malha
-						var path_rev = current_path[i].slice()
-						path_rev.reverse()
-						current_path[i] = path_rev
-						var comp_rev = meshComps[i].slice()
-						comp_rev.reverse()
-						meshComps[i] = comp_rev
-						if (ramo_caminho[0] == current_path[i][current_path[i].length - 1]) {
-							for (run = 0; run < ramo_caminho.length; run++) {
-								current_path[i].push(ramo_caminho[run])
-							}
-							for (run = 0; run < ramo_comp.length; run++) {
-								meshComps[i].push(ramo_comp[run])
-							}
-							//current_path[i].push(...ramo_caminho)
-							//meshComps[i].push(...ramo_comp)
-						} else if (ramo_caminho[ramo_caminho.length - 1] == current_path[i][current_path[i].length - 1]) {
-							for (run = 0; run < auxRev.length; run++) {
-								current_path[i].push(auxRev[run])
-							}
-							for (run = 0; run < auxRevComp.length; run++) {
-								meshComps[i].push(auxRevComp[run])
-							}
-							//current_path[i].push(...auxRev)
-							//meshComps[i].push(...auxRevComp)
-						}
-					}
-				}
-			}
-		}
-		for (var k = 0; k < current_path.length; k++) {
-			current_path_without_duplicates[k] = remove_duplicates_es6(current_path[k])
-		}
-		currentWithoutNet = current_path_without_duplicates.slice()
-		for (var m = 0; m < currentWithoutNet.length; m++) {
-			for (var p = currentWithoutNet[m].length - 1; p >= 0; p--) {
-				if (currentWithoutNet[m][p].includes("_net") == true) {
-					currentWithoutNet[m].splice(p, 1)
-				}
-			}
-		}
-	}
-
-	function remove_duplicates_es6(arr) {
-		var s = new Set(arr);
-		var it = s.values();
-		return Array.from(it);
-	}
-
-	function componentOrderFix(meshID) {
-		var comp = []
-		compOnMeshesArr[meshID] = []
-		for (var i = 0; i < meshComps[meshID].length; i++) {
-			comp.push(matriz[0][meshComps[meshID][i]])
-			compOnMeshesArr[meshID].push(matriz[0][meshComps[meshID][i]])
-		}
-		return comp
-	}
-	for (var correr_caminho = 0; correr_caminho < current_path.length; correr_caminho++) {
-		componentOrderFix(correr_caminho)
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// --CONVERT CURRENT AND REATANCES TO LATEX FORM (ADD INDEX)-- //
-	var voltSourceIndex = []
-	var currSourceIndex = []
-	var capacitorIndex = []
-	var coilIndex = []
-	criar_correntes_index();
-	addCapacitorAndCoilIndex();
-
-	function criar_correntes_index() {
-		for (var i = 0; i < QtdMalhas; i++) {
-			currSourceIndex.push("I_\{" + i + i + "\}")
-		}
-	}
-
-	function addCapacitorAndCoilIndex() {
-		for (var i = 0; i < Qtd_capacitors; i++) {
-			capacitorIndex.push("\\underline{Z}_\{" + Capacitors[i] + "\}")
-		}
-		for (i = 0; i < Qtd_coils; i++) {
-			coilIndex.push("\\underline{Z}_\{" + Coils[i] + "\}")
-		}
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// -----------------Sentido Fontes de Corrente------------------ //
-	var currentSourcePolarity = []
-	defineCurrentSourcePolarity();
-	checkIfCurrentMeshPolarityIsEqualToCurrentSourcePolarity();
-
-	function defineCurrentSourcePolarity() {
-		for (var i = 0; i < matriz[0].length; i++) {
-			if (matriz[0][i].includes("I") === true) {
-				var currentAux = []
-				currentAux.push(matriz[0][i])
-				currentAux.push(matriz[2][i])
-				currentAux.push(matriz[1][i])
-				currentAux.push(i)
-				currentSourcePolarity.push(currentAux)
-			}
-		}
-	}
-
-	function checkIfCurrentMeshPolarityIsEqualToCurrentSourcePolarity() {
-		for (var i = 0; i < currentSourcePolarity.length; i++) {
-			var auxPosSource = meshComps[i].indexOf(currentSourcePolarity[i][3])
-			var auxPosIni = 2 * auxPosSource
-			var auxPosFin = auxPosIni + 1
-			if (current_path[i][auxPosIni] == currentSourcePolarity[i][2] && current_path[i][auxPosFin] == currentSourcePolarity[i][1]) {
-				mesh[i].reverse()
-				current_path[i].reverse()
-				currentWithoutNet[i].reverse()
-				meshComps[i].reverse()
-				compOnMeshesArr[i].reverse()
-			}
-		}
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// -----------------Sentido Fontes de tensão------------------ //
-	var voltageSourcePolarity = []
-	defineVoltageSourcePolarity();
-
-	function defineVoltageSourcePolarity() {
-		for (var i = 0; i < matriz[0].length; i++) {
-			if (matriz[0][i].includes("V") === true) {
-				var voltageAux = []
-				voltageAux.push(matriz[0][i])
-				voltageAux.push(matriz[2][i])
-				voltageAux.push(matriz[1][i])
-				voltageAux.push(i)
-				voltageSourcePolarity.push(voltageAux)
-			}
-		}
-	}
-
-	function defineVoltageSourcePolarityInMeshes(i, n) {
-		var str = ""
-		var strWithVoltageValue = ""
-		for (var j = 0; j < voltageSourcePolarity.length; j++) {
-			if (meshComps[i].includes(voltageSourcePolarity[j][3]) === true) {
-				var auxPos = current_path[i].indexOf(voltageSourcePolarity[j][1])
-				var auxPosInv = current_path[i].indexOf(voltageSourcePolarity[j][2])
-				if ((current_path[i][auxPos] == voltageSourcePolarity[j][1] && current_path[i][auxPos + 1] == voltageSourcePolarity[j][2]) || (current_path[i][auxPos + 1] == voltageSourcePolarity[j][1] && current_path[i][auxPos + 2] == voltageSourcePolarity[j][2])) {
-					if (str < 1) {
-						str += voltageSourcePolarity[j][0]
-						strWithVoltageValue += matriz[3][voltageSourcePolarity[j][3]]
-					} else {
-						str += " + " + voltageSourcePolarity[j][0]
-						strWithVoltageValue += " + " + matriz[3][voltageSourcePolarity[j][3]]
-					}
-				} else if ((current_path[i][auxPosInv] == voltageSourcePolarity[j][2] && current_path[i][auxPosInv + 1] == voltageSourcePolarity[j][1]) || (current_path[i][auxPosInv + 1] == voltageSourcePolarity[j][2] && current_path[i][auxPosInv + 2] == voltageSourcePolarity[j][1])) {
-					str += " - " + voltageSourcePolarity[j][0]
-					strWithVoltageValue += " - " + matriz[3][voltageSourcePolarity[j][3]]
-				}
-			}
-			if (j == voltageSourcePolarity.length - 1) {
-				if (str < 1) {
-					str += "0"
-					strWithVoltageValue += "0"
-				}
-			}
-		}
-		var arr = [str, strWithVoltageValue]
-		return arr[n]
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// ---------Sentido Correntes Comuns em Resistencias---------- //
-	function defineCurrentFlowInResistances(i, n) {
-		var str = ""
-		var strWithOhmValues = ""
-		var flagNotUnique = 0;
-		for (var k = 0; k < meshComps[i].length; k++) {
-			var component = meshComps[i][k]
-			var auxRes = matriz[0][component]
-			var auxOhmValue = matriz[3][component]
-			if (auxRes.includes("R") === true) {
-				var moreThanTwo = 0
-				for (var j = 0; j < meshComps.length; j++) {
-					if (i !== j) {
-						if (meshComps[j].includes(component) === true) {
-							if (moreThanTwo == 0) {
-								if (str.length < 2) {
-									str += auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += auxOhmValue + " * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									//console.log(matriz[0][component],j,str.length)
-									str += " + " + auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component)
-									strWithOhmValues += " + " + auxOhmValue + " * ( " + current[i] + compWithDefinedPath(i, j, component)
-								}
-								flagNotUnique = 1
-								moreThanTwo++
-							} else {
-								if (str[str.length - 2] === ')') {
-									str = str.slice(0, str.length - 2)
-									strWithOhmValues = strWithOhmValues.slice(0, strWithOhmValues.length - 2)
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								}
-							}
-						}
-					}
-					if (str[str.length - 2] !== ')') {
-						if (str[str.length - 2] == "i") {
-							str += " ) "
-							strWithOhmValues += " ) "
-						}
-					}
-				}
-				if (flagNotUnique == 0) {
-					if (str.length < 2) {
-						str += auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += auxOhmValue + " * ( " + current[i] + " ) "
-					} else {
-						str += " + " + auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += " + " + auxOhmValue + " * ( " + current[i] + " ) "
-					}
-				}
-			}
-			flagNotUnique = 0
-		}
-		for (k = 0; k < currentSourcePolarity.length; k++) {
-			//console.log("1 - String with Ohm Values: ",strWithOhmValues,current[k])
-			str = replaceAll(str, current[k], matriz[3][currentSourcePolarity[k][3]])
-			strWithOhmValues = replaceAll(strWithOhmValues, current[k], matriz[3][currentSourcePolarity[k][3]])
-			//console.log("2 - String with Ohm Values: ",strWithOhmValues)
-		}
-		var arr = [str, strWithOhmValues]
-		return arr[n]
-	}
-
-	function escapeRegExp(str) {
-		return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-	}
-
-	function replaceAll(str, find, replace) {
-		return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-	}
-
-	function compWithDefinedPath(mesh1, mesh2, component) {
-		var str = ""
-		var auxPosComp = meshComps[mesh1].indexOf(component)
-		var auxPosComp_mesh2 = meshComps[mesh2].indexOf(component)
-		var auxPosIni = 2 * auxPosComp
-		var auxPosIni_mesh2 = 2 * auxPosComp_mesh2
-		var posIniString = current_path[mesh1][auxPosIni]
-		var posIniString_mesh2 = current_path[mesh2][auxPosIni_mesh2]
-		if (posIniString !== posIniString_mesh2) {
-			str += " - " + current[mesh2]
-		} else if (posIniString === posIniString_mesh2) {
-			str += " + " + current[mesh2]
-		}
-		//console.log("Malha",mesh1,":",posIniString,posFinString)
-		//console.log("Malha",mesh2,":",posIniString_mesh2,posFinString_mesh2)
-		return str
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// ----------COMMON CURRENT FLOW IN CAPACITORS---------------- //
-	function defineCurrentFlowInCapacitors(i, n) {
-		var str = ""
-		var strWithOhmValues = ""
-		var flagNotUnique = 0;
-		for (var k = 0; k < meshComps[i].length; k++) {
-			var component = meshComps[i][k]
-			var auxRes = matriz[0][component]
-			var auxOhmValue = matriz[3][component]
-			if (auxRes.includes("C") === true) {
-				let twoPiFreqCap = (2 * Math.PI * circuitFreq * auxOhmValue);
-				twoPiFreqCap = twoPiFreqCap.toExponential(3);
-				console.log(`Constante Cap -> ${twoPiFreqCap}`)
-				var moreThanTwo = 0
-				for (var j = 0; j < meshComps.length; j++) {
-					if (i !== j) {
-						if (meshComps[j].includes(component) === true) {
-							if (moreThanTwo == 0) {
-								if (str.length < 2) {
-									str += auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += "( 1 / ( j * " + twoPiFreqCap + ")) * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									//console.log(matriz[0][component],j,str.length)
-									str += " + " + auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component)
-									strWithOhmValues += " + ( 1 / ( j * " + twoPiFreqCap + ")) * ( " + current[i] + compWithDefinedPath(i, j, component)
-								}
-								flagNotUnique = 1
-								moreThanTwo++
-							} else {
-								if (str[str.length - 2] === ')') {
-									str = str.slice(0, str.length - 2)
-									strWithOhmValues = strWithOhmValues.slice(0, strWithOhmValues.length - 2)
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								}
-							}
-						}
-					}
-					if (str[str.length - 2] !== ')') {
-						if (str[str.length - 2] == "i") {
-							str += " ) "
-							strWithOhmValues += " ) "
-						}
-					}
-				}
-				if (flagNotUnique == 0) {
-					if (str.length < 2) {
-						str += auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += "( 1 / ( j * " + twoPiFreqCap + ")) * ( " + current[i] + " ) "
-					} else {
-						str += " + " + auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += " + ( 1 / ( j * " + twoPiFreqCap + ")) * ( " + current[i] + " ) "
-					}
-				}
-			}
-			flagNotUnique = 0
-		}
-		for (k = 0; k < currentSourcePolarity.length; k++) {
-			//console.log("1 - String with Ohm Values: ",strWithOhmValues,current[k])
-			str = replaceAll(str, current[k], matriz[3][currentSourcePolarity[k][3]])
-			strWithOhmValues = replaceAll(strWithOhmValues, current[k], matriz[3][currentSourcePolarity[k][3]])
-			//console.log("2 - String with Ohm Values: ",strWithOhmValues)
-		}
-		//strWithOhmValues = replaceAll(strWithOhmValues, "j", "sqrt(-1)")
-		var arr = [str, strWithOhmValues]
-		return arr[n]
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// ---------------COMMON COILS CURRENT FLOW------------------- //
-	function defineCurrentFlowInCoils(i, n) {
-		var str = ""
-		var strWithOhmValues = ""
-		var flagNotUnique = 0;
-		for (var k = 0; k < meshComps[i].length; k++) {
-			var component = meshComps[i][k]
-			var auxRes = matriz[0][component]
-			var auxOhmValue = matriz[3][component]
-			if (auxRes.includes("L") === true) {
-				let twoPiFreqCap = (2 * Math.PI * circuitFreq * auxOhmValue);
-				twoPiFreqCap = twoPiFreqCap.toExponential(3);
-				console.log(`Constante Hen -> ${twoPiFreqCap}`)
-				var moreThanTwo = 0
-				for (var j = 0; j < meshComps.length; j++) {
-					if (i !== j) {
-						if (meshComps[j].includes(component) === true) {
-							if (moreThanTwo == 0) {
-								if (str.length < 2) {
-									str += auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += twoPiFreqCap + " * j * ( " + current[i] + compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									//console.log(matriz[0][component],j,str.length)
-									str += " + " + auxRes + " * ( " + current[i] + compWithDefinedPath(i, j, component)
-									strWithOhmValues += " + " + twoPiFreqCap + " * j * ( " + current[i] + compWithDefinedPath(i, j, component)
-								}
-								flagNotUnique = 1
-								moreThanTwo++
-							} else {
-								if (str[str.length - 2] === ')') {
-									str = str.slice(0, str.length - 2)
-									strWithOhmValues = strWithOhmValues.slice(0, strWithOhmValues.length - 2)
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								} else {
-									str += compWithDefinedPath(i, j, component) + " ) "
-									strWithOhmValues += compWithDefinedPath(i, j, component) + " ) "
-								}
-							}
-						}
-					}
-					if (str[str.length - 2] !== ')') {
-						if (str[str.length - 2] == "i") {
-							str += " ) "
-							strWithOhmValues += " ) "
-						}
-					}
-				}
-				if (flagNotUnique == 0) {
-					if (str.length < 2) {
-						str += auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += twoPiFreqCap + " * j * ( " + current[i] + " ) "
-					} else {
-						str += " + " + auxRes + " * ( " + current[i] + " ) "
-						strWithOhmValues += " + " + twoPiFreqCap + " * j * ( " + current[i] + " ) "
-					}
-				}
-			}
-			flagNotUnique = 0
-		}
-		for (k = 0; k < currentSourcePolarity.length; k++) {
-			//console.log("1 - String with Ohm Values: ",strWithOhmValues,current[k])
-			strWithOhmValues = replaceAll(strWithOhmValues, current[k], matriz[3][currentSourcePolarity[k][3]])
-			//console.log("2 - String with Ohm Values: ",strWithOhmValues)
-		}
-		//strWithOhmValues = replaceAll(strWithOhmValues, "j", "sqrt(-1)")
-		var arr = [str, strWithOhmValues]
-		console.log(`CurrentCoil -> ${arr}`)
-		return arr[n]
-	}
-	// ----------------------------------------------------------- //
-	// ----------------------------------------------------------- //
-	// -----------------Equações das Malhas----------------------- //
-	var equationsArr = []
-	var string_final = ""
-
-	function meshesEquations() {
-		var str = ""
-		var strEqu = ""
-		var LaTex = ""
-		var rn = 0
-		str += '<div class="card col-md-12 align-content-center align-items-center"><div class="card-body"><h5 class="text-center font-weight-bold text-dark">Determina&ccedil;&atilde;o das vari&aacute;veis fundamentais do circuito (para o MCM)</h5>';
-		if (fileContents[0]) { str += '<div class="text-center"><img class="img-max mx-auto d-block" src='+fileContents[0]+'></div>' };
-		str += '<h6 class="font-weight-bold text-dark">1. Fundamental variables of the circuit</h6>';
-		str += '<p>Ramos (R): ' + num_ramos + '  |  N&oacute;s (N): ' + num_nos + '  |  Fontes de Corrente (FC): ' + num_CurrentSources + ' </p>';
-		str += "<p>Existem " + maxPossibleMeshes + " combina&ccedil;&otilde;es de Malhas poss&iacute;veis no circuito.</p>"
-		str += "<p>S&atilde;o necess&aacute;rias:<ul><li> R - (N - 1) - FC = " + num_ramos + " - ( " + num_nos + " - 1 ) - " + num_CurrentSources + " = " + (QtdMalhas - num_CurrentSources) + " Malhas Independentes";
-		if (num_CurrentSources == 0) {
-			str += ".</p></ul>"
-		} else if (num_CurrentSources == 1) {
-			str += ";</li><li>FC = " + num_CurrentSources + " Malha Auxiliar.</p></li></ul>"
-		} else if (num_CurrentSources > 1) {
-			str += ";</li><li>FC = " + num_CurrentSources + " Malhas Auxiliares.</p></li></ul>"
-		}
-		str += '<h6 class="font-weight-bold text-dark">2. Mesh Equations:</h6>';
-		for (var i = 0; i < currentSourcePolarity.length; i++) {
-			strEqu = ""
-			str += '<br><br><p class="font-weight-bold">Malha ' + i + ' (Auxiliar): ' + katex.renderToString(currSourceIndex[i]) + '</p>';
-			str += "<p>Composta por " + compOnMeshesArr[i] + " - Sentido da Fonte de Corrente " + matriz[0][arrCurrentSourcesLines[i]] + "</p>"
-			//strEqu = defineCurrentFlowInResistances(i,0) + " = " + defineVoltageSourcePolarityInMeshes(i,0)
-			strEqu = current[i] + " = " + matriz[3][currentSourcePolarity[i][3]]
-			console.log(strEqu)
-			LaTex = nerdamer(strEqu).toTeX()
-			for (rn = 0; rn < current.length; rn++) {
-				LaTex = LaTex.replace(new RegExp(current[rn], 'g'), currSourceIndex[rn])
-			}
-			str += "<b style=\"font-size: 20px\">" + currentSourcePolarity[i][0] + "</b>" + " = "
-			str += katex.renderToString(LaTex)
-			str += " <small style=\"font-size: 18px\">A</small>"
-		}
-		for (i = currentSourcePolarity.length; i < QtdMalhas; i++) {
-			strEqu = ""
-			str += '<br><br><p class="font-weight-bold">Malha ' + i + ': ' + katex.renderToString(currSourceIndex[i]) + '</p>';
-			str += "<p>Composta por " + compOnMeshesArr[i] + " - Sentido de " + currentWithoutNet[i][0] + " &rarr; " + currentWithoutNet[i][1] + " com in&iacute;cio em " + matriz[0][ramos_comp[mesh[i][0]][0]] + "</p>"
-			const compsString = compOnMeshesArr[i].toString();
-			//strEqu = defineCurrentFlowInResistances(i,0) + " = " + defineVoltageSourcePolarityInMeshes(i,0)
-			if (compsString.includes("C") == false && compsString.includes("L") == false) {
-				strEqu = defineCurrentFlowInResistances(i, 0) + " = " + defineVoltageSourcePolarityInMeshes(i, 0)
-			} else if (compsString.includes("C") == false && compsString.includes("L") == true) {
-				strEqu = defineCurrentFlowInResistances(i, 0) + " + " + defineCurrentFlowInCoils(i, 0) + " = " + defineVoltageSourcePolarityInMeshes(i, 0)
-			} else if (compsString.includes("C") == true && compsString.includes("L") == false) {
-				strEqu = defineCurrentFlowInResistances(i, 0) + " + " + defineCurrentFlowInCapacitors(i, 0) + " = " + defineVoltageSourcePolarityInMeshes(i, 0)
-			} else if (compsString.includes("C") == true && compsString.includes("L") == true) {
-				strEqu = defineCurrentFlowInResistances(i, 0) + " + " + defineCurrentFlowInCapacitors(i, 0) + " + " + defineCurrentFlowInCoils(i, 0) + " = " + defineVoltageSourcePolarityInMeshes(i, 0)
-			}
-			LaTex = nerdamer(strEqu).toTeX()
-			for (rn = 0; rn < current.length; rn++) {
-				LaTex = LaTex.replace(new RegExp(current[rn], 'g'), currSourceIndex[rn])
-			}
-			for (var k = 0; k < Qtd_capacitors; k++) {
-				LaTex = LaTex.replace(new RegExp(Capacitors[k], 'g'), capacitorIndex[k])
-			}
-			for (k = 0; k < Qtd_coils; k++) {
-				LaTex = LaTex.replace(new RegExp(Coils[k], 'g'), coilIndex[k])
-			}
-			str += katex.renderToString(LaTex)
-			equationsArr[i] = []
-			equationsArr[i].push(strEqu)
-		}
-		//document.write(str)
-		//opened.document.getElementById("equations1").innerHTML = str;
-		return str
-	}
-	string_final += meshesEquations()
-
-	function count(s1, letter) {
-		return (s1.match(RegExp(letter, 'g')) || []).length;
-	}
-
-	function remove_character(str, char_pos) {
-		part1 = str.substring(0, char_pos);
-		part2 = str.substring(char_pos + 1, str.length);
-		return (part1 + part2);
-	}
-	//var eq = new Equation(exp0,exp1,exp2,exp3,exp4,exp5)
-	//katex.render(algebra.toTex(exp0),equations)
-	if (num_CurrentSources < QtdMalhas) {
-		string_final += equacoesFinaisLATEX();
-	}
-
-	function equacoesFinaisLATEX() {
-		var str = ""
-		var resul = []
-		var rn = 0;
-		if (flagAC == 0) {
-			for (var cam = currentSourcePolarity.length; cam < QtdMalhas; cam++) {
-				const compsString = compOnMeshesArr[cam].toString();
-				str = ""
-				if (compsString.includes("C") == false && compsString.includes("L") == false) {
-					str = defineCurrentFlowInResistances(cam, 1) + " = " + defineVoltageSourcePolarityInMeshes(cam, 1)
-					console.log(`1 - Quantidade de Malhas: ${QtdMalhas}`)
-					console.log(`Equação: ${str}`)
-				} else if (compsString.includes("C") == false && compsString.includes("L") == true) {
-					str = defineCurrentFlowInResistances(cam, 1) + " + " + defineCurrentFlowInCoils(cam, 1) + " = " + defineVoltageSourcePolarityInMeshes(cam, 1)
-					console.log(`2 - Quantidade de Malhas: ${QtdMalhas}`)
-					console.log(`Equação: ${str}`)
-				} else if (compsString.includes("C") == true && compsString.includes("L") == false) {
-					str = defineCurrentFlowInResistances(cam, 1) + " + " + defineCurrentFlowInCapacitors(cam, 1) + " = " + defineVoltageSourcePolarityInMeshes(cam, 1)
-					console.log(`3 - Quantidade de Malhas: ${QtdMalhas}`)
-					console.log(`Equação: ${str}`)
-				} else if (compsString.includes("C") == true && compsString.includes("L") == true) {
-					str = defineCurrentFlowInResistances(cam, 1) + " + " + defineCurrentFlowInCapacitors(cam, 1) + " + " + defineCurrentFlowInCoils(cam, 1) + " = " + defineVoltageSourcePolarityInMeshes(cam, 1)
-					console.log(`4 - Quantidade de Malhas: ${QtdMalhas}`)
-					console.log(`Equação: ${str}`)
-				}
-				resul.push(str)
-			}
-			str = ""
-			nerdamer.set("IMAGINARY", 'j')
-			var flgOneResult = 0;
-			if (resul.length == 1) {
-				let strap = current[0] + " = " + matriz[3][currentSourcePolarity[0][3]];
-				resul.unshift(strap)
-				var sol = nerdamer.solveEquations(resul);
-				flgOneResult = 1;
-			} else {
-				var sol = nerdamer.solveEquations(resul);
-			}
-			console.log(sol)
-			str += '<br><br><h6 class="font-weight-bold text-dark">System of Equations</h6>';
-			for (var i = 0; i < resul.length; i++) {
-				var LaTex = nerdamer(resul[i] + '= 0').toTeX()
-				for (rn = 0; rn < current.length; rn++) {
-					LaTex = LaTex.replace(new RegExp(current[rn], 'g'), currSourceIndex[rn])
-				}
-				if (flgOneResult == 1) {
-					str += "<b>Malha " + i + ": </b>" + katex.renderToString(LaTex) + "<br>"
-				} else {
-					str += "<b>Malha " + (i + currentSourcePolarity.length) + ": </b>" + katex.renderToString(LaTex) + "<br>"
-				}
-			}
-			str += '<br><h6 class="font-weight-bold text-dark">Solution (of the system of equations):</h6>';
-			for (var k = 0; k < resul.length; k++) {
-				var stringApoio = ""
-				stringApoio += sol[k][0]
-				var LaTex2 = nerdamer(stringApoio).toTeX()
-				for (rn = 0; rn < current.length; rn++) {
-					LaTex2 = LaTex2.replace(new RegExp(current[rn], 'g'), currSourceIndex[rn])
-				}
-				// Mudar o ponto por virgula
-				if (sol[k][1].toString().includes('j') == false) {
-					var aux = sol[k][1].toFixed(3)
-				} else {
-					var aux = sol[k][1]
-				}
-				console.log(`AUX ---> ${ aux }`)
-				aux.toString()
-				aux = aux.replace(".", ",")
-				//aux = aux.replace("-", "&ndash; ")
-				//console.log(aux)
-				if (sol[k][1] < 0) {
-					str += katex.renderToString(LaTex2) + " = " + katex.renderToString(aux) + " A<br>"
-				} else {
-					str += katex.renderToString(LaTex2) + " = " + katex.renderToString(aux) + " A<br>"
-				}
-			}
-		}
-		//document.getElementById("equations").innerHTML = str;
-		str += "</div></div>";
-		return str;
-	}
-	//___________________________________________________________//
-	//_____________________FUNÇÕES VARIADAS_____________________//
-	function trocar_coluna(col) {
-		if (col == 1) {
-			col = 2;
-		} else {
-			col = 1;
-		}
-		return col;
-	}
-
-	function encontrar_ponto_comum(no, comp_analisados) {
-		var lin = 0;
-		var col = 1; //Valor varia entre 1 e 2 (Colunas de posição)
-		var linha_nova = 0;
-		var coluna_nova = 0;
-		for (col = 0; col < 3; col++) {
-			lin = 0;
-			while (lin < linhas_matriz) {
-				if (comp_analisados.indexOf(lin) == -1) { //Se a linha ainda não tiver sido analisada
-					if (matriz[col][lin] == no) {
-						linha_nova = lin;
-						coluna_nova = col;
+				else{
+					if(componentesRamo[i].noP == aux){
+						aux = componentesRamo[i].noP;
 						break;
 					}
 				}
-				lin++;
 			}
 		}
-		return [linha_nova, coluna_nova];
+	}while(true);
+}
+
+/**
+ * Determines the direction of the branches and the global direction the meshes should go (according to the current source)
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function meshDirection(malhas){
+	malhas.forEach(malha => {
+		let auxNode = branches[malha.branches[0]-1].endNode;		//começa-se por arbitrar um nó 
+		if(auxNode != branches[malha.branches[1]-1].startNode && auxNode != branches[malha.branches[1]-1].endNode){  //se o primeiro ramo estiver invertido
+			auxNode = branches[malha.branches[0]-1].startNode;		//atualizar auxNode
+			malha.branchesDir.push(-1);								//marca-se a direção do nó com -1
+		}
+		else{
+			malha.branchesDir.push(1);								//caso contrário, marca se com 1
+		}
+		for(let i = 0; i < malha.branches.length-1; i++){			//percorrer os ramos
+			if(auxNode == branches[malha.branches[i+1]-1].startNode){	//caso o ramo tenha o sentido correto
+				auxNode = branches[malha.branches[i+1]-1].endNode;
+				malha.branchesDir.push(1);
+			}
+			else{
+				if(auxNode == branches[malha.branches[i+1]-1].endNode){	//caso o nó tenha o sentido contrário
+					auxNode = branches[malha.branches[i+1]-1].startNode;
+					malha.branchesDir.push(-1);
+				}
+			}
+		}
+		//o resultado neste momento é um array malha.branchesDir, preenchido com 1 e -1, que indica se o ramo está ou não invertido, no decorrer da malha
+		if(malha.type == 0){		//caso a malha em questão tenha fonte de corrente
+			let trocar = false;
+
+			let aux = branches[malha.branchWithCurSrc-1];
+			let componentesRamo = [];
+			componentesRamo = componentesRamo.concat(aux.dcVoltPwSupplies, aux.acVoltPwSupplies, aux.resistors, aux.coils, aux.capacitors);
+			if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+
+			if(aux.dcAmpPwSupplies != 0){ 										//fonte de corrente é dc
+				if(aux.dcAmpPwSupplies[0].globalNoP == branches[malha.branchWithCurSrc-1].endNode){
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == -1) trocar = true;
+				}
+				else{
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == 1) trocar = true;	
+				}
+			}
+			else{																//fonte de corrente é ac
+				if(aux.acAmpPwSupplies[0].globalNoP == branches[malha.branchWithCurSrc-1].endNode){
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == -1) trocar = true;
+				}
+				else{
+					if(malha.branchesDir[malha.branches.indexOf(malha.branchWithCurSrc)] == 1) trocar = true;	
+				}
+			}
+			if(trocar){
+				//trocar sentidos dos ramos
+				for(let i = 0; i < malha.branchesDir.length; i++){
+					malha.branchesDir[i] = malha.branchesDir[i] * -1;
+				}
+				//trocar ordem das malhas
+				malha.branchesDir.reverse();
+				malha.branches.reverse();
+			}
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
 	}
-	//Apresenta resultados
-	novajanela();
-};
+}
+
+/**
+ * Determines which mesh currents pass through each branch
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function meshCurrInBranches(malhas){
+	branches.forEach(ramo => {
+		malhas.forEach(malha => {
+			for(let i = 0; i < malha.branches.length; i++){
+				if(ramo.id == malha.branches[i]){
+					ramo.meshCurr.push(malha.id);
+					ramo.meshCurrDir.push(malha.branchesDir[i]);
+					break;
+				}
+			}
+		});
+	});
+}
+
+/**
+ * Encounters all the branch components
+ */
+function getBranchComponents(){
+	branches.forEach(ramo => {
+		ramo.components = ramo.components.concat(ramo.dcAmpPwSupplies, ramo.acAmpPwSupplies, ramo.dcVoltPwSupplies, ramo.acVoltPwSupplies, ramo.resistors, ramo.coils, ramo.capacitors);
+	});
+}
+
+
+/**
+ * Encounters all the mesh components, in order
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function getComponents(malhas){
+	malhas.forEach(malha => {		//para cada malha
+		if(malha.type == 1){			//se a malha for principal
+			malha.branches.forEach(ramo => {		//para cada ramo
+				let aux = branches[ramo-1];
+				let searchNode;
+				if(malha.branchesDir[malha.branches.indexOf(ramo)] == -1){		//caso a direção do ramo for -1, contrária
+					searchNode = aux.endNode;		//set do nó inicial a procurar
+				}
+				else{															//caso a direção do ramo seja 1, nao contrária
+					searchNode = aux.startNode;		//set do nó inicial a procurar
+				}
+				
+				let componentesRamo = [];
+				componentesRamo = componentesRamo.concat(aux.components);
+				if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+				let cnt = componentesRamo.length;
+				for(let j = 0; j < cnt; j++){		//ciclo que corre tantas vezes quantos componentes houver no ramo
+					let add;
+					let i;
+					let ladoNegativo = false;
+					for(i = 0; i < componentesRamo.length; i++){	//ciclo que procura qual o componente que tem o searchNode como uma das extermidades
+						add = false;
+						if(componentesRamo[i].noP == searchNode){	//caso extermidade positiva
+							ladoNegativo = -1;
+							searchNode = componentesRamo[i].noN;	//próximo searchNode é o nó negativo
+							if(!(aux.amperemeter === componentesRamo[i])) add = true;
+							break;
+						}
+						else if(componentesRamo[i].noN == searchNode){	//caso extermidade negativa
+							ladoNegativo = 1;
+							searchNode = componentesRamo[i].noP;	//próximo searchNode é o nó positivo
+							if(!(aux.amperemeter === componentesRamo[i])) add = true;
+							break;
+						}						
+					}
+					if(add){	//caso seja para adicionar o componente
+						if(aux.dcVoltPwSupplies.includes(componentesRamo[i]) || aux.acVoltPwSupplies.includes(componentesRamo[i])){ //caso o componente seja uma fonte se tensão
+							malha.componentsLeft.push([componentesRamo[i], ladoNegativo]);		//adiciona ao lado esquerdo
+						}
+						else{																										//caso o componente não seja uma fonte de tensão
+							malha.componentsRight.push([componentesRamo[i], ramo]);						//adiciona ao lado direito
+						}
+						componentesRamo.splice(i, 1);											//remove o componente do array de componentes do ramo
+					}
+				}
+			});			
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+
+/**
+ * Builds the Equation Data
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function parseEqData(malhas){
+	malhas.forEach(malha => {	//para cada malha
+		if(malha.type == 1){	//se a malha é principal
+			let ladoEsq = [];
+			let ladoDir = [];
+			if(malha.componentsLeft.length == 0) ladoEsq = 0;	//se nao há fontes o lado esquerdo é 0
+			else{
+				for(let i = 0; i < malha.componentsLeft.length; i++){		//para cada fonte
+					ladoEsq.push({ref: malha.componentsLeft[i][0].ref, value: malha.componentsLeft[i][0].value, uni: malha.componentsLeft[i][0].unitMult, sig: malha.componentsLeft[i][1], valueRect: malha.componentsLeft[i][0].voltage, angle: malha.componentsLeft[i][0].phase}); //adicionar componente ao lado esquerdo
+				}	
+			}
+			if(malha.componentsRight.length == 0){		//caso nao hajam componentes do lado direito da equação
+				return{									//erro
+					first: true,
+					second: 3,
+					third: "Sem componentes no ramo"
+				}
+			}
+			else{
+				for(let i = 0; i < malha.componentsRight.length; i++){		//para cada componente guardar a sua info
+					ladoDir.push([]);
+					componente = malha.componentsRight[i];
+					ladoDir[i].ref = componente[0].ref;
+					ladoDir[i].value = componente[0].value;
+					ladoDir[i].uni = componente[0].unitMult;
+					ladoDir[i].meshCurrents = branches[componente[1]-1].meshCurr;
+
+					let type;
+					let impedance;
+					for(let i = 0; i < components.resistors.length; i++) {
+						if (components.resistors[i].ref == componente[0].ref) {
+							type = 'R';
+							break;
+						}
+					}
+					for(let i = 0; i < components.capacitors.length; i++) {
+						if (components.capacitors[i].ref == componente[0].ref) {
+							type = 'C';
+							impedance = componente[0].impedance;
+							break;
+						}
+					}
+					for(let i = 0; i < components.coils.length; i++) {
+						if (components.coils[i].ref == componente[0].ref) {
+							type = 'L';
+							impedance = componente[0].impedance;
+							break;
+						}
+					}
+
+					ladoDir[i].type = type;
+					ladoDir[i].imp = impedance;
+					let sentidos = [];
+					let self = malha.branchesDir[malha.branches.indexOf(componente[1])];
+					ladoDir[i].meshCurrents.forEach(curMalha => {
+						sentidos.push(self * malhas[curMalha-1].branchesDir[malhas[curMalha-1].branches.indexOf(componente[1])]);
+					});
+					ladoDir[i].meshCurrentSig = sentidos;
+				}					
+			}
+			malha.equationData = {left: ladoEsq, right: ladoDir};		//parse eq info
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+
+/**
+ * Builds the equations
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function buildEq(malhas){
+	malhas.forEach(malha => {												//para cada malha
+		if(malha.type == 1){												//se a malha é principal
+			if(malha.equationData.left == 0){									//se nao houverem fontes de tensão
+				malha.incognitoEq += '0';
+				malha.revealedCurrSrc += '0';
+				malha.revealedEq += '0';
+			}
+			else{ 															//se houverem fontes de tensão
+				for(let i = 0; i < malha.equationData.left.length; i++){		//percorrer as fontes de tensão
+					let fonte = malha.equationData.left[i];					//fonte
+					if(fonte.sig == -1){										
+						malha.incognitoEq += '-';
+						malha.revealedCurrSrc += '-';
+						malha.revealedEq += '-';
+						if(i != 0){
+							malha.solverEq += '+';
+						}
+					}
+					else{
+						malha.solverEq += '-';
+						if(i != 0){
+							malha.incognitoEq += '+';
+							malha.revealedCurrSrc += '+';
+							malha.revealedEq += '+';
+						}
+					}
+					malha.incognitoEq  = fonte.ref;
+					malha.revealedCurrSrc += fonte.ref;
+					if(simInfo.circuitFreq.value != 0){
+						malha.revealedEq += ('(' + fonte.value + '\\angle' + fonte.angle + '^{\\circ})');
+						malha.solverEq += ('(' + fonte.valueRect.split('i').join('*i') + ')');						
+					}
+					else{
+						malha.revealedEq += fonte.value;
+						malha.solverEq += fonte.value;						
+					}
+
+					if(fonte.uni != 'V'){
+						const getValUnits = multUnits.find(valUnit => valUnit.name === fonte.unit);
+						malha.revealedEq += getValUnits.value;
+						malha.solverEq += getValUnits.value;
+					}
+				}
+			}			
+			malha.incognitoEq += '=';						//igualdade
+			malha.revealedCurrSrc +='=';
+			malha.revealedEq += '=';
+			for(let i = 0; i < malha.equationData.right.length; i++){				//lado direito equação
+				if(malha.solverEq != "") malha.solverEq += "+";
+				componente = malha.equationData.right[i];
+				if(i != 0){
+					malha.incognitoEq += '+';
+					malha.revealedCurrSrc += '+';
+					malha.revealedEq += '+';
+				}
+
+				if(componente.type == 'R'){
+					malha.incognitoEq += (componente.ref);
+					malha.revealedCurrSrc += (componente.ref);					
+				}
+				else{
+					malha.incognitoEq += ('Z_{' + (componente.ref) + '}');
+					malha.revealedCurrSrc += ('Z_{' + (componente.ref) + '}');
+				}
+
+				const getValUnits = multUnits.find(valUnit => valUnit.name === componente.uni);
+
+				let equivalentValue;
+
+				if(componente.type == 'R')	equivalentValue = componente.value;
+				else if(componente.type == 'C') equivalentValue = componente.imp;
+				else if(componente.type == 'L') equivalentValue = componente.imp;
+				
+				malha.revealedEq += equivalentValue;
+				malha.solverEq += equivalentValue;
+
+				if(componente.type == 'R' && getValUnits.value != 1){
+					malha.revealedEq += String('*'+getValUnits.value);
+					malha.solverEq += String('*' + getValUnits.value);
+
+				}
+				 
+				malha.incognitoEq += '*(';
+				malha.revealedCurrSrc += '*(';
+				malha.revealedEq += '*(';
+				if(!(componente.type == 'R')) malha.solverEq += '*';
+				malha.solverEq += '(';
+
+				for(let j = 0; j < componente.meshCurrentSig.length; j++){
+					if(componente.meshCurrentSig[j] == -1){
+						malha.incognitoEq += '-';
+						malha.revealedCurrSrc += '-';
+						malha.revealedEq += '-';
+						malha.solverEq += '-';
+					}
+					else{
+						if(j != 0){
+							malha.incognitoEq += '+';
+							malha.revealedCurrSrc += '+';
+							malha.revealedEq += '+';
+							malha.solverEq += '+';
+						}
+					}
+					if(malhas[componente.meshCurrents[j]-1].type == 0){
+						if(simInfo.circuitFreq.value != 0){
+							malha.revealedCurrSrc += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
+							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
+							malha.solverEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value*Math.cos(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)));
+							if(malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) != 0) malha.solverEq += (malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) + '*i)');
+							else malha.solverEq += ')';
+						}
+						else{
+							malha.revealedCurrSrc += malhas[componente.meshCurrents[j]-1].currentSource.value;
+							malha.revealedEq += malhas[componente.meshCurrents[j]-1].currentSource.value;
+							malha.solverEq += malhas[componente.meshCurrents[j]-1].currentSource.value;
+						}
+
+						const getValUnits = multUnits.find(valUnit => valUnit.name === malhas[componente.meshCurrents[j]-1].currentSource.unitMult);
+						if(getValUnits.value != 1){
+							malha.revealedEq += '*' + getValUnits.value;
+							malha.revealedCurrSrc += '*' + getValUnits.value;
+							malha.solverEq += '*' + getValUnits.value;						
+						}
+
+					}
+					else{
+						malha.revealedCurrSrc  += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");	
+						malha.revealedEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
+						malha.solverEq += malhas[componente.meshCurrents[j]-1].letterId;
+					}
+					malha.incognitoEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
+				}
+				malha.incognitoEq += ')';
+				malha.revealedCurrSrc += ')';
+				malha.revealedEq += ')';
+				malha.solverEq += ')';
+			}
+		}
+	});
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+}
+
+/**
+ * Solves the equations
+ * @param {Array} malhas meshes
+ * @returns {Array} the same meshes array updated
+ */
+function solver(malhas){;
+	
+	let system = new linearEqSystem();
+	malhas.forEach(malha => {
+		if(malha.type == 1) system.addEquation(malha.solverEq);		//build equations
+	});
+	system.buildSystem();
+	let results = solve(system.coefMatrix, system.consMatrix, system.varMatrix, 5);	//solve system
+
+	let temp = [];
+	results.variables._data.forEach(variable => {
+		temp.push(variable[0]);
+	});
+
+	malhas.forEach(malha => {
+		let obj = new Object;
+		if(malha.type == 0){ 	//malha é auxiliar
+			if(simInfo.circuitFreq.value != 0){ //malha é complexa
+				obj.re =malha.currentSource.value*Math.cos(malha.currentSource.phase*(Math.PI/180.0));
+				obj.im =malha.currentSource.value*Math.sin(malha.currentSource.phase*(Math.PI/180.0));
+				obj.complex = true;
+				malha.currValue = obj;			
+			}
+			else{ //malha é real
+				obj.complex = false;
+				obj.value = malha.currentSource.value*multUnits.find(valUnit => valUnit.name === malha.currentSource.unitMult).value;
+				malha.currValue = obj;
+			}
+		}
+		else{					//malha é principal
+			if(simInfo.circuitFreq.value != 0){ //malha é complexa
+				obj.re = results.result._data[temp.indexOf(malha.letterId)][0].re;
+				obj.im = results.result._data[temp.indexOf(malha.letterId)][0].im;
+				obj.complex = true;
+				malha.currValue = obj;
+			}
+			else{ //malha é real
+				obj.value = results.result._data[temp.indexOf(malha.letterId)][0].re;
+				obj.complex = false;
+				malha.currValue = obj;
+			}
+		}
+	});
+
+	return{
+		first: false,
+		second: 0,
+		third: malhas
+	}
+
+}
+
+/**
+ * Solves for the branch currents
+ * @param {Array} ramos branches array
+ * @param {array} malhas meshes array
+ * @returns {Array} currents equations and values
+ */
+function getBranchCurrents(ramos, malhas){
+	let equations = [];
+	ramos.forEach(ramo => {												//para cada ramo
+		let valueRe = 0;
+		let valueIm = 0;
+		if(!(ramo.startNode == ramo.currentData.noP)){					//se o ramo e a corrente têm sentidos difetentes
+			for(let i = 0; i < ramo.meshCurrDir.length; i++){			//trocar sentidos
+				ramo.meshCurrDir[i] = ramo.meshCurrDir[i] * -1;
+			}
+		}
+		let equation = "";
+		equation = equation.concat(ramo.currentData.ref, "=");			//lado esquerdo
+		let string;
+		for(let i = 0; i < ramo.meshCurr.length; i++){					//lado direito
+			if(ramo.meshCurrDir[i] == -1){
+				equation = equation.concat("-");
+			}
+			else{
+				if(i != 0){
+					equation = equation.concat("+");
+				}
+			}
+			equation += "I" + ramo.meshCurr[i] + ramo.meshCurr[i];
+			if(simInfo.circuitFreq.value != 0){
+				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.re;  //calcula o valor real
+				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.im;  //calcula o valor imaginario	
+			}
+			else{
+				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.value;  //calcula o valor real
+			}
+			string = false;
+			if(simInfo.circuitFreq.value != 0) string = true;
+		}
+		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, valRe: valueRe, valIm: valueIm, string: string});		//guarda corrente
+	});
+	return{
+		first: false,
+		second: 0,
+		third: equations
+	}
+}
+
+function getIsolatedVoltPS(){
+	// For each Volt PS, if has in its terminals 2 Real Nodes, it is Isolated
+	var isolatedPS = new Array();
+	// DC PS
+	for(let i=0; i<dcVoltPs.length; i++) {
+		let nodeNoP = dcVoltPs[i].noP.search('_net');
+		let nodeNoN = dcVoltPs[i].noN.search('_net');
+        if( (nodeNoP < 0) && (nodeNoN < 0) ) {
+			isolatedPS.push( { id: dcVoltPs[i].id, ref: dcVoltPs[i].ref, noP: dcVoltPs[i].noP, noN: dcVoltPs[i].noN } );
+		}
+	}
+	// AC PS
+	for(let i=0; i<acVoltPs.length; i++) {
+		let nodeNoP = acVoltPs[i].noP.search('_net');
+		let nodeNoN = acVoltPs[i].noN.search('_net');
+        if( (nodeNoP < 0) && (nodeNoN < 0) ) {
+			isolatedPS.push( { id: acVoltPs[i].id, ref: acVoltPs[i].ref, noP: acVoltPs[i].noP, noN: acVoltPs[i].noN } );
+		}
+	}
+	var isolatedPS = JSON.parse(JSON.stringify(isolatedPS));
+	return isolatedPS;
+}
+
+/**
+ * Solves for the branch currents
+ * @param {array} totalMeshes total circuit meshes
+ * @param {Array} meshes choosen mesh
+ * @param {array} branchCurr branch currents array
+ * @param file json file to be updated
+ * @returns updates json file
+ */
+function saveToJson(totalMeshes, meshes, branchCurr, isolatedPowerScr, file){
+
+	file.analysisObj.totalMeshes = totalMeshes;
+	file.analysisObj.choosenMeshes = meshes;
+	file.branches = branches;
+	file.components.isolatedVPS = isolatedPowerScr;
+
+	for(let i = 0; i < branchCurr.third.length; i++){
+		file.analysisObj.currents[i].valueRe = branchCurr.third[i].valRe;
+		file.analysisObj.currents[i].valueIm = branchCurr.third[i].valIm;
+		file.analysisObj.currents[i].meshEquation = branchCurr.third[i].eq;
+		file.analysisObj.currents[i].complex = branchCurr.third[i].string;
+	}
+
+	let incogEq = [];
+	let currentRevEq = [];
+	let allRevEq = [];
+	for(let i = 0; i < meshes.length; i++){
+		if(meshes[i].type == 1){
+			incogEq.push(meshes[i].incognitoEq);
+			currentRevEq.push(meshes[i].revealedCurrSrc);
+			allRevEq.push(meshes[i].revealedEq);			
+		}
+
+	}
+
+	file.analysisObj.equations = {
+		allVariableEq: incogEq,
+		meshCurrRevealedEq: currentRevEq,
+		allRevealedEq: allRevEq
+	}
+
+    return file;
+}
+
+
+function buildTeX(file, meshImages){
+
+	let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let T = file.components.isolatedVPS.length;
+	let F = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
+	let simpEquations =  file.analysisObj.equations;
+	let meshes = file.analysisObj.choosenMeshes;
+
+	let currents = file.analysisObj.currents;
+	let branches =  file.branches;
+
+	// Tex Variable
+	let TeX = getTexFileHeaderMCM();
+
+	if(fileContents[0]){
+		// Add Image to Tex
+		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
+		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
+		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+	}
+
+	// TeX Fundamental Vars
+	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}} \\\\\r\n";
+	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
+	if(F.value == 0)
+			TeX += "DC";
+	else
+		TeX += "AC";
+
+
+	let aux;
+	if(F.value == 0){
+		aux = 'Hz';
+	}
+	else{
+		aux = F.mult;
+	}
+	TeX += "&&F="+F.value+"\\;"+aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
+
+	//meshes calculation
+    TeX += "\\section{Number of Meshes}\r\n\r\n\\subsection{Main Meshes}\r\n\r\n";
+    TeX += "\\paragraph{} General Expression:\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C\r\n\\end{gather*}\r\n\\par\r\n\r\n";
+    TeX += "\\paragraph{} Number of Main Meshes Calculation:\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}="+R+"-("+N+"-1)-"+C+"~\\Leftrightarrow~M_{p}="+E+"\r\n\\end{gather*}\r\n\\par\r\n\r\n";
+    TeX += "\r\n\\subsection{Auxiliar Meshes}\r\n\r\n";
+    TeX += "\\paragraph{} The number of Auxiliar Meshes it's the same as the number of Current Sources:\r\n";
+    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
+
+	//circuit mesh images
+	let pagebreakCounter = 0;
+	TeX += "\\section{Circuit Meshes}\r\n\r\n";
+	meshImages.forEach(image => {
+		let aux;
+		if(meshes[image.id-1].type == 0) aux = "Auxiliar";
+		else aux = "Main";
+		TeX += "\\subsection{Mesh~" + image.id + "~-~" + aux + "}\r\n"
+		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
+		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
+        if(meshes[image.id-1].type == 1) TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{"+ meshes[image.id-1].id+meshes[image.id-1].id+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
+        else{
+            if(meshes[image.id-1].currValue.complex){
+				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
+				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 2, true);
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{"+meshes[image.id-1].id+meshes[image.id-1].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A&\r\n\\end{equation}\r\n\r\n';  
+            }
+            else{
+				let result = resultDecimals(meshes[image.id-1].currValue.value)
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{" + meshes[image.id-1].id+meshes[image.id-1].id + "}~:~" + result.value + result.unit + "A&\r\n\\end{equation}\r\n\r\n";  
+            }		
+		}
+		pagebreakCounter++;
+        if(pagebreakCounter == 2){
+            pagebreakCounter = 0;
+            TeX += "\\pagebreak";
+        }
+
+	});
+
+
+	//equation system
+	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} ";
+
+	let str = '\\large \\begin{cases}';
+	for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+		str += simpEquations.allRevealedEq[k];
+		if(k < simpEquations.allRevealedEq.length-1)
+			str += '\\\\[0.7em] ';
+
+	}
+	str += '\\end{cases}';
+	TeX += " Equations:\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+	TeX += "Steps:\r\n\r\n";
+	//step 1
+	 str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allVariableEq.length; k++){
+        str += simpEquations.allVariableEq[k];
+        if(k<simpEquations.allVariableEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+	//step 2
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.meshCurrRevealedEq.length; k++){
+        str += simpEquations.meshCurrRevealedEq[k];
+        if(k<simpEquations.meshCurrRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+	//step 3
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+        str += simpEquations.allRevealedEq[k];
+        if(k<simpEquations.allRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 3:}}\\end{small}  Substitute the circuit component values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+	// Add Equation system
+	str = '\\large \\begin{cases}';
+	for(let k = 0; k<meshes.length; k++){
+		// Generate Equation
+        if(meshes[k].currValue.complex){ //malha é complexa
+            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
+            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 2, true);
+            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+        }
+        else{ //malha é real
+            let result = resultDecimals(meshes[k].currValue.value, 2, false);
+            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + result.value + result.unit + 'A\\\\';
+        }
+		if(k<results.length-1)
+			str += ' \\\\[0.7em] ';
+	}
+	str += '\\end{cases}';
+
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n";
+	TeX += "\\subsection{Mesh Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+	//mesh current results
+	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
+	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+	for( let i = 0; i < currents.length; i++){
+		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+
+		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+
+		// Add Components
+		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+			TeX += branches[i].acAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+			TeX += branches[i].acVoltPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+			TeX += branches[i].dcAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+			TeX += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+			TeX += branches[i].capacitors[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].coils.length; k++){
+			TeX += branches[i].coils[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+			TeX += branches[i].resistors[k].ref + ', ';
+		}
+		
+		// Remove last comma
+		if(TeX[TeX.length-2] == ','){
+			TeX = TeX.slice(0,TeX.length-2);
+		}
+
+		TeX += "\\\\\r\n";
+	}
+
+	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	if(currents.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currents.length; k++){
+            str += currents[k].meshEquation;
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currents.length; k++){
+
+            if(currents[k].complex){
+                let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
+                let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 2, true);
+                str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+            }
+            else{
+                let result = resultDecimals(currents[k].valueRe, 2, false);
+                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n"
+
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+        TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
+        TeX += " The following currents were obtained by the mesh currents that exist in each branch.\r\n\\end{footnotesize}\r\n\r\n";
+	}
+
+	TeX += "\\end{document}\r\n";
+	return TeX;
+}
+
+
+function Output(jsonFile){
+
+	// Print sections
+	document.getElementById('results-board').innerHTML = outHTMLSectionsMCM();
+
+	// Insert circuit image if available
+	if (fileContents[0]) { 
+		let htmlstring = '<div class="container mt-3"><div class="row bg-dark rounded text-light  p-2">';
+		htmlstring += '<h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+		htmlstring += '<div class="container mt-2 mb-2 text-center"><img style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
+		$('#circuitImage').html(htmlstring);
+		$('#circuitImage').show();	
+	}
+	else
+		$('#circuitImage').hide();
+
+
+	// Output data Generation
+	$('#buttonShowAll').html(outShowAllBtnMCM());
+
+	//circuit fundamental variables
+	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile));
+
+	//circuit info MCM
+	$('#circuitInfo').html(outCircuitInfoMCM(jsonFile));
+
+	//circuit equations info
+	$('#meshEquations').html(outEquationCalcMCM(jsonFile));
+
+
+	let canvasObjects = outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.choosenMeshes);
+
+	let step1 = outStep1MCM(jsonFile.analysisObj.equations);
+	let step2 = outStep2MCM(jsonFile.analysisObj.equations);
+	let step3 = outStep3MCM(jsonFile.analysisObj.equations);
+	let equationSystemOutput = outEquationSystemMCM(jsonFile.analysisObj.equations, step1, step2, step3);
+	$('#eqSys').html(equationSystemOutput);
+
+	$('#resultsCurrentsMesh').html(outResultsMeshesMCM(jsonFile));
+
+
+	$('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
+
+
+	$('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
+
+
+	// Turn the viz. on
+	$("#contResults").show();
+	$("#loadpage").fadeOut(1000);
+    $("#results").show();
+	$('#results-modal').modal('show');
+
+
+	// Toggle plus minus icon on show hide of collapse element
+	for(let i = 0; i<7; i++){
+		$( "#btn-"+i ).click(function() {
+			$(this).find("i").toggleClass("fas fa-plus fas fa-minus");
+		});
+	}
+
+	$( "#showALL").click(function() {
+		for(let i = 0; i<7; i++){
+			$("#btn-"+i).children('.fa-minus, .fa-plus').toggleClass("fas fa-minus fas fa-plus");
+
+		}
+	});
+
+	// Export JSON File
+	$("#json").off().on('click', function() {
+		const filename = 'urisolve_results.json';
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonFile)));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
+
+	// Export TeX File
+	$("#tex").off().on('click', function() {
+		const filename = 'urisolve_results.tex';
+		let TeX = buildTeX(jsonFile, canvasObjects);
+
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	  });
+
+
+	// Export PDF File
+	$("#pdfPrintButton").off().on('click', function() {
+		//Get User info
+		let studName = document.getElementById('output-name').value;
+		let studLastname = document.getElementById('output-lastname').value;
+		let studNumber = document.getElementById('output-number').value
+		// Get Simulation Time
+		let hourstr = new Date().getHours();
+		let minstr = new Date().getMinutes();
+		if(hourstr.toString().length < 2)
+			hourstr = "0" + hourstr;
+		if(minstr.toString().length < 2)
+			minstr = "0" + minstr;
+		hourstr = hourstr + ":" + minstr;
+		let TeX = buildTeX(jsonFile, canvasObjects);
+		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
+		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+			string += " at " + hourstr + "\r\n";
+			TeX = TeX.slice(0,1264) + string + TeX.slice(1265);
+		}
+		// Instanciate printer object
+        docToPrint = new latexprinter(null, 'printLnk', 'pdfPrintButton');
+        // Add the desired Latex Source Code
+        docToPrint.setTexFile(TeX);
+		// Add Logo Image
+		let sampleimg = base64imgselect("logo");
+		docToPrint.addImgFile('logo.jpg', sampleimg);
+		// Add Circuit Image
+		if(fileContents[0]){
+			let imageObj = new Image();
+			imageObj.src = fileContents[0];
+			sampleimg = resizeandgray(imageObj);
+			docToPrint.addImgFile('circuit.jpg', sampleimg);
+		}
+		// Add Canvas Images
+		for(let i = 0; i< canvasObjects.length; i++){
+			docToPrint.addImgFile("meshImage"+canvasObjects[i].id+'.jpg',canvasObjects[i].image)
+		}
+		docToPrint.print();
+		
+	});	
+
+	// Open in overleaf
+	$("#overleaf").off().on('click', function() {
+
+	});
+
+
+	// Update Dictionary Language
+	let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+	if(language == "english")
+		set_lang(dictionary.english);
+	else	
+		set_lang(dictionary.portuguese);
+	
+}
+
+//função principal
+function loadFileAsTextMCM(data) {
+
+	let jsonFile = JSON.parse(data);
+	
+	branches = jsonFile.branches;
+	nodes = jsonFile.nodes;
+	components = jsonFile.components;
+	simInfo = jsonFile.analysisObj;
+
+
+	// Identify MCM Equations
+	var MEquaCnt = branches.length - countNodesByType(nodes, 0) + 1 - (components.dcAmpsPs.length + components.acAmpsPs.length);
+
+	console.log("São precisas " + MEquaCnt + " equações");
+
+	//Meshes finder
+	let circuito_malhas = findMeshes(nodes, branches);
+	if(circuito_malhas.first){
+		let erro = '';
+		circuito_malhas.third.forEach(e => {
+			erro = erro + '\n' + e;
+		});
+		alert("Erro ao criar malhas!\nErros:\n" + erro);
+		return;
+	}
+	let malhas_arr = [];
+	circuito_malhas.third.order.forEach(ordem => {
+		circuito_malhas.third.order[circuito_malhas.third.order.indexOf(ordem)].forEach(malha => {
+			malhas_arr.push(malha);
+		});
+	});
+
+	//Algoritmo de escolha de malhas	
+	let malhas_escolhidas = chooseMeshes(malhas_arr, MEquaCnt);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//atualizar direções de malha e ramos
+	malhas_escolhidas = meshDirection(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//correntes de malha que atravessam cada ramo
+	meshCurrInBranches(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	getBranchComponents();
+
+	//encontrar componentes da malha
+	malhas_escolhidas = getComponents(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//organiza informação das malhas em cada objeto malha
+	malhas_escolhidas = parseEqData(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//constrói quatro equações: com incógnitas, com as fontes de corrente reveladas, com tudo revelado, e uma para resolução
+	malhas_escolhidas = buildEq(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//resolve as equações
+	malhas_escolhidas = solver(malhas_escolhidas.third);
+	if(malhas_escolhidas.first){
+		alert(malhas_escolhidas.third);
+		return;
+	}
+
+	//computa as equações das correntes dos ramos
+	let branchCurrentEq = getBranchCurrents(branches, malhas_escolhidas.third);
+	if(branchCurrentEq.first){
+		alert(branchCurrentEq.third);
+		return;
+	}
+
+	let isolatedVPS = getIsolatedVoltPS();
+
+	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, isolatedVPS, jsonFile);
+
+	Output(jsonFile);
+	
+}
