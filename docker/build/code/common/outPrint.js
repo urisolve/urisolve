@@ -179,9 +179,22 @@ function errorOutput(errList){
             /* Error Code 15 */
             case 15:
                 warnString += header;
-                warnString += '<div><span data-translate="_errCode15"></span></div>';
+                warnString += '<div><span data-translate="_errCode15MCR"></span></div>';
                 warnString += '</div></div>';
                 break;
+                /*warnString += header;
+                if(method == 'MCM'){
+                    warnString += '<div><span data-translate="_errCode15MCM"></span></div>';
+                }
+                if(method == 'MCR'){
+                    warnString += '<div><span data-translate="_errCode15MCR"></span></div>';
+                }
+                if(method == 'MTN'){
+                    warnString += '<div><span data-translate="_errCode15"></span></div>';
+                }
+                
+                warnString += '</div></div>';
+                break;*/
         }
        
     }

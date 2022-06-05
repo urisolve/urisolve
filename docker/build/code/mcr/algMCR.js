@@ -2390,20 +2390,38 @@ var typebranches=[];
 						//eq=eq+" + "+branches[k].resistors[0].value+"*"+currents[k].ref;
 						
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+								
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;
+							}
+
+						}
+						sumDC=sumDC+parseFloat(branches[k].equivVoltPs.value);
+						
 					}
+
 					if(branches[k].acVoltPwSupplies.length>0){
 
 						for(let n=0;n<branches[k].acVoltPwSupplies.length;n++){
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2412,6 +2430,11 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+										
 									}
 								}
 							}
@@ -2430,10 +2453,10 @@ var typebranches=[];
 					}*/	
 					
 
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
-					}
+					}*/
 
 					/*if((branches[k].acVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumAC=sumAC+"- ("+branches[k].acVoltPwSupplies[n].voltage+")";
@@ -2481,13 +2504,38 @@ var typebranches=[];
 						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
 						
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
 					}
 					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;						
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+							}
+
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)>0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)<0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
 					}
 
 					if(branches[k].acVoltPwSupplies.length>0){
@@ -2496,6 +2544,10 @@ var typebranches=[];
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2504,10 +2556,7 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";								
+																		
 									}
 								}
 							}
@@ -2541,24 +2590,42 @@ var typebranches=[];
 						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
 						
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
 					}
 					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+								
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;
+							}
+
+						}
+						sumDC=sumDC+parseFloat(branches[k].equivVoltPs.value);
+						
 					}
+
 					if(branches[k].acVoltPwSupplies.length>0){
 
 						for(let n=0;n<branches[k].acVoltPwSupplies.length;n++){
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2567,6 +2634,11 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+										
 									}
 								}
 							}
@@ -2602,13 +2674,34 @@ var typebranches=[];
 						eqs=eqs+" + "+sumResistors+" * "+currents[k].ref;
 						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
 					}
 					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+								
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;
+							}
+
+						}
+						sumDC=sumDC+parseFloat(branches[k].equivVoltPs.value);
+						
 					}
 
 					if(branches[k].acVoltPwSupplies.length>0){
@@ -2617,10 +2710,6 @@ var typebranches=[];
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2629,6 +2718,11 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+										
 									}
 								}
 							}
@@ -2662,13 +2756,38 @@ var typebranches=[];
 						eqs=eqs+" - "+sumResistors+" * "+currents[k].ref;
 						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
 					}
 					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;						
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+							}
+
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)>0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)<0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
 					}
 
 					if(branches[k].acVoltPwSupplies.length>0){
@@ -2677,6 +2796,10 @@ var typebranches=[];
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2685,10 +2808,7 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";								
+																		
 									}
 								}
 							}
@@ -2723,12 +2843,35 @@ var typebranches=[];
 						eqs=eqs+" - "+sumResistors+" * "+currents[k].ref;
 						eq1=eq1+" - "+branches[k].ref+" * "+currents[k].ref;
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;						
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+							}
+
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)>0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
+						if(parseFloat(branches[k].equivVoltPs.value)<0){
+						sumDC=sumDC-parseFloat(branches[k].equivVoltPs.value);
+						}
 					}
-
-
 
 					if(branches[k].acVoltPwSupplies.length>0){
 
@@ -2736,6 +2879,10 @@ var typebranches=[];
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2744,10 +2891,7 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";								
+																		
 									}
 								}
 							}
@@ -2767,10 +2911,10 @@ var typebranches=[];
 					}*/
 
 
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
-					}
+					}*/
 
 					/*if((branches[k].acVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].acVoltPwSupplies[0].noN)){
 						for(let n=0;n<branches[k].acVoltPwSupplies.length;n++){
@@ -2816,13 +2960,35 @@ var typebranches=[];
 						eqs=eqs+" + "+sumResistors+" * "+currents[k].ref;
 						eq1=eq1+" + "+branches[k].ref+" * "+currents[k].ref;
 					}
-					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
+					
+					/*if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode==branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC+parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[0].ref;
 					}
 					if((branches[k].dcVoltPwSupplies.length>0)&&(branches[k].startNode!=branches[k].endVoltPsEndNodes[0].startNode)){
 						sumDC=sumDC-parseInt(branches[k].equivVoltPs.value);
 						sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[0].ref;
+					}*/
+
+					if(branches[k].dcVoltPwSupplies.length>0){
+						for(let n=0;n<branches[k].dcVoltPwSupplies.length;n++){
+							if(branches[k].startNode==branches[k].endVoltPsEndNodes[n].startNode){
+								if(sumDCReal==""){
+									sumDCReal=branches[k].dcVoltPwSupplies[n].ref;
+								}
+								else{
+									sumDCReal=sumDCReal+" + "+branches[k].dcVoltPwSupplies[n].ref;
+								}
+								
+							}
+
+							if(branches[k].startNode!=branches[k].endVoltPsEndNodes[n].startNode){
+								sumDCReal=sumDCReal+" - "+branches[k].dcVoltPwSupplies[n].ref;
+							}
+
+						}
+						sumDC=sumDC+parseFloat(branches[k].equivVoltPs.value);
+						
 					}
 
 					if(branches[k].acVoltPwSupplies.length>0){
@@ -2831,10 +2997,6 @@ var typebranches=[];
 							for(let m=0;m<branches[k].endVoltPsEndNodes.length;m++){
 								if(branches[k].acVoltPwSupplies[n].ref==branches[k].endVoltPsEndNodes[m].voltPsRef){
 									if(branches[k].startNode==branches[k].endVoltPsEndNodes[m].startNode){
-										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
-										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
-									}
-									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
 										if(sumAC==""){
 											sumAC="("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=branches[k].acVoltPwSupplies[n].ref;
@@ -2843,6 +3005,11 @@ var typebranches=[];
 											sumAC=sumAC+"+ ("+branches[k].acVoltPwSupplies[n].voltage+")";
 											sumACReal=sumACReal+"+"+branches[k].acVoltPwSupplies[n].ref;
 										}
+										
+									}
+									if(branches[k].startNode!=branches[k].endVoltPsEndNodes[m].startNode){
+										sumAC=sumAC+" -("+branches[k].acVoltPwSupplies[n].voltage+")";
+										sumACReal=sumACReal+" - "+branches[k].acVoltPwSupplies[n].ref+"";
 									}
 								}
 							}
@@ -3057,6 +3224,8 @@ var typebranches=[];
 	if(letters[0]==txr.variables._data[0]){q=5;}
 
 	
+
+
     
 	
 }
