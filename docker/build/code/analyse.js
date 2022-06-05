@@ -2015,6 +2015,7 @@ function agregatePowerSupplies(){
 		branches[i].setVoltPsEndNodes();
 		branches[i].setEquivVoltPs();
 		branches[i].setEquivImpedance(circuitAnalData.frequency.value, circuitAnalData.frequency.mult);
+		branches[i].getReactance(circuitAnalData.frequency.value, circuitAnalData.frequency.mult);
 	}
 }
 

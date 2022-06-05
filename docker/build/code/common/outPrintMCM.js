@@ -1,3 +1,4 @@
+
 /**
  * Function to output the circuit fundamental variables
  * @param {number} file output file
@@ -159,10 +160,17 @@ function outEquationCalcMCM(file){
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
     htmlstr += '<h6 class="lead" data-translate="_equationsNrCalculus"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
-    str = "M_{p} = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow E = " + E ;
+    str = "M_{p} = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + E ;
     str = katex.renderToString(str, {throwOnError: false});
     htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ str + '</span></div>';
-    htmlstr += '</div></div></div>';
+    htmlstr += '</div>';
+
+    
+    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+    htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+    htmlstr += '<div class="ml-1"><strong><p data-translate="_nrOfEquations"></p></strong></div>';
+    htmlstr += '</div></div></div></div></div>'
 
     htmlstr += '<div class="container print-block"><div class="row print-block">';
     htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
@@ -172,13 +180,14 @@ function outEquationCalcMCM(file){
     str = "C = " + C + "\\implies  M_{a} = " + C;
     str = katex.renderToString(str, {throwOnError: false});
     htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ str + '</span></div>';
-    htmlstr += '</div></div></div>';
+    htmlstr += '</div>';
 
     htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
     htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
     htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
-    htmlstr += '<div class="ml-1"><strong><p data-translate="_nrOfEquations"></p></strong></div>';
-    htmlstr += '</div></div></div>'
+    htmlstr += '<div class="ml-1"><strong><p data-translate="_nrOfCurrSrc"></p></strong></div>';
+    htmlstr += '</div></div></div></div></div>'
+    
 
     return htmlstr;
 }
@@ -241,10 +250,9 @@ function outMeshesMCM(branchObjs, meshesObjs){
 
         htmlstr += '</p></div></div></div></div>';   
     }
-    let images = new Array;
     $('#Meshes').html(htmlstr);
 
-    // Update Dictionary Language
+
 	let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
 
     for(let i = 0; i < meshesObjs.length; i++){
@@ -254,11 +262,33 @@ function outMeshesMCM(branchObjs, meshesObjs){
             cnt++;
         });
         let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
-        let imageMesh = createMesh(meshesObjs[i], branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang);
-        images.push({
-            image: imageMesh,
-            id: meshesObjs[i].id
+        createMesh(meshesObjs[i], branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang);
+    }
+    
+
+    let images = new Array;
+
+    let svgStrings = document.querySelectorAll("svg"); 
+
+    for(let i = 0; i < meshesObjs.length; i++){
+        let data = "data:image/svg+xml;base64,";
+        let svgString = new XMLSerializer().serializeToString(svgStrings[i]);
+        let base64 = window.btoa(svgString);
+        let dataURI = data + base64;
+
+        let cnt = 0;
+        meshesObjs[i].branches.forEach(branch => {
+            cnt++;
         });
+        let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
+
+        images.push({
+            imageData: dataURI,
+            id: meshesObjs[i].id,
+            width: WindowWidth,
+            height: height+aux+Yspacing+originY+2
+        });
+
     }
     return images;
 }
@@ -485,9 +515,14 @@ function outMeshesMCM(branchObjs, meshesObjs){
     for(let k = 0; k<meshes.length; k++){
         // Generate Equation
         if(meshes[k].currValue.complex){ //malha é complexa
-            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
-            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 2, true);
-            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+            let resultAng = resultDecimals(meshes[k].currValue.angle, 2, true);
+            let resultMag = resultDecimals(meshes[k].currValue.magnitude, 2, false);
+            if(resultMag.value == 0){
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
+            }
+            else{
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+            }
         }
         else{ //malha é real
             let result = resultDecimals(meshes[k].currValue.value, 2, false);
@@ -545,9 +580,14 @@ function outMeshesMCM(branchObjs, meshesObjs){
         for(let k = 0; k<currents.length; k++){
 
             if(currents[k].complex){
-                let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
-                let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 2, true);
-                str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+                let resultMag = resultDecimals(currents[k].magnitude, 2, false);
+                let resultAng = resultDecimals(currents[k].angle, 2, true);
+                if(resultMag.value == 0){
+                    str += currents[k].ref + '=' + resultMag.value + resultMag.unit + '~A';
+                }
+                else{
+                    str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+                }
             }
             else{
                 let result = resultDecimals(currents[k].valueRe, 2, false);
@@ -595,10 +635,12 @@ function outMeshesMCM(branchObjs, meshesObjs){
  * @param {number} aux max spacing on bottom line
  */
 function createMesh(mesh, branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang){
+    let id = "mesh"+containerId;
     let svg = d3.select(containerId) //create svg
         .append("svg")
         .attr("width", WindowWidth+2)
         .attr("height", height+aux+Yspacing+originY+2)
+        .attr("id", id)
 
     let color;
     if(mesh.type == 1) color = "#F73232";
@@ -628,12 +670,6 @@ function createMesh(mesh, branchObjs, width, height, WindowWidth, WindowHeight, 
     for(let i = 0; i < labelInfo.length; i++){
         createKnotLabels(svg, labelInfo[i]); //add labels
     }
-
-    let data = "data:image/svg+xml;base64,";
-    let svgString = new XMLSerializer().serializeToString(document.querySelector("svg")); 
-    let base64 = window.btoa(svgString);
-    let dataURI = data + base64;
-    return dataURI;
 }
 
 /**
@@ -849,6 +885,9 @@ function resultDecimals(number, targetDec, isangle){
         mult = '';
     }
 
+    if(isangle){
+        index = commaIndex-1;
+    }
     str = String(Number(str.slice(0, index+1) + "." + str.slice(index+1)).toFixed(targetDec)).replace(".", char);
 
     if(negative){
@@ -948,4 +987,234 @@ function getTexFileHeaderMCM(){
 
     texHeader += "\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\nThis document provides a step by step solution for the submitted circuit, using the Mesh Current Method (MCM).\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
     return texHeader;
+}
+
+function buildPrintPDF(file, meshImages){
+	let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let T = file.components.isolatedVPS.length;
+	let F = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
+	let simpEquations =  file.analysisObj.equations;
+	let meshes = file.analysisObj.choosenMeshes;
+
+	let currents = file.analysisObj.currents;
+	let branches =  file.branches;
+
+	window.jsPDF = window.jspdf.jsPDF;
+    let marginSides = 0.2;
+    let marginBottom = 0.1;
+    let marginTop = 0.1;
+
+
+	var doc = new jsPDF({unit:'pt', format:'a4'});
+    doc.page = 1;
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    titleSize = 18;
+    subtitleSize = 16;
+    subsubtitleSize = 14;
+    bigInfoSize = 12;
+    smallInfoSize = 10;
+    tinyInfoSize = 8;
+
+
+    console.log(width, height);
+
+    doc = printBuildHead(doc);
+
+    doc.addPage();
+    doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+    let line = height*marginTop;
+
+
+    doc.setFontSize(titleSize);
+    doc.text('1  Circuit Image', marginSides*width, line+=35, null, null, 'left');
+    if(fileContents[0]){
+        let imageObj = new Image();
+        imageObj.src = fileContents[0];
+        let sampleimg = resizeandgrayMCM(imageObj, 800-2*800*marginSides);
+        doc.addImage(sampleimg.data, "JPG", width*marginSides, line+=10);
+        line += sampleimg.height-0.25*sampleimg.height;
+    }
+    else{
+        doc.setFontSize(subsubtitleSize);
+        doc.text('No image', width/2, line+=20, null, null, 'center');
+    }
+
+    line = printFundVars(doc, R, N, C, T, line, marginSides);
+    line = printCurrentsInfo(doc, currents, line, marginSides);
+
+	doc.autoPrint();
+	doc.output("dataurlnewwindow");
+}
+
+
+
+function printBuildHead(doc){
+    let line = 170;
+    width = doc.internal.pageSize.width;
+
+    doc.setFont("docker/build/vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
+
+    doc.setFontSize(20);
+    let sampleimg = base64imgselect("logo");
+    doc.addImage(sampleimg, "JPG", width/2-70, line-20, 67/3.5, 82/3.5);
+	doc.text('URIsolve APP', width/2+10, line-1, null, null, 'center');
+    doc.text('Mesh Current Method', width/2, line+=20, null, null, 'center');
+
+    doc.setFontSize(16);
+    doc.text('Step by Step Solution', width/2, line+=16, null, null, 'center');
+
+    doc.setFontSize(12);
+    doc.text('Lino Sousa', width/3, line+=50, null, null, 'center');
+    doc.text('Mário Alves', 2*width/3, line, null, null, 'center');
+    doc.text('sss@isep.ipp.pt', width/3, line+=10, null, null, 'center');
+    doc.text('mjf@isep.ipp.pt', 2*width/3, line, null, null, 'center');
+
+    doc.text('André Rocha', width/3, line+=30, null, null, 'center');
+    doc.text('Francisco Pereira', 2*width/3, line, null, null, 'center');
+    doc.text('anr@isep.ipp.pt', width/3, line+=10, null, null, 'center');
+    doc.text('fdp@isep.ipp.pt', 2*width/3, line, null, null, 'center');
+
+    doc.setFontSize(10);
+    const d = new Date(); 
+    doc.text(d.getDate()+" / "+d.getMonth()+" / "+d.getFullYear(), width/2, line+200, null, null, 'center');
+
+    return doc;
+}
+
+function printBuildFoot(doc, marginSides, marginBottom, marginTop){
+    width = doc.internal.pageSize.width;
+    height = doc.internal.pageSize.height;
+
+    ms = width*marginSides;
+    mb = height-marginBottom*height;
+    mt = marginTop*height;
+
+    doc.setFontSize(10);
+    doc.text('DEE - ISEP', ms, mb, null, null, 'left');
+    doc.text('URIsolve APP', ms, mt, null, null, 'left');
+    doc.text('Page ' + doc.page, width-ms, mb, null, null, 'right');
+    doc.text('Mesh Current Method', width-ms, mt, null, null, 'right');
+    doc.setFontSize(8);
+    doc.text('www.isep.ipp.pt', width/2, mb, null, null, 'center');
+
+    doc.line(ms, mb-10, width-ms, mb-10);
+    doc.line(ms, mt+4, width-ms, mt+4);
+
+    doc.page++;
+
+    return doc;
+}
+
+function printFundVars(doc, R, N, C, T, line, marginSides){
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    doc.setFontSize(titleSize);
+    doc.text('2  Fundamental Variables', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('Branches   |', innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('Nodes   |', 2.4*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('Current Sources   |', 4.2*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('Isolated Voltage Sources', 7.1*innerWidth/9 + width * marginSides, line, null, null, 'center');
+
+    doc.setFontSize(smallInfoSize);
+    doc.text('R = ' + R.toString(), innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('N = ' + N.toString(), 2.4*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('C = ' + C.toString(), 4.2*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('T = ' + T.toString(), 7.1*innerWidth/9 + width * marginSides, line, null, null, 'center');
+
+    return line;
+}
+
+function printCurrentsInfo(doc, currents, line, marginSides){
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('Reference', innerWidth/5 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('Start Node', 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    doc.text('EndNode', 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    doc.text('Components', 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+
+    line+=2;
+
+    doc.setFontSize(smallInfoSize);
+    for(let i = 0; i < currents.length; i++){
+        let TeXData = '';
+        let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+        for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+            TeXData += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+            TeXData += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+            TeXData += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+            TeXData += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+            TeXData += branches[branchIndex].capacitors[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].coils.length; k++){
+            TeXData += branches[branchIndex].coils[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+            TeXData += branches[branchIndex].resistors[k].ref + ', ';
+        }
+        if(TeXData[TeXData.length-2] == ','){
+            TeXData = TeXData.slice(0,TeXData.length-2);
+        }
+
+        doc.text(currents[i].ref, innerWidth/5 + width * marginSides, line+=12, null, null, 'center');
+        doc.text(currents[i].noP, 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text(currents[i].noN, 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text(TeXData, 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    }
+    return line;
+}
+  
+
+function resizeandgrayMCM(imgObj, max) {
+    var canvas = document.createElement('canvas');
+    var canvasContext = canvas.getContext('2d');
+     
+    var imgW = imgObj.width;
+    var imgH = imgObj.height;
+    var sizer=1;
+    if(imgW > max)
+        sizer = max/imgW;
+
+    canvas.width = imgW*sizer;
+    canvas.height = imgH*sizer;
+
+    canvasContext.drawImage(imgObj, 0, 0, canvas.width, canvas.height);
+    var imgPixels = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+     
+    for(var y = 0; y < imgPixels.height; y++){
+        for(var x = 0; x < imgPixels.width; x++){
+            var i = (y * 4) * imgPixels.width + x * 4;
+            var avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+            imgPixels.data[i] = avg; 
+            imgPixels.data[i + 1] = avg; 
+            imgPixels.data[i + 2] = avg;
+        }
+    }
+    canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    return {
+        data: canvas.toDataURL(),
+        width: canvas.width,
+        height: canvas.height
+    };
 }

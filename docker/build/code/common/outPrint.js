@@ -813,32 +813,32 @@ function outCurrentsInfo(currents, branches){
 
         // Add Components
         for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].acAmpPwSupplies[k].ref, {throwOnError: false}) + ', ';
-            TeXData += branches[i].acAmpPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].acAmpPwSupplies[k].ref, {throwOnError: false}) + ', ';
+            TeXData += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].acVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].acVoltPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].acVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].dcAmpPwSupplies[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].dcAmpPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].dcAmpPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].dcVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';  
-            TeXData += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].dcVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';  
+            TeXData += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
         }
         for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
-            htmlstr += katex.renderToString(branches[i].capacitors[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].capacitors[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].capacitors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].capacitors[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].coils.length; k++){
-            htmlstr += katex.renderToString(branches[i].coils[k].ref, {throwOnError: false})  + ', '; 
-            TeXData += branches[i].coils[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].coils[k].ref, {throwOnError: false})  + ', '; 
+            TeXData += branches[branchIndex].coils[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].resistors.length; k++){
-            htmlstr += katex.renderToString(branches[i].resistors[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].resistors[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].resistors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].resistors[k].ref + ', ';
         }
         
         // Remove last comma
@@ -1137,7 +1137,7 @@ function createCanvasCurrents(currentsData){
         canvasObjects.push(canvasdataURL);
     }
 
-    return canvasObjects
+    return canvasObjects;
 }
 
 /**

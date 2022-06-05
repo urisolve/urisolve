@@ -188,7 +188,8 @@ $(function () {
             "_AuxMeshes" : "Auxiliar Meshes",
             "_MainMeshes" : "Main Meshes",
             "_typeA" : "Auxiliar",
-            "_typeP" : "Main"
+            "_typeP" : "Main",
+            "_nrOfCurrSrc" : "The number of auxiliar meshes is the same as the number of current sources"
         },
 
         // Language Switch - PT-PT
@@ -375,11 +376,12 @@ $(function () {
             "_MCMEqFormula" : "Fórmula do número de malhas Principais (Mp)",
             "_equationsNrCalculus" : "Cálculo do número de malhas Principais (Mp)",
             "_MCMEqAux" : "Número de malhas Auxiliares (Ma)",
-            "_nrOfEquations" : "Nota: O número de equações necessárias será o número de equações principais calculado.",
+            "_nrOfEquations" : "Nota: O número de equações necessárias será o número de malhas principais calculado.",
             "_AuxMeshes" : "Malhas Auxiliares",
             "_MainMeshes" : "Malhas Principais",
             "_typeA" : "Auxiliar",
-            "_typeP" : "Principal"
+            "_typeP" : "Principal",
+            "_nrOfCurrSrc" : "O número de malhas auxiliares é o mesmo que o número de fontes de corrente"
         }
     };
 

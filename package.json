@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "canvg": "^4.0.0",
+    "latex.js": "^0.12.4"
+  }
+}

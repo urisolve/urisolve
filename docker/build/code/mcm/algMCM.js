@@ -1,5 +1,6 @@
 include('code/common/outPrintMCM.js');
 
+
 /*
 ERROR LIST
 
@@ -15,13 +16,11 @@ ERROR LIST
  * @param {Int} type Desired type of node to return
  * @returns Number of Nodes
  */
-
 function countNodesByType(objArr, type) {
 	let cnt = 0;
 	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
 	return cnt;
 }
-
 
 /**
  * Test if nodes are adjacent to each other
@@ -380,7 +379,6 @@ function getBranchComponents(){
 	});
 }
 
-
 /**
  * Encounters all the mesh components, in order
  * @param {Array} malhas meshes
@@ -455,7 +453,14 @@ function parseEqData(malhas){
 			if(malha.componentsLeft.length == 0) ladoEsq = 0;	//se nao há fontes o lado esquerdo é 0
 			else{
 				for(let i = 0; i < malha.componentsLeft.length; i++){		//para cada fonte
-					ladoEsq.push({ref: malha.componentsLeft[i][0].ref, value: malha.componentsLeft[i][0].value, uni: malha.componentsLeft[i][0].unitMult, sig: malha.componentsLeft[i][1], valueRect: malha.componentsLeft[i][0].voltage, angle: malha.componentsLeft[i][0].phase}); //adicionar componente ao lado esquerdo
+					let flag = false;
+					for(let j = 0; j < components.acVoltPs.length; j++) {
+						if (components.acVoltPs[j].ref == malha.componentsLeft[i][0].ref) {
+							flag = true;
+							break;
+						}
+					}
+					ladoEsq.push({ref: malha.componentsLeft[i][0].ref, value: malha.componentsLeft[i][0].value, uni: malha.componentsLeft[i][0].unitMult, sig: malha.componentsLeft[i][1], valueRect: malha.componentsLeft[i][0].voltage, angle: malha.componentsLeft[i][0].phase, complex: flag}); //adicionar componente ao lado esquerdo
 				}	
 			}
 			if(malha.componentsRight.length == 0){		//caso nao hajam componentes do lado direito da equação
@@ -549,9 +554,9 @@ function buildEq(malhas){
 							malha.revealedEq += '+';
 						}
 					}
-					malha.incognitoEq  = fonte.ref;
+					malha.incognitoEq += fonte.ref;
 					malha.revealedCurrSrc += fonte.ref;
-					if(simInfo.circuitFreq.value != 0){
+					if(fonte.complex){
 						malha.revealedEq += ('(' + fonte.value + '\\angle' + fonte.angle + '^{\\circ})');
 						malha.solverEq += ('(' + fonte.valueRect.split('i').join('*i') + ')');						
 					}
@@ -562,7 +567,7 @@ function buildEq(malhas){
 
 					if(fonte.uni != 'V'){
 						const getValUnits = multUnits.find(valUnit => valUnit.name === fonte.unit);
-						malha.revealedEq += getValUnits.value;
+						malha.revealedEq += getValUnits.teX;
 						malha.solverEq += getValUnits.value;
 					}
 				}
@@ -592,15 +597,19 @@ function buildEq(malhas){
 
 				let equivalentValue;
 
-				if(componente.type == 'R')	equivalentValue = componente.value;
-				else if(componente.type == 'C') equivalentValue = componente.imp;
-				else if(componente.type == 'L') equivalentValue = componente.imp;
-				
-				malha.revealedEq += equivalentValue;
+				if(componente.type == 'R'){
+					equivalentValue = componente.value;
+					equivalentValueDisplay = componente.value;
+				}
+				else if(componente.type == 'C' || componente.type == "L"){
+					equivalentValueDisplay = String(Number(componente.imp.replace("i", "")).toFixed(2))+"i";
+					equivalentValue = componente.imp;
+				}
+				malha.revealedEq += equivalentValueDisplay;
 				malha.solverEq += equivalentValue;
 
 				if(componente.type == 'R' && getValUnits.value != 1){
-					malha.revealedEq += String('*'+getValUnits.value);
+					malha.revealedEq += String('*'+getValUnits.teX);
 					malha.solverEq += String('*' + getValUnits.value);
 
 				}
@@ -642,8 +651,8 @@ function buildEq(malhas){
 
 						const getValUnits = multUnits.find(valUnit => valUnit.name === malhas[componente.meshCurrents[j]-1].currentSource.unitMult);
 						if(getValUnits.value != 1){
-							malha.revealedEq += '*' + getValUnits.value;
-							malha.revealedCurrSrc += '*' + getValUnits.value;
+							malha.revealedEq += '*' + getValUnits.teX;
+							malha.revealedCurrSrc += '*' + getValUnits.teX;
 							malha.solverEq += '*' + getValUnits.value;						
 						}
 
@@ -659,7 +668,38 @@ function buildEq(malhas){
 				malha.revealedCurrSrc += ')';
 				malha.revealedEq += ')';
 				malha.solverEq += ')';
+
 			}
+			malha.solverEq = malha.solverEq.replace("+-", "-");
+			malha.revealedEq = malha.revealedEq.replace("+-", "-");
+			malha.revealedCurrSrc = malha.revealedCurrSrc.replace("+-", "-");
+			malha.incognitoEq = malha.incognitoEq.replace("+-", "-");
+
+			malha.solverEq = malha.solverEq.replace("-+", "-");
+			malha.revealedEq = malha.revealedEq.replace("-+", "-");
+			malha.revealedCurrSrc = malha.revealedCurrSrc.replace("-+", "-");
+			malha.incognitoEq = malha.incognitoEq.replace("-+", "-");
+
+			malha.solverEq = malha.solverEq.replace("--", "+");
+			malha.revealedEq = malha.revealedEq.replace("--", "+");
+			malha.revealedCurrSrc = malha.revealedCurrSrc.replace("--", "+");
+			malha.incognitoEq = malha.incognitoEq.replace("--", "+");
+
+			malha.solverEq = malha.solverEq.replace("++", "+");
+			malha.revealedEq = malha.revealedEq.replace("++", "+");
+			malha.revealedCurrSrc = malha.revealedCurrSrc.replace("++", "+");
+			malha.incognitoEq = malha.incognitoEq.replace("++", "+");
+
+			let char;
+			let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+			if(language == "english")
+				char = '.';
+			else	
+				char = ',';
+
+			malha.revealedEq = malha.revealedEq.replace(".", char);
+			malha.revealedCurrSrc = malha.revealedCurrSrc.replace(".", char);
+			malha.incognitoEq = malha.incognitoEq.replace(".", char);
 		}
 	});
 	return{
@@ -692,8 +732,19 @@ function solver(malhas){;
 		let obj = new Object;
 		if(malha.type == 0){ 	//malha é auxiliar
 			if(simInfo.circuitFreq.value != 0){ //malha é complexa
-				obj.re =malha.currentSource.value*Math.cos(malha.currentSource.phase*(Math.PI/180.0));
-				obj.im =malha.currentSource.value*Math.sin(malha.currentSource.phase*(Math.PI/180.0));
+				obj.re =malha.currentSource.value*Math.cos(malha.currentSource.phase*(Math.PI/180.0))*multUnits.find(valUnit => valUnit.name === malha.currentSource.unitMult).value;;
+				obj.im =malha.currentSource.value*Math.sin(malha.currentSource.phase*(Math.PI/180.0))*multUnits.find(valUnit => valUnit.name === malha.currentSource.unitMult).value;;
+				obj.magnitude = Math.sqrt(Math.pow(obj.re, 2) + Math.pow(obj.im, 2));
+				obj.angle = Math.atan(obj.im/obj.re)*57.2957795;
+				if(obj.re < 0){
+					if(obj.im < 0){
+						obj.angle -= 180;
+					}
+					else{
+						obj.angle += 180;
+					}				
+	
+				} 
 				obj.complex = true;
 				malha.currValue = obj;			
 			}
@@ -707,6 +758,17 @@ function solver(malhas){;
 			if(simInfo.circuitFreq.value != 0){ //malha é complexa
 				obj.re = results.result._data[temp.indexOf(malha.letterId)][0].re;
 				obj.im = results.result._data[temp.indexOf(malha.letterId)][0].im;
+				obj.magnitude = Math.sqrt(Math.pow(obj.re, 2) + Math.pow(obj.im, 2));
+				obj.angle = Math.atan(obj.im/obj.re)*57.2957795; 
+				if(obj.re < 0){
+					if(obj.im < 0){
+						obj.angle -= 180;
+					}
+					else{
+						obj.angle += 180;
+					}				
+	
+				} 
 				obj.complex = true;
 				malha.currValue = obj;
 			}
@@ -754,7 +816,7 @@ function getBranchCurrents(ramos, malhas){
 					equation = equation.concat("+");
 				}
 			}
-			equation += "I" + ramo.meshCurr[i] + ramo.meshCurr[i];
+			equation += "I_{" + ramo.meshCurr[i] + ramo.meshCurr[i] + "}";
 			if(simInfo.circuitFreq.value != 0){
 				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.re;  //calcula o valor real
 				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.im;  //calcula o valor imaginario	
@@ -762,11 +824,28 @@ function getBranchCurrents(ramos, malhas){
 			else{
 				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.value;  //calcula o valor real
 			}
+
+
 			string = false;
 			if(simInfo.circuitFreq.value != 0) string = true;
 		}
-		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, valRe: valueRe, valIm: valueIm, string: string});		//guarda corrente
+
+		let magnitude = Math.sqrt(Math.pow(valueRe, 2) + Math.pow(valueIm, 2));
+		let angle = Math.atan(valueIm/valueRe)*57.2957795;
+
+		if(valueRe < 0){
+				if(valueIm < 0){
+					angle -= 180;
+				}
+				else{
+					angle += 180;
+				}				
+
+		}
+
+		equations.push({branchId: ramo.id, currRef: ramo.currentData.ref, eq: equation, valRe: valueRe, valIm: valueIm, string: string, magnitude: magnitude, angle: angle});		//guarda corrente
 	});
+
 	return{
 		first: false,
 		second: 0,
@@ -774,6 +853,10 @@ function getBranchCurrents(ramos, malhas){
 	}
 }
 
+/**
+ * Gets the number os isolated voltage power suplies
+ * @returns {number} number of isolated voltage supply
+ */
 function getIsolatedVoltPS(){
 	// For each Volt PS, if has in its terminals 2 Real Nodes, it is Isolated
 	var isolatedPS = new Array();
@@ -815,9 +898,13 @@ function saveToJson(totalMeshes, meshes, branchCurr, isolatedPowerScr, file){
 	for(let i = 0; i < branchCurr.third.length; i++){
 		file.analysisObj.currents[i].valueRe = branchCurr.third[i].valRe;
 		file.analysisObj.currents[i].valueIm = branchCurr.third[i].valIm;
+		file.analysisObj.currents[i].magnitude = branchCurr.third[i].magnitude;
+		file.analysisObj.currents[i].angle = branchCurr.third[i].angle;
 		file.analysisObj.currents[i].meshEquation = branchCurr.third[i].eq;
 		file.analysisObj.currents[i].complex = branchCurr.third[i].string;
 	}
+
+	file.analysisObj.currents.sort(function(a, b){return Number(a.ref.replace("I", "")) - Number(b.ref.replace("I", ""))});
 
 	let incogEq = [];
 	let currentRevEq = [];
@@ -988,7 +1075,12 @@ function buildTeX(file, meshImages){
         if(meshes[k].currValue.complex){ //malha é complexa
             let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
             let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 2, true);
-            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+			if(resultMag.value == 0){
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
+            }
+            else{
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+            }
         }
         else{ //malha é real
             let result = resultDecimals(meshes[k].currValue.value, 2, false);
@@ -1014,25 +1106,25 @@ function buildTeX(file, meshImages){
 
 		// Add Components
 		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
-			TeX += branches[i].acAmpPwSupplies[k].ref + ', ';
+			TeX += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
-			TeX += branches[i].acVoltPwSupplies[k].ref + ', ';
+			TeX += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
-			TeX += branches[i].dcAmpPwSupplies[k].ref + ', ';
+			TeX += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
-			TeX += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+			TeX += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
-			TeX += branches[i].capacitors[k].ref + ', ';
+			TeX += branches[branchIndex].capacitors[k].ref + ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].coils.length; k++){
-			TeX += branches[i].coils[k].ref + ', ';
+			TeX += branches[branchIndex].coils[k].ref + ', ';
 		}
 		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
-			TeX += branches[i].resistors[k].ref + ', ';
+			TeX += branches[branchIndex].resistors[k].ref + ', ';
 		}
 		
 		// Remove last comma
@@ -1064,8 +1156,13 @@ function buildTeX(file, meshImages){
             if(currents[k].complex){
                 let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
                 let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 2, true);
-                str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
-            }
+				if(resultMag.value == 0){
+					str += currents[k].ref + '=' + resultMag.value + resultMag.unit + 'A';
+				}
+				else{
+					str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+				}
+			}
             else{
                 let result = resultDecimals(currents[k].valueRe, 2, false);
                 str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
@@ -1221,7 +1318,21 @@ function Output(jsonFile){
 		}
 		// Add Canvas Images
 		for(let i = 0; i< canvasObjects.length; i++){
-			docToPrint.addImgFile("meshImage"+canvasObjects[i].id+'.jpg',canvasObjects[i].image)
+			let canvas = document.createElement('canvas');
+			canvas.width = canvasObjects[i].width;
+			canvas.height = canvasObjects[i].height;
+			let context = canvas.getContext('2d');
+			let image = new Image();
+			image.onload = function(){
+				let resizedImage = new Image();
+				resizedImage.onload = function(){
+					context.drawImage(resizedImage, 0, 0, resizedImage.width, resizedImage.height);
+					let finalImage = canvas.toDataURL();
+					docToPrint.addImgFile("meshImage"+canvasObjects[i].id+'.jpg', finalImage);
+				}
+				resizedImage.src = resizeandgrayMCM(image, 400).data;
+			}
+			image.src = canvasObjects[i].imageData;
 		}
 		docToPrint.print();
 		
@@ -1230,6 +1341,11 @@ function Output(jsonFile){
 	// Open in overleaf
 	$("#overleaf").off().on('click', function() {
 
+	});
+
+	// Print
+	$("#print").off().on('click', function() {
+		buildPrintPDF(jsonFile, canvasObjects);
 	});
 
 
