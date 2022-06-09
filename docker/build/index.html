@@ -62,6 +62,8 @@
     <script type="text/javascript" src="vendor/meshes-finder/meshes-finder.js"></script>
     <script type="text/javascript" src="vendor/jsPDF-master/dist/jspdf.umd.min.js"></script>
     <script type="text/javascript" src="vendor/jsPDF-master/jspdf.plugin.standard_fonts_metrics.js"></script>
+    <script type="text/javascript" src="vendor/jsPDF-master/canvg.js"></script>
+    <script type="text/javascript" src="vendor/SvgToPng/SvgToPng.js"></script>
 
     <script type="text/javascript" src="js/includes.js"></script>
     <script type="text/javascript" src="js/varproto.js"></script>
@@ -791,9 +793,15 @@
                           <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
                         <button id="tex" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
                         <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
-                        <button id="overleaf" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
-                          <img src="img/overleaf.png" style="width: 22px;"></img>&nbsp;&nbsp;Open in Overleaf </button>
-                          <button id="print" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-1">
+
+
+                        <form id="overleaf" action="https://www.overleaf.com/docs" method="post" target="_blank" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+                          <input id="ol_encoded_snip" type="hidden" name="encoded_snip">
+                          <img src="img/overleaf.png" style="width: 22px;"></img>&nbsp;&nbsp;Open in Overleaf 
+                        </form>
+                        
+
+                        <button id="print" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-1">
                             <img src="img/print.png" style="width: 22px;"></img>&nbsp;&nbsp;Print </button>
                         <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
                           <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>

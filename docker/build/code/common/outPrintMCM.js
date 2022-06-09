@@ -1,3 +1,23 @@
+//TODO delete when final version 
+/**
+ * Function to output the circuit nr of meshes
+ * @param {number} file output json
+ */
+ function outVersion(file){
+    let versionNumber = file.app.version;
+    let details = file.app.details;
+
+    let htmlstr = '';
+
+    htmlstr += '<div class="container print-block"><div class="row print-block">';
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
+    htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ versionNumber + '</span></div>';
+    htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ details + '</span></div>';
+    htmlstr += '</div></div>';    
+
+    return htmlstr;
+}
 
 /**
  * Function to output the circuit fundamental variables
@@ -75,7 +95,7 @@
     // TeX Content
     let fstring = '';
     if(F.value == 0)
-        fstring = "\\small F = " + F.value.toString()+ "\\; Hz";
+        fstring = "\\small -\\;";
     else
     fstring = "\\small F = " + F.value.toString()+ "\\;" + F.mult;
 
@@ -145,22 +165,13 @@ function outEquationCalcMCM(file){
     let E = R - (N - 1) - C;
 
     let htmlstr = '';
-    htmlstr += '<div class="container print-block"><div class="row print-block">';
-    htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
-    htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
-    htmlstr += '<h6 class="lead" data-translate="_MCMEqFormula"></h6></div>';
-    htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
-    str = "M_{p} = R - (N - 1) - C";
-    str = katex.renderToString(str, {throwOnError: false});
-    htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ str + '</span></div>';
-    htmlstr += '</div></div></div>';
 
     htmlstr += '<div class="container print-block"><div class="row print-block">';
     htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
     htmlstr += '<h6 class="lead" data-translate="_equationsNrCalculus"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
-    str = "M_{p} = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + E ;
+    str = "M_{p} = R - (N - 1) - C \\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + E ;
     str = katex.renderToString(str, {throwOnError: false});
     htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ str + '</span></div>';
     htmlstr += '</div>';
@@ -234,7 +245,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
         htmlstr += '<div class = "text-center scrollmenu">';
         htmlstr += '<div class = "text-center" id="'+containerId+'"></div>';
 
-        htmlstr += '<p class="text-center">';
+        htmlstr += '<p class="text-center" id="equation'+containerId+'">';
         if(meshesObjs[i].type == 1) htmlstr += katex.renderToString("I_{"+meshesObjs[i].id+meshesObjs[i].id+"}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
         else{
             if(meshesObjs[i].currValue.complex){
@@ -932,7 +943,7 @@ function outShowAllBtnMCM(){
  * Function to create the output html sections
  * @returns {string} HTML string
  */
- function outHTMLSectionsMCM(){
+ function outHTMLSectionsMCM(file){
 
     let htmlstr = '';
 
@@ -940,6 +951,12 @@ function outShowAllBtnMCM(){
     htmlstr += '<div id="errors"></div><div id="warnings"></div><div id="circuitImage"></div>';
     htmlstr += '<div id= "contResults">';  
     htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
+    
+    //remove this block after testing
+    //version
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3">Debug - Version</h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="version"></div><div class="container mt-3">';
     
     // Fundamental variables
     htmlstr += '<div class="container mt-3">';
@@ -990,14 +1007,8 @@ function getTexFileHeaderMCM(){
 }
 
 function buildPrintPDF(file, meshImages){
-	let R = file.branches.length;
-	let N = countNodesByType(file.nodes, 0);
-	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
-	let T = file.components.isolatedVPS.length;
-	let F = file.analysisObj.circuitFreq;
-	let totalCurrents = file.analysisObj.currents.length;
-	let Amps = file.probes.ammeters.length;
-	let E = R - (N - 1) - C;
+
+
 	let simpEquations =  file.analysisObj.equations;
 	let meshes = file.analysisObj.choosenMeshes;
 
@@ -1024,8 +1035,8 @@ function buildPrintPDF(file, meshImages){
 
 
     console.log(width, height);
-
     doc = printBuildHead(doc);
+
 
     doc.addPage();
     doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
@@ -1040,14 +1051,31 @@ function buildPrintPDF(file, meshImages){
         let sampleimg = resizeandgrayMCM(imageObj, 800-2*800*marginSides);
         doc.addImage(sampleimg.data, "JPG", width*marginSides, line+=10);
         line += sampleimg.height-0.25*sampleimg.height;
+
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
     }
     else{
         doc.setFontSize(subsubtitleSize);
         doc.text('No image', width/2, line+=20, null, null, 'center');
     }
 
-    line = printFundVars(doc, R, N, C, T, line, marginSides);
+    line = printFundVars(doc, file, line+=10, marginSides);
+
+    line = printCircInfo(doc, file, line+=10, marginSides);
+    
+    line = printMeshCalc(doc, file, line+=10, marginSides);
+
+
+    doc.addPage();
+    doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+    line = height*marginTop;
+
+    line = circuitMeshes(doc, meshes, meshImages, line, marginSides, marginBottom, marginTop);
+    
     line = printCurrentsInfo(doc, currents, line, marginSides);
+
 
 	doc.autoPrint();
 	doc.output("dataurlnewwindow");
@@ -1112,7 +1140,13 @@ function printBuildFoot(doc, marginSides, marginBottom, marginTop){
     return doc;
 }
 
-function printFundVars(doc, R, N, C, T, line, marginSides){
+function printFundVars(doc, file, line, marginSides){
+    
+    let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let T = file.components.isolatedVPS.length;
+
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
     let innerWidth = width - 2 * width * marginSides;
@@ -1135,10 +1169,140 @@ function printFundVars(doc, R, N, C, T, line, marginSides){
     return line;
 }
 
+function printCircInfo(doc, file, line, marginSides){
+    
+    let freq = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let ammeters = file.probes.ammeters.length;
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    doc.setFontSize(titleSize);
+    doc.text('3  Circuit Information', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('Simulation Type [AC/DC]', innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('Frequency', 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+    doc.text('Ammeters', 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+
+    let aux;
+    let aux1;
+    if(freq.value == 0){
+        aux = 'DC';
+        aux1 = ' Hz';
+    }
+    else{
+        aux = 'AC';
+        aux1 = ' '+freq.mult;
+    }
+    doc.setFontSize(smallInfoSize);
+    doc.text(aux, innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('F = ' + freq.value + aux1, 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+    doc.text(ammeters + '/' + totalCurrents, 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+
+    return line;
+}
+
+function printMeshCalc(doc, file, line, marginSides){
+    let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let E = R - (N - 1) - C;
+
+    doc.setFontSize(titleSize);
+    doc.text('4  Number of Meshes', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(subtitleSize);
+    doc.text(' 4.1  Main Meshes', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('     General Expression:', marginSides*width, line+=20, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text("Mp = R - (N - 1) - C", width/2, line+=20, null, null, 'center');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('     Number of Main Meshes Calculation:', marginSides*width, line+=20, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text("Mp = "+ R +" - ("+ N +" - 1) - " + C + " <=> " + "Mp = " + E, width/2, line+=20, null, null, 'center');
+
+    doc.setFontSize(subtitleSize);
+    doc.text(' 4.2  Auxiliar Meshes', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text('     The number of Auxiliar Meshes is the same as the number of Current Sources:', marginSides*width, line+=20, null, null, 'left');
+
+    doc.setFontSize(bigInfoSize);
+    doc.text("Ma = C <=> Mp = " + C, width/2, line+=20, null, null, 'center');
+    return line;
+}
+
+function circuitMeshes(doc, meshes, images, line, marginSides, marginBottom, marginTop){
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    doc.setFontSize(titleSize);
+    doc.text('5  Circuit Meshes', marginSides*width, line+=25, null, null, 'left');
+
+    for(let i = 0; i < meshes.length; i++){
+        let prop = 1;
+        if(images[i].width > width-2*width*marginSides) prop = (width-2*width*marginSides)/images[i].width;
+        if(line+10+images[i].height*prop+20 > height-height*marginBottom-10){
+            doc.addPage();
+            doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+            line = height*marginTop;
+        }
+        let aux = "Main";
+        if(meshes[i].type == 0) aux = "Auxiliar";
+        doc.setFontSize(subtitleSize);
+        doc.text(' 5.' + String(i+1) + '  Mesh ' + String(i+1) + ' - ' + aux, marginSides*width, line+=25, null, null, 'left');
+
+
+        var svg = document.getElementById("mesh#Mesh" + String(i+1));
+        var img = new Image;
+        svg.toDataURL("image/png", {
+            callback: function(data) {
+                img.setAttribute("src", data);
+                let align = (width-prop*images[i].width)/2;
+                doc.addImage(data, "PNG", align, line+=13, images[i].width*prop, images[i].height*prop);
+                line+=images[i].height*prop;
+            }
+        })
+
+        
+
+        if(meshes[i].type == 0){
+            if(meshes[i].currValue.complex){
+                let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[i].currValue.re, 2) + Math.pow(meshes[i].currValue.im, 2)), 2, false);
+                let resultAng = resultDecimals(Math.atan(meshes[i].currValue.im/meshes[i].currValue.re)*57.2957795, 2, true);
+                printEquation(doc, "I/s"+meshes[i].id+'/s'+meshes[i].id+":"+ resultMag.value + '/a ' + resultAng.value + '/g ' + resultMag.unit +'A', width/2, line+=5, 'center');  
+            }
+            else{
+                let result = resultDecimals(meshes[i].currValue.value, 2, false);
+                printEquation(doc, "I/s"+meshes[i].id+'/s'+meshes[i].id+":"+result.value+''+result.unit+"A", width/2, line+=5, 'center');  
+            }
+        }
+        else{
+            //printEquation(doc, meshes[i].printEq, width/2, line, 'center');  
+        }
+
+    }
+    return line;
+}
+
 function printCurrentsInfo(doc, currents, line, marginSides){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
     let innerWidth = width - 2 * width * marginSides;
+
+    doc.setFontSize(titleSize);
+    doc.text('8  Circuit Currents', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(subtitleSize);
+    doc.text(' 8.1  General Information', marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(bigInfoSize);
     doc.text('Reference', innerWidth/5 + width * marginSides, line+=20, null, null, 'center');
@@ -1218,3 +1382,49 @@ function resizeandgrayMCM(imgObj, max) {
         height: canvas.height
     };
 }
+
+
+
+function printEquation(doc, latexString, x, y, mode){
+    let side;
+    if(mode == 'center') side = x-latexString.length*5/2;
+    else if(mode == 'left') side = x;
+    else if(mode == 'right') side = x-latexString.length*5;
+
+    for(let i = 0; i < latexString.length; i++){
+        if(latexString.charAt(i) == "/"){
+            switch(latexString.charAt(i+1)){
+                case 'g':
+                    //imprimir o grau
+                    doc.setFontSize(smallInfoSize);
+                    doc.text('o', side+8, y-4, null, null, 'center');
+                    i++;
+                    break;
+                case 'a':
+                    //imprimir o angulo
+                    doc.setFontSize(subtitleSize);
+                    doc.text('<', side+11, y+5, null, 25, 'center');
+                    i++;
+                    break;
+                case 's':
+                    //imprimir em baixo
+                    doc.setFontSize(smallInfoSize);
+                    doc.text(latexString.charAt(i+=2), side+=5, y+3, null, null, 'center');
+                    break;
+                default:
+
+                    break;
+            }
+        }
+        else{
+            //imprimir a letra
+            doc.setFontSize(bigInfoSize);
+            doc.text(latexString.charAt(i), side+=9, y, null, null, 'center');
+        }
+    }
+}
+
+
+
+
+

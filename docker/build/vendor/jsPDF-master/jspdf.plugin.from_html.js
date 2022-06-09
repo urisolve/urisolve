@@ -853,4 +853,4 @@
 			settings.elementHandlers = {};
 		return process(this, HTML, x || 4, y || 4, settings, callback);
 	};
-})(jsPDF.API);
+})(window.jspdf.jsPDF.API);

@@ -222,6 +222,7 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		}
 		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
 	}
+	
 	if(count < nr_malhas_principais){	//malhas em falta
 		let count2 = 0;
 		for(let c = 0; c < ramos_flags.length; c++){
@@ -239,6 +240,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 			}
 		}
 	}
+	
+	
 	return{
 		first: false,
 		second: 0,
@@ -962,29 +965,25 @@ function buildTeX(file, meshImages){
 	// TeX Circuit Information
 	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
 	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
-	if(F.value == 0)
-			TeX += "DC";
-	else
-		TeX += "AC";
-
-
-	let aux;
 	if(F.value == 0){
-		aux = 'Hz';
+			TeX += "-";
+			aux = '';
 	}
 	else{
+		TeX += "AC";
 		aux = F.mult;
 	}
+
 	TeX += "&&F="+F.value+"\\;"+aux;
 
 	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
 
 	//meshes calculation
     TeX += "\\section{Number of Meshes}\r\n\r\n\\subsection{Main Meshes}\r\n\r\n";
-    TeX += "\\paragraph{} General Expression:\r\n";
-    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C\r\n\\end{gather*}\r\n\\par\r\n\r\n";
-    TeX += "\\paragraph{} Number of Main Meshes Calculation:\r\n";
-    TeX += "\\begin{gather*}\r\nM_{p}="+R+"-("+N+"-1)-"+C+"~\\Leftrightarrow~M_{p}="+E+"\r\n\\end{gather*}\r\n\\par\r\n\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
+    TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
+	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
+	TeX += "\\paragraph{} The number of Main meshes will be the number of needed equations\r\n";
     TeX += "\r\n\\subsection{Auxiliar Meshes}\r\n\r\n";
     TeX += "\\paragraph{} The number of Auxiliar Meshes it's the same as the number of Current Sources:\r\n";
     TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
@@ -1206,6 +1205,9 @@ function Output(jsonFile){
 	// Output data Generation
 	$('#buttonShowAll').html(outShowAllBtnMCM());
 
+	//debug version
+	$('#version').html(outVersion(jsonFile));
+
 	//circuit fundamental variables
 	$('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile));
 
@@ -1340,7 +1342,9 @@ function Output(jsonFile){
 
 	// Open in overleaf
 	$("#overleaf").off().on('click', function() {
-
+		let TeX = buildTeX(jsonFile, canvasObjects);
+		document.getElementById('ol_encoded_snip').value = encodeURIComponent(TeX);
+		document.getElementById('overleaf').submit();
 	});
 
 	// Print
@@ -1357,6 +1361,7 @@ function Output(jsonFile){
 		set_lang(dictionary.portuguese);
 	
 }
+
 
 //função principal
 function loadFileAsTextMCM(data) {

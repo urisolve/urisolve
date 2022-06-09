@@ -2033,7 +2033,12 @@ function buildJson(){
 		circuitFreq: circuitFrequency,
 		currents: currents
 	};
+	var appObj = {
+		version: "1.0.1",
+		details: "Print output in progress"
+	}
 	var outputJson = {
+		app: appObj,
 		components: componentsObj,
 		probes: probesObj,
 		nodes: nodes,
