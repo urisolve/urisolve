@@ -2034,9 +2034,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "1.0.2",
-		details: "Print output done",
-		releaseDate: "2022-6-10T11:45:00.000"
+		version: "1.0.3",
+		details: "In series voltage sources error fix",
+		releaseDate: "2022-6-10T16:50:00.000"
 	}
 	var outputJson = {
 		app: appObj,

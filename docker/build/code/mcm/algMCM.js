@@ -164,9 +164,13 @@ function chooseMeshes(malhas, nr_malhas_principais){
 					if(malhas_flags[j] == 0){					//se a malha estiver disponível
 						for(let k = 0; k < malhas[j].length; k++){ //para cada ramo da malha
 							if(malhas[j][k] == i+1){				//se tiver o ramo com a fonte de corrente em questão
+								/*
 								for(let m = 0; m < malhas[j].length; m++){
 									ramos_flags[malhas[j][m]-1] = 1;
 								}
+								*/
+								ramos_flags[malhas[j][i+1]-1] = 1;
+
 								malhas_flags[j] = 1;
 								let temp;
 								if(branches[i].dcAmpPwSupplies.length != 0) temp = branches[i].dcAmpPwSupplies[0];
@@ -223,6 +227,7 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
 	}
 	
+	/*
 	if(count < nr_malhas_principais){	//malhas em falta
 		let count2 = 0;
 		for(let c = 0; c < ramos_flags.length; c++){
@@ -240,7 +245,7 @@ function chooseMeshes(malhas, nr_malhas_principais){
 			}
 		}
 	}
-	
+	*/
 	
 	return{
 		first: false,
@@ -661,11 +666,11 @@ function buildEq(malhas){
 
 					}
 					else{
-						malha.revealedCurrSrc  += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");	
-						malha.revealedEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
+						malha.revealedCurrSrc  += ('I_{M' + componente.meshCurrents[j] + "}");	
+						malha.revealedEq += ('I_{M' + componente.meshCurrents[j] + "}");
 						malha.solverEq += malhas[componente.meshCurrents[j]-1].letterId;
 					}
-					malha.incognitoEq += ('I_{' + componente.meshCurrents[j] + componente.meshCurrents[j] + "}");
+					malha.incognitoEq += ('I_{M' + componente.meshCurrents[j] + "}");
 				}
 				malha.incognitoEq += ')';
 				malha.revealedCurrSrc += ')';

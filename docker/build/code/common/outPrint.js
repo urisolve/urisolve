@@ -3,7 +3,7 @@
  * @param {array} errList error Codes
  * @returns {string} html String
  */
-function errorOutput(errList){
+function errorOutput(errList, method){
 
     // Warnings html string
     let htmlstr = '';
@@ -179,8 +179,41 @@ function errorOutput(errList){
             /* Error Code 15 */
             case 15:
                 warnString += header;
-                warnString += '<div><span data-translate="_errCode15"></span></div>';
+                if(method == 'MTN'){
+                    warnString += '<div><span data-translate="_errCode15"></span></div>';
+                }
+                else if(method == 'MCM'){
+                    warnString += '<div><span data-translate="_errCode15MCM"></span></div>';
+                }
                 warnString += '</div></div>';
+                break;
+
+            /* Error Code 18 */
+            case 18:
+                let strDC = '';
+                let strAC = '';
+                for(let j = 0; j < errList[i].Vsources.DC.length; j++){
+                    strDC += errList[i].Vsources.DC[j].ref + ',  ';
+                    if(j == errList[i].Vsources.DC.length-1) strDC = strDC.slice(0, -3);
+                }
+                for(let j = 0; j < errList[i].Vsources.AC.length; j++){
+                    strAC += errList[i].Vsources.AC[j].ref + ',  ';
+                    if(j == errList[i].Vsources.AC.length-1) strAC = strAC.slice(0, -3);
+                }
+                warnString += header;
+                warnString += '<div><span data-translate="_errCode18-0"></span></div></div>';
+
+                warnString += '<div class="d-flex flex-row ml-3"><div><i class="fas fa-exclamation mr-1 fa-sm text-danger"></i></div>';
+                warnString += '<div><span data-translate="_errCode18-1"></span><strong><span>';
+
+                warnString += strDC;
+                warnString += '</span></strong></div></div>';
+
+                warnString += '<div class="d-flex flex-row ml-3"><div><i class="fas fa-exclamation mr-1 fa-sm text-danger"></i></div>';
+                warnString += '<div><span data-translate="_errCode18-2"></span><strong><span>';
+                warnString += strAC;
+                warnString += '</span></strong></div></div>';
+
                 break;
         }
        
