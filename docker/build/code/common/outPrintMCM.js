@@ -1,3 +1,4 @@
+
 //TODO delete when final version 
 /**
  * Function to output the circuit nr of meshes
@@ -19,6 +20,8 @@
     return htmlstr;
 }
 
+
+//BUILD MODAL INFORMATION
 /**
  * Function to output the circuit fundamental variables
  * @param {number} file output file
@@ -74,7 +77,6 @@
 
     return htmlstr;
 }
-
 /**
  * Function to output the circuit information
  * @param {object} file output json
@@ -151,7 +153,6 @@
 
     return htmlstr;
 }
-
 /**
  * Function to output the circuit nr of meshes
  * @param {number} file output json
@@ -202,7 +203,6 @@ function outEquationCalcMCM(file){
 
     return htmlstr;
 }
-
 /**
  * outputs the meshes
  * @param {Array} branchObjs branches
@@ -303,7 +303,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
     }
     return images;
 }
-
 /**
  * Function to output equation system STEP 1
  * @param {object} currents currents object
@@ -331,7 +330,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
 
     return htmlstr;
 }
-
 /**
  * Function to output equation system STEP 2
  * @param {object} currents currents object
@@ -360,7 +358,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
     return htmlstr
 
 }
-
 /**
  * Function to output equation system STEP 2
  * @param {object} currents currents object
@@ -389,7 +386,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
     return htmlstr;
 
 }
-
 /**
  * Function to output the Final Equation System and every step
  * @param {String Array} simpEquations simplified equation system
@@ -496,7 +492,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
     return htmlstr;
 
 }
-
 /**
  * Function to output circuit mesh currents
  * @param {object} file output json file
@@ -554,282 +549,6 @@ function outMeshesMCM(branchObjs, meshesObjs){
 
     return htmlstr;
 }
-
-/**
- * Function to output circuit branch currents
- * @param {object} currents currents data
- * @returns {string} HTML string
- */
- function outResultsCurrentsMCM(file){
-
-    let currents = file.analysisObj.currents;
-
-    let htmlstr = '';
-
-    //********************************* CIRCUIT CURRENTS ************************************
-
-    // Add card for currents
-    htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
-    htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center no-page-break" style="opacity:0.9">';
-    htmlstr += '<h6 class="lead" data-translate="_currents"></h6></div>';
-    htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
-
-    if(currents.length > 0){
-        // Create Equations
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<currents.length; k++){
-            str += currents[k].meshEquation;
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-        str += '\\end{cases}';
-
-        str += ' \\Leftrightarrow';
-
-        str += '\\large \\begin{cases}';
-
-        for(let k = 0; k<currents.length; k++){
-
-            if(currents[k].complex){
-                let resultMag = resultDecimals(currents[k].magnitude, 2, false);
-                let resultAng = resultDecimals(currents[k].angle, 2, true);
-                if(resultMag.value == 0){
-                    str += currents[k].ref + '=' + resultMag.value + resultMag.unit + '~A';
-                }
-                else{
-                    str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
-                }
-            }
-            else{
-                let result = resultDecimals(currents[k].valueRe, 2, false);
-                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
-            }
-
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-
-        str += '\\end{cases}';
-
-        // Render System to TeX
-        str = katex.renderToString(str, {throwOnError: false});
-        // Add Notes
-        htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
-        htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
-        htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
-        htmlstr += '<div class="ml-1"><strong><p data-translate="_currResNotes1MCM"></p></strong></div>';
-        htmlstr += '</div></div></div>'
-        // Add equations in a scroll menu
-        htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
-    }
-    // Close Currents Card
-    htmlstr += '</div></div></div>';
-
-    // Close results panel
-    htmlstr += '</div></div>';
-
-    return htmlstr;
-}
-
-/**
- * Creates line
- * @param {object} svg svg to construct 
- * @param {Array} branchObjs branches
- * @param {number} width width of each card
- * @param {number} height height of each card
- * @param {number} WindowWidth global card width
- * @param {number} WindowHeight global card height
- * @param {number} Xspacing horizontal space between each card
- * @param {number} Yspacing vertical space between each card
- * @param {number} originX left space
- * @param {number} originY top space
- * @param {number} aux max spacing on bottom line
- */
-function createMesh(mesh, branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang){
-    let id = "mesh"+containerId;
-    let svg = d3.select(containerId) //create svg
-        .append("svg")
-        .attr("width", WindowWidth+2)
-        .attr("height", height+aux+Yspacing+originY+2)
-        .attr("id", id)
-
-    let color;
-    if(mesh.type == 1) color = "#F73232";
-    else color = "#629af5";
-
-    let knot;
-    let labelInfo = [];
-    for(let j = 0; j < mesh.branches.length; j++){  //add card for each branch
-        createBranchBlock(svg, branchObjs[mesh.branches[j]-1], j*(width+Xspacing)+Xspacing+1+originX, 1+originY, width, height, lang);
-        createArrow(svg, j*(width+Xspacing)+Xspacing+width+1+originX, height/2+originY, j*(width+Xspacing)+width+2*Xspacing+1+originX, height/2+originY, color)
-
-        if(mesh.branchesDir[j] == 1) knot = branchObjs[mesh.branches[j]-1].endNode;
-        else knot = branchObjs[mesh.branches[j]-1].startNode;
-
-        if(j == mesh.branches.length-1){ //add lines
-            createArrow(svg, j*(width+Xspacing)+width+2*Xspacing+1+originX, height/2+originY, j*(width+Xspacing)+width+2*Xspacing+1+originX, height+aux+1+originY, color)
-            createArrow(svg, j*(width+Xspacing)+width+2*Xspacing+1+originX, height+aux+1+originY, 1+originX, height+aux+1+originY, color)
-            createArrow(svg, 1+originX, height+aux+1+originY, 1+originX, height/2+1+originY, color)
-            createArrow(svg, 1+originX, height/2+1+originY, 1+Xspacing+originX, height/2+1+originY, color)
-            createArrow(svg, Xspacing-8+originX, height/2+1+8+originY, 1+Xspacing+originX, height/2+1+originY, color)
-            createArrow(svg, Xspacing-8+originX, height/2+1-8+originY, 1+Xspacing+originX, height/2+1+originY, color)
-            
-        }
-
-        labelInfo.push({fromX: j*(width+Xspacing)+1.5*Xspacing+width+1+originX, fromY: height/2+originY, labelX: j*(width+Xspacing)+1.5*Xspacing+width+1+originX, labelY: originY-25, labelText: knot});
-    }
-    for(let i = 0; i < labelInfo.length; i++){
-        createKnotLabels(svg, labelInfo[i]); //add labels
-    }
-}
-
-/**
- * Creates the know labels
- * @param {object} svg svg to construct 
- * @param {Array} labelInfo info about the label
- */
-function createKnotLabels(svg, labelInfo){
-    const labelWidth = 50;
-    const labelHeight = 30;
-
-    createArrow(svg, labelInfo.fromX, labelInfo.fromY, labelInfo.labelX, labelInfo.labelY, "#1e2b37");
-
-    svg.append("rect")
-        .attr("width", labelWidth+2)
-        .attr("height", labelHeight+2)
-        .attr("x", labelInfo.labelX-labelWidth/2)
-        .attr("y", labelInfo.labelY)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  '#ced0ce')
-
-    svg.append("rect")
-        .attr("width", labelWidth)
-        .attr("height", labelHeight)
-        .attr("x", labelInfo.labelX-labelWidth/2)
-        .attr("y", labelInfo.labelY)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  'white')
-
-    svg.append("text")
-        .text(labelInfo.labelText.toUpperCase())
-            .attr("x", labelInfo.labelX)
-            .attr("y", labelInfo.labelY+0.78*labelWidth/2)
-            .style("text-anchor", "middle")
-            .style('fill', '#6f7f8c')
-            .attr("font-family", " inherit")
-            .attr("font-weight", 500)
-            .attr("font-size", 14)
-            .attr("line-wight", 1.2)
-
-    svg.append("circle")
-        .attr("cx", labelInfo.fromX)
-        .attr("cy", labelInfo.fromY)
-        .attr("r", 5)
-        .style('fill', '#1e2b37')
-}
-
-/**
- * Creates line
- * @param {object} svg svg to construct 
- * @param {number} x1 from x
- * @param {number} y1 from y
- * @param {number} x2 to x
- * @param {number} y2 to y
- * @param {number} totalCurrents Number of currents in the circuit
- */
-function createArrow(svg, x1, y1, x2, y2, color){
-    svg.append("line")
-        .attr("x1", x1)  
-        .attr("y1", y1)  
-        .attr("x2", x2)  
-        .attr("y2", y2)  
-        .attr("stroke", color)  
-        .attr("stroke-width", 2)
-}
-
-/**
- * Creates branch block info
- * @param {object} svg svg to construct
- * @param {object} branch 
- * @param {number} x at x
- * @param {number} y at y
- * @param {number} w block width
- * @param {number} h block height
- */
-function createBranchBlock(svg, branch, x, y, w, h, lang){
-
-    svg.append("rect")
-        .attr("width", w+2)
-        .attr("height", h+2)
-        .attr("x", x-1)
-        .attr("y", y-1)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  '#ced0ce')
-
-    svg.append("rect")
-        .attr("width", w)
-        .attr("height", h)
-        .attr("x", x)
-        .attr("y", y)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  'white')
-
-    svg.append("rect")
-        .attr("width", w+2)
-        .attr("height", h/2+2)
-        .attr("x", x-1)
-        .attr("y", y-1)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  '#6f969a')    
-
-    svg.append("rect")
-        .attr("width", w)
-        .attr("height",h/2)
-        .attr("x", x)
-        .attr("y", y)
-        .attr("rx", 6)
-        .attr("ry", 6)
-        .attr('fill',  '#7ba7ac')
-
-    let word;
-
-	if(lang == "english") word = "Branch";
-    else word = "Ramo";
-
-    svg.append("text")
-        .text(word + ' ' + branch.id)
-            .attr("x", w/2+x)
-            .attr("y", 0.35*h+y)
-            .style("text-anchor", "middle")
-            .style('fill', 'white')
-            .attr("font-family", " inherit")
-            .attr("font-weight", 500)
-            .attr("font-size", 16)
-            .attr("line-wight", 1.2)
-
-    let comp = '';
-    for(let i = 0; i < branch.components.length; i++){
-        comp +=branch.components[i].ref; 
-        if(!(i == branch.components.length-1)) comp += " | ";
-    }
-
-    svg.append("text")
-        .text(comp)
-        .attr("x", w/2+x)
-        .attr("y", 0.8*h+y)
-        .style("text-anchor", "middle")
-        .style('fill', '#6f7f8c')
-        .attr("font-family", " inherit")
-        .attr("font-weight", 500)
-        .attr("font-size", 14)
-        .attr("line-wight", 1.2)
-}
-
 /**
  * Creates branch block info
  * @param {object} number 
@@ -924,7 +643,10 @@ function resultDecimals(number, targetDec, isangle){
 
 
 }
-
+/**
+ * Create Show All Collapse Button
+ * @returns object number: number, 
+ */
 function outShowAllBtnMCM(){
     
     // Create Show All Collapse Button
@@ -938,7 +660,6 @@ function outShowAllBtnMCM(){
     return showAllbtn;
 
 }
-
 /**
  * Function to create the output html sections
  * @returns {string} HTML string
@@ -998,34 +719,293 @@ function outShowAllBtnMCM(){
     return htmlstr;
 }
 
+
+//BUILD TEX FILE
+/**
+ * Function to build the TeX header
+ * @returns {string} TeX string
+ */
 function getTexFileHeaderMCM(){
     let texHeader = '';
-    texHeader = "\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Mesh Current Method}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{Mesh Current Method} \\\\\r\n\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n\\author{\r\n\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}\r\nLino Sousa           & M\u00E1rio Alves          \\\\\r\nsss@isep.ipp.pt  & mjf@isep.ipp.pt      \\\\\r\n\t\t\t\t\t &                      \\\\\r\nAndr\u00E9 Rocha          & Francisco Pereira    \\\\\r\nanr@isep.ipp.pt      & fdp@isep.ipp.pt      \\\\\r\n\\end{tabular}\r\n}\r\n\r\n\\date{}\r\n\r\n";
+    texHeader = "\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Mesh Current Method}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{Mesh Current Method} \\\\\r\n\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n\\author{\r\n\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}\r\nLino Sousa           & M\u00E1rio Alves          \\\\\r\nsss@isep.ipp.pt  & mjf@isep.ipp.pt      \\\\\r\n\t\t\t\t\t &                      \\\\\r\nAndr\u00E9 Rocha          & Francisco Pereira    \\\\\r\nanr@isep.ipp.pt      & fdp@isep.ipp.pt      \\\\\r\n\\end{tabular}\r\n}\r\n\r\n\\date{}\r\n\r\n";
 
     texHeader += "\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\nThis document provides a step by step solution for the submitted circuit, using the Mesh Current Method (MCM).\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
     return texHeader;
 }
+/**
+ * Function to create the output TeX
+ * @param {object} file json output
+ * @param {array} meshImages image information
+ * @returns {string} TeX string
+ */
+function buildTeX(file, meshImages){
 
-function buildPrintPDF(file, meshImages){
-
-
+	let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let T = file.components.isolatedVPS.length;
+	let F = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
 	let simpEquations =  file.analysisObj.equations;
 	let meshes = file.analysisObj.chosenMeshes;
 
 	let currents = file.analysisObj.currents;
 	let branches =  file.branches;
 
+	// Tex Variable
+	let TeX = getTexFileHeaderMCM();
+
+	if(fileContents[0]){
+		// Add Image to Tex
+		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
+		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
+		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+	}
+
+	// TeX Fundamental Vars
+	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}} \\\\\r\n";
+	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
+	if(F.value == 0){
+			TeX += "DC";
+			aux = "&&N~/~A\\;";
+	}
+	else{
+		TeX += "AC";
+		aux = "&&F="+F.value+"\\;"+F.mult;
+	}
+
+	TeX += aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
+
+	//meshes calculation
+    TeX += "\\section{Number of Meshes}\r\n\r\n\\subsection{Main Meshes}\r\n\r\n";
+    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
+    TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
+	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
+	TeX += "\\paragraph{} The number of Main meshes will be the number of needed equations\r\n";
+    TeX += "\r\n\\subsection{Auxiliar Meshes}\r\n\r\n";
+    TeX += "\\paragraph{} The number of Auxiliar Meshes it's the same as the number of Current Sources:\r\n";
+    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
+
+	//circuit mesh images
+	let pagebreakCounter = 0;
+	TeX += "\\section{Circuit Meshes}\r\n\r\n";
+	meshImages.forEach(image => {
+		let aux;
+		if(meshes[image.id-1].type == 0) aux = "Auxiliar";
+		else aux = "Main";
+		TeX += "\\subsection{Mesh~" + image.id + "~-~" + aux + "}\r\n"
+		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
+		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
+        if(meshes[image.id-1].type == 1) TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{M"+ meshes[image.id-1].id+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
+        else{
+            if(meshes[image.id-1].currValue.complex){
+				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
+				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 2, true);
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M"+meshes[image.id-1].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A&\r\n\\end{equation}\r\n\r\n';  
+            }
+            else{
+				let result = resultDecimals(meshes[image.id-1].currValue.value)
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M" + meshes[image.id-1].id+"}~:~" + result.value + result.unit + "A&\r\n\\end{equation}\r\n\r\n";  
+            }		
+		}
+		pagebreakCounter++;
+        if(pagebreakCounter == 2){
+            pagebreakCounter = 0;
+            TeX += "\\pagebreak";
+        }
+
+	});
+
+
+	//equation system
+	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} ";
+
+	let str = '\\large \\begin{cases}';
+	for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+		str += simpEquations.allRevealedEq[k];
+		if(k < simpEquations.allRevealedEq.length-1)
+			str += '\\\\[0.7em] ';
+
+	}
+	str += '\\end{cases}';
+	TeX += " Equations:\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+	TeX += "Steps:\r\n\r\n";
+	//step 1
+	 str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allVariableEq.length; k++){
+        str += simpEquations.allVariableEq[k];
+        if(k<simpEquations.allVariableEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+	//step 2
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.meshCurrRevealedEq.length; k++){
+        str += simpEquations.meshCurrRevealedEq[k];
+        if(k<simpEquations.meshCurrRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+	//step 3
+	str = '\\large \\begin{cases}';
+    for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+        str += simpEquations.allRevealedEq[k];
+        if(k<simpEquations.allRevealedEq.length-1)
+            str += ' \\\\[0.7em] ';
+
+    }
+    str += '\\end{cases}';
+    TeX += "\\begin{small}\\textbf{\\textit{Step 3:}}\\end{small}  Substitute the circuit component values\r\n";
+    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+	// Add Equation system
+	str = '\\large \\begin{cases}';
+	for(let k = 0; k<meshes.length; k++){
+		// Generate Equation
+        if(meshes[k].currValue.complex){ //malha é complexa
+            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
+            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 2, true);
+			if(resultMag.value == 0){
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
+            }
+            else{
+                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+            }
+        }
+        else{ //malha é real
+            let result = resultDecimals(meshes[k].currValue.value, 2, false);
+            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + result.value + result.unit + 'A\\\\';
+        }
+		if(k<results.length-1)
+			str += ' \\\\[0.7em] ';
+	}
+	str += '\\end{cases}';
+
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n";
+	TeX += "\\subsection{Mesh Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+	//mesh current results
+	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
+	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+	for( let i = 0; i < currents.length; i++){
+		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+
+		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+
+		// Add Components
+		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+			TeX += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+			TeX += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+			TeX += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+			TeX += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+			TeX += branches[branchIndex].capacitors[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].coils.length; k++){
+			TeX += branches[branchIndex].coils[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+			TeX += branches[branchIndex].resistors[k].ref + ', ';
+		}
+		
+		// Remove last comma
+		if(TeX[TeX.length-2] == ','){
+			TeX = TeX.slice(0,TeX.length-2);
+		}
+
+		TeX += "\\\\\r\n";
+	}
+
+	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	if(currents.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currents.length; k++){
+            str += currents[k].meshEquation;
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currents.length; k++){
+
+            if(currents[k].complex){
+                let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
+                let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 2, true);
+				if(resultMag.value == 0){
+					str += currents[k].ref + '=' + resultMag.value + resultMag.unit + 'A';
+				}
+				else{
+					str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+				}
+			}
+            else{
+                let result = resultDecimals(currents[k].valueRe, 2, false);
+                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n"
+
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+        TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
+        TeX += " The following currents were obtained by the mesh currents that exist in each branch.\r\n\\end{footnotesize}\r\n\r\n";
+	}
+
+	TeX += "\\end{document}\r\n";
+	return TeX;
+}
+
+
+//BUILD PDF FOR PRINT
+/**
+ * Main function to build the pdf for printing
+ * @param {object} file output jsonFile
+ * @param {array} meshImages array with the images information
+ */
+function buildPrintPDF(file, meshImages){
 	window.jsPDF = window.jspdf.jsPDF;
-    let marginSides = 0.2;
-    let marginBottom = 0.1;
-    let marginTop = 0.1;
 
+    const marginSides = 0.2;
+    const marginBottom = 0.1;
+    const marginTop = 0.1;
 
-	var doc = new jsPDF({unit:'pt', format:'a4'});
-    doc.page = 1;
-
-    let height = doc.internal.pageSize.height;
-
+    //letter size
     titleSize = 18;
     subtitleSize = 16;
     subsubtitleSize = 14;
@@ -1033,46 +1013,41 @@ function buildPrintPDF(file, meshImages){
     smallInfoSize = 10;
     tinyInfoSize = 8;
 
+    //init file
+    let doc = new jsPDF({unit:'pt', format:'a4'});
+    doc.setFont("docker/build/vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
+    doc.page = 1;
+    const height = doc.internal.pageSize.height;
+
+    //print head
     doc = printBuildHead(doc);
 
+    //add page
     doc.addPage();
     doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
     let line = height*marginTop;
 
+    //print information
     line = printCircuitImage(doc, line, marginSides, marginTop);
-
     line = printFundVars(doc, file, line+=10, marginSides);
-
     line = printCircInfo(doc, file, line+=10, marginSides);
-    
     line = printMeshCalc(doc, file, line+=10, marginSides);
+    line = printCircuitMeshes(doc, file, meshImages, line, marginSides, marginBottom, marginTop);
+    line = printEqSystem(doc, file, line, marginSides, marginTop, marginBottom);
+    line = printMeshResults(doc, file, line, marginSides, marginTop, marginBottom);    
+    line = printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom);
+    line = printBranchResults(doc, file, line, marginSides, marginTop, marginBottom);
 
-    doc.addPage();
-    doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
-    line = height*marginTop;
-
-    line = printCircuitMeshes(doc, meshes, meshImages, line, marginSides, marginBottom, marginTop);
-    
-    line = printEqSystem(doc, simpEquations, line, marginSides, marginTop, marginBottom);
-
-    line = printMeshResults(doc, meshes, line, marginSides, marginTop, marginBottom);    
-
-    line = printCurrentsInfo(doc, currents, line, marginSides, marginTop, marginBottom);
-
-    line = printBranchResults(doc, currents, line, marginSides, marginTop, marginBottom);
-
-
-	//doc.autoPrint();
+	doc.autoPrint();
 	doc.output("dataurlnewwindow");
 }
-
-
-
+/**
+ * Function to build the print pdf head
+ * @param {object} doc jsPDF document
+ */
 function printBuildHead(doc){
     let line = 170;
-    let width = doc.internal.pageSize.width;
-
-    doc.setFont("docker/build/vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
+    const width = doc.internal.pageSize.width;
 
     doc.setFontSize(20);
     let sampleimg = base64imgselect("logo");
@@ -1095,12 +1070,26 @@ function printBuildHead(doc){
     doc.text('fdp@isep.ipp.pt', 2*width/3, line, null, null, 'center');
 
     doc.setFontSize(10);
+    doc.text('Abstract', width/2, line+=200, null, null, 'center');
+
+    doc.setFontSize(8);
+    doc.text('This document provides a step by step solution for the submitted', width/2, line+=10, null, null, 'center');
+    doc.text('circuit, using the Mesh Current Method (MCM).', width/2, line+=10, null, null, 'center');
+
+
+    doc.setFontSize(10);
     const d = new Date(); 
-    doc.text(d.getDate()+" / "+d.getMonth()+" / "+d.getFullYear(), width/2, line+200, null, null, 'center');
+    doc.text(d.getDate()+" / "+d.getMonth()+" / "+d.getFullYear(), width/2, line+=150, null, null, 'center');
 
     return doc;
 }
-
+/**
+ * Function to build the footer
+ * @param {object} doc jsPDF document
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ */
 function printBuildFoot(doc, marginSides, marginBottom, marginTop){
     width = doc.internal.pageSize.width;
     height = doc.internal.pageSize.height;
@@ -1124,7 +1113,15 @@ function printBuildFoot(doc, marginSides, marginBottom, marginTop){
 
     return doc;
 }
-
+/**
+ * Function to write the circuit image
+ * @param {object} doc jsPDF document
+ * @param {nmber} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
 function printCircuitImage(doc, line, marginSides, marginTop){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
@@ -1149,7 +1146,14 @@ function printCircuitImage(doc, line, marginSides, marginTop){
 
     return line;
 }
-
+/**
+ * Function to print the fundamental variables
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {nmber} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @returns {number} line vertical height
+ */
 function printFundVars(doc, file, line, marginSides){
     
     let R = file.branches.length;
@@ -1177,7 +1181,14 @@ function printFundVars(doc, file, line, marginSides){
 
     return line;
 }
-
+/**
+ * Function to output the circuit information
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {nmber} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @returns {number} line vertical height
+ */
 function printCircInfo(doc, file, line, marginSides){
     
     let freq = file.analysisObj.circuitFreq;
@@ -1199,20 +1210,27 @@ function printCircInfo(doc, file, line, marginSides){
     let aux1;
     if(freq.value == 0){
         aux = 'DC';
-        aux1 = ' Hz';
+        aux1 = 'F = ' + freq.value + ' Hz';
     }
     else{
         aux = 'AC';
-        aux1 = ' '+freq.mult;
+        aux1 = 'F = ' + freq.value + ' ' + freq.mult;
     }
     doc.setFontSize(smallInfoSize);
     doc.text(aux, innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
-    doc.text('F = ' + freq.value + aux1, 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+    doc.text(aux1, 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
     doc.text(ammeters + '/' + totalCurrents, 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
 
     return line;
 }
-
+/**
+ * Function to output the mesh calculations
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @returns {number} line vertical height
+ */
 function printMeshCalc(doc, file, line, marginSides){
     let width = doc.internal.pageSize.width;
 
@@ -1228,16 +1246,12 @@ function printMeshCalc(doc, file, line, marginSides){
     doc.text(' 4.1  Main Meshes', marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(smallInfoSize);
-    doc.text('     General Expression:', marginSides*width, line+=20, null, null, 'left');
+    doc.text("Mp = R - (N - 1) - C <=>", width/2, line+=20, null, null, 'center');
+    doc.text("<=> Mp = "+ R +" - ("+ N +" - 1) - " + C + " <=> ", width/2, line+=20, null, null, 'center');
+    doc.text("Mp = " + E, width/2, line+=20, null, null, 'center');
 
     doc.setFontSize(smallInfoSize);
-    doc.text("Mp = R - (N - 1) - C", width/2, line+=20, null, null, 'center');
-
-    doc.setFontSize(smallInfoSize);
-    doc.text('     Number of Main Meshes Calculation:', marginSides*width, line+=20, null, null, 'left');
-
-    doc.setFontSize(smallInfoSize);
-    doc.text("Mp = "+ R +" - ("+ N +" - 1) - " + C + " <=> " + "Mp = " + E, width/2, line+=20, null, null, 'center');
+    doc.text('     The number of Main meshes will be the number of needed equations', marginSides*width, line+=20, null, null, 'left');
 
     doc.setFontSize(subsubtitleSize);
     doc.text(' 4.2  Auxiliar Meshes', marginSides*width, line+=25, null, null, 'left');
@@ -1249,10 +1263,27 @@ function printMeshCalc(doc, file, line, marginSides){
     doc.text("Ma = C <=> Mp = " + C, width/2, line+=20, null, null, 'center');
     return line;
 }
-
-function printCircuitMeshes(doc, meshes, images, line, marginSides, marginBottom, marginTop){
+/**
+ * Function to print the meshes
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {array} images images data
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, marginTop){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
+    let meshes = file.analysisObj.chosenMeshes;
+
+    if(line+25 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    } 
 
     doc.setFontSize(subtitleSize);
     doc.text('5.  Circuit Meshes', marginSides*width, line+=25, null, null, 'left');
@@ -1299,10 +1330,20 @@ function printCircuitMeshes(doc, meshes, images, line, marginSides, marginBottom
     }
     return line;
 }
-
-function printEqSystem(doc, equations, line, marginSides, marginTop, marginBottom){
+/**
+ * Function to output circuit branch currents
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
+    let equations =  file.analysisObj.equations;
 
     //head + FINAL equation
     if(line+equations.allVariableEq.length*12+25+15 > height-height*marginBottom-10){
@@ -1372,11 +1413,21 @@ function printEqSystem(doc, equations, line, marginSides, marginTop, marginBotto
     line+=5;
     return line;
 }
-
-function printMeshResults(doc, meshes, line, marginSides, marginTop, marginBottom){
+/**
+ * Function to output circuit branch currents
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {nmber} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+function printMeshResults(doc, file, line, marginSides, marginTop, marginBottom){
 
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
+    let meshes = file.analysisObj.chosenMeshes;
 
     if(line+meshes.length*12+25+15 > height-height*marginBottom-10){
         doc.addPage();
@@ -1388,7 +1439,7 @@ function printMeshResults(doc, meshes, line, marginSides, marginTop, marginBotto
 
     line+=5;
     doc.setLineWidth(1);
-    doc.line(width/2-0.05*width, line+5, width/2-0.05*width, line+meshes.length*13+5);
+    doc.line(width/2-0.1*width, line+5, width/2-0.1*width, line+meshes.length*13+5);
     for(let i = 0; i < meshes.length; i++){
         let str = '';
         if(meshes[i].currValue.complex){ //malha é complexa
@@ -1405,15 +1456,26 @@ function printMeshResults(doc, meshes, line, marginSides, marginTop, marginBotto
             let result = resultDecimals(meshes[i].currValue.value, 2, false);
             str += "I_{M" + meshes[i].id + "}~=~" + result.value + '~' + result.unit + 'A';
         }
-        printEquation(doc, str, width/2-0.05*width, line+=14, 'left');  
+        printEquation(doc, str, width/2-0.1*width, line+=14, 'left');  
     }
 
     return line;
 }
-
-function printCurrentsInfo(doc, currents, line, marginSides, marginTop, marginBottom){
+/**
+ * Function to output circuit branch currents
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+function printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom){
     let width = doc.internal.pageSize.width;
     let innerWidth = width - 2 * width * marginSides;
+    let currents = file.analysisObj.currents;
+
 
     if(line+25+25+20+currents.length*12 > height-height*marginBottom-10){
         doc.addPage();
@@ -1471,11 +1533,21 @@ function printCurrentsInfo(doc, currents, line, marginSides, marginTop, marginBo
     }
     return line;
 }
-
-function printBranchResults(doc, currents, line, marginSides, marginTop, marginBottom){
+/**
+ * Function to output circuit branch currents
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+function printBranchResults(doc, file, line, marginSides, marginTop, marginBottom){
 
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
+    let currents = file.analysisObj.currents;
 
     if(line+currents.length*12+25+15 > height-height*marginBottom-10){
         doc.addPage();
@@ -1483,11 +1555,12 @@ function printBranchResults(doc, currents, line, marginSides, marginTop, marginB
         line = height*marginTop;
     }
     doc.setFontSize(subtitleSize);
-    doc.text('7.  Mesh Current Results', marginSides*width, line+=25, null, null, 'left');
+    doc.text('8.  Circuit Current Results', marginSides*width, line+=25, null, null, 'left');
 
     line+=5;
     doc.setLineWidth(1);
-    doc.line(width/2-0.05*width, line+5, width/2-0.05*width, line+currents.length*13+5);
+    doc.line(2.6*width/4-0.1*width, line+5, 2.6*width/4-0.1*width, line+currents.length*13+5);
+    doc.line(1.3*width/4-0.1*width, line+5, 1.3*width/4-0.1*width, line+currents.length*13+5);
     for(let i = 0; i < currents.length; i++){
         let str = '';
         if(currents[i].complex){
@@ -1504,13 +1577,23 @@ function printBranchResults(doc, currents, line, marginSides, marginTop, marginB
             let result = resultDecimals(currents[i].valueRe, 2, false);
             str += currents[i].ref + '~=~' + result.value + '~' + result.unit +'A';
         }
-        printEquation(doc, str, width/2-0.05*width, line+=14, 'left');  
+        printEquation(doc, currents[i].meshEquation, 1.3*width/4-0.1*width, line+=14, 'left');  
+        printEquation(doc, str, 2.6*width/4-0.1*width, line, 'left');  
     }
 
     return line;
 }
-  
 
+
+
+
+//UTIL FUNCTIONS
+/**
+ * Function to output circuit branch currents
+ * @param {image} imgObj image object
+ * @param {number} max max width (for resizing purposes)
+ * @returns {string} base64 png
+ */
 function resizeandgrayMCM(imgObj, max) {
     var canvas = document.createElement('canvas');
     var canvasContext = canvas.getContext('2d');
@@ -1544,13 +1627,293 @@ function resizeandgrayMCM(imgObj, max) {
     };
 }
 
+//DRAW MESHES UTIL
+/**
+ * Function to output circuit branch currents
+ * @param {object} currents currents data
+ * @returns {string} HTML string
+ */
+ function outResultsCurrentsMCM(file){
 
+    let currents = file.analysisObj.currents;
 
-function printEquation(doc, latexString, x, y, mode){
+    let htmlstr = '';
+
+    //********************************* CIRCUIT CURRENTS ************************************
+
+    // Add card for currents
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center no-page-break" style="opacity:0.9">';
+    htmlstr += '<h6 class="lead" data-translate="_currents"></h6></div>';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
+
+    if(currents.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currents.length; k++){
+            str += currents[k].meshEquation;
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currents.length; k++){
+
+            if(currents[k].complex){
+                let resultMag = resultDecimals(currents[k].magnitude, 2, false);
+                let resultAng = resultDecimals(currents[k].angle, 2, true);
+                if(resultMag.value == 0){
+                    str += currents[k].ref + '=' + resultMag.value + resultMag.unit + '~A';
+                }
+                else{
+                    str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+                }
+            }
+            else{
+                let result = resultDecimals(currents[k].valueRe, 2, false);
+                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        // Render System to TeX
+        str = katex.renderToString(str, {throwOnError: false});
+        // Add Notes
+        htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+        htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+        htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+        htmlstr += '<div class="ml-1"><strong><p data-translate="_currResNotes1MCM"></p></strong></div>';
+        htmlstr += '</div></div></div>'
+        // Add equations in a scroll menu
+        htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
+    }
+    // Close Currents Card
+    htmlstr += '</div></div></div>';
+
+    // Close results panel
+    htmlstr += '</div></div>';
+
+    return htmlstr;
+}
+/**
+ * Creates line
+ * @param {object} svg svg to construct 
+ * @param {Array} branchObjs branches
+ * @param {number} width width of each card
+ * @param {number} height height of each card
+ * @param {number} WindowWidth global card width
+ * @param {number} WindowHeight global card height
+ * @param {number} Xspacing horizontal space between each card
+ * @param {number} Yspacing vertical space between each card
+ * @param {number} originX left space
+ * @param {number} originY top space
+ * @param {number} aux max spacing on bottom line
+ */
+function createMesh(mesh, branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang){
+    let id = "mesh"+containerId;
+    let svg = d3.select(containerId) //create svg
+        .append("svg")
+        .attr("width", WindowWidth+2)
+        .attr("height", height+aux+Yspacing+originY+2)
+        .attr("id", id)
+
+    let color;
+    if(mesh.type == 1) color = "#F73232";
+    else color = "#629af5";
+
+    let knot;
+    let labelInfo = [];
+    for(let j = 0; j < mesh.branches.length; j++){  //add card for each branch
+        createBranchBlock(svg, branchObjs[mesh.branches[j]-1], j*(width+Xspacing)+Xspacing+1+originX, 1+originY, width, height, lang);
+        createArrow(svg, j*(width+Xspacing)+Xspacing+width+1+originX, height/2+originY, j*(width+Xspacing)+width+2*Xspacing+1+originX, height/2+originY, color)
+
+        if(mesh.branchesDir[j] == 1) knot = branchObjs[mesh.branches[j]-1].endNode;
+        else knot = branchObjs[mesh.branches[j]-1].startNode;
+
+        if(j == mesh.branches.length-1){ //add lines
+            createArrow(svg, j*(width+Xspacing)+width+2*Xspacing+1+originX, height/2+originY, j*(width+Xspacing)+width+2*Xspacing+1+originX, height+aux+1+originY, color)
+            createArrow(svg, j*(width+Xspacing)+width+2*Xspacing+1+originX, height+aux+1+originY, 1+originX, height+aux+1+originY, color)
+            createArrow(svg, 1+originX, height+aux+1+originY, 1+originX, height/2+1+originY, color)
+            createArrow(svg, 1+originX, height/2+1+originY, 1+Xspacing+originX, height/2+1+originY, color)
+            createArrow(svg, Xspacing-8+originX, height/2+1+8+originY, 1+Xspacing+originX, height/2+1+originY, color)
+            createArrow(svg, Xspacing-8+originX, height/2+1-8+originY, 1+Xspacing+originX, height/2+1+originY, color)
+            
+        }
+
+        labelInfo.push({fromX: j*(width+Xspacing)+1.5*Xspacing+width+1+originX, fromY: height/2+originY, labelX: j*(width+Xspacing)+1.5*Xspacing+width+1+originX, labelY: originY-25, labelText: knot});
+    }
+    for(let i = 0; i < labelInfo.length; i++){
+        createKnotLabels(svg, labelInfo[i]); //add labels
+    }
+}
+/**
+ * Creates the know labels
+ * @param {object} svg svg to construct 
+ * @param {Array} labelInfo info about the label
+ */
+function createKnotLabels(svg, labelInfo){
+    const labelWidth = 50;
+    const labelHeight = 30;
+
+    createArrow(svg, labelInfo.fromX, labelInfo.fromY, labelInfo.labelX, labelInfo.labelY, "#1e2b37");
+
+    svg.append("rect")
+        .attr("width", labelWidth+2)
+        .attr("height", labelHeight+2)
+        .attr("x", labelInfo.labelX-labelWidth/2)
+        .attr("y", labelInfo.labelY)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  '#ced0ce')
+
+    svg.append("rect")
+        .attr("width", labelWidth)
+        .attr("height", labelHeight)
+        .attr("x", labelInfo.labelX-labelWidth/2)
+        .attr("y", labelInfo.labelY)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  'white')
+
+    svg.append("text")
+        .text(labelInfo.labelText.toUpperCase())
+            .attr("x", labelInfo.labelX)
+            .attr("y", labelInfo.labelY+0.78*labelWidth/2)
+            .style("text-anchor", "middle")
+            .style('fill', '#6f7f8c')
+            .attr("font-family", " inherit")
+            .attr("font-weight", 500)
+            .attr("font-size", 14)
+            .attr("line-wight", 1.2)
+
+    svg.append("circle")
+        .attr("cx", labelInfo.fromX)
+        .attr("cy", labelInfo.fromY)
+        .attr("r", 5)
+        .style('fill', '#1e2b37')
+}
+/**
+ * Creates line
+ * @param {object} svg svg to construct 
+ * @param {number} x1 from x
+ * @param {number} y1 from y
+ * @param {number} x2 to x
+ * @param {number} y2 to y
+ * @param {number} totalCurrents Number of currents in the circuit
+ */
+function createArrow(svg, x1, y1, x2, y2, color){
+    svg.append("line")
+        .attr("x1", x1)  
+        .attr("y1", y1)  
+        .attr("x2", x2)  
+        .attr("y2", y2)  
+        .attr("stroke", color)  
+        .attr("stroke-width", 2)
+}
+/**
+ * Creates branch block info
+ * @param {object} svg svg to construct
+ * @param {object} branch 
+ * @param {number} x at x
+ * @param {number} y at y
+ * @param {number} w block width
+ * @param {number} h block height
+ */
+function createBranchBlock(svg, branch, x, y, w, h, lang){
+
+    svg.append("rect")
+        .attr("width", w+2)
+        .attr("height", h+2)
+        .attr("x", x-1)
+        .attr("y", y-1)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  '#ced0ce')
+
+    svg.append("rect")
+        .attr("width", w)
+        .attr("height", h)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  'white')
+
+    svg.append("rect")
+        .attr("width", w+2)
+        .attr("height", h/2+2)
+        .attr("x", x-1)
+        .attr("y", y-1)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  '#6f969a')    
+
+    svg.append("rect")
+        .attr("width", w)
+        .attr("height",h/2)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('fill',  '#7ba7ac')
+
+    let word;
+
+	if(lang == "english") word = "Branch";
+    else word = "Ramo";
+
+    svg.append("text")
+        .text(word + ' ' + branch.id)
+            .attr("x", w/2+x)
+            .attr("y", 0.35*h+y)
+            .style("text-anchor", "middle")
+            .style('fill', 'white')
+            .attr("font-family", " inherit")
+            .attr("font-weight", 500)
+            .attr("font-size", 16)
+            .attr("line-wight", 1.2)
+
+    let comp = '';
+    for(let i = 0; i < branch.components.length; i++){
+        comp +=branch.components[i].ref; 
+        if(!(i == branch.components.length-1)) comp += " | ";
+    }
+
+    svg.append("text")
+        .text(comp)
+        .attr("x", w/2+x)
+        .attr("y", 0.8*h+y)
+        .style("text-anchor", "middle")
+        .style('fill', '#6f7f8c')
+        .attr("font-family", " inherit")
+        .attr("font-weight", 500)
+        .attr("font-size", 14)
+        .attr("line-wight", 1.2)
+}
+
+//JSPDF PRINT EQUATION
+/**
+ * Function to print an equation formated in latex, in jsPDF
+ * @param {object} doc jsPDF document
+ * @param {string} latexString latex string
+ * @param {number} x horizontal alignment
+ * @param {number} y vertical alignment
+ * @param {string} mode text alignment 'left', 'center' or 'right'
+ * @returns {number} line vertical height
+ */
+ function printEquation(doc, latexString, x, y, mode){
     let side;
-    if(mode == 'center') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*4/2;
+    if(mode == 'center') side = x-latexString.replaceAll("\\angle", "<").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6/2;
     else if(mode == 'left') side = x;
-    else if(mode == 'right') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*4;
+    else if(mode == 'right') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6;
 
     latexString = latexString.replaceAll(" ", "");
 
@@ -1574,7 +1937,7 @@ function printEquation(doc, latexString, x, y, mode){
             doc.setFontSize(tinyInfoSize);
             doc.text(sub, side+7, y+3, null, null, 'center');
             i+=sub.length+3;
-            side+=4*sub.length;
+            side+=4.5*sub.length;
         }
         if(latexString.charAt(i) == "^"){
             let nextChar = latexString.substr(i+1, i+10);
@@ -1597,11 +1960,11 @@ function printEquation(doc, latexString, x, y, mode){
             doc.text(',', side+=4, y, null, null, 'center');
             side-=2;
         }
-        else if(latexString.charAt(i) == "-"){
+        else if(latexString.charAt(i) == "-" || latexString.charAt(i) == '+'){
             //imprimir um espaço
             doc.setFontSize(smallInfoSize);
             doc.text('-', side+=5, y, null, null, 'center');
-            side-=2;
+            //side-=2;
         }
         else{
             //imprimir a letra
@@ -1610,9 +1973,3 @@ function printEquation(doc, latexString, x, y, mode){
         }
     }
 }
-
-
-
-
-
-

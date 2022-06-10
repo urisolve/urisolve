@@ -2034,9 +2034,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "1.0.3",
-		details: "In series voltage sources error fix",
-		releaseDate: "2022-6-10T16:50:00.000"
+		version: "1.0.4",
+		details: "In series voltage sources error fix, Minor bugs fixed",
+		releaseDate: "2022-6-10T20:21:00.000"
 	}
 	var outputJson = {
 		app: appObj,

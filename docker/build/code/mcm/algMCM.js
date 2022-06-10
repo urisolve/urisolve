@@ -1,6 +1,5 @@
 include('code/common/outPrintMCM.js');
 
-
 /*
 ERROR LIST
 
@@ -935,261 +934,10 @@ function saveToJson(totalMeshes, meshes, branchCurr, isolatedPowerScr, file){
     return file;
 }
 
-
-function buildTeX(file, meshImages){
-
-	let R = file.branches.length;
-	let N = countNodesByType(file.nodes, 0);
-	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
-	let T = file.components.isolatedVPS.length;
-	let F = file.analysisObj.circuitFreq;
-	let totalCurrents = file.analysisObj.currents.length;
-	let Amps = file.probes.ammeters.length;
-	let E = R - (N - 1) - C;
-	let simpEquations =  file.analysisObj.equations;
-	let meshes = file.analysisObj.chosenMeshes;
-
-	let currents = file.analysisObj.currents;
-	let branches =  file.branches;
-
-	// Tex Variable
-	let TeX = getTexFileHeaderMCM();
-
-	if(fileContents[0]){
-		// Add Image to Tex
-		TeX += "\\section{Circuit Image}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
-		TeX += "\\includegraphics[width=\\textwidth, keepaspectratio]{circuit}}\r\n\\caption{";
-		TeX += "Circuit image}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
-	}
-
-	// TeX Fundamental Vars
-	TeX += "\\section{Fundamental Variables}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Branches {[}R{]}}&&\\textbf{Nodes {[}N{]}}&&\\textbf{Current Sources {[}C{]}}&&\\textbf{Isolated Voltage Sources {[}T{]}} \\\\\r\n";
-	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
-
-	// TeX Circuit Information
-	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
-	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
-	if(F.value == 0){
-			TeX += "DC";
-			aux = "&&N~/~A\\;";
-	}
-	else{
-		TeX += "AC";
-		aux = "&&F="+F.value+"\\;"+F.mult;
-	}
-
-	TeX += aux;
-
-	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
-
-	//meshes calculation
-    TeX += "\\section{Number of Meshes}\r\n\r\n\\subsection{Main Meshes}\r\n\r\n";
-    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
-    TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
-	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
-	TeX += "\\paragraph{} The number of Main meshes will be the number of needed equations\r\n";
-    TeX += "\r\n\\subsection{Auxiliar Meshes}\r\n\r\n";
-    TeX += "\\paragraph{} The number of Auxiliar Meshes it's the same as the number of Current Sources:\r\n";
-    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
-
-	//circuit mesh images
-	let pagebreakCounter = 0;
-	TeX += "\\section{Circuit Meshes}\r\n\r\n";
-	meshImages.forEach(image => {
-		let aux;
-		if(meshes[image.id-1].type == 0) aux = "Auxiliar";
-		else aux = "Main";
-		TeX += "\\subsection{Mesh~" + image.id + "~-~" + aux + "}\r\n"
-		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
-		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
-        if(meshes[image.id-1].type == 1) TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{M"+ meshes[image.id-1].id+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
-        else{
-            if(meshes[image.id-1].currValue.complex){
-				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
-				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 2, true);
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M"+meshes[image.id-1].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A&\r\n\\end{equation}\r\n\r\n';  
-            }
-            else{
-				let result = resultDecimals(meshes[image.id-1].currValue.value)
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M" + meshes[image.id-1].id+"}~:~" + result.value + result.unit + "A&\r\n\\end{equation}\r\n\r\n";  
-            }		
-		}
-		pagebreakCounter++;
-        if(pagebreakCounter == 2){
-            pagebreakCounter = 0;
-            TeX += "\\pagebreak";
-        }
-
-	});
-
-
-	//equation system
-	TeX += "\\pagebreak\\section{Equation System}\r\n\r\n\\paragraph{} ";
-
-	let str = '\\large \\begin{cases}';
-	for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
-		str += simpEquations.allRevealedEq[k];
-		if(k < simpEquations.allRevealedEq.length-1)
-			str += '\\\\[0.7em] ';
-
-	}
-	str += '\\end{cases}';
-	TeX += " Equations:\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
-
-	TeX += "Steps:\r\n\r\n";
-	//step 1
-	 str = '\\large \\begin{cases}';
-    for(let k = 0; k<simpEquations.allVariableEq.length; k++){
-        str += simpEquations.allVariableEq[k];
-        if(k<simpEquations.allVariableEq.length-1)
-            str += ' \\\\[0.7em] ';
-
-    }
-    str += '\\end{cases}';
-    TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
-    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
-	//step 2
-	str = '\\large \\begin{cases}';
-    for(let k = 0; k<simpEquations.meshCurrRevealedEq.length; k++){
-        str += simpEquations.meshCurrRevealedEq[k];
-        if(k<simpEquations.meshCurrRevealedEq.length-1)
-            str += ' \\\\[0.7em] ';
-
-    }
-    str += '\\end{cases}';
-    TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
-    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
-	//step 3
-	str = '\\large \\begin{cases}';
-    for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
-        str += simpEquations.allRevealedEq[k];
-        if(k<simpEquations.allRevealedEq.length-1)
-            str += ' \\\\[0.7em] ';
-
-    }
-    str += '\\end{cases}';
-    TeX += "\\begin{small}\\textbf{\\textit{Step 3:}}\\end{small}  Substitute the circuit component values\r\n";
-    TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
-
-	// Add Equation system
-	str = '\\large \\begin{cases}';
-	for(let k = 0; k<meshes.length; k++){
-		// Generate Equation
-        if(meshes[k].currValue.complex){ //malha é complexa
-            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
-            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 2, true);
-			if(resultMag.value == 0){
-                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
-            }
-            else{
-                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
-            }
-        }
-        else{ //malha é real
-            let result = resultDecimals(meshes[k].currValue.value, 2, false);
-            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + result.value + result.unit + 'A\\\\';
-        }
-		if(k<results.length-1)
-			str += ' \\\\[0.7em] ';
-	}
-	str += '\\end{cases}';
-
-	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n";
-	TeX += "\\subsection{Mesh Currents}\r\n\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
-
-	//mesh current results
-	TeX += "\\section{Circuit Currents}\r\n\r\n\\subsection{General information}\r\n\r\n";
-	TeX += "\\begin{table}[ht]\r\n\\caption{List of the circuit currents and its properties\/components}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
-	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
-
-	for( let i = 0; i < currents.length; i++){
-		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
-
-		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
-
-		// Add Components
-		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
-			TeX += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
-			TeX += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
-			TeX += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
-			TeX += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
-			TeX += branches[branchIndex].capacitors[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].coils.length; k++){
-			TeX += branches[branchIndex].coils[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
-			TeX += branches[branchIndex].resistors[k].ref + ', ';
-		}
-		
-		// Remove last comma
-		if(TeX[TeX.length-2] == ','){
-			TeX = TeX.slice(0,TeX.length-2);
-		}
-
-		TeX += "\\\\\r\n";
-	}
-
-	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
-
-	if(currents.length > 0){
-        // Create Equations
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<currents.length; k++){
-            str += currents[k].meshEquation;
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-        str += '\\end{cases}';
-
-        str += ' \\Leftrightarrow';
-
-        str += '\\large \\begin{cases}';
-
-        for(let k = 0; k<currents.length; k++){
-
-            if(currents[k].complex){
-                let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
-                let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 2, true);
-				if(resultMag.value == 0){
-					str += currents[k].ref + '=' + resultMag.value + resultMag.unit + 'A';
-				}
-				else{
-					str += currents[k].ref + '=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
-				}
-			}
-            else{
-                let result = resultDecimals(currents[k].valueRe, 2, false);
-                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
-            }
-
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-
-        str += '\\end{cases}';
-
-        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{Results}\r\n\r\n"
-
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
-        TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
-        TeX += " The following currents were obtained by the mesh currents that exist in each branch.\r\n\\end{footnotesize}\r\n\r\n";
-	}
-
-	TeX += "\\end{document}\r\n";
-	return TeX;
-}
-
-
+/**
+ * Outputs the information to the modal
+ * @param {object} jsonFile result json File
+ */
 function Output(jsonFile){
 
 	// Print sections
@@ -1230,15 +978,9 @@ function Output(jsonFile){
 	let step3 = outStep3MCM(jsonFile.analysisObj.equations);
 	let equationSystemOutput = outEquationSystemMCM(jsonFile.analysisObj.equations, step1, step2, step3);
 	$('#eqSys').html(equationSystemOutput);
-
 	$('#resultsCurrentsMesh').html(outResultsMeshesMCM(jsonFile));
-
-
 	$('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
-
-
 	$('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
-
 
 	// Turn the viz. on
 	$("#contResults").show();
@@ -1348,6 +1090,7 @@ function Output(jsonFile){
 	// Open in overleaf
 	$("#overleaf").off().on('click', function() {
 		let TeX = buildTeX(jsonFile, canvasObjects);
+		TeX = TeX.replaceAll("[latin1]", "");
 		document.getElementById('ol_encoded_snip').value = encodeURIComponent(TeX);
 		document.getElementById('overleaf').submit();
 	});
@@ -1368,7 +1111,10 @@ function Output(jsonFile){
 }
 
 
-//função principal
+/**
+ * Main Function
+ * @param {object} data initila jsonFile data
+ */
 function loadFileAsTextMCM(data) {
 
 	let jsonFile = JSON.parse(data);
