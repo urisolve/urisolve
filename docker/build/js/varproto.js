@@ -759,7 +759,7 @@ class branch {
         this.resistors = cpResistors,
         this.coils = cpCoils,
         this.capacitors = cpCapacitors,
-        this.amperemeter = cpAmperemeter,
+        this.ammeter = cpAmperemeter,
         this.equivImpedance = cpEquivImpedance,
         this.equivVoltPs = cpEquivVoltPs,
         this.endVoltPsEndNodes = cpEndVoltPsEndNodes,
@@ -972,8 +972,8 @@ class branch {
                 else
                     this.currentData.value = currentValue;
               
-                if(this.amperemeter){
-                    if(this.amperemeter.noP == this.dcAmpPwSupplies[0].globalNoP)
+                if(this.ammeter){
+                    if(this.ammeter.noP == this.dcAmpPwSupplies[0].globalNoP)
                         this.currentData.value = math.multiply(currentValue,-1);
                     else
                         this.currentData.value = currentValue;
@@ -991,8 +991,8 @@ class branch {
                 else
                     this.currentData.value = currentValue;
               
-                if(this.amperemeter){
-                    if(this.amperemeter.noP == this.acAmpPwSupplies[0].globalNoP)
+                if(this.ammeter){
+                    if(this.ammeter.noP == this.acAmpPwSupplies[0].globalNoP)
                         this.currentData.value = -currentValue;
                     else
                         this.currentData.value = currentValue;
@@ -1121,7 +1121,7 @@ class voltmeter {
     }
 }
 
-class amperemeter {
+class ammeter {
     constructor(cpId, cpRef, cpNoP, cpNoN, cpType, cpIntRes, cpIntResMult, cpPosX, cpPosY) {
         this.id = cpId,
         this.ref = cpRef,

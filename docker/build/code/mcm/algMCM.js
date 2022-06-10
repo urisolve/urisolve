@@ -318,7 +318,7 @@ function meshDirection(malhas){
 			let aux = branches[malha.branchWithCurSrc-1];
 			let componentesRamo = [];
 			componentesRamo = componentesRamo.concat(aux.dcVoltPwSupplies, aux.acVoltPwSupplies, aux.resistors, aux.coils, aux.capacitors);
-			if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+			if(aux.ammeter != undefined) componentesRamo = componentesRamo.concat(aux.ammeter);
 
 			if(aux.dcAmpPwSupplies != 0){ 										//fonte de corrente é dc
 				if(aux.dcAmpPwSupplies[0].globalNoP == branches[malha.branchWithCurSrc-1].endNode){
@@ -402,7 +402,7 @@ function getComponents(malhas){
 				
 				let componentesRamo = [];
 				componentesRamo = componentesRamo.concat(aux.components);
-				if(aux.amperemeter != undefined) componentesRamo = componentesRamo.concat(aux.amperemeter);
+				if(aux.ammeter != undefined) componentesRamo = componentesRamo.concat(aux.ammeter);
 				let cnt = componentesRamo.length;
 				for(let j = 0; j < cnt; j++){		//ciclo que corre tantas vezes quantos componentes houver no ramo
 					let add;
@@ -413,13 +413,13 @@ function getComponents(malhas){
 						if(componentesRamo[i].noP == searchNode){	//caso extermidade positiva
 							ladoNegativo = -1;
 							searchNode = componentesRamo[i].noN;	//próximo searchNode é o nó negativo
-							if(!(aux.amperemeter === componentesRamo[i])) add = true;
+							if(!(aux.ammeter === componentesRamo[i])) add = true;
 							break;
 						}
 						else if(componentesRamo[i].noN == searchNode){	//caso extermidade negativa
 							ladoNegativo = 1;
 							searchNode = componentesRamo[i].noP;	//próximo searchNode é o nó positivo
-							if(!(aux.amperemeter === componentesRamo[i])) add = true;
+							if(!(aux.ammeter === componentesRamo[i])) add = true;
 							break;
 						}						
 					}
@@ -819,7 +819,7 @@ function getBranchCurrents(ramos, malhas){
 					equation = equation.concat("+");
 				}
 			}
-			equation += "I_{" + ramo.meshCurr[i] + ramo.meshCurr[i] + "}";
+			equation += "I_{M" + ramo.meshCurr[i] + "}";
 			if(simInfo.circuitFreq.value != 0){
 				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.re;  //calcula o valor real
 				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.im;  //calcula o valor imaginario	
@@ -886,7 +886,7 @@ function getIsolatedVoltPS(){
 /**
  * Solves for the branch currents
  * @param {array} totalMeshes total circuit meshes
- * @param {Array} meshes choosen mesh
+ * @param {Array} meshes chosen mesh
  * @param {array} branchCurr branch currents array
  * @param file json file to be updated
  * @returns updates json file
@@ -894,7 +894,7 @@ function getIsolatedVoltPS(){
 function saveToJson(totalMeshes, meshes, branchCurr, isolatedPowerScr, file){
 
 	file.analysisObj.totalMeshes = totalMeshes;
-	file.analysisObj.choosenMeshes = meshes;
+	file.analysisObj.chosenMeshes = meshes;
 	file.branches = branches;
 	file.components.isolatedVPS = isolatedPowerScr;
 
@@ -942,7 +942,7 @@ function buildTeX(file, meshImages){
 	let Amps = file.probes.ammeters.length;
 	let E = R - (N - 1) - C;
 	let simpEquations =  file.analysisObj.equations;
-	let meshes = file.analysisObj.choosenMeshes;
+	let meshes = file.analysisObj.chosenMeshes;
 
 	let currents = file.analysisObj.currents;
 	let branches =  file.branches;
@@ -966,15 +966,15 @@ function buildTeX(file, meshImages){
 	TeX += "\\section{Circuit Information}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
 	TeX += "\\textbf{Simulation {[}AC\/DC{]}} && \\textbf{Circuit Frequency {[}A{]}} && \\textbf{Ammeters {[}I{]}} \\\\\r\n";
 	if(F.value == 0){
-			TeX += "-";
-			aux = '';
+			TeX += "DC";
+			aux = "&&N~/~A\\;";
 	}
 	else{
 		TeX += "AC";
-		aux = F.mult;
+		aux = "&&F="+F.value+"\\;"+F.mult;
 	}
 
-	TeX += "&&F="+F.value+"\\;"+aux;
+	TeX += aux;
 
 	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
 
@@ -998,16 +998,16 @@ function buildTeX(file, meshImages){
 		TeX += "\\subsection{Mesh~" + image.id + "~-~" + aux + "}\r\n"
 		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
 		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
-        if(meshes[image.id-1].type == 1) TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{"+ meshes[image.id-1].id+meshes[image.id-1].id+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
+        if(meshes[image.id-1].type == 1) TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{M"+ meshes[image.id-1].id+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
         else{
             if(meshes[image.id-1].currValue.complex){
 				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
 				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 2, true);
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{"+meshes[image.id-1].id+meshes[image.id-1].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A&\r\n\\end{equation}\r\n\r\n';  
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M"+meshes[image.id-1].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A&\r\n\\end{equation}\r\n\r\n';  
             }
             else{
 				let result = resultDecimals(meshes[image.id-1].currValue.value)
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{" + meshes[image.id-1].id+meshes[image.id-1].id + "}~:~" + result.value + result.unit + "A&\r\n\\end{equation}\r\n\r\n";  
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{M" + meshes[image.id-1].id+"}~:~" + result.value + result.unit + "A&\r\n\\end{equation}\r\n\r\n";  
             }		
 		}
 		pagebreakCounter++;
@@ -1218,7 +1218,7 @@ function Output(jsonFile){
 	$('#meshEquations').html(outEquationCalcMCM(jsonFile));
 
 
-	let canvasObjects = outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.choosenMeshes);
+	let canvasObjects = outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.chosenMeshes);
 
 	let step1 = outStep1MCM(jsonFile.analysisObj.equations);
 	let step2 = outStep2MCM(jsonFile.analysisObj.equations);

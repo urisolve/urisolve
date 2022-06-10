@@ -146,7 +146,7 @@ function importData(netlistTxt){
 				}
 
 				case cpRefTest("IProbe"): {
-					var newAmpsMeter = new amperemeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
+					var newAmpsMeter = new ammeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
 					ampsMeters.push(newAmpsMeter);
 					break;
 				}
@@ -190,7 +190,7 @@ function manageAmpmeters(){
 		var found = iProbeNodesLoc.find(element => element == newNodes);
 		if (typeof found == 'undefined') {
 			iProbeNodesLoc.push(newNodes);
-			// Save location of the amperemeter in the iProbeNodesLoc and next series connected component Reference
+			// Save location of the ammeters in the iProbeNodesLoc and next series connected component Reference
 			iProbeLocVsAmpId.push({iProbLocPos: (iProbeNodesLoc.length-1), ampId: ampsMeters[i].id, ampRef: ampsMeters[i].ref, serieConCpRef: '', branchId: '', jointNodeP: '', jointNodeN: ''});
 		}
 
@@ -221,7 +221,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -237,11 +237,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -257,11 +257,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -285,11 +285,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -305,11 +305,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -328,7 +328,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -344,11 +344,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -364,11 +364,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -392,11 +392,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -412,11 +412,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -436,7 +436,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -452,11 +452,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -472,11 +472,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -500,11 +500,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -520,11 +520,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -544,7 +544,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -560,11 +560,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -580,11 +580,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -608,11 +608,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -628,11 +628,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -652,7 +652,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -668,11 +668,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -688,11 +688,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -716,11 +716,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -736,11 +736,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -760,7 +760,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -776,11 +776,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -796,11 +796,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -824,11 +824,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -844,11 +844,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -868,7 +868,7 @@ function findNodes(){
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify Amperemeter Nodes
+			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -884,11 +884,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -904,11 +904,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -932,11 +932,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -952,11 +952,11 @@ function findNodes(){
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeters nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeters nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -1488,14 +1488,14 @@ function makeBranches(){
  */
 function branchCurrents(){
 
-	// Analyse Branches vs Amperemeters (Currents Names)
-	// Now its possible to analyse if it was provided One Amperemeter for the branch
+	// Analyse Branches vs ammeterss (Currents Names)
+	// Now its possible to analyse if it was provided One ammeters for the branch
 	// If it is there, we can use its Reference to use in the Output (Current Reference)
 	// If not, produce a Unique Id for each Current
 
-	// Produce below a function to search for Amperemeter Nodes
+	// Produce below a function to search for ammeters Nodes
 
-	// Update branches information with Amperemeters Data and Next component
+	// Update branches information with ammeterss Data and Next component
 	for(var i=0; i<iProbeLocVsAmpId.length; i++) {
 		let ampRef = iProbeLocVsAmpId[i].ampRef;
 		let serieConCpRef = iProbeLocVsAmpId[i].serieConCpRef;
@@ -1506,13 +1506,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1523,13 +1523,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1540,13 +1540,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1557,13 +1557,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1574,13 +1574,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1591,13 +1591,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1608,13 +1608,13 @@ function branchCurrents(){
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for Amperemeter
+						// Save JointNode for ammeters
 						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noN;
-						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						// Save ammeters data to branch
+						branches[j].ammeters = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1623,28 +1623,28 @@ function branchCurrents(){
 	}
 
 	for(let i=0; i<branches.length; i++) {
-		if (typeof branches[i].amperemeter != 'undefined') {
-			let ampNoP = branches[i].amperemeter.noP;
-			let ampNoN = branches[i].amperemeter.noN;
-			// Verify if the Amperemeter is already connected to a Real Node
+		if (typeof branches[i].ammeters != 'undefined') {
+			let ampNoP = branches[i].ammeters.noP;
+			let ampNoN = branches[i].ammeters.noN;
+			// Verify if the ammeters is already connected to a Real Node
 			if(ampNoP == branches[i].startNode) {
-				branches[i].amperemeter.noN = branches[i].endNode;
+				branches[i].ammeters.noN = branches[i].endNode;
 				continue;
 			}
 			if(ampNoP == branches[i].endNode) {
-				branches[i].amperemeter.noN = branches[i].startNode;
+				branches[i].ammeters.noN = branches[i].startNode;
 				continue;
 			}
 			if(ampNoN == branches[i].startNode) {
-				branches[i].amperemeter.noP = branches[i].endNode;
+				branches[i].ammeters.noP = branches[i].endNode;
 				continue;
 			}
 			if(ampNoN == branches[i].endNode) {
-				branches[i].amperemeter.noP = branches[i].startNode;
+				branches[i].ammeters.noP = branches[i].startNode;
 				continue;
 			}
 
-			let nodeIndex = iProbeLocVsAmpId.findIndex(item => item.ampRef == branches[i].amperemeter.ref);
+			let nodeIndex = iProbeLocVsAmpId.findIndex(item => item.ampRef == branches[i].ammeters.ref);
 			let nextNode;
 			let ampJoint;	// True - noP; False - noN;
 			if(iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoP || iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoN) { nextNode = ampNoP; ampJoint = true; }
@@ -1742,12 +1742,12 @@ function branchCurrents(){
 				}
 				else {
 					if(nextNode == thisBranch.startNode) {
-						if(!ampJoint) { branches[i].amperemeter.noN = branches[i].endNode; branches[i].amperemeter.noP = branches[i].startNode;}
-						if(ampJoint) { branches[i].amperemeter.noN = branches[i].startNode; branches[i].amperemeter.noP = branches[i].endNode;}
+						if(!ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode;}
+						if(ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode;}
 					}
 					if(nextNode == thisBranch.endNode) {
-						if(!ampJoint) { branches[i].amperemeter.noN = branches[i].startNode; branches[i].amperemeter.noP = branches[i].endNode;}
-						if(ampJoint) { branches[i].amperemeter.noN = branches[i].endNode; branches[i].amperemeter.noP = branches[i].startNode;}
+						if(!ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode;}
+						if(ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode;}
 					}
 					end = true;
 				}
@@ -1755,7 +1755,7 @@ function branchCurrents(){
 		}
 	}
 
-	// If theres no Amperemeters, produce Ids for Currents
+	// If theres no ammeterss, produce Ids for Currents
 	// Except for branches containing a Current Power Supply
 	// Amperimeter Reference will be mandatory, over Current PS Reference
 
@@ -1775,7 +1775,7 @@ function branchCurrents(){
 		let currNoP = branches[i].startNode;
 		let currNoN = branches[i].endNode;
 
-		if(!branches[i].amperemeter) {
+		if(!branches[i].ammeters) {
 
 			// Has Current Power Supplies?
 			if(branches[i].dcAmpPwSupplies.length > 0) {
@@ -1786,17 +1786,17 @@ function branchCurrents(){
 			}
 		}
 		else {
-			// If this branch has an Amperemeter, assign its reference to the current
+			// If this branch has an ammeters, assign its reference to the current
 			// If this branch has a Current PS, save both in a separated array
-			if (typeof branches[i].amperemeter != 'undefined') {
+			if (typeof branches[i].ammeters != 'undefined') {
 
 				// Has Current Power Supplies?
-				if(branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].amperemeter, currPs: branches[i].dcAmpPwSupplies[0]});
-				if(branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].amperemeter, currPs: branches[i].acAmpPwSupplies[0]});
+				if(branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeters, currPs: branches[i].dcAmpPwSupplies[0]});
+				if(branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeters, currPs: branches[i].acAmpPwSupplies[0]});
 
-				currRef = branches[i].amperemeter.ref;
-				currNoP = branches[i].amperemeter.noP;
-				currNoN = branches[i].amperemeter.noN;
+				currRef = branches[i].ammeters.ref;
+				currNoP = branches[i].ammeters.noP;
+				currNoN = branches[i].ammeters.noN;
 			}
 		}
 		// If there's no name, create a unique one
@@ -2034,8 +2034,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "1.0.1",
-		details: "Print output in progress"
+		version: "1.0.2",
+		details: "Print output done",
+		releaseDate: "2022-6-10T11:45:00.000"
 	}
 	var outputJson = {
 		app: appObj,

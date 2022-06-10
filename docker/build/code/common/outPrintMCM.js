@@ -12,7 +12,7 @@
     htmlstr += '<div class="container print-block"><div class="row print-block">';
     htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
-    htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ versionNumber + '</span></div>';
+    htmlstr += '<div class="text-center" mt-2 mb-2"><span >V'+ versionNumber + '</span></div>';
     htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ details + '</span></div>';
     htmlstr += '</div></div>';    
 
@@ -246,16 +246,16 @@ function outMeshesMCM(branchObjs, meshesObjs){
         htmlstr += '<div class = "text-center" id="'+containerId+'"></div>';
 
         htmlstr += '<p class="text-center" id="equation'+containerId+'">';
-        if(meshesObjs[i].type == 1) htmlstr += katex.renderToString("I_{"+meshesObjs[i].id+meshesObjs[i].id+"}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
+        if(meshesObjs[i].type == 1) htmlstr += katex.renderToString("I_{M"+meshesObjs[i].id+"}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
         else{
             if(meshesObjs[i].currValue.complex){
                 let resultMag = resultDecimals(Math.sqrt(Math.pow(meshesObjs[i].currValue.re, 2) + Math.pow(meshesObjs[i].currValue.im, 2)), 2, false);
                 let resultAng = resultDecimals(Math.atan(meshesObjs[i].currValue.im/meshesObjs[i].currValue.re)*57.2957795, 2, true);
-                htmlstr += katex.renderToString("I_{"+meshesObjs[i].id+meshesObjs[i].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit +'A', {throwOnError: false});  
+                htmlstr += katex.renderToString("I_{M"+meshesObjs[i].id+"}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit +'A', {throwOnError: false});  
             }
             else{
                 let result = resultDecimals(meshesObjs[i].currValue.value, 2, false);
-                htmlstr += katex.renderToString("I_{"+meshesObjs[i].id+meshesObjs[i].id+"}~:~"+result.value+result.unit+"A", {throwOnError: false});  
+                htmlstr += katex.renderToString("I_{M"+meshesObjs[i].id+"}~:~"+result.value+result.unit+"A", {throwOnError: false});  
             }
         }
 
@@ -504,7 +504,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
  */
  function outResultsMeshesMCM(file){
 
-    let meshes = file.analysisObj.choosenMeshes;
+    let meshes = file.analysisObj.chosenMeshes;
 
     // Create HTML String
     let htmlstr = '';
@@ -529,15 +529,15 @@ function outMeshesMCM(branchObjs, meshesObjs){
             let resultAng = resultDecimals(meshes[k].currValue.angle, 2, true);
             let resultMag = resultDecimals(meshes[k].currValue.magnitude, 2, false);
             if(resultMag.value == 0){
-                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
+                str += "I_{M" + meshes[k].id + "} = " + resultMag.value + resultMag.unit + '~A\\\\';
             }
             else{
-                str += "I_{" + meshes[k].id + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+                str += "I_{M" + meshes[k].id + "} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
             }
         }
         else{ //malha é real
             let result = resultDecimals(meshes[k].currValue.value, 2, false);
-            str += "I_{" + meshes[k].id + meshes[k].id + "} = " + result.value + result.unit + 'A\\\\';
+            str += "I_{M" + meshes[k].id + "} = " + result.value + result.unit + 'A\\\\';
         }
         if(k<results.length-1)
             str += ' \\\\[0.7em] ';
@@ -943,7 +943,7 @@ function outShowAllBtnMCM(){
  * Function to create the output html sections
  * @returns {string} HTML string
  */
- function outHTMLSectionsMCM(file){
+ function outHTMLSectionsMCM(){
 
     let htmlstr = '';
 
@@ -1010,7 +1010,7 @@ function buildPrintPDF(file, meshImages){
 
 
 	let simpEquations =  file.analysisObj.equations;
-	let meshes = file.analysisObj.choosenMeshes;
+	let meshes = file.analysisObj.chosenMeshes;
 
 	let currents = file.analysisObj.currents;
 	let branches =  file.branches;
@@ -1023,7 +1023,7 @@ function buildPrintPDF(file, meshImages){
 
 	var doc = new jsPDF({unit:'pt', format:'a4'});
     doc.page = 1;
-    let width = doc.internal.pageSize.width;
+
     let height = doc.internal.pageSize.height;
 
     titleSize = 18;
@@ -1033,33 +1033,13 @@ function buildPrintPDF(file, meshImages){
     smallInfoSize = 10;
     tinyInfoSize = 8;
 
-
-    console.log(width, height);
     doc = printBuildHead(doc);
-
 
     doc.addPage();
     doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
     let line = height*marginTop;
 
-
-    doc.setFontSize(titleSize);
-    doc.text('1  Circuit Image', marginSides*width, line+=35, null, null, 'left');
-    if(fileContents[0]){
-        let imageObj = new Image();
-        imageObj.src = fileContents[0];
-        let sampleimg = resizeandgrayMCM(imageObj, 800-2*800*marginSides);
-        doc.addImage(sampleimg.data, "JPG", width*marginSides, line+=10);
-        line += sampleimg.height-0.25*sampleimg.height;
-
-        doc.addPage();
-        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
-        line = height*marginTop;
-    }
-    else{
-        doc.setFontSize(subsubtitleSize);
-        doc.text('No image', width/2, line+=20, null, null, 'center');
-    }
+    line = printCircuitImage(doc, line, marginSides, marginTop);
 
     line = printFundVars(doc, file, line+=10, marginSides);
 
@@ -1067,17 +1047,22 @@ function buildPrintPDF(file, meshImages){
     
     line = printMeshCalc(doc, file, line+=10, marginSides);
 
-
     doc.addPage();
     doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
     line = height*marginTop;
 
-    line = circuitMeshes(doc, meshes, meshImages, line, marginSides, marginBottom, marginTop);
+    line = printCircuitMeshes(doc, meshes, meshImages, line, marginSides, marginBottom, marginTop);
     
-    line = printCurrentsInfo(doc, currents, line, marginSides);
+    line = printEqSystem(doc, simpEquations, line, marginSides, marginTop, marginBottom);
+
+    line = printMeshResults(doc, meshes, line, marginSides, marginTop, marginBottom);    
+
+    line = printCurrentsInfo(doc, currents, line, marginSides, marginTop, marginBottom);
+
+    line = printBranchResults(doc, currents, line, marginSides, marginTop, marginBottom);
 
 
-	doc.autoPrint();
+	//doc.autoPrint();
 	doc.output("dataurlnewwindow");
 }
 
@@ -1085,7 +1070,7 @@ function buildPrintPDF(file, meshImages){
 
 function printBuildHead(doc){
     let line = 170;
-    width = doc.internal.pageSize.width;
+    let width = doc.internal.pageSize.width;
 
     doc.setFont("docker/build/vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
 
@@ -1140,6 +1125,31 @@ function printBuildFoot(doc, marginSides, marginBottom, marginTop){
     return doc;
 }
 
+function printCircuitImage(doc, line, marginSides, marginTop){
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    doc.setFontSize(subtitleSize);
+    doc.text('1.  Circuit Image', marginSides*width, line+=35, null, null, 'left');
+    if(fileContents[0]){
+        let imageObj = new Image();
+        imageObj.src = fileContents[0];
+        let sampleimg = resizeandgrayMCM(imageObj, 800-2*800*marginSides);
+        doc.addImage(sampleimg.data, "JPG", width*marginSides, line+=10);
+        line += sampleimg.height-0.25*sampleimg.height;
+
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    else{
+        doc.setFontSize(bigInfoSize);
+        doc.text('No image', width/2, line+=20, null, null, 'center');
+    }
+
+    return line;
+}
+
 function printFundVars(doc, file, line, marginSides){
     
     let R = file.branches.length;
@@ -1148,13 +1158,12 @@ function printFundVars(doc, file, line, marginSides){
 	let T = file.components.isolatedVPS.length;
 
     let width = doc.internal.pageSize.width;
-    let height = doc.internal.pageSize.height;
     let innerWidth = width - 2 * width * marginSides;
 
-    doc.setFontSize(titleSize);
-    doc.text('2  Fundamental Variables', marginSides*width, line+=25, null, null, 'left');
+    doc.setFontSize(subtitleSize);
+    doc.text('2.  Fundamental Variables', marginSides*width, line+=25, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text('Branches   |', innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
     doc.text('Nodes   |', 2.4*innerWidth/9 + width * marginSides, line, null, null, 'center');
     doc.text('Current Sources   |', 4.2*innerWidth/9 + width * marginSides, line, null, null, 'center');
@@ -1176,13 +1185,12 @@ function printCircInfo(doc, file, line, marginSides){
 	let ammeters = file.probes.ammeters.length;
 
     let width = doc.internal.pageSize.width;
-    let height = doc.internal.pageSize.height;
     let innerWidth = width - 2 * width * marginSides;
 
-    doc.setFontSize(titleSize);
-    doc.text('3  Circuit Information', marginSides*width, line+=25, null, null, 'left');
+    doc.setFontSize(subtitleSize);
+    doc.text('3.  Circuit Information', marginSides*width, line+=25, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text('Simulation Type [AC/DC]', innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
     doc.text('Frequency', 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
     doc.text('Ammeters', 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
@@ -1206,59 +1214,61 @@ function printCircInfo(doc, file, line, marginSides){
 }
 
 function printMeshCalc(doc, file, line, marginSides){
+    let width = doc.internal.pageSize.width;
+
     let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
 	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
 	let E = R - (N - 1) - C;
 
-    doc.setFontSize(titleSize);
-    doc.text('4  Number of Meshes', marginSides*width, line+=25, null, null, 'left');
-
     doc.setFontSize(subtitleSize);
+    doc.text('4.  Number of Meshes', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(subsubtitleSize);
     doc.text(' 4.1  Main Meshes', marginSides*width, line+=25, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text('     General Expression:', marginSides*width, line+=20, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text("Mp = R - (N - 1) - C", width/2, line+=20, null, null, 'center');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text('     Number of Main Meshes Calculation:', marginSides*width, line+=20, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text("Mp = "+ R +" - ("+ N +" - 1) - " + C + " <=> " + "Mp = " + E, width/2, line+=20, null, null, 'center');
 
-    doc.setFontSize(subtitleSize);
+    doc.setFontSize(subsubtitleSize);
     doc.text(' 4.2  Auxiliar Meshes', marginSides*width, line+=25, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text('     The number of Auxiliar Meshes is the same as the number of Current Sources:', marginSides*width, line+=20, null, null, 'left');
 
-    doc.setFontSize(bigInfoSize);
+    doc.setFontSize(smallInfoSize);
     doc.text("Ma = C <=> Mp = " + C, width/2, line+=20, null, null, 'center');
     return line;
 }
 
-function circuitMeshes(doc, meshes, images, line, marginSides, marginBottom, marginTop){
+function printCircuitMeshes(doc, meshes, images, line, marginSides, marginBottom, marginTop){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
 
-    doc.setFontSize(titleSize);
-    doc.text('5  Circuit Meshes', marginSides*width, line+=25, null, null, 'left');
+    doc.setFontSize(subtitleSize);
+    doc.text('5.  Circuit Meshes', marginSides*width, line+=25, null, null, 'left');
 
     for(let i = 0; i < meshes.length; i++){
         let prop = 1;
         if(images[i].width > width-2*width*marginSides) prop = (width-2*width*marginSides)/images[i].width;
-        if(line+10+images[i].height*prop+20 > height-height*marginBottom-10){
+        if(line+10+images[i].height*prop+30 > height-height*marginBottom-10){
             doc.addPage();
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
             line = height*marginTop;
         }
         let aux = "Main";
         if(meshes[i].type == 0) aux = "Auxiliar";
-        doc.setFontSize(subtitleSize);
-        doc.text(' 5.' + String(i+1) + '  Mesh ' + String(i+1) + ' - ' + aux, marginSides*width, line+=25, null, null, 'left');
+        doc.setFontSize(subsubtitleSize);
+        doc.text(' 5.' + String(i+1) + '  Mesh ' + String(i+1) + ' - ' + aux, marginSides*width, line+=22, null, null, 'left');
 
 
         var svg = document.getElementById("mesh#Mesh" + String(i+1));
@@ -1267,44 +1277,157 @@ function circuitMeshes(doc, meshes, images, line, marginSides, marginBottom, mar
             callback: function(data) {
                 img.setAttribute("src", data);
                 let align = (width-prop*images[i].width)/2;
-                doc.addImage(data, "PNG", align, line+=13, images[i].width*prop, images[i].height*prop);
+                doc.addImage(data, "PNG", align, line+=10, images[i].width*prop, images[i].height*prop);
                 line+=images[i].height*prop;
             }
-        })
-
-        
+        })  
 
         if(meshes[i].type == 0){
             if(meshes[i].currValue.complex){
                 let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[i].currValue.re, 2) + Math.pow(meshes[i].currValue.im, 2)), 2, false);
                 let resultAng = resultDecimals(Math.atan(meshes[i].currValue.im/meshes[i].currValue.re)*57.2957795, 2, true);
-                printEquation(doc, "I/s"+meshes[i].id+'/s'+meshes[i].id+":"+ resultMag.value + '/a ' + resultAng.value + '/g ' + resultMag.unit +'A', width/2, line+=5, 'center');  
+                printEquation(doc, "I_{M"+meshes[i].id+"}:~"+ resultMag.value + '\\angle' + resultAng.value + '^{\\circ}' + resultMag.unit +'A', width/2, line+=5, 'center');  
             }
             else{
                 let result = resultDecimals(meshes[i].currValue.value, 2, false);
-                printEquation(doc, "I/s"+meshes[i].id+'/s'+meshes[i].id+":"+result.value+''+result.unit+"A", width/2, line+=5, 'center');  
+                printEquation(doc, "I_{M"+meshes[i].id+"}:~"+result.value+result.unit+"A", width/2, line+=5, 'center');  
             }
         }
         else{
-            //printEquation(doc, meshes[i].printEq, width/2, line, 'center');  
+            printEquation(doc, "I_{M"+meshes[i].id+"}:~"+meshes[i].incognitoEq, width/2, line, 'center');  
         }
-
     }
     return line;
 }
 
-function printCurrentsInfo(doc, currents, line, marginSides){
+function printEqSystem(doc, equations, line, marginSides, marginTop, marginBottom){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
-    let innerWidth = width - 2 * width * marginSides;
 
-    doc.setFontSize(titleSize);
-    doc.text('8  Circuit Currents', marginSides*width, line+=25, null, null, 'left');
-
+    //head + FINAL equation
+    if(line+equations.allVariableEq.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
     doc.setFontSize(subtitleSize);
-    doc.text(' 8.1  General Information', marginSides*width, line+=25, null, null, 'left');
+    doc.text('6.  Equation System', marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(bigInfoSize);
+    doc.text('Equations:', marginSides*width+10, line+=15, null, null, 'left');
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(marginSides*width+13, line+5, marginSides*width+13, line+equations.allRevealedEq.length*13+5);
+    for(let i = 0; i < equations.allRevealedEq.length; i++){
+        printEquation(doc, equations.allRevealedEq[i], marginSides*width+15, line+=14, 'left');  
+    }
+    line+=5;
+
+    //STEP 1
+    if(line+equations.allVariableEq.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    doc.setFontSize(smallInfoSize);
+    doc.text('Step 1 - Initial equation system:', marginSides*width+13, line+=15, null, null, 'left');
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allVariableEq.length*13+5);
+    for(let i = 0; i < equations.allVariableEq.length; i++){
+        printEquation(doc, equations.allVariableEq[i], marginSides*width+18, line+=14, 'left');  
+    }
+    line+=5;
+
+    //STEP 2
+    if(line+equations.allVariableEq.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    doc.setFontSize(smallInfoSize);
+    doc.text('Step 2 - Substitute the known mesh current values:', marginSides*width+13, line+=15, null, null, 'left');
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.meshCurrRevealedEq.length*13+5);
+    for(let i = 0; i < equations.meshCurrRevealedEq.length; i++){
+        printEquation(doc, equations.meshCurrRevealedEq[i], marginSides*width+18, line+=14, 'left');  
+    }
+    line+=5;
+
+    //STEP 3
+    if(line+equations.allVariableEq.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    doc.setFontSize(smallInfoSize);
+    doc.text('Step 3 - Substitute the circuit component values:', marginSides*width+13, line+=15, null, null, 'left');
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allRevealedEq.length*13+5);
+    for(let i = 0; i < equations.allRevealedEq.length; i++){
+        printEquation(doc, equations.allRevealedEq[i], marginSides*width+18, line+=14, 'left');  
+    }
+    line+=5;
+    return line;
+}
+
+function printMeshResults(doc, meshes, line, marginSides, marginTop, marginBottom){
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    if(line+meshes.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    doc.setFontSize(subtitleSize);
+    doc.text('7.  Mesh Current Results', marginSides*width, line+=25, null, null, 'left');
+
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(width/2-0.05*width, line+5, width/2-0.05*width, line+meshes.length*13+5);
+    for(let i = 0; i < meshes.length; i++){
+        let str = '';
+        if(meshes[i].currValue.complex){ //malha é complexa
+            let resultAng = resultDecimals(meshes[i].currValue.angle, 2, true);
+            let resultMag = resultDecimals(meshes[i].currValue.magnitude, 2, false);
+            if(resultMag.value == 0){
+                str += "I_{M" + meshes[i].id + "}~=~" + resultMag.value + '~' + resultMag.unit + 'A';
+            }
+            else{
+                str += "I_{M" + meshes[i].id + "}~=~" + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}' + '~' + resultMag.unit + 'A';
+            }
+        }
+        else{ //malha é real
+            let result = resultDecimals(meshes[i].currValue.value, 2, false);
+            str += "I_{M" + meshes[i].id + "}~=~" + result.value + '~' + result.unit + 'A';
+        }
+        printEquation(doc, str, width/2-0.05*width, line+=14, 'left');  
+    }
+
+    return line;
+}
+
+function printCurrentsInfo(doc, currents, line, marginSides, marginTop, marginBottom){
+    let width = doc.internal.pageSize.width;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+25+20+currents.length*12 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('8.  Circuit Currents', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(subsubtitleSize);
+    doc.text(' 8.1  General Information', marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(smallInfoSize);
     doc.text('Reference', innerWidth/5 + width * marginSides, line+=20, null, null, 'center');
     doc.text('Start Node', 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
     doc.text('EndNode', 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
@@ -1348,6 +1471,44 @@ function printCurrentsInfo(doc, currents, line, marginSides){
     }
     return line;
 }
+
+function printBranchResults(doc, currents, line, marginSides, marginTop, marginBottom){
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    if(line+currents.length*12+25+15 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop);
+        line = height*marginTop;
+    }
+    doc.setFontSize(subtitleSize);
+    doc.text('7.  Mesh Current Results', marginSides*width, line+=25, null, null, 'left');
+
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(width/2-0.05*width, line+5, width/2-0.05*width, line+currents.length*13+5);
+    for(let i = 0; i < currents.length; i++){
+        let str = '';
+        if(currents[i].complex){
+            let resultMag = resultDecimals(currents[i].magnitude, 2, false);
+            let resultAng = resultDecimals(currents[i].angle, 2, true);
+            if(resultMag.value == 0){
+                str += currents[i].ref + '~=~' + resultMag.value + '~' + resultMag.unit + 'A';
+            }
+            else{
+                str += currents[i].ref + '~=~' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}' + '~' + resultMag.unit + 'A';
+            }
+        }
+        else{
+            let result = resultDecimals(currents[i].valueRe, 2, false);
+            str += currents[i].ref + '~=~' + result.value + '~' + result.unit +'A';
+        }
+        printEquation(doc, str, width/2-0.05*width, line+=14, 'left');  
+    }
+
+    return line;
+}
   
 
 function resizeandgrayMCM(imgObj, max) {
@@ -1387,42 +1548,69 @@ function resizeandgrayMCM(imgObj, max) {
 
 function printEquation(doc, latexString, x, y, mode){
     let side;
-    if(mode == 'center') side = x-latexString.length*5/2;
+    if(mode == 'center') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*4/2;
     else if(mode == 'left') side = x;
-    else if(mode == 'right') side = x-latexString.length*5;
+    else if(mode == 'right') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*4;
+
+    latexString = latexString.replaceAll(" ", "");
 
     for(let i = 0; i < latexString.length; i++){
-        if(latexString.charAt(i) == "/"){
-            switch(latexString.charAt(i+1)){
-                case 'g':
-                    //imprimir o grau
-                    doc.setFontSize(smallInfoSize);
-                    doc.text('o', side+8, y-4, null, null, 'center');
-                    i++;
-                    break;
-                case 'a':
-                    //imprimir o angulo
-                    doc.setFontSize(subtitleSize);
-                    doc.text('<', side+11, y+5, null, 25, 'center');
-                    i++;
-                    break;
-                case 's':
-                    //imprimir em baixo
-                    doc.setFontSize(smallInfoSize);
-                    doc.text(latexString.charAt(i+=2), side+=5, y+3, null, null, 'center');
-                    break;
-                default:
-
-                    break;
+        if(latexString.charAt(i) == "\\"){
+            let nextChar = latexString.substr(i+1, i+6);
+            if(nextChar.includes('angle')){
+                //imprimir o angulo
+                doc.setFontSize(subsubtitleSize);
+                doc.text('<', side+=8.5, y+4.5, null, 25, 'center');
+                i+=6;
             }
+        }
+        if(latexString.charAt(i) == "_"){
+            let sub = '';
+            for(let j = i+2; j < latexString.length; j++){
+                if(latexString.charAt(j) == '}') break;
+                else sub+=latexString.charAt(j);
+            }
+            //imprimir em baixo
+            doc.setFontSize(tinyInfoSize);
+            doc.text(sub, side+7, y+3, null, null, 'center');
+            i+=sub.length+3;
+            side+=4*sub.length;
+        }
+        if(latexString.charAt(i) == "^"){
+            let nextChar = latexString.substr(i+1, i+10);
+            if(nextChar.includes('{\\circ}')){
+                //imprimir o grau
+                doc.setFontSize(tinyInfoSize);
+                doc.text('o', side+=6, y-5, null, null, 'center');
+                i+=7;
+                side+=0.5;
+            }
+        }
+        else if(latexString.charAt(i) == "~"){
+            //imprimir um espaço
+            doc.setFontSize(smallInfoSize);
+            doc.text(' ', side+=6, y, null, null, 'center');
+        }
+        else if(latexString.charAt(i) == ","){
+            //imprimir um espaço
+            doc.setFontSize(smallInfoSize);
+            doc.text(',', side+=4, y, null, null, 'center');
+            side-=2;
+        }
+        else if(latexString.charAt(i) == "-"){
+            //imprimir um espaço
+            doc.setFontSize(smallInfoSize);
+            doc.text('-', side+=5, y, null, null, 'center');
+            side-=2;
         }
         else{
             //imprimir a letra
-            doc.setFontSize(bigInfoSize);
-            doc.text(latexString.charAt(i), side+=9, y, null, null, 'center');
+            doc.setFontSize(smallInfoSize);
+            doc.text(latexString.charAt(i), side+=6, y, null, null, 'center');
         }
     }
 }
+
 
 
 
