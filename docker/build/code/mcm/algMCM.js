@@ -947,7 +947,7 @@ function Output(jsonFile){
 	if (fileContents[0]) { 
 		let htmlstring = '<div class="container mt-3"><div class="row bg-dark rounded text-light  p-2">';
 		htmlstring += '<h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
-		htmlstring += '<div class="container mt-2 mb-2 text-center"><img style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
+		htmlstring += '<div class="container mt-2 mb-2 text-center"><img id = "circuitImage" style="max-width: 700px;width:100%;" src='+fileContents[0]+'></div>';
 		$('#circuitImage').html(htmlstring);
 		$('#circuitImage').show();	
 	}

@@ -35,6 +35,13 @@
 			$('#results-modal').modal('show');
 			$('#errors').html(errorOutput(netlistTxt.first, method));
 			$('#errors').show();
+			document.getElementById("pdfPrintButton").hidden = true;
+			document.getElementById("json").hidden = true;
+			document.getElementById("tex").hidden = true;
+			document.getElementById("overleaf").hidden = true;
+			document.getElementById("print").hidden = true;
+			document.getElementById("output-info-global").hidden = true;
+
 			let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
 			if(language == "english")
 				set_lang(dictionary.english);
@@ -2035,9 +2042,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "1.0.5",
-		details: "In series voltage sources error fix <br> Minor bugs fixed <br> Print Output Bugs Fixed",
-		releaseDate: "2022-6-12T02:50:00.000"
+		version: "1.0.6",
+		details: "In series voltage sources error fix <br> Minor bugs fixed <br> Print Output Bugs Fixed <br> Open in Overleaf Images <br> TeX download Images <br> Minor Bugs Fixed",
+		releaseDate: "2022-6-12T20:05:00.000"
 	}
 	var outputJson = {
 		app: appObj,
