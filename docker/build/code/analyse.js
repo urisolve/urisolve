@@ -6,10 +6,11 @@
  function loadFile(method){
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
+		alert("Submit netlist first!!");
 		return{
 			first: true,
 			second: 1,
-			third: "Submit netlist first!!"
+			third: "No netlist file found"
 		};
 	}
 
@@ -2034,9 +2035,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "1.0.4",
-		details: "In series voltage sources error fix, Minor bugs fixed",
-		releaseDate: "2022-6-10T20:21:00.000"
+		version: "1.0.5",
+		details: "In series voltage sources error fix <br> Minor bugs fixed <br> Print Output Bugs Fixed",
+		releaseDate: "2022-6-12T02:50:00.000"
 	}
 	var outputJson = {
 		app: appObj,
@@ -2088,10 +2089,10 @@ function common(method){
 	let load = loadFile(method);
 	if(load.first){
 		return{
-			first: true,
-			second: 1,
+			first: load.first,
+			second: load.second,
 			third: load.third
-		};
+		}
 	}
 	cleanData();
 	importData(load.third);
@@ -2161,10 +2162,9 @@ function analyseCircuit(analysismet) {
                 for (let i = 0; i < retriesNumber; i++) {
                     try {
                         let data = common(analysismet);
-                        if(data.first){
-							break;
+                        if(!data.first){
+							loadFileAsTextMCM(data.third);
                         }
-                        else loadFileAsTextMCM(data.third);
                         successFlag = true;
                     } catch (error) {
                         console.log("Error in MCM: " + error);

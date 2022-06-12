@@ -1018,15 +1018,26 @@ function Output(jsonFile){
 	// Export TeX File
 	$("#tex").off().on('click', function() {
 		const filename = 'urisolve_results.tex';
-		let TeX = buildTeX(jsonFile, canvasObjects);
+		const imagesFilename = 'urisolve_images.tex';
+
+		let TeX = buildTeXOv(jsonFile, canvasObjects);
+		let ImagesTeX = buildImTeX(canvasObjects);
+
 
 		let element = document.createElement('a');
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
 		element.setAttribute('download', filename);
+		let element2 = document.createElement('a');
+		element2.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(ImagesTeX));
+		element2.setAttribute('download', imagesFilename);
 		element.style.display = 'none';
+		element2.style.display = 'none';
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+		document.body.appendChild(element2);
+		element2.click();
+		document.body.removeChild(element2);
 	  });
 
 
@@ -1044,7 +1055,7 @@ function Output(jsonFile){
 		if(minstr.toString().length < 2)
 			minstr = "0" + minstr;
 		hourstr = hourstr + ":" + minstr;
-		let TeX = buildTeX(jsonFile, canvasObjects);
+		let TeX = buildTeXRich(jsonFile, canvasObjects);
 		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
 		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
 			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
@@ -1089,9 +1100,11 @@ function Output(jsonFile){
 
 	// Open in overleaf
 	$("#overleaf").off().on('click', function() {
-		let TeX = buildTeX(jsonFile, canvasObjects);
+		let TeX = buildTeXOv(jsonFile, canvasObjects);
+		let ImagesTeX = buildImTeX(canvasObjects);
 		TeX = TeX.replaceAll("[latin1]", "");
-		document.getElementById('ol_encoded_snip').value = encodeURIComponent(TeX);
+		document.getElementById('main').value = encodeURIComponent(TeX);
+		document.getElementById('images').value = encodeURIComponent(ImagesTeX);
 		document.getElementById('overleaf').submit();
 	});
 
