@@ -1324,7 +1324,7 @@ function buildPrintPDF(file, meshImages){
 
     //init file
     let doc = new jsPDF({unit:'pt', format:'a4'});
-    doc.setFont("docker/build/vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
+    doc.setFont("../../vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
     doc.page = 1;
     const height = doc.internal.pageSize.height;
 
@@ -1348,7 +1348,7 @@ function buildPrintPDF(file, meshImages){
     line = printBranchResults(doc, file, line, marginSides, marginTop, marginBottom);
 
 	doc.autoPrint();
-	doc.output("dataurlnewwindow");
+	doc.output("dataurlnewwindow", {filename: "output.pdf"});
 }
 /**
  * Function to build the print pdf head
@@ -1367,8 +1367,12 @@ function printBuildHead(doc){
     doc.setFontSize(16);
     doc.text('Step by Step Solution', width/2, line+=16, null, null, 'center');
 
+    doc.setFontSize(13);
+    doc.text('Project Coordinators', width/2, line+=50, null, null, 'center');
+
+
     doc.setFontSize(12);
-    doc.text('Lino Sousa', width/3, line+=50, null, null, 'center');
+    doc.text('Lino Sousa', width/3, line+=40, null, null, 'center');
     doc.text('Mário Alves', 2*width/3, line, null, null, 'center');
     doc.text('sss@isep.ipp.pt', width/3, line+=10, null, null, 'center');
     doc.text('mjf@isep.ipp.pt', 2*width/3, line, null, null, 'center');
@@ -1378,8 +1382,19 @@ function printBuildHead(doc){
     doc.text('anr@isep.ipp.pt', width/3, line+=10, null, null, 'center');
     doc.text('fdp@isep.ipp.pt', 2*width/3, line, null, null, 'center');
 
+    doc.setFontSize(13);
+    doc.text('Developers', width/2, line+=40, null, null, 'center');
+
+    doc.setFontSize(12);
+    doc.text('v2.0.0 - 07/2022', width/2, line+=40, null, null, 'center');
+    doc.text('Ângelo Pinheiro - 1190398@isep.ipp.pt', width/2, line+=15, null, null, 'center');
+
+    doc.text('v1.0.0 - 09/2019', width/2, line+=30, null, null, 'center');
+    doc.text('Miguel Duarte - 1131201@isep.ipp.pt', width/2, line+=15, null, null, 'center');
+    
+
     doc.setFontSize(10);
-    doc.text('Abstract', width/2, line+=200, null, null, 'center');
+    doc.text('Abstract', width/2, line+=100, null, null, 'center');
 
     doc.setFontSize(8);
     doc.text('This document provides a step by step solution for the submitted', width/2, line+=10, null, null, 'center');

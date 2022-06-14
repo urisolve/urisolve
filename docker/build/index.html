@@ -60,9 +60,9 @@
     <script type="text/javascript" src="vendor/latexprinter/samples/latexsample.js"></script>
     <script type="text/javascript" src="vendor/latexprinter/texworker.js"></script>
     <script type="text/javascript" src="vendor/meshes-finder/meshes-finder.js"></script>
-    <script type="text/javascript" src="vendor/jsPDF-master/dist/jspdf.umd.min.js"></script>
-    <script type="text/javascript" src="vendor/jsPDF-master/jspdf.plugin.standard_fonts_metrics.js"></script>
-    <script type="text/javascript" src="vendor/jsPDF-master/canvg.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/dist/jspdf.umd.min.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/jspdf.plugin.standard_fonts_metrics.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/canvg.js"></script>
     <script type="text/javascript" src="vendor/SvgToPng/SvgToPng.js"></script>
 
     <script type="text/javascript" src="js/includes.js"></script>
@@ -782,7 +782,7 @@
                     </form>
                     </div>
 
-                    <div class="modal-footer no-print">
+                    <div id = "buttons-div" class="modal-footer no-print">
                       <fieldset class="w-100">
                         <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
                         <button id="pdfPrintButton" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
