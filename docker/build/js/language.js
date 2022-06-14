@@ -285,7 +285,7 @@ $(function () {
             "_errCode11-0": "Foi identificado um curto circuito nos seguintes nós:",
             "_errCode15": "O circuito em questão não pode ser analisado pelo Método da Tensão nos Nós, porque não contém nenhum nó Real.",
             "_errCode15MCM": "O circuito em questão pode ser resolvido utilizando todos os passos do método. No entanto é mais simples aplicar simplesmente a Lei de Kirchhoff das Malhas.",
-            "_errCode15MCR": "O circuito em questão pode ser analisando pelo Método da Corrente nos Ramos. No entanto é mais simples aplicar a Lei de Kirchhoff das Malhas.",
+            "_errCode15MCR": "O circuito em questão pode ser analisado pelo Método da Corrente nos Ramos. No entanto é mais simples aplicar a Lei de Kirchhoff das Malhas.",
             "_circuitImage": "Imagem do Circuito",
             "_infoTitle": "Informação do Circuito",
             "_info_F": "Frequência",

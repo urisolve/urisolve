@@ -3265,7 +3265,7 @@ var typebranches=[];
 	}
     ziq.buildSystem();
 
-    var txr = solve(ziq.coefMatrix, ziq.consMatrix, ziq.varMatrix, 3);
+    var txr = solve(ziq.coefMatrix, ziq.consMatrix, ziq.varMatrix, 4);
 	var sumDCAmpresult=0;
 	var eqresult;
 	/*for(let i=0;i<txr.result._data.length;i++){
@@ -3302,7 +3302,7 @@ var typebranches=[];
 					if(branches[i].dcAmpPwSupplies[n].unitMult=="A"){
 					sumDCAmpresult=sumDCAmpresult-parseFloat(branches[i].dcAmpPwSupplies[n].value)
 					}
-
+ 
 					if(branches[i].dcAmpPwSupplies[n].unitMult=="mA"){
 						sumDCAmpresult=sumDCAmpresult-parseFloat(branches[i].dcAmpPwSupplies[n].value)*0.001;
 					}
@@ -3326,11 +3326,32 @@ var typebranches=[];
 	}
 	if(letters[0]==txr.variables._data[0]){q=5;}
 
+	function cartesian2Polar(x, y){
+		distance = Math.sqrt(x*x + y*y)
+		radians = Math.atan2(y,x) //This takes y first
+		degrees = radians * (180/Math.PI)
+		polarCoor = { distance:distance, radians:radians, degrees:degrees}
+		return polarCoor
+	}
+	var valuev=1;
+	var angulo=-45;
+	var radangulo = angulo / (180/Math.PI)
+
+	
+	var numnum=math.multiply(valuev, math.exp(math.complex(0, radangulo)));
+	var Complex="";
+	numnum.im=numnum.im.toFixed(4);
+	numnum.re=numnum.re.toFixed(4);
+	if(numnum.im>0){
+	Complex="("+numnum.re+" + "+numnum.im+"i)";
+	}
+	if(numnum.im<0){
+		Complex="("+numnum.re+" "+numnum.im+"i)";
+	}
 	
 
-
-    var sss="5.6";
-	var www=parseFloat(sss)*0.001;
+	
+	
 	
 }
 
