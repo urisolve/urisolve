@@ -2131,13 +2131,19 @@ var sumDCAmp=0;
 var sumDCAmpReal="";
 var currinReal="";
 var curroutReal="";
+var radangulo;
+var sumACAmp="";
+var Complex;
+var valuev;
+var sumACAmpReal="";
 for(let i=0;i<nodesn.length-1;i++){
 	Nodeequations[i]=[];
 	analysisObj.nodeMatrix[i]=[];
 	for(let j=0;j<branches.length;j++){
 	
-	if((currents[j].noP==nodesn[i])&&(branches[j].dcAmpPwSupplies.length>0)){
+	if((currents[j].noP==nodesn[i])&&((branches[j].dcAmpPwSupplies.length>0)||(branches[j].acAmpPwSupplies.length>0))){
 
+		if(branches[j].dcAmpPwSupplies.length>0){
 			for(let n=0;n<branches[j].dcAmpPwSupplies.length;n++){
 				if(branches[j].dcAmpPwSupplies[n].unitMult=="A"){
 					sumDCAmp=sumDCAmp-parseFloat(branches[j].dcAmpPwSupplies[n].value)}
@@ -2146,14 +2152,38 @@ for(let i=0;i<nodesn.length-1;i++){
 					sumDCAmp=sumDCAmp-parseFloat(branches[j].dcAmpPwSupplies[n].value)*0.001;
 					}
 			}
-		//sumDCAmp=sumDCAmp-parseFloat(branches[j].dcAmpPwSupplies[0].value);
 		sumDCAmpReal=sumDCAmpReal+" - "+branches[j].dcAmpPwSupplies[0].ref;
-
-		//Nodeequations[i][j]=0;
 		analysisObj.nodeMatrix[i][j]=0;
+		}
+
+		if(branches[j].acAmpPwSupplies.length>0){
+			for(let n=0;n<branches[j].acAmpPwSupplies.length;n++){
+				radangulo = parseFloat(branches[j].acAmpPwSupplies[n].theta) / (180/Math.PI);
+				valuev=parseFloat(branches[j].acAmpPwSupplies[n].value);
+				var Complex=math.multiply(valuev, math.exp(math.complex(0, radangulo)));
+				Complex.im=Complex.im.toFixed(4);
+				Complex.re=Complex.re.toFixed(4);
+					if(parseFloat(Complex.im)==0){
+					sumACAmp=sumACAmp+" - ("+Complex.re+")";
+					}
+					if(parseFloat(Complex.re)==0){
+					sumACAmp=sumACAmp+" - ("+Complex.im+")";
+					}
+					if(parseFloat(Complex.im)>0){
+					sumACAmp=sumACAmp+" - ("+Complex.re+" + "+Complex.im+"i)";
+					}
+					if(parseFloat(Complex.im)<0){
+						sumACAmp=sumACAmp+" - ("+Complex.re+" "+Complex.im+"i)"; 
+					}
+
+			}
+			sumACAmpReal=sumACAmpReal+" - "+branches[j].acAmpPwSupplies[0].ref;
+			analysisObj.nodeMatrix[i][j]=0;
+		}
+
 	}
-	if((currents[j].noN==nodesn[i])&&(branches[j].dcAmpPwSupplies.length>0)){
-		
+	if((currents[j].noN==nodesn[i])&&((branches[j].dcAmpPwSupplies.length>0)||(branches[j].acAmpPwSupplies.length>0))){
+		if(branches[j].dcAmpPwSupplies.length>0){
 		for(let n=0;n<branches[j].dcAmpPwSupplies.length;n++){
 			if(branches[j].dcAmpPwSupplies[n].unitMult=="A"){
 				sumDCAmp=sumDCAmp+parseFloat(branches[j].dcAmpPwSupplies[n].value)}
@@ -2163,11 +2193,36 @@ for(let i=0;i<nodesn.length-1;i++){
 				}
 		}
 		
-		//sumDCAmp=sumDCAmp+parseFloat(branches[j].dcAmpPwSupplies[0].value);
 		sumDCAmpReal=sumDCAmpReal+" + "+branches[j].dcAmpPwSupplies[0].ref;
-
-		//Nodeequations[i][j]=0;
 		analysisObj.nodeMatrix[i][j]=0;
+		}
+
+		if(branches[j].acAmpPwSupplies.length>0){
+			for(let n=0;n<branches[j].acAmpPwSupplies.length;n++){
+				radangulo = parseFloat(branches[j].acAmpPwSupplies[n].theta) / (180/Math.PI);
+				valuev=parseFloat(branches[j].acAmpPwSupplies[n].value);
+				Complex=math.multiply(valuev, math.exp(math.complex(0, radangulo)));
+				Complex.im=Complex.im.toFixed(4);
+				Complex.re=Complex.re.toFixed(4);
+					if(parseFloat(Complex.im)==0){
+					sumACAmp=sumACAmp+" + ("+Complex.re+")";
+					}
+					if(parseFloat(Complex.re)==0){
+					sumACAmp=sumACAmp+" + ("+Complex.im+")";
+					}
+					
+					if(parseFloat(Complex.im)>0){
+					sumACAmp=sumACAmp+" + ("+Complex.re+" + "+Complex.im+"i)";
+					}
+					if(parseFloat(Complex.im)<0){
+						sumACAmp=sumACAmp+" + ("+Complex.re+" "+Complex.im+"i)"; 
+					}
+
+			}
+			sumACAmpReal=sumACAmpReal+" + "+branches[j].acAmpPwSupplies[0].ref;
+			analysisObj.nodeMatrix[i][j]=0;
+
+		}
 	}
 	
 	if((currents[j].noP==nodesn[i])&&(currout!="")&&(branches[j].dcAmpPwSupplies.length==0)){
@@ -2207,6 +2262,9 @@ for(let i=0;i<nodesn.length-1;i++){
 
 if(sumDCAmpReal==""){
 	sumDCAmpReal=0;
+}
+if(sumACAmpReal==""){
+	sumACAmpReal=0;
 }
 /*if(sumDCAmp>=0){
 	sumDCAmp=" - " +sumDCAmp
@@ -2276,13 +2334,15 @@ if((currin!="")&&(currout!="")){
    sumDCAmpReal="";
    var currinReal="";
 	var curroutReal="";
+	sumACAmp="";
+	sumACAmpReal="";
 
 }
 
 
 
 var numMeshes;
-numMeshes=branches.length-dcAmpsPs.length-(nodesn.length-1);
+numMeshes=branches.length-dcAmpsPs.length-acAmpsPs.length-(nodesn.length-1);
 
 
 
@@ -2306,11 +2366,11 @@ numMeshes=branches.length-dcAmpsPs.length-(nodesn.length-1);
 
 var typebranches=[];
 	for(i=0;i<branches.length;i++){
-		if(branches[i].dcAmpPwSupplies.length<1){
+		if((branches[i].dcAmpPwSupplies.length<1)&&(branches[i].acAmpPwSupplies.length<1)){
 			
 			typebranches[i]=0;
 		}
-		if(branches[i].dcAmpPwSupplies.length>0){
+		if((branches[i].dcAmpPwSupplies.length>0)||(branches[i].acAmpPwSupplies.length>0)){
 			typebranches[i]=1;
 			
 		}
@@ -3326,14 +3386,14 @@ var typebranches=[];
 	}
 	if(letters[0]==txr.variables._data[0]){q=5;}
 
-	function cartesian2Polar(x, y){
+	/*function cartesian2Polar(x, y){
 		distance = Math.sqrt(x*x + y*y)
 		radians = Math.atan2(y,x) //This takes y first
 		degrees = radians * (180/Math.PI)
 		polarCoor = { distance:distance, radians:radians, degrees:degrees}
 		return polarCoor
-	}
-	var valuev=1;
+	}*/
+	/*var valuev=1;
 	var angulo=-45;
 	var radangulo = angulo / (180/Math.PI)
 
@@ -3346,8 +3406,8 @@ var typebranches=[];
 	Complex="("+numnum.re+" + "+numnum.im+"i)";
 	}
 	if(numnum.im<0){
-		Complex="("+numnum.re+" "+numnum.im+"i)";
-	}
+		Complex="("+numnum.re+" "+numnum.im+"i)"; 
+	}*/
 	
 
 	
