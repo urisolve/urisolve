@@ -1025,7 +1025,7 @@ function getTexFileHeaderMCMOv(){
 
     let texHeader = '';
     texHeader = '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\n\r';
-    texHeader += '\\include{Untitled (1)}\r\n';
+    texHeader += '\\include{images}\r\n';
     texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Mesh Current Method}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\r\n\\textsc{Mesh Current Method} \\\\\r\n\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
     texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{Project Coordinators}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{Developers}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Ângelo Pinheiro - 1190398@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
     texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\nThis document provides a step by step solution for the submitted circuit, using the Mesh Current Method (MCM).\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
@@ -2265,23 +2265,29 @@ function createBranchBlock(svg, branch, x, y, w, h, lang){
  */
  function printEquation(doc, latexString, x, y, mode){
     let side;
-    if(mode == 'center') side = x-latexString.replaceAll("\\angle", "<").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6/2;
+    if(mode == 'center') side = x-latexString.replaceAll("\\angle", "<").replaceAll("^{\\circ}", " ").replaceAll("\\cdot", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6/2;
     else if(mode == 'left') side = x;
-    else if(mode == 'right') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6;
+    else if(mode == 'right') side = x-latexString.replaceAll("\\angle", "  ").replaceAll("^{\\circ}", " ").replaceAll("\\cdot", " ").replaceAll("{", "").replaceAll("}", "").replaceAll("_", "").replaceAll(" ", "").replaceAll("~", " ").length*6;
 
     latexString = latexString.replaceAll(" ", "");
 
     for(let i = 0; i < latexString.length; i++){
         if(latexString.charAt(i) == "\\"){
-            let nextChar = latexString.substr(i+1, i+6);
+            let nextChar = latexString.slice(i+1, i+6);
             if(nextChar.includes('angle')){
                 //imprimir o angulo
                 doc.setFontSize(subsubtitleSize);
                 doc.text('<', side+=8.5, y+4.5, null, 25, 'center');
-                i+=6;
+                i+=5;
+            }
+            if(nextChar.includes('cdot')){
+                //imprimir o angulo
+                doc.setFontSize(subsubtitleSize);
+                doc.text('.', side+=6, y-2, null, null, 'center');
+                i+=4;
             }
         }
-        if(latexString.charAt(i) == "_"){
+        else if(latexString.charAt(i) == "_"){
             let sub = '';
             for(let j = i+2; j < latexString.length; j++){
                 if(latexString.charAt(j) == '}') break;
@@ -2290,11 +2296,11 @@ function createBranchBlock(svg, branch, x, y, w, h, lang){
             //imprimir em baixo
             doc.setFontSize(tinyInfoSize);
             doc.text(sub, side+7, y+3, null, null, 'center');
-            i+=sub.length+3;
-            side+=4.5*sub.length;
+            i+=sub.length+2;
+            side+=4.7*sub.length;
         }
-        if(latexString.charAt(i) == "^"){
-            let nextChar = latexString.substr(i+1, i+10);
+        else if(latexString.charAt(i) == "^"){
+            let nextChar = latexString.slice(i+1, i+10);
             if(nextChar.includes('{\\circ}')){
                 //imprimir o grau
                 doc.setFontSize(tinyInfoSize);
@@ -2317,7 +2323,7 @@ function createBranchBlock(svg, branch, x, y, w, h, lang){
         else if(latexString.charAt(i) == "-" || latexString.charAt(i) == '+'){
             //imprimir um espaço
             doc.setFontSize(smallInfoSize);
-            doc.text('-', side+=5, y, null, null, 'center');
+            doc.text(latexString.charAt(i), side+=5, y, null, null, 'center');
             //side-=2;
         }
         else{

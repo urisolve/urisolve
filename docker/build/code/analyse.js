@@ -2041,7 +2041,7 @@ function buildJson(){
 	};
 	var appObj = {
 		version: "2.0.7",
-		details: "In series voltage sources error fix <br> Minor bugs fixed <br> Print Output Bugs Fixed <br> Open in Overleaf Images <br> TeX download Images <br> Minor Bugs Fixed",
+		details: "Minor Bugs Fix",
 		releaseDate: "2022-6-12T20:05:00.000"
 	}
 	var outputJson = {

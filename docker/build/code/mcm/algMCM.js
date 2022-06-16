@@ -621,9 +621,9 @@ function buildEq(malhas){
 
 				}
 				 
-				malha.incognitoEq += '*(';
-				malha.revealedCurrSrc += '*(';
-				malha.revealedEq += '*(';
+				malha.incognitoEq += '\\cdot(';
+				malha.revealedCurrSrc += '\\cdot(';
+				malha.revealedEq += '\\cdot(';
 				if(!(componente.type == 'R')) malha.solverEq += '*';
 				malha.solverEq += '(';
 
@@ -658,8 +658,8 @@ function buildEq(malhas){
 
 						const getValUnits = multUnits.find(valUnit => valUnit.name === malhas[componente.meshCurrents[j]-1].currentSource.unitMult);
 						if(getValUnits.value != 1){
-							malha.revealedEq += '*' + getValUnits.teX;
-							malha.revealedCurrSrc += '*' + getValUnits.teX;
+							malha.revealedEq += '\\cdot' + getValUnits.teX;
+							malha.revealedCurrSrc += '\\cdot' + getValUnits.teX;
 							malha.solverEq += '*' + getValUnits.value;						
 						}
 
