@@ -2,7 +2,7 @@
 
 var _DECPLACES = {
     CALC: 3,
-    RESULT: 9
+    RESULT: 15
 };
 
 /*
@@ -1223,19 +1223,9 @@ class capacitor {
 
                 // Calculate Component Impedance
 
-                // Angle = Phase * (pi / 180)
-                let cpValAngle = -90;
-                cpValAngle = math.chain(math.pi)
-                    .divide(180)
-                    .multiply(cpValAngle)
-                    .done()
+                cZc = (-1*math.divide(numer, denom));
 
-                cZc = math.divide(numer, denom);
-
-                // Turn into a complex number
-                cZc = math.complex({ r: cZc, phi: cpValAngle });
-
-                this.impedance = math.string(math.round(cZc, _DECPLACES.RESULT));
+                this.impedance = String(math.round(cZc, _DECPLACES.RESULT))+'i';
             }
 
             return {
@@ -1309,17 +1299,10 @@ class coil {
 
                 // Calculate Component Impedance
 
-                // Angle = Phase * (pi / 180)
-                let cpValAngle = 90;
-                cpValAngle = math.chain(math.pi)
-                    .divide(180)
-                    .multiply(cpValAngle)
-                    .done()
+                cZc = numer;
 
-                // Turn into a complex number
-                cZc = math.complex({ r: numer, phi: cpValAngle });
+                this.impedance = String(math.round(cZc, _DECPLACES.RESULT))+'i';
 
-                this.impedance = math.string(math.round(cZc, _DECPLACES.RESULT));
             }
 
             return {
@@ -1507,7 +1490,7 @@ class acCurrPower {
 }
 
 class mesh {
-    constructor(meshId, meshType, meshBranches, curBranch, curSrc, meshLetterId){
+    constructor(meshId, meshType, meshBranches, curBranch, curSrc, meshLetterId, DisplayId){
         this.id = meshId;
         this.type = meshType;
         this.branches = meshBranches;
@@ -1524,6 +1507,7 @@ class mesh {
         this.solverEq = '';
         this.currValue;
         this.currMult;
+        this.displayId = DisplayId;
     }
 }
 

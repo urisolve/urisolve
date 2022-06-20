@@ -154,6 +154,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		if(count > 1) malhas_flags[i] = -1;
 	}
 
+	let auxCnt = 0;
+
 	//Escolha de C malhas auxiliares
 	for(let i = 0; i < ramos_fontecorrente_flags.length; i++){  //para cada fonte de corrente
 		if(ramos_fontecorrente_flags[i] == 1){					//Se o ramo contém fonte de corrente
@@ -174,7 +176,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 								let temp;
 								if(branches[i].dcAmpPwSupplies.length != 0) temp = branches[i].dcAmpPwSupplies[0];
 								else temp = branches[i].acAmpPwSupplies[0];
-								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1, temp, null));
+								auxCnt++;
+								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1, temp, null, auxCnt));
 								escolhido = true;
 								break;
 							}
@@ -185,6 +188,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 			}			
 		}
 	}
+
+	let mainCnt = 0;
 
 	//inutilizar as restantes malhas com ramos com fontes de corrente
 	for(let i = 0; i < malhas.length; i++){
@@ -215,7 +220,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 					ramos_flags[malhas[i][j]-1] = 1;
 				}				
 				malhas_flags[i] = 1;
-				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null, substitutions.charAt(index)));
+				mainCnt++;
+				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null, substitutions.charAt(index), mainCnt));
 				index++;
 				count++;
 			}
@@ -225,8 +231,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		}
 		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
 	}
-	
 	/*
+	
 	if(count < nr_malhas_principais){	//malhas em falta
 		let count2 = 0;
 		for(let c = 0; c < ramos_flags.length; c++){
@@ -244,8 +250,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 			}
 		}
 	}
-	*/
 	
+	*/
 	return{
 		first: false,
 		second: 0,
@@ -535,6 +541,8 @@ function parseEqData(malhas){
  * @returns {Array} the same meshes array updated
  */
 function buildEq(malhas){
+	let line = false;
+	if(simInfo.circuitFreq.value != 0) line = true;
 	malhas.forEach(malha => {												//para cada malha
 		if(malha.type == 1){												//se a malha é principal
 			if(malha.equationData.left == 0){									//se nao houverem fontes de tensão
@@ -561,8 +569,18 @@ function buildEq(malhas){
 							malha.revealedEq += '+';
 						}
 					}
+					if(line){
+						malha.incognitoEq +='\\underline{';
+						malha.revealedCurrSrc += '\\underline{';						
+					}
+
 					malha.incognitoEq += fonte.ref;
 					malha.revealedCurrSrc += fonte.ref;
+
+					if(line){
+						malha.incognitoEq +='}';
+						malha.revealedCurrSrc += '}';						
+					}	
 					if(fonte.complex){
 						malha.revealedEq += ('(' + fonte.value + '\\angle' + fonte.angle + '^{\\circ})');
 						malha.solverEq += ('(' + fonte.valueRect.split('i').join('*i') + ')');						
@@ -596,8 +614,8 @@ function buildEq(malhas){
 					malha.revealedCurrSrc += (componente.ref);					
 				}
 				else{
-					malha.incognitoEq += ('Z_{' + (componente.ref) + '}');
-					malha.revealedCurrSrc += ('Z_{' + (componente.ref) + '}');
+					malha.incognitoEq += ('\\underline{Z_{' + (componente.ref) + '}}');
+					malha.revealedCurrSrc += ('\\underline{Z_{' + (componente.ref) + '}}');
 				}
 
 				const getValUnits = multUnits.find(valUnit => valUnit.name === componente.uni);
@@ -609,7 +627,8 @@ function buildEq(malhas){
 					equivalentValueDisplay = componente.value;
 				}
 				else if(componente.type == 'C' || componente.type == "L"){
-					equivalentValueDisplay = String(Number(componente.imp.replace("i", "")).toFixed(2))+"i";
+					value = resultDecimals(componente.imp.replace("i", ""), 2, false);
+					equivalentValueDisplay = String(value.value)+value.TeXUnit+"i";
 					equivalentValue = componente.imp;
 				}
 				malha.revealedEq += equivalentValueDisplay;
@@ -642,7 +661,16 @@ function buildEq(malhas){
 							malha.solverEq += '+';
 						}
 					}
+					let aux = '';
+
+					let ac = false;
+					if(simInfo.circuitFreq.value != 0){
+						ac = true;
+					}
+
 					if(malhas[componente.meshCurrents[j]-1].type == 0){
+						aux = 'a';
+						aux += String(malhas[componente.meshCurrents[j]-1].displayId); 
 						if(simInfo.circuitFreq.value != 0){
 							malha.revealedCurrSrc += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
 							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
@@ -665,11 +693,27 @@ function buildEq(malhas){
 
 					}
 					else{
-						malha.revealedCurrSrc  += ('I_{M' + componente.meshCurrents[j] + "}");	
-						malha.revealedEq += ('I_{M' + componente.meshCurrents[j] + "}");
+						aux = 'p';
+						aux += String(malhas[componente.meshCurrents[j]-1].displayId); 
+						if(ac){
+							malha.revealedCurrSrc  += ('\\underline{');	
+							malha.revealedEq += ('\\underline{');
+						}
+						malha.revealedCurrSrc  += ('I_{M' + aux + "}");	
+						malha.revealedEq += ('I_{M' + aux + "}");
+						if(ac){
+							malha.revealedCurrSrc  += ('}');	
+							malha.revealedEq += ('}');
+						}
 						malha.solverEq += malhas[componente.meshCurrents[j]-1].letterId;
 					}
-					malha.incognitoEq += ('I_{M' + componente.meshCurrents[j] + "}");
+					if(ac){
+						malha.incognitoEq  += ('\\underline{');	
+					}
+					malha.incognitoEq += ('I_{M' + aux + "}");
+					if(ac){
+						malha.incognitoEq  += ('}');	
+					}
 				}
 				malha.incognitoEq += ')';
 				malha.revealedCurrSrc += ')';
@@ -722,18 +766,24 @@ function buildEq(malhas){
  * @returns {Array} the same meshes array updated
  */
 function solver(malhas){;
-	
-	let system = new linearEqSystem();
-	malhas.forEach(malha => {
-		if(malha.type == 1) system.addEquation(malha.solverEq);		//build equations
-	});
-	system.buildSystem();
-	let results = solve(system.coefMatrix, system.consMatrix, system.varMatrix, 5);	//solve system
+	let cnt = 0;
+	for(let i = 0; i < malhas.length; i++){
+		if(malhas[i].type == 1) cnt++;
+	}
 
-	let temp = [];
-	results.variables._data.forEach(variable => {
-		temp.push(variable[0]);
-	});
+	if(cnt > 0){
+		let system = new linearEqSystem();
+		malhas.forEach(malha => {
+			if(malha.type == 1) system.addEquation(malha.solverEq);		//build equations
+		});
+		system.buildSystem();
+		var results = solve(system.coefMatrix, system.consMatrix, system.varMatrix, 12);	//solve system
+
+		var temp = [];
+		results.variables._data.forEach(variable => {
+			temp.push(variable[0]);
+		});		
+	}
 
 	malhas.forEach(malha => {
 		let obj = new Object;
@@ -812,18 +862,29 @@ function getBranchCurrents(ramos, malhas){
 			}
 		}
 		let equation = "";
-		equation = equation.concat(ramo.currentData.ref, "=");			//lado esquerdo
+		if(simInfo.circuitFreq.value != 0) equation += '\\underline{';
+		equation += ramo.currentData.ref;
+		if(simInfo.circuitFreq.value != 0) equation += '}';
+		equation += "=";			//lado esquerdo
 		let string;
 		for(let i = 0; i < ramo.meshCurr.length; i++){					//lado direito
 			if(ramo.meshCurrDir[i] == -1){
-				equation = equation.concat("-");
+				equation += "-";
 			}
 			else{
 				if(i != 0){
-					equation = equation.concat("+");
+					equation += "+";
 				}
 			}
-			equation += "I_{M" + ramo.meshCurr[i] + "}";
+
+			let aux = '';
+			if(malhas[ramo.meshCurr[i]-1].type == 0) aux = 'a';
+			else  aux = 'p';
+			aux += String(malhas[ramo.meshCurr[i]-1].displayId); 
+
+			if(simInfo.circuitFreq.value != 0) equation += '\\underline{';
+			equation += "I_{M" + aux + "}";
+			if(simInfo.circuitFreq.value != 0) equation += '}';
 			if(simInfo.circuitFreq.value != 0){
 				valueRe = valueRe + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.re;  //calcula o valor real
 				valueIm = valueIm + ramo.meshCurrDir[i]*malhas[ramo.meshCurr[i]-1].currValue.im;  //calcula o valor imaginario	
@@ -1019,10 +1080,29 @@ function Output(jsonFile){
 	$("#tex").off().on('click', function() {
 		const filename = 'urisolve_results.tex';
 		const imagesFilename = 'urisolve_images.tex';
+				
+		//Get User info
+		let studName = document.getElementById('output-name').value;
+		let studLastname = document.getElementById('output-lastname').value;
+		let studNumber = document.getElementById('output-number').value
+		// Get Simulation Time
+		let hourstr = new Date().getHours();
+		let minstr = new Date().getMinutes();
+		if(hourstr.toString().length < 2)
+			hourstr = "0" + hourstr;
+		if(minstr.toString().length < 2)
+			minstr = "0" + minstr;
+		hourstr = hourstr + ":" + minstr;
 
 		let TeX = buildTeXOv(jsonFile, canvasObjects);
 		let ImagesTeX = buildImTeX(canvasObjects);
 
+		//Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
+		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+			string += " at " + hourstr + "\r\n";
+			TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
+		}
 
 		let element = document.createElement('a');
 		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
@@ -1056,11 +1136,11 @@ function Output(jsonFile){
 			minstr = "0" + minstr;
 		hourstr = hourstr + ":" + minstr;
 		let TeX = buildTeXRich(jsonFile, canvasObjects);
-		//Print TeX (Temporary - Index 1264 - texfile cannot be change before it)
+		//Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
 		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
 			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
 			string += " at " + hourstr + "\r\n";
-			TeX = TeX.slice(0,1264) + string + TeX.slice(1265);
+			TeX = TeX.slice(0,1432) + string + TeX.slice(1433);
 		}
 		// Instanciate printer object
         docToPrint = new latexprinter(null, 'printLnk', 'pdfPrintButton');
@@ -1073,7 +1153,7 @@ function Output(jsonFile){
 		if(fileContents[0]){
 			let imageObj = new Image();
 			imageObj.src = fileContents[0];
-			sampleimg = resizeandgray(imageObj);
+			sampleimg = resize(imageObj);
 			docToPrint.addImgFile('circuit.jpg', sampleimg);
 		}
 		// Add Canvas Images
@@ -1090,7 +1170,7 @@ function Output(jsonFile){
 					let finalImage = canvas.toDataURL();
 					docToPrint.addImgFile("meshImage"+canvasObjects[i].id+'.jpg', finalImage);
 				}
-				resizedImage.src = resizeandgrayMCM(image, 400).data;
+				resizedImage.src = resizeMCM(image, 400).data;
 			}
 			image.src = canvasObjects[i].imageData;
 		}
@@ -1102,6 +1182,24 @@ function Output(jsonFile){
 	$("#overleaf").off().on('click', function() {
 		let TeX = buildTeXOv(jsonFile, canvasObjects);
 		let ImagesTeX = buildImTeX(canvasObjects);
+		//Get User info
+		let studName = document.getElementById('output-name').value;
+		let studLastname = document.getElementById('output-lastname').value;
+		let studNumber = document.getElementById('output-number').value
+		// Get Simulation Time
+		let hourstr = new Date().getHours();
+		let minstr = new Date().getMinutes();
+		if(hourstr.toString().length < 2)
+			hourstr = "0" + hourstr;
+		if(minstr.toString().length < 2)
+			minstr = "0" + minstr;
+		hourstr = hourstr + ":" + minstr;
+		//Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
+		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+			let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+			string += " at " + hourstr + "\r\n";
+			TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
+		}
 		TeX = TeX.replaceAll("[latin1]", "");
 		document.getElementById('main').value = encodeURIComponent(TeX);
 		document.getElementById('images').value = encodeURIComponent(ImagesTeX);
@@ -1209,7 +1307,8 @@ function loadFileAsTextMCM(data) {
 	if(malhas_escolhidas.first){
 		alert(malhas_escolhidas.third);
 		return;
-	}
+	}		
+
 
 	//computa as equações das correntes dos ramos
 	let branchCurrentEq = getBranchCurrents(branches, malhas_escolhidas.third);

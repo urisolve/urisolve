@@ -1,4 +1,5 @@
 
+
 /**
  * Loads the file and validates the netlist
  * @returns netlist
@@ -71,7 +72,7 @@
 
 /**
  * Imports data to local variables
- * @param {String} netlistTxtnetlist validated file 
+ * @param {String} netlistTxt validated file 
  */
 function importData(netlistTxt){
 
@@ -186,9 +187,8 @@ function importData(netlistTxt){
 }
 
 /**
- * Sabes the ammeter position and the component in series with it
+ * Saves the ammeter position and the component in series with it
  */
-//Guarda a posição do amperímetro e o componente em série com ele
 function manageAmpmeters(){
 	for(var i=0; i<ampsMeters.length; i++) {
 		var newNodes = ampsMeters[i].getNodes();
@@ -931,7 +931,7 @@ function findNodes(){
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
 					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.toNode;
-					if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
+					else if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -951,7 +951,7 @@ function findNodes(){
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
 					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.fromNode;
-					if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
+					else if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -982,12 +982,28 @@ function findNodes(){
 	// Push nodes data to nodes array
 	for(var i=0; i<foundNodes.length; i++) {
 		var nodeId = ++circuitAnalCnt.node;
-		var nodeType = 1;	// Real Node
+		var nodeType = 1;	// Virtual Node
 		var pos = foundnodeInstances.filter(function(x){ return x === foundNodes[i]; }).length;
-        if(pos > 2 ) nodeType = 0;	// Virtual Node
+        if(pos > 2 ) nodeType = 0;	// Real Node
 		var newNode = new node(nodeId, foundNodes[i], [], nodeType, null);
 		nodes.push(newNode);
 	}
+
+	/*
+	for(let i = 0; i < ampsMeters.length; i++){
+		for(let j = 0; j < nodes.length; j++){
+			if(ampsMeters[i].noP == nodes[j].ref || nodes[j].type == 0){
+				for(let k = 0; k < nodes.length; k++){
+					if(ampsMeters[i].noN == nodes[k].ref || nodes[k].type == 0){
+						
+					}
+				}
+			}
+		}
+		
+	}
+	*/
+
 	return{
 		first: false,
 		second: 0
@@ -2017,6 +2033,7 @@ function cleanData(){
  * Agregates voltPowerSources in series
  */
 function agregatePowerSupplies(){
+
 	for(let i=0; i<branches.length; i++) {
 		branches[i].setVoltPsEndNodes();
 		branches[i].setEquivVoltPs();
@@ -2029,7 +2046,6 @@ function agregatePowerSupplies(){
  * Builds json file for further method analisys
  * @returns {String} stringyfied json file
  */
-//builds json file for further method analisys
 function buildJson(){
 
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
@@ -2040,9 +2056,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "2.0.7",
-		details: "Minor Bugs Fix",
-		releaseDate: "2022-6-12T20:05:00.000"
+		version: "2.0.8",
+		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix",
+		releaseDate: "2022-6-20T20:15:00.000"
 	}
 	var outputJson = {
 		app: appObj,
@@ -2056,6 +2072,7 @@ function buildJson(){
 	let jsonStr = JSON.stringify(outputJson);
     return jsonStr;
 }
+
 
 
 /**
@@ -2089,7 +2106,7 @@ function common(method){
 	//Manage ampmeters
 	iProbeNodesLoc = new Array();
 	iProbeNodesArr = new Array();
-	iProbeLocVsAmpId = new Array()
+	iProbeLocVsAmpId = new Array();
 
 	let load = loadFile(method);
 	if(load.first){

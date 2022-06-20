@@ -1368,7 +1368,7 @@ function validateNetlist(text) {
         let words = outLines[i].split(' ');
         let name = words[0].split(':');
         if(name[1].includes("_")){
-            name[1] = name[1].replace("_","x");
+            name[1] = name[1].replace("_","\\_");
             words[0] = name[0]+":"+name[1];
         }
         if(!isNaN(parseInt(name[1]))){

@@ -828,7 +828,7 @@ function outCurrentsInfo(currents, branches){
         htmlstr += '<div class="card text-white bg-secondary mb-3">';
         htmlstr += '<div class="card-body">'
         // Current ID
-        htmlstr += '<h5 class="card-title text-left"> ID: '+ katex.renderToString(currents[i].ref, {throwOnError: false}) +'</h5>';
+        htmlstr += '<h5 class="card-title text-left"> ID: '+ katex.renderToString(currents[i].ref.replaceAll("_", "\\_"), {throwOnError: false}) +'</h5>';
         // From Node
         htmlstr += '<h5 class="card-text text-left"> <span data-translate="_currFlow"></span>: '+ katex.renderToString(currents[i].noP, {throwOnError: false});
         // Arrow Icon
@@ -842,7 +842,7 @@ function outCurrentsInfo(currents, branches){
         let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
 
         // TeX information
-        TeXData += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+        TeXData += currents[i].ref.replaceAll("_", "\\_") + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
 
         // Add Components
         for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
@@ -2216,6 +2216,24 @@ function resizeandgray(imgObj) {
         }
     }
     canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    return canvas.toDataURL();
+}
+
+function resize(imgObj) {
+    var canvas = document.createElement('canvas');
+    var canvasContext = canvas.getContext('2d');
+     
+    var imgW = imgObj.width;
+    var imgH = imgObj.height;
+    var sizer=1;
+    if(imgW > 1200 || imgH > 650)
+        sizer = Math.min((1200/imgW),(650/imgH));
+
+    canvas.width = imgW*sizer;
+    canvas.height = imgH*sizer;
+
+    canvasContext.drawImage(imgObj, 0, 0, canvas.width, canvas.height);
+
     return canvas.toDataURL();
 }
 
