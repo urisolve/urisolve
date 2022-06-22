@@ -1400,59 +1400,20 @@ function validateNetlist(text) {
 
     /* [#18] errorCode verification */
 
-    let vSrcData = new Array();
-    //Find Voltage Sources information
-    
-    for(let i= 0; i<outLines.length; i++){
-        let words = outLines[i].split(' ');
-        if(words[0].split(':')[0] == 'Vdc'){
-            let obj = {
-                type: 'Vdc',
-                ref: words[0].split(':')[1],
-                U: words[3].split('"')[1],
-                unit: words[4].split('"')[0],
-                phase: 0
+    let VDCsources = new Array;
+    let VACsources = new Array;
+
+    for(let i = 0; i < Branches.length; i++){
+        for(let j = 0; j < Branches[i].type.length; j++){
+            if(Branches[i].type[j] == "Vdc"){
+                VDCsources.push(Branches[i].elements[j]);
             }
-            vSrcData.push(obj);
-            //Remove from netlist if it belongs to a set of voltage sources
-            for(let set = 0; set < isolatedSets.length; set++) {
-                if(isolatedSets[set].srcList.includes(obj.ref)){
-                    outLines.splice(i,1);
-                    i--;
-                }
-            }
-           
-        }
-        if(words[0].split(':')[0] == 'Vac'){
-            let obj = {
-                type: 'Vac',
-                ref: words[0].split(':')[1],
-                U: words[3].split('"')[1],
-                unit: words[4].split('"')[0],
-                freq: words[5].split('"')[1],
-                freqUnit: words[6].split('"')[0],
-                phase: words[7].split('"')[1]
-            }
-            vSrcData.push(obj);
-            for(let set = 0; set < isolatedSets.length; set++) {
-                if(isolatedSets[set].srcList.includes(obj.ref)){
-                    outLines.splice(i,1);
-                    i--;
-                }
+            else if(Branches[i].type[j] == "Vac"){
+                VACsources.push(Branches[i].elements[j]);
             }
         }
     }
 
-    let VDCsources = new Array;
-    let VACsources = new Array;
-    for(let i = 0; i < vSrcData.length; i++){
-        if(vSrcData[i].type == 'Vdc'){
-            VDCsources.push(vSrcData[i]);
-        }
-        else{
-            VACsources.push(vSrcData[i]);
-        }
-    }
     if(VDCsources.length != 0 && VACsources.length != 0){
         errorList.push({errorCode: 18, Vsources: {DC: VDCsources, AC: VACsources}});
     }

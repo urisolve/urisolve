@@ -50,14 +50,6 @@
 					third: "Error"
 				};	
 		}
-		else{
-			warningsText = warningOutput(netlistTxt.first);
-			if(warningsText != 0){
-				$('#warnings').html(warningsText);
-				$('#errors').hide();
-				$('#warnings').show();
-			}
-		}
 	}
 	document.getElementById("output-info-global").hidden = false;
 	document.getElementById("buttons-div").hidden = false;
@@ -2046,19 +2038,20 @@ function agregatePowerSupplies(){
  * Builds json file for further method analisys
  * @returns {String} stringyfied json file
  */
-function buildJson(){
+function buildJson(netlist){
 
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
 	var probesObj = { ammeters: ampsMeters, voltmeters: voltMeters };
 	var analysisObj = {
 		circuitFreq: circuitFrequency,
-		currents: currents
+		currents: currents,
+		warnings: netlist.first
 	};
 	var appObj = {
-		version: "2.0.8",
-		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix",
-		releaseDate: "2022-6-20T20:15:00.000"
+		version: "2.0.9",
+		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix; Series Voltage Sources Bug Fix",
+		releaseDate: "2022-6-22T18:00:00.000"
 	}
 	var outputJson = {
 		app: appObj,
@@ -2066,7 +2059,7 @@ function buildJson(){
 		probes: probesObj,
 		nodes: nodes,
 		branches: branches,
-		analysisObj: analysisObj
+		analysisObj: analysisObj,
 	};
 
 	let jsonStr = JSON.stringify(outputJson);
@@ -2126,7 +2119,7 @@ function common(method){
 	return {
 		first: false,
 		second: 0,
-		third: buildJson()
+		third: buildJson(load.third)
 	}
 }
 

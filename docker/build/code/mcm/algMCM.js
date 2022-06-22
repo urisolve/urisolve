@@ -1004,6 +1004,13 @@ function Output(jsonFile){
 	// Print sections
 	document.getElementById('results-board').innerHTML = outHTMLSectionsMCM();
 
+	let warningsText = warningOutput(jsonFile.analysisObj.warnings);
+	if(warningsText != 0){
+		$('#warnings').html(warningsText);
+		$('#errors').hide();
+		$('#warnings').show();
+	}
+
 	// Insert circuit image if available
 	if (fileContents[0]) { 
 		let htmlstring = '<div class="container mt-3"><div class="row bg-dark rounded text-light  p-2">';

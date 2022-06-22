@@ -663,16 +663,16 @@ function outShowAllBtnMCM(){
 
     let htmlstr = '';
 
-    // Warnings section
-    htmlstr += '<div id="errors"></div><div id="warnings"></div><div id="circuitImage"></div>';
-    htmlstr += '<div id= "contResults">';  
-    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
-    
     //remove this block after testing
     //version
     htmlstr += '<div class="container mt-3">';
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3">Debug - Version</h5></div></div>';
     htmlstr += '<div class="container mt-3" id="version"></div><div class="container mt-3">';
+
+    // Warnings section
+    htmlstr += '<div id="errors"></div><div id="warnings"></div><div id="circuitImage"></div>';
+    htmlstr += '<div id= "contResults">';  
+    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
     
     // Fundamental variables
     htmlstr += '<div class="container mt-3">';

@@ -231,10 +231,10 @@ function loadFileAsTextMTN() {
 	}
 	// Manage Voltmeters (nothing to do, because they won't count for branches calculation)
 
-	// Store ammeters Nodes
+	// Store Amperemeters Nodes
 	var iProbeNodesLoc = new Array();
 	var iProbeNodesArr = new Array();
-	var iProbeLocVsAmpId = new Array();	// Store iProbe position related to ammeter Id
+	var iProbeLocVsAmpId = new Array();	// Store iProbe position related to Amperemeter Id
 
 	for(var i=0; i<ampsMeters.length; i++) {
 		var newNodes = ampsMeters[i].getNodes();
@@ -259,7 +259,7 @@ function loadFileAsTextMTN() {
 
 
 	// Create Nodes
-	// Remove ammeters
+	// Remove Amperemeters
 	var foundNodes = new Array();
 
 	for(var i=0; i<resistors.length; i++) {
@@ -268,7 +268,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -375,7 +375,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -483,7 +483,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -591,7 +591,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -699,7 +699,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -807,7 +807,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -915,7 +915,7 @@ function loadFileAsTextMTN() {
 
 		var pos = newNodes.fromNode.search('_net');
         if(pos > -1 ) {
-			// Verify ammeter Nodes
+			// Verify Amperemeter Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -1521,14 +1521,14 @@ function loadFileAsTextMTN() {
 		}
 	}
 
-	// Analyse Branches vs ammeters (Currents Names)
-	// Now its possible to analyse if it was provided One ammeter for the branch
+	// Analyse Branches vs Amperemeters (Currents Names)
+	// Now its possible to analyse if it was provided One Amperemeter for the branch
 	// If it is there, we can use its Reference to use in the Output (Current Reference)
 	// If not, produce a Unique Id for each Current
 
-	// Produce below a function to search for ammeter Nodes
+	// Produce below a function to search for Amperemeter Nodes
 
-	// Update branches information with ammeters Data and Next component
+	// Update branches information with Amperemeters Data and Next component
 	for(var i=0; i<iProbeLocVsAmpId.length; i++) {
 		let ampRef = iProbeLocVsAmpId[i].ampRef;
 		let serieConCpRef = iProbeLocVsAmpId[i].serieConCpRef;
@@ -1539,12 +1539,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1556,12 +1556,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1573,12 +1573,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1590,12 +1590,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1607,12 +1607,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1624,12 +1624,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1641,12 +1641,12 @@ function loadFileAsTextMTN() {
 				if(refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
 					if(ampIndex > -1) {
-						// Save JointNode for ammeter
+						// Save JointNode for Amperemeter
 						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noN;
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noN;
-						// Save ammeter data to branch
+						// Save Amperemeter data to branch
 						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
@@ -1659,7 +1659,7 @@ function loadFileAsTextMTN() {
 		if (typeof branches[i].ammeter != 'undefined') {
 			let ampNoP = branches[i].ammeter.noP;
 			let ampNoN = branches[i].ammeter.noN;
-			// Verify if the ammeter is already connected to a Real Node
+			// Verify if the Amperemeter is already connected to a Real Node
 			if(ampNoP == branches[i].startNode) {
 				branches[i].ammeter.noN = branches[i].endNode;
 				continue;
@@ -1788,7 +1788,7 @@ function loadFileAsTextMTN() {
 		}
 	}
 
-	// If theres no ammeters, produce Ids for Currents
+	// If theres no Amperemeters, produce Ids for Currents
 	// Except for branches containing a Current Power Supply
 	// Amperimeter Reference will be mandatory, over Current PS Reference
 
@@ -1819,7 +1819,7 @@ function loadFileAsTextMTN() {
 			}
 		}
 		else {
-			// If this branch has an ammeter, assign its reference to the current
+			// If this branch has an Amperemeter, assign its reference to the current
 			// If this branch has a Current PS, save both in a separated array
 			if (typeof branches[i].ammeter != 'undefined') {
 

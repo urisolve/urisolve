@@ -193,11 +193,11 @@ function errorOutput(errList, method){
                 let strDC = '';
                 let strAC = '';
                 for(let j = 0; j < errList[i].Vsources.DC.length; j++){
-                    strDC += errList[i].Vsources.DC[j].ref + ',  ';
+                    strDC += errList[i].Vsources.DC[j] + ',  ';
                     if(j == errList[i].Vsources.DC.length-1) strDC = strDC.slice(0, -3);
                 }
                 for(let j = 0; j < errList[i].Vsources.AC.length; j++){
-                    strAC += errList[i].Vsources.AC[j].ref + ',  ';
+                    strAC += errList[i].Vsources.AC[j] + ',  ';
                     if(j == errList[i].Vsources.AC.length-1) strAC = strAC.slice(0, -3);
                 }
                 warnString += header;
