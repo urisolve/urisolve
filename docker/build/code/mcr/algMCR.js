@@ -16,5 +16,5 @@ function loadFileAsTextMCR(data) {
 	components = jsonFile.components;
 	simInfo = jsonFile.analysisObj;
 
- 
+  
 }

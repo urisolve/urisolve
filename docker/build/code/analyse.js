@@ -2056,9 +2056,9 @@ function buildJson(){
 		currents: currents
 	};
 	var appObj = {
-		version: "2.0.8",
-		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix",
-		releaseDate: "2022-6-20T20:15:00.000"
+		version: "0.0.0",
+		details: "",
+		releaseDate: "2022-6-00T00:00:00.000"
 	}
 	var outputJson = {
 		app: appObj,
