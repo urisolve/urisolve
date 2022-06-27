@@ -2154,7 +2154,10 @@ function analyseCircuit(analysismet) {
                 let successFlag = false;
                 for (let i = 0; i < retriesNumber; i++) {
                     try {
-                        loadFileAsTextMCR();
+						let data = common(analysismet);
+						if(!data.first){
+						loadFileAsTextMCR(data.third);
+                        }
                         successFlag = true;
                     } catch (error) {
                         console.log("Error in MCR: " + error);
