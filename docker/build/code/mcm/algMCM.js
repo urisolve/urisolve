@@ -151,6 +151,156 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		for(let j = 0; j < malhas[i].length; j++){
 			if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1) count++;
 		}
+		if(count > 1){
+			malhas.splice(i, 1);
+			i--;
+		}
+	}
+
+	let auxCnt = 0;
+
+	//Escolha de C malhas auxiliares
+	for(let i = 0; i < ramos_fontecorrente_flags.length; i++){  //para cada fonte de corrente
+		if(ramos_fontecorrente_flags[i] == 1){					//Se o ramo contém fonte de corrente
+			let escolhido = false;
+			while(!escolhido){
+				for(let j = 0; j < malhas.length; j++){			//percorrer o array das malhas
+					//if(malhas_flags[j] == 0){					//se a malha estiver disponível
+						for(let k = 0; k < malhas[j].length; k++){ //para cada ramo da malha
+							if(malhas[j][k] == i+1){				//se tiver o ramo com a fonte de corrente em questão
+								/*
+								for(let m = 0; m < malhas[j].length; m++){
+									ramos_flags[malhas[j][m]-1] = 1;
+								}
+								*/
+								
+								ramos_flags[malhas[j][i+1]-1] = 1;
+								
+
+								//malhas_flags[j] = 1;
+								let temp;
+								if(branches[i].dcAmpPwSupplies.length != 0) temp = branches[i].dcAmpPwSupplies[0];
+								else temp = branches[i].acAmpPwSupplies[0];
+								auxCnt++;
+								malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 0, malhas[j], i+1, temp, null, auxCnt));
+								malhas.splice(j, 1);
+								j--;
+								escolhido = true;
+								break;
+							}
+						}
+					//}
+					if(escolhido) break;
+				}
+			}			
+		}
+	}
+
+	let mainCnt = 0;
+
+	//inutilizar as restantes malhas com ramos com fontes de corrente
+	for(let i = 0; i < malhas.length; i++){
+		//if(malhas_flags[i] == 0){
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1){
+					//malhas_flags[i] = -1;
+					malhas.splice(i, 1);
+					i--;
+					break;
+				}
+			}
+		//}
+	}
+
+	//Escolher o número de malhas principais
+	let count = 0;
+	let add = false;
+	let index = 0;
+	for(let i = 0; i < malhas.length; i++){
+		//if(malhas_flags[i] == 0){
+			add = false;
+			for(let j = 0; j < malhas[i].length; j++){
+				if(ramos_flags[malhas[i][j]-1] == 0){ //contem ramo novo
+					add = true;
+				}
+			}
+			if(add){
+				let j;
+				for(j = 0; j < malhas[i].length; j++){
+					ramos_flags[malhas[i][j]-1] = 1;
+				}				
+				mainCnt++;
+				malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[i], -1, null, substitutions.charAt(index), mainCnt));
+				malhas.splice(malhas[i], 1);
+				i--;
+				index++;
+				count++;
+			}
+		//}
+		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
+	}
+	
+	/*
+	if(count < nr_malhas_principais){	//malhas em falta
+		let count2 = 0;
+		for(let c = 0; c < ramos_flags.length; c++){
+			if(ramos_flags[c] == 1)	 count2++;
+		}
+		if(count2 == ramos_flags.length){ //ramos todos ocupados e malhas em falta
+			let count3 = 0;
+			for(let c = 0; c < malhas.length; c++){
+				if(malhas_flags[c] == 2){
+					malhas_escolhidas.push(new mesh(malhas_escolhidas.length+1, 1, malhas[c], -1, [], substitutions.charAt(index)));
+					index++;
+					count3++;
+				}
+				if(count3 == nr_malhas_principais-count) break;
+			}
+		}
+	}
+	
+	*/
+	return{
+		first: false,
+		second: 0,
+		third: malhas_escolhidas
+	};
+}
+
+/**
+ * Chooses all meshes to use in the MCM method
+ * @param {Array} malhas Array of all circuit meshes
+ * @param {Int} nr_malhas_principais Number of main meshes needed
+ * @returns boolean, true if adjacent
+ */
+/*
+ function chooseMeshes(malhas, nr_malhas_principais){
+	let malhas_flags = [];
+	let ramos_fontecorrente_flags = [];
+	let ramos_flags = [];
+	const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ"
+	for(let i = 0; i < malhas.length; i++){
+		malhas_flags[i] = 0;
+	}
+	for(let i = 0; i < branches.length; i++){
+		if(branches[i].dcAmpPwSupplies.length + branches[i].acAmpPwSupplies.length == 0){
+			ramos_fontecorrente_flags[i] = 0;
+		}
+		else{
+			ramos_fontecorrente_flags[i] = 1;
+		}
+	}
+	for(let i = 0; i < branches.length; i++){
+		ramos_flags[i] = 0;
+	}
+
+	let malhas_escolhidas = [];
+	//inutilizar malhas com mais que uma fonte de corrente
+	for(let i = 0; i < malhas.length; i++){
+		let count = 0;
+		for(let j = 0; j < malhas[i].length; j++){
+			if(ramos_fontecorrente_flags[malhas[i][j]-1] == 1) count++;
+		}
 		if(count > 1) malhas_flags[i] = -1;
 	}
 
@@ -170,6 +320,7 @@ function chooseMeshes(malhas, nr_malhas_principais){
 									ramos_flags[malhas[j][m]-1] = 1;
 								}
 								*/
+								/*
 								ramos_flags[malhas[j][i+1]-1] = 1;
 
 								malhas_flags[j] = 1;
@@ -231,8 +382,8 @@ function chooseMeshes(malhas, nr_malhas_principais){
 		}
 		if(count == nr_malhas_principais) break; //caso tenha escolhido malhas suficientes
 	}
+	*/
 	/*
-	
 	if(count < nr_malhas_principais){	//malhas em falta
 		let count2 = 0;
 		for(let c = 0; c < ramos_flags.length; c++){
@@ -252,12 +403,14 @@ function chooseMeshes(malhas, nr_malhas_principais){
 	}
 	
 	*/
+	/*
 	return{
 		first: false,
 		second: 0,
 		third: malhas_escolhidas
 	};
 }
+*/
 
 /**
  * Determines if a component is in the same way of his branch

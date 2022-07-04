@@ -981,21 +981,6 @@ function findNodes(){
 		nodes.push(newNode);
 	}
 
-	/*
-	for(let i = 0; i < ampsMeters.length; i++){
-		for(let j = 0; j < nodes.length; j++){
-			if(ampsMeters[i].noP == nodes[j].ref || nodes[j].type == 0){
-				for(let k = 0; k < nodes.length; k++){
-					if(ampsMeters[i].noN == nodes[k].ref || nodes[k].type == 0){
-						
-					}
-				}
-			}
-		}
-		
-	}
-	*/
-
 	return{
 		first: false,
 		second: 0
@@ -2024,7 +2009,7 @@ function cleanData(){
 /**
  * Agregates voltPowerSources in series
  */
-function agregatePowerSupplies(){
+function getBranchInfo(){
 
 	for(let i=0; i<branches.length; i++) {
 		branches[i].setVoltPsEndNodes();
@@ -2049,9 +2034,9 @@ function buildJson(netlist){
 		warnings: netlist.first
 	};
 	var appObj = {
-		version: "2.0.9",
-		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix; Series Voltage Sources Bug Fix",
-		releaseDate: "2022-6-22T18:00:00.000"
+		version: "2.1.0",
+		details: "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix; Series Voltage Sources Bug Fix; Algoritmo de escolha de malhas optimizado",
+		releaseDate: "2022-07-04T3:00:00.000"
 	}
 	var outputJson = {
 		app: appObj,
@@ -2115,7 +2100,7 @@ function common(method){
 	findNodes();
 	makeBranches();
 	branchCurrents();
-    agregatePowerSupplies();
+    getBranchInfo();
 	return {
 		first: false,
 		second: 0,

@@ -980,8 +980,8 @@ function buildTeXRich(file, meshImages){
 					str += '\\underline{' + currents[k].ref + '}=' + resultMag.value + resultMag.unit + 'A';
 				}
 				else{
-					str += '\\underline' + currents[k].ref + '}=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
-				}
+					str += '\\underline{' + currents[k].ref + '}=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
+                }
 			}
             else{
                 let result = resultDecimals(currents[k].valueRe, 2, false);
@@ -1383,7 +1383,11 @@ function buildPrintPDF(file, meshImages){
     line = printBranchResults(doc, file, line, marginSides, marginTop, marginBottom, lang);
 
 	doc.autoPrint();
-	doc.output("dataurlnewwindow", {filename: "output.pdf"});
+
+    const d = new Date();
+    let name = "U=Risolve_Results_D_" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + "_T_" + d.getHours() + ":" + d.getMinutes() + ":" + d.getMilliseconds() + ".pdf";
+    doc.setProperties({ title: name });
+	doc.output("dataurlnewwindow", {filename: "Results"});
 }
 /**
  * Function to build the print pdf head
@@ -1396,7 +1400,7 @@ function printBuildHead(doc, lang){
     doc.setFontSize(20);
     let sampleimg = base64imgselect("logo");
     doc.addImage(sampleimg, "JPG", width/2-70, line-20, 67/3.5, 82/3.5);
-	doc.text('URIsolve APP', width/2+10, line-1, null, null, 'center');
+	doc.text('U=RIsolve APP', width/2+10, line-1, null, null, 'center');
     doc.text(lang._MCMmethod, width/2, line+=20, null, null, 'center');
 
     doc.setFontSize(16);
@@ -1438,7 +1442,7 @@ function printBuildHead(doc, lang){
 
     doc.setFontSize(10);
     const d = new Date(); 
-    doc.text(d.getDate()+" / "+d.getMonth()+" / "+d.getFullYear(), width/2, line+=150, null, null, 'center');
+    doc.text(d.getDate()+" / "+(d.getMonth()+1)+" / "+d.getFullYear(), width/2, line+=150, null, null, 'center');
 
     return doc;
 }
@@ -1459,7 +1463,7 @@ function printBuildFoot(doc, marginSides, marginBottom, marginTop, lang){
 
     doc.setFontSize(10);
     doc.text('DEE - ISEP', ms, mb, null, null, 'left');
-    doc.text('URIsolve APP', ms, mt, null, null, 'left');
+    doc.text('U=RIsolve APP', ms, mt, null, null, 'left');
     doc.text(lang._page + doc.page, width-ms, mb, null, null, 'right');
     doc.text(lang._MCMmethod, width-ms, mt, null, null, 'right');
     doc.setFontSize(8);
