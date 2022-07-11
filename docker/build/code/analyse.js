@@ -2578,10 +2578,10 @@ function buildJson(netlist) {
     warnings: netlist.first,
   };
   var appObj = {
-    version: "2.0.9",
+    version: "0.0.0",
     details:
-      "Circuitos só com malhas auxiliares bugs; Idioma dos diferentes outputs; Minor bugs Fix; Series Voltage Sources Bug Fix",
-    releaseDate: "2022-6-22T18:00:00.000",
+      "",
+    releaseDate: "2022-6-28T18:00:00.000",
   };
   var outputJson = {
     app: appObj,
