@@ -1449,11 +1449,20 @@ return currResult;
 
  function saveToJSON(totalMeshes,meshes,meshes2, alleq, eqresult, isolatedPowerScr, file){
 
+
+	let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let E = R - (N - 1) - C;
+	let Q = N-1;
+
 	file.analysisObj.totalMeshes = totalMeshes;
 	file.analysisObj.chosenMeshes = meshes;
 	file.analysisObj.choosenMeshes= meshes2;
 	file.branches = branches;
 	file.components.isolatedVPS = isolatedPowerScr;
+	file.analysisObj.numMeshEquations= E;
+	file.analysisObj.numNodeEquations=Q;
 
 	/*for(let i = 0; i < branchCurr.third.length; i++){
 		file.analysisObj.currents[i].valueRe = branchCurr.third[i].valRe;
@@ -1742,7 +1751,7 @@ return currResult;
  function loadFileAsTextMCR(data) {
 
 	let jsonFile = JSON.parse(data);
-	
+
 	branches = jsonFile.branches;
 	nodes = jsonFile.nodes;
 	components = jsonFile.components;
