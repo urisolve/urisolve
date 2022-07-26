@@ -3086,7 +3086,7 @@ function loadFileAsTextMTN() {
 			otherNodes.push(knlEquationsReg[i].node)
 	}
 
-	// Create the nodes substitutions to insert in the system equation solver
+	// Create the nodes sub\stitutions to insert in the system equation solver
 	// Nodes CANNOT have more than 2 letters in the equations
 	var nodeSubstitutions = new Array();
 	var currentNodes = knlEquationsReg.map(a => a.node);

@@ -896,7 +896,7 @@ function outCurrentsInfo(currents, branches){
 }
 
 /**
- * Function to output the equivalent impedances and voltages
+ * Function to output the equivalent impedances and voltages    
  * @param {object} Zequiv equivalent impedance extracted from branches
  * @param {object} Vequiv equivalent voltage extracted from branches
  * @param {object} Nodes  branch start/end nodes

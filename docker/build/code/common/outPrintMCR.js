@@ -4,7 +4,7 @@
  * Function to output the circuit nr of meshes
  * @param {number} file output json
  */
- function outVersion(file){
+ function outVersionMCR(file){
     let versionNumber = file.app.version;
     let details = file.app.details;
 
@@ -26,7 +26,7 @@
  * Function to output the circuit fundamental variables
  * @param {number} file output file
  */
- function outCircuitFundamentalsMCM(file){  
+ function outCircuitFundamentalsMCR(file){  
 
     let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -81,7 +81,7 @@
  * Function to output the circuit information
  * @param {object} file output json
  */
- function outCircuitInfoMCM(file){
+ function outCircuitInfoMCR(file){
 
     let F = file.analysisObj.circuitFreq;
 	let totalCurrents = file.analysisObj.currents.length;
@@ -153,11 +153,289 @@
 
     return htmlstr;
 }
+
+/**
+ * Function to output the circuit currents information
+ * @param {object} currents currents object
+ * @returns {string} HTML string
+ */
+ function outCurrentsInfoMCR(currents, branches){
+    // Create row div
+    let htmlstr = '<div class="row mt-3">';
+    // TEX Data
+    let TeXData = '';
+    // Add every current information
+    for( let i = 0; i < currents.length; i++){
+        htmlstr += '<div class="col-6 col-sm-6 col-md-6 col-lg-4">';
+        htmlstr += '<div class="card text-white bg-secondary mb-3">';
+        htmlstr += '<div class="card-body">'
+        // Current ID
+        htmlstr += '<h5 class="card-title text-left"> ID: '+ katex.renderToString(currents[i].ref, {throwOnError: false}) +'</h5>';
+        // From Node
+        htmlstr += '<h5 class="card-text text-left"> <span data-translate="_currFlow"></span>: '+ katex.renderToString(currents[i].noP, {throwOnError: false});
+        // Arrow Icon
+        htmlstr += '<i class="fas fa-arrow-right mr-2 ml-2"></i>';
+        // To Node
+        htmlstr += katex.renderToString(currents[i].noN, {throwOnError: false})+'</h5>';
+        // Components
+        htmlstr += ' <h5 class="card-text text-left"> <span data-translate="_currComponents"></span>: ';
+        
+        // Find id in branches
+        let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+
+        // TeX information
+        TeXData += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+
+        // Add Components
+        for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+            htmlstr += katex.renderToString(branches[i].acAmpPwSupplies[k].ref, {throwOnError: false}) + ', ';
+            TeXData += branches[i].acAmpPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+            htmlstr += katex.renderToString(branches[i].acVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[i].acVoltPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+            htmlstr += katex.renderToString(branches[i].dcAmpPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[i].dcAmpPwSupplies[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+            htmlstr += katex.renderToString(branches[i].dcVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';  
+            TeXData += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+            htmlstr += katex.renderToString(branches[i].capacitors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[i].capacitors[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].coils.length; k++){
+            htmlstr += katex.renderToString(branches[i].coils[k].ref, {throwOnError: false})  + ', '; 
+            TeXData += branches[i].coils[k].ref + ', ';
+        }
+        for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+            htmlstr += katex.renderToString(branches[i].resistors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[i].resistors[k].ref + ', ';
+        }
+        
+        // Remove last comma
+        if(htmlstr[htmlstr.length-2] == ','){
+            htmlstr = htmlstr.slice(0,htmlstr.length-2);
+            TeXData = TeXData.slice(0,TeXData.length-2);
+        }
+
+        TeXData += "\\\\\r\n";
+
+        htmlstr += '</h5>';
+        htmlstr += '</div></div></div>';
+    }
+    htmlstr += '</div>';
+
+    let obj = {
+        first: htmlstr,
+        second: TeXData
+    }
+    return obj;
+    
+}
+
+function outCurrentsKNLMCR(knlCurrEquations){
+
+    // Create string
+    let htmlstr = '';
+
+    let TeXData = "";
+
+
+    if(knlCurrEquations.length > 0){
+        htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_knlTitle"></h5></div></div>';
+        htmlstr += '<div class="container mt-3"><div class="row row-tile" id="currentsKNL">';
+    }
+
+    // Simplify the objects and get the currents directions and IDs
+    let KNLeqs = new Array();
+    for(let i = 0; i< knlCurrEquations.length; i++){
+        let obj = {
+            node: knlCurrEquations[i].node,
+            equation:'',
+            orderedEq: knlCurrEquations[i].equation,
+            currents: new Array()
+        };
+
+        for(let k = 0; k< knlCurrEquations[i].branchesused.length; k++ ){
+            //let curr = knlCurrEquations[i].eqObj.lhs.terms[k];
+            let currObj = {
+                id: knlCurrEquations[i].branchesused[k],
+                flow: knlCurrEquations[i].branchesusedflow[k],
+            };
+            //if(curr.coefficients[0].numer == 1)
+                //currObj.flow = 'in'
+            //else
+                //currObj.flow = 'out'
+            obj.currents.push(currObj);
+        }
+
+        // Create Equation
+        let strEq = ''
+        for(let k=0; k<knlCurrEquations[i].branchesused.length; k++){
+            if(knlCurrEquations[i].branchesusedflow[k] == "in")
+                strEq += knlCurrEquations[i].branchesused[k] + "+";
+        }
+        if(obj.currents.filter(function(x){ return x.flow === "in"; }).length == 0)
+            strEq += '0='
+        else
+            strEq += "=";
+        
+        strEq = strEq.replace('+=','=');
+        for(let k=0; k<knlCurrEquations[i].branchesused.length; k++){
+            if(knlCurrEquations[i].branchesusedflow[k] == "out")
+                strEq += knlCurrEquations[i].branchesused[k] + "+";
+        }
+        if(obj.currents.filter(function(x){ return x.flow === "out"; }).length == 0)
+            strEq += '0'
+        else
+            strEq += "=";
+        strEq = strEq.replace('+=','');
+        obj.equation = strEq;
+        KNLeqs.push(obj);
+    }
+
+    // Change the node ID if it belongs to a supernode
+    /*for(let i = 0; i<KNLeqs.length; i++){
+        for(let k = 0; k< supernodes.length; k++){
+            for(let j = 0; j< supernodes[k].nodes.length; j++){
+                if( supernodes[k].nodes[j].ref == KNLeqs[i].node){
+                    KNLeqs[i].node = supernodes[k].ref;
+                    k = supernodes.length;
+                    break;
+                }
+                    
+            }
+        }
+  
+    }*/
+    let pagebreakCounter = 0;
+
+    //Generate the cards and insert Node and Equation
+    for(let i = 0; i< KNLeqs.length; i++){
+        htmlstr +='<div class="col-sm-12 col-md-6 mt-3"><div class="card bg-light mb-3">'
+        let canvasID = "currCanvas"+i;
+        htmlstr += '<div class="card-body text-secondary">';
+        htmlstr += '<h5 class="card-title ml-3 text-center border rounded-top"><span data-translate="_knlNode"></span> ';
+        htmlstr += '<span class="font-weight-bold text-dark"> &nbsp;&nbsp;'+KNLeqs[i].node + '</span></h5>';
+        htmlstr += '<div class="d-flex justify-content-center square mb-3" id="img'+i+'"><canvas width="225" height="225" id="'+canvasID+'"></canvas></div>';
+        htmlstr += '<p class="text-center">';
+        htmlstr += katex.renderToString(KNLeqs[i].equation, {throwOnError: false});
+        htmlstr += '</p></div></div></div>';
+
+        TeXData += "\\subsubsection{Node " + KNLeqs[i].node + "}\r\n\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{";
+        TeXData += canvasID + "}}\r\n\\caption{Node " + KNLeqs[i].node + " currents.}\r\n\\label{" + KNLeqs[i].node + "currents}\r\n\\end{figure}\r\n";
+        TeXData += "\\begin{equation}\r\n \\textrm{Equation}: \\quad "+ KNLeqs[i].equation +"\r\n\\end{equation}\r\n\r\n";
+        pagebreakCounter++;
+        if(pagebreakCounter == 2){
+            pagebreakCounter = 0;
+            TeXData += "\\pagebreak";
+        }
+    }
+
+
+    htmlstr += '</div></div>';
+
+    let obj = {
+        first: htmlstr,
+        second: KNLeqs,
+        third: TeXData
+    };
+    return obj;
+}
+
+
+
+function createCanvasCurrentsMCR(currentsData){
+    
+    // Arrows Array
+    let arrows = new Array();
+    // Ids Array
+    let text = new Array();
+
+    //Canvas dataURL Object array
+    let canvasObjects = new Array();
+
+    for(let i = 0; i<currentsData.length; i++){
+
+        // Get Canvas HTML ID
+        let canvasID = "currCanvas" + i;
+        let canvas = document.getElementById(canvasID);
+        let context = canvas.getContext('2d');
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        let radius  = 5;
+        let alignConfig = ["left","center","right","center","left","right","right","left"];
+
+        // Generate Arrows in 8 angles (MAX 8 CURRENTS)
+        arrows.push([centerX+radius+1, centerY, centerX+75, centerY]); // 0   Deg
+        arrows.push([centerX, centerY-radius-1, centerX, centerY-75]); // 90  Deg
+	    arrows.push([centerX-radius-1, centerY, centerX-75, centerY]); // 180 Deg
+        arrows.push([centerX, centerY+radius+1, centerX, centerY+75]); // 270 Deg
+
+        arrows.push([centerX+radius+1, centerY-radius-1, centerX+65, centerY-65]); // 45 Deg
+        arrows.push([centerX-radius-1, centerY-radius-1, centerX-65, centerY-65]); // 135 Deg
+        arrows.push([centerX-radius-1, centerY+radius+1, centerX-65, centerY+65]); // 225 Deg
+        arrows.push([centerX+radius+1, centerY+radius+1, centerX+65, centerY+65]); // 315 Deg
+
+        // Generate Text Coordinates for each angle
+        text.push([centerX+75+6, centerY+3]);
+        text.push([centerX, centerY-75-10]);
+        text.push([centerX-75-6, centerY+3]);
+        text.push([centerX, centerY+75+15]);
+
+        text.push([centerX+65+3, centerY-65-3]);
+        text.push([centerX-65-3, centerY-65-3]);
+        text.push([centerX-65-3, centerY+65+10]);
+        text.push([centerX+65+6, centerY+65+10]);
+
+        // Cycle through currents if less than 8
+        if(currentsData[i].currents.length <= 8){
+            for(let k = 0; k < currentsData[i].currents.length; k++){
+                // Draw the Arrow
+                if(currentsData[i].currents[k].flow == "out")
+                    drawArrow(arrows[k][0], arrows[k][1], arrows[k][2], arrows[k][3],"#941600",canvasID);
+                else
+                    drawArrow(arrows[k][2], arrows[k][3], arrows[k][0], arrows[k][1],"#1D6E07",canvasID);
+
+                context.font='15px serif';
+                context.fillStyle = "#656865";
+                context.textAlign = alignConfig[k];
+                // Draw the ID
+                context.fillText(currentsData[i].currents[k].id, text[k][0],text[k][1]);
+            }
+
+            // Draw Node Circle
+            context.beginPath();
+            context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            context.fillStyle = '#656865';
+            context.fill();
+            context.lineWidth = 1;
+            context.strokeStyle = '#b8b8b8';
+            context.stroke();
+        }
+
+        // Convert to Data URL
+        let canvasdataURL = {
+            dataURL: canvas.toDataURL(),
+            id: canvasID
+        }
+
+        canvasObjects.push(canvasdataURL);
+    }
+
+    return canvasObjects;
+}
+
+
 /**
  * Function to output the circuit nr of meshes
  * @param {number} file output json
  */
-function outEquationCalcMCM(file){
+function outEquationCalcMCR(file){
 
     let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -170,21 +448,21 @@ function outEquationCalcMCM(file){
     htmlstr += '<div class="container print-block"><div class="row print-block">';
     htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
-    htmlstr += '<h6 class="lead" data-translate="_MCMEqPri"></h6></div>';
+    htmlstr += '<h6 class="lead" data-translate="_MCRMeshEq"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1">';
-    str = "M_{p} = R - (N - 1) - C \\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow M_{p} = " + E ;
+    str = "M = R - (N - 1) - C \\Leftrightarrow \\\\ \\Leftrightarrow M = " + R + "- (" + N + " - 1) - " + C + "\\Leftrightarrow \\\\ \\Leftrightarrow M = " + E ;
     str = katex.renderToString(str, {throwOnError: false});
     htmlstr += '<div class="text-center" mt-2 mb-2"><span >'+ str + '</span></div>';
     htmlstr += '</div>';
 
     
-    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    /*htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
     htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
     htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
     htmlstr += '<div class="ml-1"><strong><p data-translate="_nrOfEquations"></p></strong></div>';
-    htmlstr += '</div></div></div></div></div>'
+    htmlstr += '</div></div></div></div></div>'*/
 
-    htmlstr += '<div class="container print-block"><div class="row print-block">';
+    /*htmlstr += '<div class="container print-block"><div class="row print-block">';
     htmlstr += '<div class="col-sm-12 col-lg-6-40 no-page-break"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center" style="opacity:0.9">';
     htmlstr += '<h6 class="lead" data-translate="_MCMEqAux"></h6></div>';
@@ -198,7 +476,7 @@ function outEquationCalcMCM(file){
     htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
     htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
     htmlstr += '<div class="ml-1"><strong><p data-translate="_nrOfCurrSrc"></p></strong></div>';
-    htmlstr += '</div></div></div></div></div>'
+    htmlstr += '</div></div></div></div></div>'*/
     
 
     return htmlstr;
@@ -208,119 +486,126 @@ function outEquationCalcMCM(file){
  * @param {Array} branchObjs branches
  * @param {Array} meshesObjs meshes
  */
-function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
-    const Xspacing = 30;
-    const Yspacing = 15;
-    const width = 100;
-    const height = 60;
-    let originX = 0;
-    let originY = 25;
-
-    //define Window Width and Height
-    let WindowHeight = meshesObjs.length*(height + Yspacing+originY);
-
-    //Max spacing on bottom line
-    let aux = Xspacing;
-    if(aux > 20) aux = 20;
+function outMeshesMCR(branchObjs, meshesObjs, resultObjs){
+        const Xspacing = 30;
+        const Yspacing = 15;
+        const width = 100;
+        const height = 60;
+        let originX = 0;
+        let originY = 25;
     
-    let htmlstr = '';
-    //Draw meshes
-    for(let i = 0; i < meshesObjs.length; i++){
-        let containerId = 'Mesh' + meshesObjs[i].id;
-        let type;
-        let color;
+        //define Window Width and Height
+        let WindowHeight = meshesObjs.length*(height + Yspacing+originY);
+    
+        //Max spacing on bottom line
+        let aux = Xspacing;
+        if(aux > 20) aux = 20;
         
-            type = 'A';
-            color = "#629af5";
-
-        htmlstr +='<div class="col-sm-12 mt-3" style = "margin: auto;"><div class="card bg-light mb-3">'
-        htmlstr += '<div class="card-body text-secondary">';
-        htmlstr += '<h5 class="card-title ml-3 text-center border rounded-top"><span data-translate="_kmlMesh"></span>';
-        htmlstr += '<span class="font-weight-bold text-dark"> &nbsp;&nbsp;'+meshesObjs[i].id + '&nbsp;-&nbsp; </span><span style = "color: ' + color + '" data-translate="_type'+ type +'"></h5>';
-        htmlstr += '<div class = "text-center scrollmenu">';
-        htmlstr += '<div class = "text-center" id="'+containerId+'"></div>';
-
-        htmlstr += '<p class="text-center" id="equation'+containerId+'">';
-
-        /*if(meshesObjs[i].type == 1){
-            if(meshesObjs[i].currValue.complex){
-                htmlstr += katex.renderToString("\\underline{I_{Mp"+meshesObjs[i].displayId+"}}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
+        let htmlstr = '';
+        //Draw meshes
+        for(let i = 0; i < meshesObjs.length; i++){
+            let containerId = 'Mesh' + meshesObjs[i].id;
+            let type;
+            let color;
+            if(meshesObjs[i].type == 0){
+                type = 'A';
+                color = "#629af5";
             }
             else{
-                htmlstr += katex.renderToString("I_{Mp"+meshesObjs[i].displayId+"}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
+                type = 'P';
+                color = "#F73232";
             }
-        }
-        else{
-            if(meshesObjs[i].currValue.complex){
-                let resultMag = resultDecimals(Math.sqrt(Math.pow(meshesObjs[i].currValue.re, 2) + Math.pow(meshesObjs[i].currValue.im, 2)), 2, false);
-                let resultAng = resultDecimals(Math.atan(meshesObjs[i].currValue.im/meshesObjs[i].currValue.re)*57.2957795, 2, true);
-                htmlstr += katex.renderToString("\\underline{I_{Ma"+meshesObjs[i].displayId+"}}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit +'A', {throwOnError: false});  
-            }
-            else{
-                let result = resultDecimals(meshesObjs[i].currValue.value, 2, false);
-                htmlstr += katex.renderToString("I_{Ma"+meshesObjs[i].displayId+"}~:~"+result.value+result.unit+"A", {throwOnError: false});  
-            }
-        }
-        */
-        htmlstr += '</p></div></div></div></div>';   
-    }
-    $('#Meshes').html(htmlstr);
-
-
-	let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
-
-    for(let i = 0; i < meshesObjs.length; i++){
-        let containerId = '#Mesh' + meshesObjs[i].id;////////////////////////////////////
-        let cnt = meshesObj[i].branches.length;
-        //meshesObjs[i].branches.forEach(branch => {
-        //    cnt++;
-        //});
-        let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
-        createMesh(meshesObjs[i], branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang);
-    }
     
+            htmlstr +='<div class="col-sm-12 mt-3" style = "margin: auto;"><div class="card bg-light mb-3">'
+            htmlstr += '<div class="card-body text-secondary">';
+            htmlstr += '<h5 class="card-title ml-3 text-center border rounded-top"><span data-translate="_kmlMesh"></span>';
+            htmlstr += '<span class="font-weight-bold text-dark"> &nbsp;&nbsp;'+meshesObjs[i].id;
+            htmlstr += '<div class = "text-center scrollmenu">';
+            htmlstr += '<div class = "text-center" id="'+containerId+'"></div>';
 
-    let images = new Array;
-
-    let svgStrings = document.querySelectorAll("svg"); 
-
-    for(let i = 0; i < meshesObjs.length; i++){
-        let data = "data:image/svg+xml;base64,";
-        let svgString = new XMLSerializer().serializeToString(svgStrings[i]);
-        let base64 = window.btoa(svgString);
-        let dataURI = data + base64;
-
-        let cnt = 0;
-        meshesObjs[i].branches.forEach(branch => {
-            cnt++;
-        });
-        let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
-
-        images.push({
-            imageData: dataURI,
-            id: meshesObjs[i].id,
-            width: WindowWidth,
-            height: height+aux+Yspacing+originY+2
-        });
-
-    }
-    return images;
+            //+ '&nbsp;-&nbsp; </span><span style = "color: ' + color + '" data-translate="_type'+ type +'"></h5>'
+    
+            htmlstr += '<p class="text-center" id="equation'+containerId+'">';
+    
+            if(meshesObjs[i].type == 1){
+               // if(meshesObjs[i].currValue.complex){
+                    htmlstr += katex.renderToString("\\underline{M_{"+meshesObjs[i].displayId+"}}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
+                //}
+               // else{
+                 //   htmlstr += katex.renderToString("I_{Mp"+meshesObjs[i].displayId+"}~:~"+meshesObjs[i].incognitoEq, {throwOnError: false});
+                //}
+            }
+            else{
+                if(meshesObjs[i].currValue.complex){
+                    let resultMag = resultDecimals(Math.sqrt(Math.pow(meshesObjs[i].currValue.re, 2) + Math.pow(meshesObjs[i].currValue.im, 2)), 2, false);
+                    let resultAng = resultDecimals(Math.atan(meshesObjs[i].currValue.im/meshesObjs[i].currValue.re)*57.2957795, 2, true);
+                    htmlstr += katex.renderToString("\\underline{I_{Ma"+meshesObjs[i].displayId+"}}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit +'A', {throwOnError: false});  
+                }
+                else{
+                    let result = resultDecimals(meshesObjs[i].currValue.value, 2, false);
+                    htmlstr += katex.renderToString("I_{Ma"+meshesObjs[i].displayId+"}~:~"+result.value+result.unit+"A", {throwOnError: false});  
+                }
+            }
+    
+            htmlstr += '</p></div></div></div></div>';   
+        }
+        $('#Meshes').html(htmlstr);
+    
+    
+        let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+    
+        for(let i = 0; i < meshesObjs.length; i++){
+            let containerId = '#Mesh' + meshesObjs[i].id;
+            let cnt = 0;
+            meshesObjs[i].branches.forEach(branch => {
+                cnt++;
+            });
+            let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
+            createMesh2(meshesObjs[i], branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang);
+        }
+        
+    
+        let images = new Array;
+    
+        let svgStrings = document.querySelectorAll("svg"); 
+    
+        for(let i = 0; i < meshesObjs.length; i++){
+            let data = "data:image/svg+xml;base64,";
+            let svgString = new XMLSerializer().serializeToString(svgStrings[i]);
+            let base64 = window.btoa(svgString);
+            let dataURI = data + base64;
+    
+            let cnt = 0;
+            meshesObjs[i].branches.forEach(branch => {
+                cnt++;
+            });
+            let WindowWidth = cnt*width+(cnt+1)*Xspacing+2+10+originX;
+    
+            images.push({
+                imageData: dataURI,
+                id: meshesObjs[i].id,
+                width: WindowWidth,
+                height: height+aux+Yspacing+originY+2
+            });
+    
+        }
+        return images;
 }
 /**
  * Function to output equation system STEP 1
  * @param {object} currents currents object
  * @returns {string} HTML string
  */
- function outStep1MCM(currents){
+ function outStep1MCR(currents){
     // Create HTML string
     let htmlstr = '';
     // Generate the collapse panel
     htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step1Panel">';
     // Generate equation system
     let str = '\\large \\begin{cases}';
-    for(let k = 0; k<currents.allVariableEq.length; k++){
-        str += currents.allVariableEq[k];
-        if(k<currents.allVariableEq.length-1)
+    for(let k = 0; k<currents.allRealEq.length; k++){
+        str += currents.allRealEq[k].equation;
+        if(k<currents.allRealEq.length-1)
             str += ' \\\\[0.7em] ';
 
     }
@@ -338,16 +623,16 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
  * @param {object} currents currents object
  * @returns {string} HTML string
  */
- function outStep2MCM(currents){
+ function outStep2MCR(currents){
     // Create HTML string
     let htmlstr = '';
     // Generate the collapse panel
     htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step2Panel">';
     // Generate equation system
     let str = '\\large \\begin{cases}';
-    for(let k = 0; k<currents.meshCurrRevealedEq.length; k++){
-        str += currents.meshCurrRevealedEq[k];
-        if(k<currents.meshCurrRevealedEq.length-1)
+    for(let k = 0; k<currents.allRevealedEq.length; k++){
+        str += currents.allRevealedEq[k].equation;
+        if(k<currents.allRevealedEq.length-1)
             str += ' \\\\[0.7em] ';
 
     }
@@ -397,11 +682,12 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
  * @param {string} strStep3 HTML String for step 3
  * @returns {string} first: HTML String with results
  */
- function outEquationSystemMCM(simpEquations, strStep1, strStep2, strStep3){
+ function outEquationSystemMCR(simpEquations, strStep1, strStep2){
 
     // HTML String
     let htmlstr = '';
-    if(simpEquations.allVariableEq.length > 0){
+    if(simpEquations.meshEquationsReal.length > 0){
+
 
         htmlstr += '<div class="container mt-3">';
         htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_eqSystemTitle"></h5></div></div>';
@@ -418,11 +704,17 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
 
         let str = '\\large \\begin{cases}';
         for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
-            str += simpEquations.allRevealedEq[k];
+            str += simpEquations.allRevealedEq[k].equation;
             if(k < simpEquations.allRevealedEq.length-1)
                 str += '\\\\[0.7em] ';
     
         }
+        //for(let q = 0; q<simpEquations.nodeEquationsReal.length; q++){
+          //  str += simpEquations.nodeEquationsReal[q].equation;
+            //if(q < simpEquations.nodeEquationsReal.length-1)
+            //    str += '\\\\[0.7em] ';
+    
+        //}
         str += '\\end{cases}';
         // Render to TeX
         str = katex.renderToString(str, {throwOnError: false});
@@ -464,26 +756,26 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
         htmlstr += '<div class="row bg-success rounded">';
         // Add step text
         htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 2:';
-        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep2MCM"></small></h5></div>';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep3MCM"></small></h5></div>';
         // Add button
         htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
         // Add Step results
         htmlstr += strStep2 +'</div>';
 
         // STEP #3
-        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-3" data-toggle="collapse" data-target="#step3Panel';
-        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        //btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        //btnstr += 'id="btn-3" data-toggle="collapse" data-target="#step3Panel';
+        //btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
-        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
-        htmlstr += '<div class="row bg-success rounded">';
+        //htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        //htmlstr += '<div class="row bg-success rounded">';
         // Add step text
-        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 3:';
-        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep3MCM"></small></h5></div>';
+        //htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 3:';
+        //htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep3MCM"></small></h5></div>';
         // Add button
-        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        //htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
         // Add Step results
-        htmlstr += strStep3 +'</div>';
+        //htmlstr += strStep3 +'</div>';
 
         // Close collapse panel
         htmlstr += "</div>";
@@ -561,9 +853,9 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
  * @param {object} currents currents data
  * @returns {string} HTML string
  */
- function outResultsCurrentsMCM(file){
+ function outResultsCurrentsMCR(file){
 
-    let currents = file.analysisObj.currents; 
+    let results = file.analysisObj.result.cuurentResult; 
 
     let htmlstr = '';
 
@@ -575,21 +867,21 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
     htmlstr += '<h6 class="lead" data-translate="_currents"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
 
-    if(currents.length > 0){
+    if(results.length > 0){
         // Create Equations
         str = '\\large \\begin{cases}';
-        for(let k = 0; k<currents.length; k++){
-            str += currents[k].meshEquation;
+        for(let k = 0; k<results.length; k++){
+            str += results[k];
             if(k<currents.length-1)
                 str += ' \\\\[0.7em] ';
         }
         str += '\\end{cases}';
 
-        str += ' \\Leftrightarrow';
+        //str += ' \\Leftrightarrow';
 
-        str += '\\large \\begin{cases}';
+        ////str += '\\large \\begin{cases}';
 
-        for(let k = 0; k<currents.length; k++){
+       /* for(let k = 0; k<currents.length; k++){
 
             if(currents[k].complex){
                 let resultMag = resultDecimals(currents[k].magnitude, 2, false);
@@ -608,18 +900,18 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
 
             if(k<currents.length-1)
                 str += ' \\\\[0.7em] ';
-        }
+        }*/
 
-        str += '\\end{cases}';
+        ////str += '\\end{cases}';
 
         // Render System to TeX
         str = katex.renderToString(str, {throwOnError: false});
         // Add Notes
-        htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+        /*htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
         htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
         htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
         htmlstr += '<div class="ml-1"><strong><p data-translate="_currResNotes1MCM"></p></strong></div>';
-        htmlstr += '</div></div></div>'
+        htmlstr += '</div></div></div>'*/
         // Add equations in a scroll menu
         htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
     }
@@ -637,7 +929,7 @@ function outMeshesMCM(branchObjs, meshesObjs, resultObjs){
  * Create Show All Collapse Button
  * @returns object number: number, 
  */
-function outShowAllBtnMCM(){
+function outShowAllBtnMCR(){
     
     // Create Show All Collapse Button
     let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-toggle="collapse" ';
@@ -678,28 +970,36 @@ function outShowAllBtnMCM(){
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
 
-    //Method Equations
-    htmlstr += '<div class="container mt-3">';
-    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshNumberTitle"></h5></div></div>';
-    htmlstr += '<div class="container mt-3" id="meshEquations"></div>';
-
-    //Meshes
-    htmlstr += '<div class="container mt-3">';
-    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshTitle"></h5></div></div>';
-    htmlstr += '<div class="container mt-3" id="Meshes"></div>';
-
-    // Equation System
-    htmlstr += '<div id="eqSys"></div>';
-
-    // Results Mesh currents
-    htmlstr += '<div class="container mt-3">';
-    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resMesh"></h5></div></div>';
-    htmlstr += '<div class="container mt-3" id="resultsCurrentsMesh"></div></div>';
-
     // Currents data
     htmlstr += '<div class="container mt-3">';
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
+
+    // Nodes information
+    //htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_knlTitle"></h5></div></div>';
+    //htmlstr += '<div class="container mt-3"><div class="row row-tile" id="currentsKNL">';
+
+    // KNL equations
+    htmlstr += '<div id="KNLEquations"></div>';
+
+    //Method Equations
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshNumberTitleMcr"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="meshEquations"></div>';
+
+    //Meshes
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshTitleMCR"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="Meshes"></div>';
+
+    // Equation System
+    
+   htmlstr += '<div id="eqSys"></div>';
+
+    // Results Mesh currents
+    //htmlstr += '<div class="container mt-3">';
+    //htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resMesh"></h5></div></div>';
+    //htmlstr += '<div class="container mt-3" id="resultsCurrentsMesh"></div></div>';
 
     // Results
     htmlstr += '<div class="container mt-3">';
@@ -714,7 +1014,7 @@ function outShowAllBtnMCM(){
  * Function to build the TeX header
  * @returns {string} TeX string
  */
- function getTexFileHeaderMCMRich(lang){
+ function getTexFileHeaderMCRRich(lang){
     let texHeader = '';
     texHeader += '\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._MCMmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{' + lang._MCMmethod + '} \\\\\r\n \\\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
     texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Ângelo Pinheiro - 1190398@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
@@ -728,7 +1028,7 @@ function outShowAllBtnMCM(){
  * @param {array} meshImages image information
  * @returns {string} TeX string
  */
-function buildTeXRich(file, meshImages){
+function buildTeXRRich(file, meshImages){
 
 	let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -749,7 +1049,7 @@ function buildTeXRich(file, meshImages){
     else if(lang == 'português') lang = dictionary.portuguese;
 
 	// Tex Variable
-	let TeX = getTexFileHeaderMCMRich(lang);
+	let TeX = getTexFileHeaderMCRRich(lang);
 
 	if(fileContents[0]){
 		TeX += "\\section{" + lang._circuitImage + "}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{";
@@ -779,7 +1079,7 @@ function buildTeXRich(file, meshImages){
 	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
 
 	//meshes calculation
-    TeX += "\\section{" + lang._MeshNumberTitle + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
+    TeX += "\\section{" + lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
     TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
     TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
 	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
@@ -790,11 +1090,11 @@ function buildTeXRich(file, meshImages){
 
 	//circuit mesh images
 	let pagebreakCounter = 0;
-	TeX += "\\section{" + lang._MeshTitle + "}\r\n\r\n";
+	TeX += "\\section{" + lang._MeshTitleMCR + "}\r\n\r\n";
 	meshImages.forEach(image => {
 		let aux;
 		if(meshes[image.id-1].type == 0) aux = lang._typeA;
-		else aux = lang._typeP;
+		else aux = lang._typePMCR;
 		TeX += "\\subsection{" + lang._kmlMesh + "~" + image.id + "~-~" + aux + "}\r\n"
 		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
 		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
@@ -860,7 +1160,7 @@ function buildTeXRich(file, meshImages){
 
         }
         str += '\\end{cases}';
-        TeX += "\\begin{small}\\textbf{\\textit{" + lang._step + " 2:}}\\end{small}  " + lang._eqStep2MCM + "\r\n";
+        TeX += "\\begin{small}\\textbf{\\textit{" + lang._step + " 2:}}\\end{small}  " + lang._eqStep3MCM + "\r\n";
         TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
         //step 3
         str = '\\large \\begin{cases}';
@@ -1030,7 +1330,7 @@ function buildImTeX(images){
  * Function to build the TeX header
  * @returns {string} TeX string
  */
-function getTexFileHeaderMCMOv(lang){
+function getTexFileHeaderMCROv(lang){
 
     let texHeader = '';
     texHeader = '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\n\r';
@@ -1067,7 +1367,7 @@ function buildTeXOv(file, meshImages){
     else if(lang == 'português') lang = dictionary.portuguese;
 
 	// Tex Variable
-	let TeX = getTexFileHeaderMCMOv(lang);
+	let TeX = getTexFileHeaderMCROv(lang);
 
 	if(fileContents[0]){
 		TeX += "\\section{" + lang._circuitImage + "}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";
@@ -1097,7 +1397,7 @@ function buildTeXOv(file, meshImages){
 	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
 
 	//meshes calculation
-    TeX += "\\section{" + lang._MeshNumberTitle + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
+    TeX += "\\section{" + lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
     TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
     TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
 	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
@@ -1109,11 +1409,11 @@ function buildTeXOv(file, meshImages){
 	//circuit mesh images
     const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
 	let pagebreakCounter = 0;
-	TeX += "\\section{" + lang._MeshTitle + "}\r\n\r\n";
+	TeX += "\\section{" + lang._MeshTitleMCR + "}\r\n\r\n";
 	meshImages.forEach(image => {
 		let aux;
 		if(meshes[image.id-1].type == 0) aux = lang._typeA;
-		else aux = lang._typeP;
+		else aux = lang._typePMCR;
         let prop = 1;
         if(image.width > 350){
             prop = 350/image.width;
@@ -1616,7 +1916,7 @@ function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, la
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('4.  ' + lang._MeshNumberTitle, marginSides*width, line+=25, null, null, 'left');
+    doc.text('4.  ' + lang._MeshNumberTitleMcr, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(subsubtitleSize);
     doc.text(' 4.1  ' + lang._MainMeshes, marginSides*width, line+=25, null, null, 'left');
@@ -1695,8 +1995,8 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('5.  ' + lang._MeshTitle.slice(0, slice1), marginSides*width, line+=25, null, null, 'left');
-    doc.text(lang._MeshTitle.slice(slice1), marginSides*width, line+=15, null, null, 'left');
+    doc.text('5.  ' + lang._MeshTitleMCR.slice(0, slice1), marginSides*width, line+=25, null, null, 'left');
+    doc.text(lang._MeshTitleMCR.slice(slice1), marginSides*width, line+=15, null, null, 'left');
 
     for(let i = 0; i < meshes.length; i++){
         let prop = 1;
@@ -1706,7 +2006,7 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
             line = height*marginTop;
         }
-        let aux = lang._typeP;
+        let aux = lang._typePMCR;
         if(meshes[i].type == 0) aux = lang._typeA;
         doc.setFontSize(subsubtitleSize);
         doc.text(' 5.' + String(i+1) + '  ' +  lang._kmlMesh + ' ' + String(i+1) + ' - ' + aux, marginSides*width, line+=22, null, null, 'left');
@@ -1803,7 +2103,7 @@ function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, la
             line = height*marginTop;
         }
         doc.setFontSize(smallInfoSize);
-        doc.text(lang._step + ' 2 - ' + lang._eqStep2MCM, marginSides*width+13, line+=15, null, null, 'left');
+        doc.text(lang._step + ' 2 - ' + lang._eqStepMCM, marginSides*width+13, line+=15, null, null, 'left');
         line+=5;
         doc.setLineWidth(1);
         doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.meshCurrRevealedEq.length*18);
@@ -2223,7 +2523,7 @@ function resizeMCM(imgObj, max) {
  * @param {number} originY top space
  * @param {number} aux max spacing on bottom line
  */
-function createMesh(mesh, branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang){
+function createMesh2(mesh, branchObjs, width, height, WindowWidth, WindowHeight, Xspacing, Yspacing, originX, originY, aux, containerId, lang){
     let id = "mesh"+containerId;
     let svg = d3.select(containerId) //create svg
         .append("svg")
