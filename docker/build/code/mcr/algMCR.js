@@ -4,12 +4,12 @@ function countNodesByType(objArr, type) {
 	let cnt = 0;
 	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
 	return cnt;
-}
-
+					}
+				
 /**
  * Finds all circuit meshes
  * @returns first: error; second: errorCode; third: array with all the meshes
- */
+				*/
  function findMeshess(){
 
 	//const nr_nos = countNodesByType(nodes, 0);
@@ -18,14 +18,14 @@ function countNodesByType(objArr, type) {
 	for(let i=0;i<nodes.length;i++){
 		if(nodes[i].type==0){nodesn[i]=nodes[i].ref}
 		else{nodesn[i]=0;}
-	}
+						}
 	nodesn = nodesn.filter(function(item) {
     return item !== 0
 	})
 	var branches_id = [];
 	for(let i = 0; i<branches.length; i++){
 		branches_id.push(branches[i].id);
-	}
+					}
 	//cria matriz de adjacencia
 	var adjMatrix=[];
 	for(let i=0;i<nodesn.length;i++){
@@ -35,13 +35,13 @@ function countNodesByType(objArr, type) {
 				for(let k=0;k<branches.length;k++){
 					if(((branches[k].startNode==nodesn[i])&&(branches[k].endNode==nodesn[j]))||((branches[k].startNode==nodesn[j])&&(branches[k].endNode==nodesn[i]))){
 						adjMatrix[i][j]=1;
-					}
+				}
 					else{adjMatrix[i][j]=0;}
 					if(adjMatrix[i][j]==1){break;}
-				}
-        }
+			}
+		}
 	}
-		
+
 	//cria matriz de incicendia
 	var incMatrix=[];
 	for(let i=0;i<nodesn.length;i++){
@@ -51,7 +51,7 @@ function countNodesByType(objArr, type) {
 				incMatrix[i][j]=1;
 			}
 			else{incMatrix[i][j]=0;}
-        }
+		}
 	}
 
 	//Meshes finder
@@ -59,7 +59,7 @@ function countNodesByType(objArr, type) {
 	let circuit = new MeshesFinder();
 	circuit.initGraph(adjMatrix, incMatrix, nodesn, branches_id);
 	let meshes = circuit.getMeshes();
-	
+
 	if(meshes.error.state == true) {
 	  return{
 		  first: true,
@@ -67,13 +67,13 @@ function countNodesByType(objArr, type) {
 		  third: meshes.error.reason
 	  };
 	}
-	
+
 	return{
 		first: false,
 		second: 0,
 		third: meshes.data
+		}
 	}
-}
 
 
 /***
@@ -90,12 +90,12 @@ function countNodesByType(objArr, type) {
 	var typebranches=[];
 	for(i=0;i<branches.length;i++){
 		if((branches[i].dcAmpPwSupplies.length<1)&&(branches[i].acAmpPwSupplies.length<1)){
-			
+
 			typebranches[i]=0;
-		}
+	}
 		if((branches[i].dcAmpPwSupplies.length>0)||(branches[i].acAmpPwSupplies.length>0)){
 			typebranches[i]=1;
-			
+
 		}
 	}
 	//escolhe as malhas a ser usadas e coloca em "choosenMeshes"
@@ -104,24 +104,24 @@ function countNodesByType(objArr, type) {
 	let meshestype1=0;
 	for(let i=0;i<Meshes.length;i++){
 		for(let j=0;j<Meshes[i].length;j++){
-			
+
 					for(let l=0;l<branches.length;l++){
-					
+
 					if((branches[l].id==Meshes[i][j])&&(typebranches[l]==1))
 						{meshestype1=meshestype1+1;}
-						
+
 					if ((branches[l].id==Meshes[i][j])&&(typebranches[l]==0))
 						{meshestype0=meshestype0+1}
-					
+
 					if ((branches[l].id==Meshes[i][j])&&(typebranches[l]==2))
 						{meshestype2=meshestype2+1}
 
-					}
 		}
+	}
 			if ((meshestype1==0)&&(meshestype0>0)&&(choosenMeshes.length<numMeshes))
 			{
-				
-				
+
+
 				/*let cMesh={
 					"type": 1,
 					"id": meshid,
@@ -141,17 +141,17 @@ function countNodesByType(objArr, type) {
 					for(let p=0;p<branches.length;p++){
 						if(branches[p].id==Meshes[i][o]){
 							typebranches[p]=2;
-						}
-					}
 				}
 			}
+		}
+	}
 			else{meshestype1=0;
 				 meshestype2=0;
 				 meshestype0=0;}
-				
-		
-		
-		
+
+
+
+
 
 	}
 	return{
@@ -159,7 +159,7 @@ function countNodesByType(objArr, type) {
 		second: 0,
 		third: choosenMeshes,
 		forth: choosenMeshes2
-		
+
 	};
 
  }
@@ -586,7 +586,7 @@ function getMeshEquations(Mesh){
 		"equations": [],
 		"equationReal":[],
 		"equationsRevealed":[],
-		};
+	};
 	
 		let sumDC=0;
 	let sumResistors=0;
@@ -1370,7 +1370,7 @@ function getMeshEquations(Mesh){
 				
 			}
 			
-		}
+	}
 		equations1[i]=eqs+" = "+sumDC;
 
 		//if(sumDCReal==""){
@@ -1541,16 +1541,16 @@ function eqSolver(all_equations){
 	
 			if(branches[j].dcAmpPwSupplies.length==0){
 				eq[i]=eq[i].replace(currents[j].ref,letters[j]);
-			}
-	
-		
-			
 		}
-	}
+
+
+
+		}
+			}
 	var ziq = new linearEqSystem();
 	for(let i=0;i<eq.length;i++){
 		ziq.addEquation(eq[i]);
-	}
+		}
 	ziq.buildSystem();
 	var txr = solve(ziq.coefMatrix, ziq.consMatrix, ziq.varMatrix,12);
 
@@ -1563,13 +1563,13 @@ function eqSolver(all_equations){
 
 					if(branches[i].dcAmpPwSupplies[n].unitMult=="mA"){
 					sumDCAmpresult=sumDCAmpresult+parseFloat(branches[i].dcAmpPwSupplies[n].value)*0.001;
-					}
-				}
+	}
+		}
 				else{
 					if(branches[i].dcAmpPwSupplies[n].unitMult=="A"){
 					sumDCAmpresult=sumDCAmpresult-parseFloat(branches[i].dcAmpPwSupplies[n].value)
-					}
- 
+	}
+
 					if(branches[i].dcAmpPwSupplies[n].unitMult=="mA"){
 						sumDCAmpresult=sumDCAmpresult-parseFloat(branches[i].dcAmpPwSupplies[n].value)*0.001;
 					}
