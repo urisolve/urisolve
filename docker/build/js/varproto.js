@@ -667,7 +667,7 @@ class node {
 
             return {
                 first:   errorCode,
-                second:  nodeCurr,
+                second:   nodeCurr,
                 third:   plainEquat
             };
         };
