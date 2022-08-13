@@ -183,7 +183,7 @@ $(function () {
             "_AuxiliarMeshCurrNote1": "The meshes ",
             "_AuxiliarMeshCurrNote2": "are auxiliar meshes, therefore, they already have a current value, and don't have an equation. The mesh current value comes from the current source that the mesh contains.",
             "_MeshNumberTitle": "Number of Main (or Principal) and Auxiliar meshes",
-            "_MeshNumberTitleMcr": "Number of needed meshes",
+            "_MeshNumberTitleMcr": "Number of needed meshes (mesh equations)",
             "_MeshTitle": "Selected Meshes (Auxiliar and Principal) and corresponding equations",
             "_MeshTitleMCR": "Selected Meshes and corresponding equations",
             "_MCMEqPri" : "Number of Principal meshes (Mp)",
@@ -205,7 +205,9 @@ $(function () {
             "_branchIden": "Branch Currents identification",
             "_currentsTableCap": "List of the circuit currents and its properties\/components",
             "_page": "Page: ",
-            "_noImage": "No image"
+            "_noImage": "No image",
+            "_resultsMCR" :"Results",
+            "_calcResultMCR": "Branch currents calculation"
         },
 
         // Language Switch - PT-PT
@@ -391,7 +393,7 @@ $(function () {
             "_AuxiliarMeshCurrNote1": "As malhas ",
             "_AuxiliarMeshCurrNote2": "são do tipo auxiliar, logo, têm valor de corrente definido e não possuem equação. O valor da corrente da malha é imposto pela fonte de corrente que ela contém.",
             "_MeshNumberTitle": "Número de malhas Principais e Auxiliares",
-            "_MeshNumberTitleMcr": "Número de malhas necessárias",
+            "_MeshNumberTitleMcr": "Número de (equações das) Malhas necessárias",
             "_MeshTitle": "Malhas selecionadas (Auxiliares e Principais) e equações correspondentes",
             "_MeshTitleMCR": "Malhas selecionadas e equações correspondentes",
             "_MCMEqPri" : "Número de malhas Principais (Mp)",
@@ -414,7 +416,9 @@ $(function () {
             "_branchIden": "Identificação da Corrente nos Ramos",
             "_currentsTableCap": "Lista das Correntes do Circuito e as suas propriedades\/componentes",
             "_page": "Página: ",
-            "_noImage": "Sem imagem"
+            "_noImage": "Sem imagem",
+            "_resultsMCR" :"Resultados",
+            "_calcResultMCR": "Cálculo das correntes nos ramos"
         }
     };
 

@@ -864,7 +864,7 @@ function outMeshesMCR(branchObjs, meshesObjs, resultObjs){
     // Add card for currents
     htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center no-page-break" style="opacity:0.9">';
-    htmlstr += '<h6 class="lead" data-translate="_currents"></h6></div>';
+    htmlstr += '<h6 class="lead" data-translate="_calcResultMCR"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
 
     if(results.length > 0){
@@ -1003,7 +1003,7 @@ function outShowAllBtnMCR(){
 
     // Results
     htmlstr += '<div class="container mt-3">';
-    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resBranch"></h5></div></div>';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resultsMCR"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="resultsCurrentsBranch"></div></div>';
     
     return htmlstr;
@@ -1289,7 +1289,7 @@ function buildTeXRRich(file, meshImages){
 
         str += '\\end{cases}';
 
-        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\subsection{" + lang._resBranch + "}\r\n\r\n"
+        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\subsection{" + lang._resultsMCR + "}\r\n\r\n"
 
         TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
         TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
@@ -1346,7 +1346,7 @@ function getTexFileHeaderMCROv(lang){
  * @param {array} meshImages image information
  * @returns {string} TeX string
  */
-function buildTeXOv(file, meshImages){
+function buildTeXOv2(file, meshImages){
 
 	let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -1615,7 +1615,7 @@ function buildTeXOv(file, meshImages){
 
         str += '\\end{cases}';
 
-        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\subsection{" + lang._resBranch + "}\r\n\r\n"
+        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\subsection{" + lang._resultsMCR + "}\r\n\r\n"
 
         TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
         TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
@@ -2301,7 +2301,7 @@ function printBranchResults(doc, file, line, marginSides, marginTop, marginBotto
         line = height*marginTop;
     }
     doc.setFontSize(subsubtitleSize);
-    doc.text('8.2  ' + lang._resBranch, marginSides*width, line+=25, null, null, 'left');
+    doc.text('8.2  ' + lang._resultsMCR, marginSides*width, line+=25, null, null, 'left');
 
     line+=5;
     doc.setLineWidth(1);
