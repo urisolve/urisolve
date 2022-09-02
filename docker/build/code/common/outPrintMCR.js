@@ -864,7 +864,7 @@ function outMeshesMCR(branchObjs, meshesObjs, resultObjs){
     // Add card for currents
     htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-header rounded text-light bg-warning d-flex align-items-center justify-content-center no-page-break" style="opacity:0.9">';
-    htmlstr += '<h6 class="lead" data-translate="_calcResultMCR"></h6></div>';
+    htmlstr += '<h6 class="lead" data-translate="_resBranch"></h6></div>';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
 
     if(results.length > 0){
@@ -1040,6 +1040,7 @@ function buildTeXRRich(file, meshImages){
 	let E = R - (N - 1) - C;
 	let simpEquations =  file.analysisObj.equations;
 	let meshes = file.analysisObj.chosenMeshes;
+    let resultsMCR=file.analysisObj.result.cuurentResult;
 
 	let currents = file.analysisObj.currents;
 	let branches =  file.branches;
@@ -1301,7 +1302,8 @@ function buildTeXRRich(file, meshImages){
 }
 
 //BUILD TEX FILE FOR OVERLEAF
-function buildImTeX(images){
+function buildImTeXMCR(images, imagesNodes){
+    let subscnt=0;
     let imageTex = '';
 
     let sampleimg = base64imgselect("logo");
@@ -1319,8 +1321,19 @@ function buildImTeX(images){
             callback: function(data) {
                 img.setAttribute("src", data);
                 imageTex += '\\newcommand{\\mesh' + substitutions[i] + '}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
+                subscnt=subscnt+1;
             }
         });
+    }
+
+    for(let i = 0; i < imagesNodes.length; i++){
+       
+       imagesNodes[i].dataURL=imagesNodes[i].dataURL.replace('data:image/png;base64,', '')
+      
+                imageTex += '\\newcommand{\\node' + substitutions[i] + '}{' + imagesNodes[i].dataURL + '}\r\n';
+                
+            
+       
     }
     
 
@@ -1335,9 +1348,9 @@ function getTexFileHeaderMCROv(lang){
     let texHeader = '';
     texHeader = '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\n\r';
     texHeader += '\\include{images}\r\n';
-    texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._MCMmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\r\n\\textsc{' + lang._MCMmethod + '} \\\\\r\n\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
-    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Ângelo Pinheiro - 1190398@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
-    texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n' + lang._abstract + '\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
+    texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang.__MCRmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\r\n\\textsc{' + lang._MCRmethod + '} \\\\\r\n\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
+    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Helder Casanova - 1171114@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n' + lang._abstractMCR + '\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
     return texHeader;
 }
 /**
@@ -1346,7 +1359,7 @@ function getTexFileHeaderMCROv(lang){
  * @param {array} meshImages image information
  * @returns {string} TeX string
  */
-function buildTeXOv2(file, meshImages){
+function buildTeXOv2(file, meshImages, nodeImages){
 
 	let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -1357,7 +1370,8 @@ function buildTeXOv2(file, meshImages){
 	let Amps = file.probes.ammeters.length;
 	let E = R - (N - 1) - C;
 	let simpEquations =  file.analysisObj.equations;
-	let meshes = file.analysisObj.chosenMeshes;
+	let meshes = file.analysisObj.choosenMeshes;
+    let resultsMCR=file.analysisObj.result.cuurentResult;
 
 	let currents = file.analysisObj.currents;
 	let branches =  file.branches;
@@ -1394,148 +1408,10 @@ function buildTeXOv2(file, meshImages){
 
 	TeX += aux;
 
-	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
-
-	//meshes calculation
-    TeX += "\\section{" + lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
-    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
-    TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
-	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
-	TeX += "\\paragraph{} " + lang._nrOfEquations + "\r\n";
-    TeX += "\r\n\\subsection{" + lang._AuxMeshes + "}\r\n\r\n";
-    TeX += "\\paragraph{} " + lang._nrOfCurrSrc + "\r\n";
-    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
-
-	//circuit mesh images
-    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
-	let pagebreakCounter = 0;
-	TeX += "\\section{" + lang._MeshTitleMCR + "}\r\n\r\n";
-	meshImages.forEach(image => {
-		let aux;
-		if(meshes[image.id-1].type == 0) aux = lang._typeA;
-		else aux = lang._typePMCR;
-        let prop = 1;
-        if(image.width > 350){
-            prop = 350/image.width;
-        }
-		TeX += "\\subsection{" + lang._kmlMesh + "~" + image.id + "~-~" + aux + "}\r\n"
-		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\resizebox{" + (image.width*prop).toFixed(0) + "pt}{!}{\\inlineimages{"
-		TeX += "mesh" + String(image.id) + ".png}{\\mesh" + substitutions[meshImages.indexOf(image)] + "}}}\r\n\r\n\\end{figure}\r\n";
-        if(meshes[image.id-1].type == 1){
-            if(meshes[image.id-1].currValue.complex){
-                TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad \\underline{I_{Mp"+ meshes[image.id-1].displayId+"}}~:~" + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
-            }
-            else{
-                TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{Mp"+ meshes[image.id-1].displayId+"}~:~" + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
-            }
-        }
-        else{
-            if(meshes[image.id-1].currValue.complex){
-				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
-				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 3, true);
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad \\underline{I_{Ma"+meshes[image.id-1].displayId+"}}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A\r\n\\end{equation}\r\n\r\n';  
-            }
-            else{
-				let result = resultDecimals(meshes[image.id-1].currValue.value)
-                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{Ma" + meshes[image.id-1].displayId+"}~:~" + result.value + result.unit + "A\r\n\\end{equation}\r\n\r\n";  
-            }		
-		}
-		pagebreakCounter++;
-        if(pagebreakCounter == 2){
-            pagebreakCounter = 0;
-            TeX += "\\pagebreak";
-        }
-
-	});
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
 
 
-	//equation system
-	TeX += "\\pagebreak\\section{" + lang._eqSystemTitle + "}\r\n\r\n\\paragraph{} ";
-
-    if(simpEquations.allRevealedEq.length > 0){
-        let str = '\\large \\begin{cases}';
-        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
-            str += simpEquations.allRevealedEq[k];
-            if(k < simpEquations.allRevealedEq.length-1)
-                str += '\\\\[0.7em] ';
-
-        }
-        str += '\\end{cases}';
-        TeX += lang._snEquat + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
-
-        TeX += lang._Steps + ":\r\n\r\n";
-        //step 1
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<simpEquations.allVariableEq.length; k++){
-            str += simpEquations.allVariableEq[k];
-            if(k<simpEquations.allVariableEq.length-1)
-                str += ' \\\\[0.7em] ';
-
-        }
-        str += '\\end{cases}';
-        TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}  Initial equation system\r\n";
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
-        //step 2
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<simpEquations.meshCurrRevealedEq.length; k++){
-            str += simpEquations.meshCurrRevealedEq[k];
-            if(k<simpEquations.meshCurrRevealedEq.length-1)
-                str += ' \\\\[0.7em] ';
-
-        }
-        str += '\\end{cases}';
-        TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small}  Substitute the mesh current values\r\n";
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
-        //step 3
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
-            str += simpEquations.allRevealedEq[k];
-            if(k<simpEquations.allRevealedEq.length-1)
-                str += ' \\\\[0.7em] ';
-
-        }
-        str += '\\end{cases}';
-        TeX += "\\begin{small}\\textbf{\\textit{Step 3:}}\\end{small}  Substitute the circuit component values\r\n";
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";        
-    }
-    else{
-        TeX +=  lang._noSystem;
-    }
-
-
-
-	// Add Equation system
-	str = '\\large \\begin{cases}';
-	for(let k = 0; k<meshes.length; k++){
-        let aux = '';
-        if(meshes[k].type == 0) aux = 'a';
-        else  aux = 'p';
-        aux += String(meshes[k].displayId); 
-
-		// Generate Equation
-        if(meshes[k].currValue.complex){ //malha é complexa
-            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
-            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 3, true);
-			if(resultMag.value == 0){
-                str += "\\underline{I_{M" + aux + "}} = " + resultMag.value + resultMag.unit + '~A\\\\';
-            }
-            else{
-                str += "\\underline{I_{M" + aux + "}} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
-            }
-        }
-        else{ //malha é real
-            let result = resultDecimals(meshes[k].currValue.value, 2, false);
-            str += "I_{M" + aux + "} = " + result.value + result.unit + 'A\\\\';
-        }
-		if(k<results.length-1)
-			str += ' \\\\[0.7em] ';
-	}
-	str += '\\end{cases}';
-
-	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{" + lang._resMesh + "}\r\n\r\n";
-	TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
-
-	//mesh current results
+    //mesh current results
 	TeX += "\\section{" + lang._branchIden + "}\r\n\r\n\\subsection{" + lang._currents + "}\n\r\n\r";
 	TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
 	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
@@ -1577,6 +1453,179 @@ function buildTeXOv2(file, meshImages){
 	}
 
 	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+
+
+    //node calculation
+    const substitutionss = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
+	let pagebreakCounters = 0;
+	TeX += "\\pagebreak\\section{" + lang._knlTitle + "}\r\n\r\n";
+	for(j=0;j<nodeImages.length;j++){
+        let nreq=j+1;
+		TeX += "\\subsection{" + lang._knlNode + "~" + file.analysisObj.equations.nodeEquationsReal[j].node + "}\r\n"
+		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\resizebox{ 150 pt}{!}{\\inlineimages{"
+		TeX += "node" + String(nodeImages[j].id) + ".png}{\\node" + substitutionss[j] + "}}}\r\n\r\n\\end{figure}\r\n";
+        
+            //if(meshes[image.id-1].currValue.complex){
+              //  TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad \\underline{I_{Mp"+ meshes[image.id-1].displayId+"}}~:~" + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
+            //}
+            
+                //TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I{M"+ meshes[image.id-1].displayId+"}~:~" + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
+                 TeX += "\\begin{equation}\r\n \\textrm{"+ lang._singleeq +"~" +nreq+"}: \\quad "+ file.analysisObj.equations.nodeEquationsReal[j].equation +"\r\n\\end{equation}\r\n\r\n";
+
+		pagebreakCounters++;
+        
+        if((pagebreakCounters == 2)){
+            pagebreakCounters = 0;
+            TeX += "\\pagebreak\r\n";
+        }
+    }
+
+	   
+
+	//meshes calculation
+    TeX += "\\section{"+ lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MCRMeshEq + "}\r\n\r\n";
+    TeX += "\\begin{gather*}\r\nM=R-(N-1)-C ~ \\Leftrightarrow \\\\";
+    TeX += "M="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
+	TeX += "\\Leftrightarrow ~ M="+E+"\\end{gather*}\r\n\\par\r\n\r\n\\pagebreak";
+	//TeX += "\\paragraph{} " + lang._nrOfEquations + "\r\n";
+    //TeX += "\r\n\\subsection{" + lang._AuxMeshes + "}\r\n\r\n";
+    //TeX += "\\paragraph{} " + lang._nrOfCurrSrc + "\r\n";
+    //TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
+
+	//circuit mesh images
+    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
+	let pagebreakCounter = 0;
+	TeX += "\\section{" + lang._MeshTitleMCR + "}\r\n\r\n";
+    let nreq=0;
+	meshImages.forEach(image => {
+        nreq=nreq+1;
+		let aux;
+		if(meshes[image.id-1].type == 0) aux = lang._typeA;
+		else aux = lang._typePMCR;
+        let prop = 1;
+        if(image.width > 350){
+            prop = 350/image.width;
+        }
+		TeX += "\\subsection{" + lang._kmlMesh + "~" + image.id + "~-~" + aux + "}\r\n"
+		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\resizebox{" + (image.width*prop).toFixed(0) + "pt}{!}{\\inlineimages{"
+		TeX += "mesh" + String(image.id) + ".png}{\\mesh" + substitutions[meshImages.indexOf(image)] + "}}}\r\n\r\n\\end{figure}\r\n";
+        if(meshes[image.id-1].type == 1){
+            //if(meshes[image.id-1].currValue.complex){
+              //  TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad \\underline{I_{Mp"+ meshes[image.id-1].displayId+"}}~:~" + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
+            //}
+            
+                TeX += "\\begin{equation}\r\n \\textrm{"+ lang._singleeq +"~" +nreq+"}: \\quad " + meshes[image.id-1].incognitoEq +"\r\n\\end{equation}\r\n\r\n";
+            
+        }                //\\quad I{M"+ meshes[image.id-1].displayId+"}~:~
+        else{
+            if(meshes[image.id-1].currValue.complex){
+				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
+				let resultAng = resultDecimals(Math.atan(meshes[image.id-1].currValue.im/meshes[image.id-1].currValue.re)*57.2957795, 3, true);
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad \\underline{I_{Ma"+meshes[image.id-1].displayId+"}}~:~"+ resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A\r\n\\end{equation}\r\n\r\n';  
+            }
+            else{
+				let result = resultDecimals(meshes[image.id-1].currValue.value)
+                TeX += "\\begin{equation}\r\n \\textrm{Value}: \\quad I_{Ma" + meshes[image.id-1].displayId+"}~:~" + result.value + result.unit + "A\r\n\\end{equation}\r\n\r\n";  
+            }		
+		}
+		pagebreakCounter++;
+        if(pagebreakCounter == 2){
+            pagebreakCounter = 0;
+            TeX += "\\pagebreak";
+        }
+
+	});
+
+
+	//equation system
+	TeX += "\\pagebreak\\section{" + lang._eqSystemTitle + "}\r\n\r\n\\paragraph{} ";
+
+    if(simpEquations.allRevealedEq.length > 0){
+        let str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+            str += simpEquations.allRevealedEq[k].equation;
+            if(k < simpEquations.allRevealedEq.length-1)
+                str += '\\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += lang._snEquat + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+        TeX += lang._Steps + ":\r\n\r\n";
+        //step 1
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRealEq.length; k++){
+            str += simpEquations.allRealEq[k].equation;
+            if(k<simpEquations.allRealEq.length-1)
+                str += ' \\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}"  + "~"+ lang._eqStep1MCM + "\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+        //step 2
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+            str += simpEquations.allRevealedEq[k].equation;
+            if(k<simpEquations.allRevealedEq.length-1)
+                str += ' \\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small} " +lang._eqStep5 +"\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+        //step 3
+       /* str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+            str += simpEquations.allRevealedEq[k];
+            if(k<simpEquations.allRevealedEq.length-1)
+                str += ' \\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += "\\begin{small}\\textbf{\\textit{Step 3:}}\\end{small}  Substitute the circuit component values\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";  */      
+    }
+    else{
+        TeX +=  lang._noSystem;
+    }
+
+
+
+	// Add Equation system
+	str = '\\large \\begin{cases}';
+	for(let k = 0; k<currents.length; k++){
+        let aux = '';
+        //if(meshes[k].type == 0) aux = 'a';
+        //else  aux = 'p';
+        aux = (currents[k].ref); 
+
+		// Generate Equation
+        /*if(meshes[k].currValue.complex){ //malha é complexa
+            let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[k].currValue.re, 2) + Math.pow(meshes[k].currValue.im, 2)), 2, false);
+            let resultAng = resultDecimals(Math.atan(meshes[k].currValue.im/meshes[k].currValue.re)*57.2957795, 3, true);
+			if(resultMag.value == 0){
+                str += "\\underline{I_{M" + aux + "}} = " + resultMag.value + resultMag.unit + '~A\\\\';
+            }
+            else{
+                str += "\\underline{I_{M" + aux + "}} = " + resultMag.value + '\\angle{} ' + resultAng.value + '^{\\circ{}}\\;' + resultMag.unit + 'A\\\\';
+            }
+        }*/
+         //malha é real
+            let result = resultsMCR[k];
+            str +=   result + '\\\\';
+        
+		if(k<results.length-1)
+			str += ' \\\\[0.7em] ';
+	}
+	str += '\\end{cases}';
+
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{" + lang._resBranch + "}\r\n\r\n";
+	TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+    
+	
+    /*
 
 	if(currents.length > 0){
         // Create Equations
@@ -1621,7 +1670,7 @@ function buildTeXOv2(file, meshImages){
         TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
         TeX += lang._currResNotes1MCM.slice(6) + "\r\n\\end{footnotesize}\r\n\r\n";
 	}
-
+*/
 	TeX += "\\end{document}\r\n";
 	return TeX;
 }

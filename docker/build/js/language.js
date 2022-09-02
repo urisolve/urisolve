@@ -196,10 +196,12 @@ $(function () {
             "_typeP" : "Main",
             "_nrOfCurrSrc" : "Note: The number of auxiliary meshes is the same as the number of current sources (FC). Each auxiliary mesh passes through a single FC, normally choosing the same direction of flow of the (current of the) mesh in order to align itself in the direction of the FC current, thus assuming its own (positive) value.",
             "_MCMmethod" : "Mesh Current Method",
+            "_MCRmethod" : "Branch Current Method",
             "_step_by_step" : "Step by Step Solution",
             "_project_coor" : "Project Coordinators",
             "_devel" : "Developers",
             "_abstract": "This document provides a step by step solution for the submitted circuit, using the Mesh Current Method (MCM).",
+            "_abstractMCR": "This document provides a step by step solution for the submitted circuit, using the Branch Current Method (MCR).",
             "_Steps": "Steps",
             "_noSystem": "This circuit does not need an equation system in order to be solved.",
             "_branchIden": "Branch Currents identification",
@@ -207,7 +209,9 @@ $(function () {
             "_page": "Page: ",
             "_noImage": "No image",
             "_resultsMCR" :"Results",
-            "_calcResultMCR": "Branch currents calculation"
+            "_calcResultMCR": "Branch currents calculation",
+            "_singleeq": "Equation",
+            "_table": "Table"
         },
 
         // Language Switch - PT-PT
@@ -287,7 +291,7 @@ $(function () {
             "_step": "Passo",
             "_notes":"Notas: ",
             "_resMesh" : "Valores das correntes de malha",
-            "_resBranch" : "Computação da Corrente nos Ramos",
+            "_resBranch" : "Valores das correntes dos ramos",
             "_and": "e",
             "_nodeVoltages": "Tensões nos Nós",
             "_meshCurrents": "Correntes nas Malhas",
@@ -407,10 +411,12 @@ $(function () {
             "_typePMCR" :"",
             "_nrOfCurrSrc" : "Nota: O número de malhas auxiliares é o mesmo que o número de fontes de corrente (FC). Cada malha auxiliar passa numa única FC, normalmente escolhendo-se o sentido de circulação da (corrente da) malha igual de forma a alinhar-se no sentido da corrente da FC, assumindo assim o seu próprio valor (positivo).",
             "_MCMmethod" : "Método da Corrente das Malhas",
+            "_MCRmethod" : "Método da Corrente nos Ramos",
             "_step_by_step" : "Solução Passo a Passo",
             "_project_coor" : "Coordenadores do Projeto",
             "_devel" : "Desenvolvedores",
             "_abstract": "Este documento fornece uma solução passo a passo para o circuito submetido, usando o Método da Corrente das Malhas (MCM)",
+            "_abstractMCR": "Este documento fornece uma solução passo a passo para o circuito submetido, usando o Método da Corrente nos Ramos(MCR)",
             "_Steps": "Passos",
             "_noSystem": "Este circuito não necessita de um sistema de equações para ser resolvido.",
             "_branchIden": "Identificação da Corrente nos Ramos",
@@ -418,7 +424,9 @@ $(function () {
             "_page": "Página: ",
             "_noImage": "Sem imagem",
             "_resultsMCR" :"Resultados",
-            "_calcResultMCR": "Cálculo das correntes nos ramos"
+            "_calcResultMCR": "Cálculo das correntes nos ramos",
+            "_singleeq": "Equação",
+            "_table":"Tabela"
         }
     };
 

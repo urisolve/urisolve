@@ -2086,16 +2086,16 @@ function eqSolver(all_equations){
 		}
 		if(branches[i].acAmpPwSupplies.length>0){
 
-				for(let n=0;n<branches[j].acAmpPwSupplies.length;n++){
-					radanguloAC = parseFloat(branches[j].acAmpPwSupplies[n].phase) / (180/Math.PI);
-					if(branches[j].acAmpPwSupplies[n].unitMult=="A"){
-					valuevAC=parseFloat(branches[j].acAmpPwSupplies[n].value);}
-					if(branches[j].acAmpPwSupplies[n].unitMult=="mA"){
-					valuevAC=parseFloat(branches[j].acAmpPwSupplies[n].value)/1000;}
-					if(branches[j].acAmpPwSupplies[n].unitMult=="uA"){
-					valuevAC=parseFloat(branches[j].acAmpPwSupplies[n].value)/1000000;}
-					if(branches[j].acAmpPwSupplies[n].unitMult=="nA"){
-					valuevAC=parseFloat(branches[j].acAmpPwSupplies[n].value)/1000000000;}
+				for(let n=0;n<branches[i].acAmpPwSupplies.length;n++){
+					radanguloAC = parseFloat(branches[i].acAmpPwSupplies[n].phase) / (180/Math.PI);
+					if(branches[i].acAmpPwSupplies[n].unitMult=="A"){
+					valuevAC=parseFloat(branches[i].acAmpPwSupplies[n].value);}
+					if(branches[i].acAmpPwSupplies[n].unitMult=="mA"){
+					valuevAC=parseFloat(branches[i].acAmpPwSupplies[n].value)/1000;}
+					if(branches[i].acAmpPwSupplies[n].unitMult=="uA"){
+					valuevAC=parseFloat(branches[i].acAmpPwSupplies[n].value)/1000000;}
+					if(branches[i].acAmpPwSupplies[n].unitMult=="nA"){
+					valuevAC=parseFloat(branches[i].acAmpPwSupplies[n].value)/1000000000;}
 
 
 					ComplexAC=math.multiply(valuevAC, math.exp(math.complex(0, radanguloAC)));
@@ -2478,8 +2478,8 @@ function meshEqinMesh(malhas,equacoes){
 			minstr = "0" + minstr;
 		hourstr = hourstr + ":" + minstr;
 
-		let TeX = buildTeXOv(jsonFile, canvasObjects);
-		let ImagesTeX = buildImTeX(canvasObjects);
+		let TeX = buildTeXOv2(jsonFile, canvasObjects, canvasObjectss);
+		let ImagesTeX = buildImTeXMCR(canvasObjects, canvasObjectss);
 
 		//Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
 		if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
@@ -2564,8 +2564,8 @@ function meshEqinMesh(malhas,equacoes){
 
 	// Open in overleaf
 	$("#overleaf").off().on('click', function() {
-		let TeX = buildTeXOv2(jsonFile, canvasObjects);
-		let ImagesTeX = buildImTeX(canvasObjects);
+		let TeX = buildTeXOv2(jsonFile, canvasObjects, canvasObjectss);
+		let ImagesTeX = buildImTeXMCR(canvasObjects, canvasObjectss);
 		//Get User info
 		let studName = document.getElementById('output-name').value;
 		let studLastname = document.getElementById('output-lastname').value;
