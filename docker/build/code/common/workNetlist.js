@@ -21,6 +21,7 @@
  * @description error Code 15: Circuit with no real Nodes found --------------------> CRITICAL
  * @description error Code 16: Sets of in-series isolated Voltage Sources found
  * @description error Code 17: Non-critical invalid ID
+ * @description error Code 18: AC and DC voltage sources in the same circuit -------> CRITICAL
  */
 
  
@@ -98,6 +99,10 @@
         
     error 14 Return Object:
         * errorCode (integer): error Code
+
+    error 18 Return Object:
+        * errorCode (integer): error Code
+        * Voltage sources (object array): Vsources
 */
 
 function validateNetlist(text) {
@@ -1363,7 +1368,7 @@ function validateNetlist(text) {
         let words = outLines[i].split(' ');
         let name = words[0].split(':');
         if(name[1].includes("_")){
-            name[1] = name[1].replace("_","x");
+            name[1] = name[1].replace("_","\\_");
             words[0] = name[0]+":"+name[1];
         }
         if(!isNaN(parseInt(name[1]))){
@@ -1393,10 +1398,30 @@ function validateNetlist(text) {
         outLines[i] = line.join(' ');
     }
 
+    /* [#18] errorCode verification */
+
+    let VDCsources = new Array;
+    let VACsources = new Array;
+
+    for(let i = 0; i < Branches.length; i++){
+        for(let j = 0; j < Branches[i].type.length; j++){
+            if(Branches[i].type[j] == "Vdc"){
+                VDCsources.push(Branches[i].elements[j]);
+            }
+            else if(Branches[i].type[j] == "Vac"){
+                VACsources.push(Branches[i].elements[j]);
+            }
+        }
+    }
+
+    if(VDCsources.length != 0 && VACsources.length != 0){
+        errorList.push({errorCode: 18, Vsources: {DC: VDCsources, AC: VACsources}});
+    }
+
     return {
         first: errorList,
         second: outLines
-        };
+    };
 
 };
 
@@ -1753,7 +1778,7 @@ function acquireCpData(line, cnt) {
  function foundCriticalErr(errList) {
     
     // Critical Error Codes
-    var critical = [0,2,4,5,6,7,11,15];
+    var critical = [0,2,4,5,6,7,11,15, 18];
     for(let i = 0; i < errList.length; i++){
         // Find error code in the array
         if(critical.indexOf(errList[i].errorCode) >= 0)

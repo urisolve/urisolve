@@ -2,7 +2,7 @@
 
 var _DECPLACES = {
     CALC: 3,
-    RESULT: 3
+    RESULT: 15
 };
 
 /*
@@ -204,54 +204,54 @@ function getEndNodes(fcBranch, fcNextNode, psRef, fcBranchStartNode, fcBranchEnd
  * List of Unit multiples
 */
 const multUnits = [
-    {name: 'pA', value: 1e-12},
-    {name: 'nA', value: 1e-9},
-    {name: 'uA', value: 1e-6},
-    {name: 'mA', value: 1e-3},
-    {name: 'A', value: 1},
-    {name: 'kA', value: 1e3},
-    {name: 'MA', value: 1e6},
-    {name: 'GA', value: 1e9},
-    {name: 'pF', value: 1e-12},
-    {name: 'nF', value: 1e-9},
-    {name: 'uF', value: 1e-6},
-    {name: 'mF', value: 1e-3},
-    {name: 'F', value: 1},
-    {name: 'kF', value: 1e3},
-    {name: 'MF', value: 1e6},
-    {name: 'GF', value: 1e9},
-    {name: 'pH', value: 1e-12},
-    {name: 'nH', value: 1e-9},
-    {name: 'uH', value: 1e-6},
-    {name: 'mH', value: 1e-3},
-    {name: 'H', value: 1},
-    {name: 'kH', value: 1e3},
-    {name: 'MH', value: 1e6},
-    {name: 'GH', value: 1e9},
-    {name: 'pHz', value: 1e-12},
-    {name: 'nHz', value: 1e-9},
-    {name: 'uHz', value: 1e-6},
-    {name: 'mHz', value: 1e-3},
-    {name: 'Hz', value: 1},
-    {name: 'kHz', value: 1e3},
-    {name: 'MHz', value: 1e6},
-    {name: 'GHz', value: 1e9},
-    {name: 'pV', value: 1e-12},
-    {name: 'nV', value: 1e-9},
-    {name: 'uV', value: 1e-6},
-    {name: 'mV', value: 1e-3},
-    {name: 'V', value: 1},
-    {name: 'kV', value: 1e3},
-    {name: 'MV', value: 1e6},
-    {name: 'GV', value: 1e9},
-    {name: 'pOhm', value: 1e-12},
-    {name: 'nOhm', value: 1e-9},
-    {name: 'uOhm', value: 1e-6},
-    {name: 'mOhm', value: 1e-3},
-    {name: 'Ohm', value: 1},
-    {name: 'kOhm', value: 1e3},
-    {name: 'MOhm', value: 1e6},
-    {name: 'GOhm', value: 1e9}
+    {name: 'pA', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nA', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uA', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mA', value: 1e-3, teX: "10^{-3}"},
+    {name: 'A', value: 1, teX: ""},
+    {name: 'kA', value: 1e3, teX: "10^{3}"},
+    {name: 'MA', value: 1e6, teX: "10^{6}"},
+    {name: 'GA', value: 1e9, teX: "10^{9}"},
+    {name: 'pF', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nF', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uF', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mF', value: 1e-3, teX: "10^{-3}"},
+    {name: 'F', value: 1, teX: ""},
+    {name: 'kF', value: 1e3, teX: "10^{3}"},
+    {name: 'MF', value: 1e6, teX: "10^{6}"},
+    {name: 'GF', value: 1e9, teX: "10^{9}"},
+    {name: 'pH', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nH', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uH', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mH', value: 1e-3, teX: "10^{-3}"},
+    {name: 'H', value: 1, teX: ""},
+    {name: 'kH', value: 1e3, teX: "10^{3}"},
+    {name: 'MH', value: 1e6, teX: "10^{6}"},
+    {name: 'GH', value: 1e9, teX: "10^{9}"},
+    {name: 'pHz', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nHz', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uHz', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mHz', value: 1e-3, teX: "10^{-3}"},
+    {name: 'Hz', value: 1, teX: ""},
+    {name: 'kHz', value: 1e3, teX: "10^{3}"},
+    {name: 'MHz', value: 1e6, teX: "10^{6}"},
+    {name: 'GHz', value: 1e9, teX: "10^{9}"},
+    {name: 'pV', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nV', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uV', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mV', value: 1e-3, teX: "10^{-3}"},
+    {name: 'V', value: 1, teX: ""},
+    {name: 'kV', value: 1e3, teX: "10^{3}"},
+    {name: 'MV', value: 1e6, teX: "10^{6}"},
+    {name: 'GV', value: 1e9, teX: "10^{9}"},
+    {name: 'pOhm', value: 1e-12, teX: "10^{-12}"},
+    {name: 'nOhm', value: 1e-9, teX: "10^{-9}"},
+    {name: 'uOhm', value: 1e-6, teX: "10^{-6}"},
+    {name: 'mOhm', value: 1e-3, teX: "10^{-3}"},
+    {name: 'Ohm', value: 1, teX: ""},
+    {name: 'kOhm', value: 1e3, teX: "10^{3}"},
+    {name: 'MOhm', value: 1e6, teX: "10^{6}"},
+    {name: 'GOhm', value: 1e9, teX: "10^{9}"}
 ];
 
 // Circuit Objects
@@ -667,7 +667,7 @@ class node {
 
             return {
                 first:   errorCode,
-                second:  nodeCurr,
+                second:   nodeCurr,
                 third:   plainEquat
             };
         };
@@ -759,11 +759,15 @@ class branch {
         this.resistors = cpResistors,
         this.coils = cpCoils,
         this.capacitors = cpCapacitors,
-        this.amperemeter = cpAmperemeter,
+        this.ammeter = cpAmperemeter,
         this.equivImpedance = cpEquivImpedance,
         this.equivVoltPs = cpEquivVoltPs,
         this.endVoltPsEndNodes = cpEndVoltPsEndNodes,
         this.currentData = cpCurrentData,
+        this.meshCurr = [];
+        this.meshCurrDir = [];
+        this.components = [];
+        this.reactance;
         this.setEquivImpedance = function (freqV, freqM) {
             let errorCode = 0;
             let tImpedance = 0;
@@ -790,6 +794,27 @@ class branch {
             }
             this.equivImpedance.ref = 'Zeq' + this.startNode + this.endNode;
             this.equivImpedance.value = math.string(math.round(tImpedance, _DECPLACES.CALC));
+            return errorCode;
+        };
+        this.getReactance = function (freqV, freqM) {
+            let errorCode = 0;
+            let tImpedance = 0;
+            if(freqV>0) {
+                // Function to calculate Equivalent Impedance
+                for(let i=0; i<this.capacitors.length; i++) {
+                    let cImp = this.capacitors[i].compImpedance(freqV, freqM).second;
+                    tImpedance = math.add(tImpedance, cImp);
+                    // Add this ref to array
+                    this.equivImpedance.impedanceElem.push( { ref: this.capacitors[i].ref, type: 'capacitor', value: cImp.toString() } );
+                }
+                for(let i=0; i<this.coils.length; i++) {
+                    let lImp = this.coils[i].compImpedance(freqV, freqM).second;
+                    tImpedance = math.add(tImpedance, lImp);
+                    // Add this ref to array
+                    this.equivImpedance.impedanceElem.push( { ref: this.coils[i].ref, type: 'coil', value: lImp.toString() } );
+                }
+            }
+            this.reactance = math.string(math.round(tImpedance, _DECPLACES.CALC));
             return errorCode;
         };
         this.setEquivVoltPs = function () {
@@ -947,8 +972,8 @@ class branch {
                 else
                     this.currentData.value = currentValue;
               
-                if(this.amperemeter){
-                    if(this.amperemeter.noP == this.dcAmpPwSupplies[0].globalNoP)
+                if(this.ammeter){
+                    if(this.ammeter.noP == this.dcAmpPwSupplies[0].globalNoP)
                         this.currentData.value = math.multiply(currentValue,-1);
                     else
                         this.currentData.value = currentValue;
@@ -966,8 +991,8 @@ class branch {
                 else
                     this.currentData.value = currentValue;
               
-                if(this.amperemeter){
-                    if(this.amperemeter.noP == this.acAmpPwSupplies[0].globalNoP)
+                if(this.ammeter){
+                    if(this.ammeter.noP == this.acAmpPwSupplies[0].globalNoP)
                         this.currentData.value = -currentValue;
                     else
                         this.currentData.value = currentValue;
@@ -1096,7 +1121,7 @@ class voltmeter {
     }
 }
 
-class amperemeter {
+class ammeter {
     constructor(cpId, cpRef, cpNoP, cpNoN, cpType, cpIntRes, cpIntResMult, cpPosX, cpPosY) {
         this.id = cpId,
         this.ref = cpRef,
@@ -1198,19 +1223,9 @@ class capacitor {
 
                 // Calculate Component Impedance
 
-                // Angle = Phase * (pi / 180)
-                let cpValAngle = -90;
-                cpValAngle = math.chain(math.pi)
-                    .divide(180)
-                    .multiply(cpValAngle)
-                    .done()
+                cZc = (-1*math.divide(numer, denom));
 
-                cZc = math.divide(numer, denom);
-
-                // Turn into a complex number
-                cZc = math.complex({ r: cZc, phi: cpValAngle });
-
-                this.impedance = math.string(math.round(cZc, _DECPLACES.RESULT));
+                this.impedance = String(math.round(cZc, _DECPLACES.RESULT))+'i';
             }
 
             return {
@@ -1284,17 +1299,10 @@ class coil {
 
                 // Calculate Component Impedance
 
-                // Angle = Phase * (pi / 180)
-                let cpValAngle = 90;
-                cpValAngle = math.chain(math.pi)
-                    .divide(180)
-                    .multiply(cpValAngle)
-                    .done()
+                cZc = numer;
 
-                // Turn into a complex number
-                cZc = math.complex({ r: numer, phi: cpValAngle });
+                this.impedance = String(math.round(cZc, _DECPLACES.RESULT))+'i';
 
-                this.impedance = math.string(math.round(cZc, _DECPLACES.RESULT));
             }
 
             return {
@@ -1378,6 +1386,14 @@ class dcCurrPower {
                 toNode:     this.noN,
             };
         };
+        /*
+        this.getGlobalNodes = function () {
+            return {
+                fromNode:   this.globalNoP,
+                toNode:     this.globalNoN,
+            };
+        };
+        */
     }
 }
 
@@ -1464,6 +1480,34 @@ class acCurrPower {
                 toNode:     this.noN,
             };
         };
+        this.getGlobalNodes = function () {
+            return {
+                fromNode:   this.globalNoP,
+                toNode:     this.globalNoN,
+            };
+        };
+    }
+}
+
+class mesh {
+    constructor(meshId, meshType, meshBranches, curBranch, curSrc, meshLetterId, DisplayId){
+        this.id = meshId;
+        this.type = meshType;
+        this.branches = meshBranches;
+        this.branchWithCurSrc = curBranch;
+        this.currentSource = curSrc;
+        this.letterId = meshLetterId;
+        this.branchesDir = [];
+        this.componentsLeft = [];
+        this.componentsRight = [];
+        this.equationData = [];
+        this.incognitoEq = '';
+        this.revealedCurrSrc = '';
+        this.revealedEq = '';
+        this.solverEq = '';
+        this.currValue;
+        this.currMult;
+        this.displayId = DisplayId;
     }
 }
 

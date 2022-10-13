@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-toggle.min.css">
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="vendor/ldLoader/ldld.min.css"/>
-    
+
 
     <link rel="stylesheet" href="css/animate.min.css">
     <link rel="stylesheet" href="css/flag-icon.min.css">
@@ -59,6 +59,11 @@
     <script type="text/javascript" src="vendor/latexprinter/samples/base64data.js"></script>
     <script type="text/javascript" src="vendor/latexprinter/samples/latexsample.js"></script>
     <script type="text/javascript" src="vendor/latexprinter/texworker.js"></script>
+    <script type="text/javascript" src="vendor/meshes-finder/meshes-finder.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/dist/jspdf.umd.min.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/jspdf.plugin.standard_fonts_metrics.js"></script>
+    <script type="text/javascript" src="vendor/jspdf/canvg.js"></script>
+    <script type="text/javascript" src="vendor/SvgToPng/SvgToPng.js"></script>
 
     <script type="text/javascript" src="js/includes.js"></script>
     <script type="text/javascript" src="js/varproto.js"></script>
@@ -69,7 +74,6 @@
     <script type="text/javascript" src="js/contact-form.js"></script>
     <script type="text/javascript" src="js/login-register.js"></script>
     <script type="text/javascript" src="js/publications.js"></script>
-
 
     <script type="text/javascript">
     // Global Arrays
@@ -175,11 +179,11 @@
                         </div>
 
                         <div class="col-md-4 d-flex justify-content-center" >
-                          <button id="btnMCR" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button" aria-disabled="true"> <span data-translate="_btn_mcr_p1"></span> <br> <span data-translate="_btn_mcr_p2"></span> </button>
+                          <button id="btnMCR" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light type="button" onclick="analyseCircuit('MCR')"> <span data-translate="_btn_mcr_p1"></span> <br> <span data-translate="_btn_mcr_p2"></span> </button>
                         </div>
 
                         <div class="col-md-4 d-flex justify-content-center" >
-                          <button id="btnMCM" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light disabled noHover" type="button"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
+                          <button id="btnMCM" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick = "analyseCircuit('MCM')"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
                         </div>
                       </div>
                       <br>
@@ -687,7 +691,7 @@
                   <div class="col-sm-3 text-center">
                     <div class="contact-cont wow fadeInUp"  data-wow-delay="0.6s">
                       <a href="#">
-                        <img src="img/txr.png" alt="" class="img-fluid">
+                        <img src="img/anr.png" alt="" class="img-fluid">
                         <h5>André Rocha</h5>
                       </a>
                     </div>
@@ -695,7 +699,7 @@
                   <div class="col-sm-3 text-center">
                     <div class="contact-cont wow fadeInUp"  data-wow-delay="0.9s">
                       <a href="#">
-                          <img src="img/lino.png" alt="" class="img-fluid">
+                          <img src="img/sss.png" alt="" class="img-fluid">
                           <h5>Lino Sousa</h5>
                       </a>
                     </div>
@@ -755,7 +759,7 @@
                     <div id="results-board" class="modal-body"></div>
                     <!-- <div id="results-json" class="modal-body"></div> -->
                     <!-- User name box -->
-                    <div class="container" style="visibility: visible;">
+                    <div id = "output-info-global" class="container" style="visibility: visible;">
                       <form role="form" method="post" id="userform-temp" class="col-lg-6 offset-lg-3">
                         <div class="row justify-content-center">
                             <div class="col-4 form-group">
@@ -778,7 +782,7 @@
                     </form>
                     </div>
 
-                    <div class="modal-footer no-print">
+                    <div id = "buttons-div" class="modal-footer no-print">
                       <fieldset class="w-100">
                         <a id='printLnk' download='urisolve_results.pdf' style="display:none;"></a>
                         <button id="pdfPrintButton" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
@@ -786,9 +790,22 @@
                           <div class="ldld bare em-1 light d-inline-block ml-1 align-middle" id="pdfLoader"></div>
                         </button>
                         <button id="json" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
-                        <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
+                          <i class="fas fa-file-code" aria-hidden="true"></i>&nbsp;&nbsp;Download JSON </button>
                         <button id="tex" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-2">
                         <img src="img/TeX.png" style="width: 35px;"></img>&nbsp;&nbsp;Download TeX </button>
+
+
+                        <form id="overleaf" action="https://www.overleaf.com/docs" method="post" target="_blank" class="btn btn-secondary font-weight-light align-bottom col-md-2">
+                          <input id="main" type="hidden" name="encoded_snip">
+                          <input id="images" type="hidden" name="encoded_snip">
+                          <input type="hidden" name="snip_name[]" value="main.tex">
+                          <input type="hidden" name="snip_name[]" value="images.tex">
+                          <img src="img/overleaf.png" style="width: 22px;"></img>&nbsp;&nbsp;Open in Overleaf 
+                        </form>
+                        
+
+                        <button id="print" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-1">
+                            <img src="img/print.png" style="width: 22px;"></img>&nbsp;&nbsp;Print </button>
                         <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
                           <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
                       </fieldset>
@@ -879,7 +896,7 @@
                                   </div>
                                   <div style="width: 100%;">
                                     <i class="fas fa-lock pt-3 pl-2" style="position: absolute;"></i>
-                                  <input id="re-pass" class="form-control" type="password" placeholder="Repeat Password" name="re-pass" minlength="4" maxlength="16" onkeyup="validatePW(); return false;" required>
+                                  <input id="re-pass" class="form-control" type="password" placeholder="Repeat Password" name="re-pass" minlength="4" maxlength="16" onkeyup="validatePW();" required>
                                   </div>
                                   <div id="confirmMessage"></div>
                                   <button type="submit" class="btn btn-default btn-register" name="commit" id="register-button">
@@ -1013,6 +1030,7 @@
         <script src="vendor/JQuery/jquery.easing.min.js"></script>
         <script src="vendor/OwlCarousel2/owl.carousel.min.js"></script>
         <script src="vendor/wow/wow.min.js"></script>
+        <script src="vendor/D3/d3.v7.js"></script>
         <script src="js/app.js"></script>
 
         <script>
@@ -1080,6 +1098,7 @@
             $('#results-modal').modal('hide');
           });
         </script>
+
 
         <script type="text/javascript" src="js/fileup.js"></script>
         <script type="text/javascript" src="js/modalresults.js"></script>

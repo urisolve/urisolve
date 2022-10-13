@@ -3,7 +3,7 @@
  * @param {array} errList error Codes
  * @returns {string} html String
  */
-function errorOutput(errList){
+function errorOutput(errList, method){
 
     // Warnings html string
     let htmlstr = '';
@@ -179,8 +179,41 @@ function errorOutput(errList){
             /* Error Code 15 */
             case 15:
                 warnString += header;
-                warnString += '<div><span data-translate="_errCode15"></span></div>';
+                if(method == 'MTN'){
+                    warnString += '<div><span data-translate="_errCode15"></span></div>';
+                }
+                else if(method == 'MCM'){
+                    warnString += '<div><span data-translate="_errCode15MCM"></span></div>';
+                }
                 warnString += '</div></div>';
+                break;
+
+            /* Error Code 18 */
+            case 18:
+                let strDC = '';
+                let strAC = '';
+                for(let j = 0; j < errList[i].Vsources.DC.length; j++){
+                    strDC += errList[i].Vsources.DC[j] + ',  ';
+                    if(j == errList[i].Vsources.DC.length-1) strDC = strDC.slice(0, -3);
+                }
+                for(let j = 0; j < errList[i].Vsources.AC.length; j++){
+                    strAC += errList[i].Vsources.AC[j] + ',  ';
+                    if(j == errList[i].Vsources.AC.length-1) strAC = strAC.slice(0, -3);
+                }
+                warnString += header;
+                warnString += '<div><span data-translate="_errCode18-0"></span></div></div>';
+
+                warnString += '<div class="d-flex flex-row ml-3"><div><i class="fas fa-exclamation mr-1 fa-sm text-danger"></i></div>';
+                warnString += '<div><span data-translate="_errCode18-1"></span><strong><span>';
+
+                warnString += strDC;
+                warnString += '</span></strong></div></div>';
+
+                warnString += '<div class="d-flex flex-row ml-3"><div><i class="fas fa-exclamation mr-1 fa-sm text-danger"></i></div>';
+                warnString += '<div><span data-translate="_errCode18-2"></span><strong><span>';
+                warnString += strAC;
+                warnString += '</span></strong></div></div>';
+
                 break;
         }
        
@@ -795,7 +828,7 @@ function outCurrentsInfo(currents, branches){
         htmlstr += '<div class="card text-white bg-secondary mb-3">';
         htmlstr += '<div class="card-body">'
         // Current ID
-        htmlstr += '<h5 class="card-title text-left"> ID: '+ katex.renderToString(currents[i].ref, {throwOnError: false}) +'</h5>';
+        htmlstr += '<h5 class="card-title text-left"> ID: '+ katex.renderToString(currents[i].ref.replaceAll("_", "\\_"), {throwOnError: false}) +'</h5>';
         // From Node
         htmlstr += '<h5 class="card-text text-left"> <span data-translate="_currFlow"></span>: '+ katex.renderToString(currents[i].noP, {throwOnError: false});
         // Arrow Icon
@@ -809,36 +842,36 @@ function outCurrentsInfo(currents, branches){
         let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
 
         // TeX information
-        TeXData += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+        TeXData += currents[i].ref.replaceAll("_", "\\_") + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
 
         // Add Components
         for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].acAmpPwSupplies[k].ref, {throwOnError: false}) + ', ';
-            TeXData += branches[i].acAmpPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].acAmpPwSupplies[k].ref, {throwOnError: false}) + ', ';
+            TeXData += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].acVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].acVoltPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].acVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].dcAmpPwSupplies[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].dcAmpPwSupplies[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].dcAmpPwSupplies[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
-            htmlstr += katex.renderToString(branches[i].dcVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';  
-            TeXData += branches[i].dcVoltPwSupplies[k].ref+ ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].dcVoltPwSupplies[k].ref, {throwOnError: false})  + ', ';  
+            TeXData += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
         }
         for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
-            htmlstr += katex.renderToString(branches[i].capacitors[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].capacitors[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].capacitors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].capacitors[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].coils.length; k++){
-            htmlstr += katex.renderToString(branches[i].coils[k].ref, {throwOnError: false})  + ', '; 
-            TeXData += branches[i].coils[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].coils[k].ref, {throwOnError: false})  + ', '; 
+            TeXData += branches[branchIndex].coils[k].ref + ', ';
         }
         for(let k = 0; k < branches[branchIndex].resistors.length; k++){
-            htmlstr += katex.renderToString(branches[i].resistors[k].ref, {throwOnError: false})  + ', ';
-            TeXData += branches[i].resistors[k].ref + ', ';
+            htmlstr += katex.renderToString(branches[branchIndex].resistors[k].ref, {throwOnError: false})  + ', ';
+            TeXData += branches[branchIndex].resistors[k].ref + ', ';
         }
         
         // Remove last comma
@@ -863,7 +896,7 @@ function outCurrentsInfo(currents, branches){
 }
 
 /**
- * Function to output the equivalent impedances and voltages
+ * Function to output the equivalent impedances and voltages    
  * @param {object} Zequiv equivalent impedance extracted from branches
  * @param {object} Vequiv equivalent voltage extracted from branches
  * @param {object} Nodes  branch start/end nodes
@@ -1137,7 +1170,7 @@ function createCanvasCurrents(currentsData){
         canvasObjects.push(canvasdataURL);
     }
 
-    return canvasObjects
+    return canvasObjects;
 }
 
 /**
@@ -2183,6 +2216,24 @@ function resizeandgray(imgObj) {
         }
     }
     canvasContext.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+    return canvas.toDataURL();
+}
+
+function resize(imgObj) {
+    var canvas = document.createElement('canvas');
+    var canvasContext = canvas.getContext('2d');
+     
+    var imgW = imgObj.width;
+    var imgH = imgObj.height;
+    var sizer=1;
+    if(imgW > 1200 || imgH > 650)
+        sizer = Math.min((1200/imgW),(650/imgH));
+
+    canvas.width = imgW*sizer;
+    canvas.height = imgH*sizer;
+
+    canvasContext.drawImage(imgObj, 0, 0, canvas.width, canvas.height);
+
     return canvas.toDataURL();
 }
 

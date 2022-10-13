@@ -21,6 +21,7 @@
  * @description error Code 15: Circuit with no real Nodes found --------------------> CRITICAL
  * @description error Code 16: Sets of in-series isolated Voltage Sources found
  * @description error Code 17: Non-critical invalid ID
+ * @description error Code 18: AC and DC voltage sources in the same circuit -------> CRITICAL
  */
 
  
@@ -1394,6 +1395,65 @@ function validateNetlist(text) {
         if(line[2].length == 1)
             line[2] = line[2].toUpperCase();
         outLines[i] = line.join(' ');
+    }
+
+    
+    /* [#18] errorCode verification */
+    let vSrcData = new Array();
+    //Find Voltage Sources information
+    
+    for(let i= 0; i<outLines.length; i++){
+        let words = outLines[i].split(' ');
+        if(words[0].split(':')[0] == 'Vdc'){
+            let obj = {
+                type: 'Vdc',
+                ref: words[0].split(':')[1],
+                U: words[3].split('"')[1],
+                unit: words[4].split('"')[0],
+                phase: 0
+            }
+            vSrcData.push(obj);
+            //Remove from netlist if it belongs to a set of voltage sources
+            for(let set = 0; set < isolatedSets.length; set++) {
+                if(isolatedSets[set].srcList.includes(obj.ref)){
+                    outLines.splice(i,1);
+                    i--;
+                }
+            }
+           
+        }
+        if(words[0].split(':')[0] == 'Vac'){
+            let obj = {
+                type: 'Vac',
+                ref: words[0].split(':')[1],
+                U: words[3].split('"')[1],
+                unit: words[4].split('"')[0],
+                freq: words[5].split('"')[1],
+                freqUnit: words[6].split('"')[0],
+                phase: words[7].split('"')[1]
+            }
+            vSrcData.push(obj);
+            for(let set = 0; set < isolatedSets.length; set++) {
+                if(isolatedSets[set].srcList.includes(obj.ref)){
+                    outLines.splice(i,1);
+                    i--;
+                }
+            }
+        }
+    }
+
+    let VDCsources = new Array;
+    let VACsources = new Array;
+    for(let i = 0; i < vSrcData.length; i++){
+        if(vSrcData[i].type == 'Vdc'){
+            VDCsources.push(vSrcData[i]);
+        }
+        else{
+            VACsources.push(vSrcData[i]);
+        }
+    }
+    if(VDCsources.length != 0 && VACsources.length != 0){
+        errorList.push({errorCode: 18, Vsources: {DC: VDCsources, AC: VACsources}});
     }
 
     return {

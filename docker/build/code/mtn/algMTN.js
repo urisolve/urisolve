@@ -197,7 +197,7 @@ function loadFileAsTextMTN() {
 				}
 
 				case cpRefTest("IProbe"): {
-					var newAmpsMeter = new amperemeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
+					var newAmpsMeter = new ammeter(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.intRes, cpData.second.intResMult, null, null);
 					ampsMeters.push(newAmpsMeter);
 					break;
 				}
@@ -242,7 +242,7 @@ function loadFileAsTextMTN() {
 		var found = iProbeNodesLoc.find(element => element == newNodes);
 		if (typeof found == 'undefined') {
 			iProbeNodesLoc.push(newNodes);
-			// Save location of the amperemeter in the iProbeNodesLoc and next series connected component Reference
+			// Save location of the ammeter in the iProbeNodesLoc and next series connected component Reference
 			iProbeLocVsAmpId.push({iProbLocPos: (iProbeNodesLoc.length-1), ampId: ampsMeters[i].id, ampRef: ampsMeters[i].ref, serieConCpRef: '', branchId: '', jointNodeP: '', jointNodeN: ''});
 		}
 
@@ -253,7 +253,7 @@ function loadFileAsTextMTN() {
 		if (typeof found == 'undefined') iProbeNodesArr.push(newNodes.toNode);
 	}
 
-	// Get a copy of amperemeters reference and location
+	// Get a copy of ammeters reference and location
 	var iProbNodesLocFilled = iProbeNodesLoc.slice();
 	var iProbeNodesArrFilled = iProbeNodesArr.slice();
 
@@ -284,11 +284,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -304,11 +304,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -332,11 +332,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -352,11 +352,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = resistors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -391,11 +391,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -411,11 +411,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -439,11 +439,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -459,11 +459,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = coils[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -499,11 +499,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -519,11 +519,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -547,11 +547,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -567,11 +567,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = capacitors[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -607,11 +607,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -627,11 +627,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -655,11 +655,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -675,11 +675,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -715,11 +715,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -735,11 +735,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -763,11 +763,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -783,11 +783,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acVoltPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -823,11 +823,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -843,11 +843,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -871,11 +871,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -891,11 +891,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = dcAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -931,11 +931,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -951,11 +951,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -979,11 +979,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -999,11 +999,11 @@ function loadFileAsTextMTN() {
 					const locIndex = iProbeLocVsAmpId.findIndex(item => item.iProbLocPos == index);
 					iProbeLocVsAmpId[locIndex].serieConCpRef = acAmpsPs[i].ref;
 
-					// Clear pending amperemeter nodes
+					// Clear pending ammeter nodes
 					index = iProbeNodesArr.indexOf(found);
 					if (index > -1) { iProbeNodesArr.splice(index, 1); }
 
-					// Clear pending amperemeter nodes location
+					// Clear pending ammeter nodes location
 					index = iProbeNodesLoc.indexOf(found2);
 					if (index > -1) { iProbeNodesLoc.splice(index, 1); }
 				}
@@ -1545,7 +1545,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1562,7 +1562,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1579,7 +1579,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1596,7 +1596,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1613,7 +1613,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1630,7 +1630,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1647,7 +1647,7 @@ function loadFileAsTextMTN() {
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noP;
 						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noN;
 						// Save Amperemeter data to branch
-						branches[j].amperemeter = ampsMeters[ampIndex];
+						branches[j].ammeter = ampsMeters[ampIndex];
 					}
 					break;
 				}
@@ -1656,28 +1656,28 @@ function loadFileAsTextMTN() {
 	}
 
 	for(let i=0; i<branches.length; i++) {
-		if (typeof branches[i].amperemeter != 'undefined') {
-			let ampNoP = branches[i].amperemeter.noP;
-			let ampNoN = branches[i].amperemeter.noN;
+		if (typeof branches[i].ammeter != 'undefined') {
+			let ampNoP = branches[i].ammeter.noP;
+			let ampNoN = branches[i].ammeter.noN;
 			// Verify if the Amperemeter is already connected to a Real Node
 			if(ampNoP == branches[i].startNode) {
-				branches[i].amperemeter.noN = branches[i].endNode;
+				branches[i].ammeter.noN = branches[i].endNode;
 				continue;
 			}
 			if(ampNoP == branches[i].endNode) {
-				branches[i].amperemeter.noN = branches[i].startNode;
+				branches[i].ammeter.noN = branches[i].startNode;
 				continue;
 			}
 			if(ampNoN == branches[i].startNode) {
-				branches[i].amperemeter.noP = branches[i].endNode;
+				branches[i].ammeter.noP = branches[i].endNode;
 				continue;
 			}
 			if(ampNoN == branches[i].endNode) {
-				branches[i].amperemeter.noP = branches[i].startNode;
+				branches[i].ammeter.noP = branches[i].startNode;
 				continue;
 			}
 
-			let nodeIndex = iProbeLocVsAmpId.findIndex(item => item.ampRef == branches[i].amperemeter.ref);
+			let nodeIndex = iProbeLocVsAmpId.findIndex(item => item.ampRef == branches[i].ammeter.ref);
 			let nextNode;
 			let ampJoint;	// True - noP; False - noN;
 			if(iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoP || iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoN) { nextNode = ampNoP; ampJoint = true; }
@@ -1775,12 +1775,12 @@ function loadFileAsTextMTN() {
 				}
 				else {
 					if(nextNode == thisBranch.startNode) {
-						if(!ampJoint) { branches[i].amperemeter.noN = branches[i].endNode; branches[i].amperemeter.noP = branches[i].startNode;}
-						if(ampJoint) { branches[i].amperemeter.noN = branches[i].startNode; branches[i].amperemeter.noP = branches[i].endNode;}
+						if(!ampJoint) { branches[i].ammeter.noN = branches[i].endNode; branches[i].ammeter.noP = branches[i].startNode;}
+						if(ampJoint) { branches[i].ammeter.noN = branches[i].startNode; branches[i].ammeter.noP = branches[i].endNode;}
 					}
 					if(nextNode == thisBranch.endNode) {
-						if(!ampJoint) { branches[i].amperemeter.noN = branches[i].startNode; branches[i].amperemeter.noP = branches[i].endNode;}
-						if(ampJoint) { branches[i].amperemeter.noN = branches[i].endNode; branches[i].amperemeter.noP = branches[i].startNode;}
+						if(!ampJoint) { branches[i].ammeter.noN = branches[i].startNode; branches[i].ammeter.noP = branches[i].endNode;}
+						if(ampJoint) { branches[i].ammeter.noN = branches[i].endNode; branches[i].ammeter.noP = branches[i].startNode;}
 					}
 					end = true;
 				}
@@ -1808,7 +1808,7 @@ function loadFileAsTextMTN() {
 		let currNoP = branches[i].startNode;
 		let currNoN = branches[i].endNode;
 
-		if(!branches[i].amperemeter) {
+		if(!branches[i].ammeter) {
 
 			// Has Current Power Supplies?
 			if(branches[i].dcAmpPwSupplies.length > 0) {
@@ -1821,15 +1821,15 @@ function loadFileAsTextMTN() {
 		else {
 			// If this branch has an Amperemeter, assign its reference to the current
 			// If this branch has a Current PS, save both in a separated array
-			if (typeof branches[i].amperemeter != 'undefined') {
+			if (typeof branches[i].ammeter != 'undefined') {
 
 				// Has Current Power Supplies?
-				if(branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].amperemeter, currPs: branches[i].dcAmpPwSupplies[0]});
-				if(branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].amperemeter, currPs: branches[i].acAmpPwSupplies[0]});
+				if(branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeter, currPs: branches[i].dcAmpPwSupplies[0]});
+				if(branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeter, currPs: branches[i].acAmpPwSupplies[0]});
 
-				currRef = branches[i].amperemeter.ref;
-				currNoP = branches[i].amperemeter.noP;
-				currNoN = branches[i].amperemeter.noN;
+				currRef = branches[i].ammeter.ref;
+				currNoP = branches[i].ammeter.noP;
+				currNoN = branches[i].ammeter.noN;
 			}
 		}
 		// If there's no name, create a unique one
@@ -3086,7 +3086,7 @@ function loadFileAsTextMTN() {
 			otherNodes.push(knlEquationsReg[i].node)
 	}
 
-	// Create the nodes substitutions to insert in the system equation solver
+	// Create the nodes sub\stitutions to insert in the system equation solver
 	// Nodes CANNOT have more than 2 letters in the equations
 	var nodeSubstitutions = new Array();
 	var currentNodes = knlEquationsReg.map(a => a.node);
@@ -3785,7 +3785,7 @@ function loadFileAsTextMTN() {
 	// Debug JSON Output
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
-	var probesObj = { amperemeters: ampsMeters, voltmeters: voltMeters };
+	var probesObj = { ammeters: ampsMeters, voltmeters: voltMeters };
 	var analysisObj = {
 		_00_circuitFreq: circuitFrequency,
 		_01_currents: currents,
