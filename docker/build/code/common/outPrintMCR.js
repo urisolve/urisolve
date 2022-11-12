@@ -1016,10 +1016,10 @@ function outShowAllBtnMCR(){
  */
  function getTexFileHeaderMCRRich(lang){
     let texHeader = '';
-    texHeader += '\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._MCMmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{' + lang._MCMmethod + '} \\\\\r\n \\\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
-    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Ângelo Pinheiro - 1190398@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += '\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._MCRmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{' + lang._MCRmethod + '} \\\\\r\n \\\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
+    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\&\\\\\\multicolumn{2}{c}{\\small{\\textbf{v2.0.0 - 07/2022}}}  \\\\\\multicolumn{2}{c}{Helder Casanova - 1171114@isep.ipp.pt}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 09/2019}}}  \\\\\\multicolumn{2}{c}{Miguel Duarte - 1131201@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
 
-    texHeader += "\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n" + lang._abstract + "\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
+    texHeader += "\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n" + lang._abstractMCR + "\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
     return texHeader;
 }
 /**
@@ -1028,7 +1028,7 @@ function outShowAllBtnMCR(){
  * @param {array} meshImages image information
  * @returns {string} TeX string
  */
-function buildTeXRRich(file, meshImages){
+function buildTeXRRich(file, meshImages, nodeImages){
 
 	let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -1079,33 +1079,94 @@ function buildTeXRRich(file, meshImages){
 
 	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
 
-	//meshes calculation
-    TeX += "\\section{" + lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MainMeshes + "}\r\n\r\n";
-    TeX += "\\begin{gather*}\r\nM_{p}=R-(N-1)-C ~ \\Leftrightarrow \\\\";
-    TeX += "M_{p}="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
-	TeX += "\\Leftrightarrow ~ M_{p}="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
-	TeX += "\\paragraph{} " + lang._nrOfEquations + " \r\n";
-    TeX += "\r\n\\subsection{" + lang._AuxMeshes + "}\r\n\r\n";
-    TeX += "\\paragraph{} " + lang._nrOfCurrSrc + "\r\n";
-    TeX += "\\begin{gather*}\r\nC = " + C + "\\implies  M_{a} = " + C+"\r\n\\end{gather*}\r\n\\pagebreak";
+    //mesh current results
+	TeX += "\\section{" + lang._branchIden + "}\n\r\n\r\\subsection{" + lang._currents + "}\n\r\n\r";
+	TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+	for( let i = 0; i < currents.length; i++){
+		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
+
+		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
+
+		// Add Components
+		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
+			TeX += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
+			TeX += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
+			TeX += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
+			TeX += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
+			TeX += branches[branchIndex].capacitors[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].coils.length; k++){
+			TeX += branches[branchIndex].coils[k].ref + ', ';
+		}
+		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
+			TeX += branches[branchIndex].resistors[k].ref + ', ';
+		}
+		
+		// Remove last comma
+		if(TeX[TeX.length-2] == ','){
+			TeX = TeX.slice(0,TeX.length-2);
+		}
+
+		TeX += "\\\\\r\n";
+	}
+
+	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	
+
+    //node images
+    let pagebreakCounters = 0;
+    TeX += "\\pagebreak";
+	TeX += "\\section{" + lang._knlTitle + "}\r\n\r\n";
+    let nreq=1;
+    let j=0;
+
+	nodeImages.forEach(image => {
+		TeX += "\\subsection{" + lang._knlNode + "~" + file.analysisObj.equations.nodeEquationsReal[j].node + "}\r\n"
+		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
+		TeX += image.id +'.jpg' + "}}\r\n\r\n\\end{figure}\r\n";
+
+        TeX += "\\begin{equation}\r\n \\textrm{"+ lang._singleeq +"~" +nreq+"}: \\quad "+ file.analysisObj.equations.nodeEquationsReal[j].equation +"\r\n\\end{equation}\r\n\r\n";
+
+        nreq=nreq+1;
+        j=j+1;
+		pagebreakCounters++;
+        if(pagebreakCounters == 2){
+            pagebreakCounters = 0;
+            TeX += "\\pagebreak";
+        }
+
+	});
+
+    //meshes calculation
+    TeX += "\\section{" + lang._MeshNumberTitleMcr + "}\r\n\r\n\\subsection{" + lang._MCRMeshEq + "}\r\n\r\n";
+    TeX += "\\begin{gather*}\r\nM=R-(N-1)-C ~ \\Leftrightarrow \\\\";
+    TeX += "M="+R+"-("+N+"-1)-"+C+" ~ \\Leftrightarrow \\\\";
+	TeX += "\\Leftrightarrow ~ M="+E+"\\end{gather*}\r\n\\par\r\n\r\n";
+	
 
 	//circuit mesh images
 	let pagebreakCounter = 0;
+    TeX += "\\pagebreak";
 	TeX += "\\section{" + lang._MeshTitleMCR + "}\r\n\r\n";
 	meshImages.forEach(image => {
-		let aux;
-		if(meshes[image.id-1].type == 0) aux = lang._typeA;
-		else aux = lang._typePMCR;
-		TeX += "\\subsection{" + lang._kmlMesh + "~" + image.id + "~-~" + aux + "}\r\n"
+		TeX += "\\subsection{" + lang._kmlMesh + "~" + image.id + "}\r\n"
 		TeX += "\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{"
 		TeX += "meshImage" + image.id + "}}\r\n\r\n\\end{figure}\r\n";
         if(meshes[image.id-1].type == 1)
-            if(meshes[image.id-1].currValue.complex){
-                TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad \\underlineI_{Mp"+ meshes[image.id-1].displayId+"}}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
-            }
-            else{
-                TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I_{Mp"+ meshes[image.id-1].displayId+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
-            }
+           
+                TeX += "\\begin{equation}\r\n \\textrm{Equation}: \\quad I{M"+ meshes[image.id-1].displayId+"}~:~" + meshes[image.id-1].incognitoEq +"&\r\n\\end{equation}\r\n\r\n";
+           
         else{
             if(meshes[image.id-1].currValue.complex){
 				let resultMag = resultDecimals(Math.sqrt(Math.pow(meshes[image.id-1].currValue.re, 2) + Math.pow(meshes[image.id-1].currValue.im, 2)), 2, false);
@@ -1126,6 +1187,72 @@ function buildTeXRRich(file, meshImages){
 	});
 
 
+    TeX += "\\pagebreak\\section{" + lang._eqSystemTitle + "}\r\n\r\n\\paragraph{} ";
+
+    if(simpEquations.allRevealedEq.length > 0){
+        let str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+            str += simpEquations.allRevealedEq[k].equation;
+            if(k < simpEquations.allRevealedEq.length-1)
+                str += '\\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += lang._snEquat + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+        TeX += lang._Steps + ":\r\n\r\n";
+        //step 1
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRealEq.length; k++){
+            str += simpEquations.allRealEq[k].equation;
+            if(k<simpEquations.allRealEq.length-1)
+                str += ' \\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += "\\begin{small}\\textbf{\\textit{Step 1:}}\\end{small}"  + "~"+ lang._eqStep1MCM + "\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+        //step 2
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<simpEquations.allRevealedEq.length; k++){
+            str += simpEquations.allRevealedEq[k].equation;
+            if(k<simpEquations.allRevealedEq.length-1)
+                str += ' \\\\[0.7em] ';
+
+        }
+        str += '\\end{cases}';
+        TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small} " +lang._eqStep3MCM +"\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
+       
+    }
+    else{
+        TeX +=  lang._noSystem;
+    }
+
+
+
+	// Add Equation system
+	str = '\\large \\begin{cases}';
+	for(let k = 0; k<currents.length; k++){
+        let aux = '';
+        //if(meshes[k].type == 0) aux = 'a';
+        //else  aux = 'p';
+        aux = (currents[k].ref); 
+
+		
+            let result = resultsMCR[k];
+            str +=   result + '\\\\';
+        
+		if(k<results.length-1)
+			str += ' \\\\[0.7em] ';
+	}
+	str += '\\end{cases}';
+
+	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{" + lang._resBranch + "}\r\n\r\n";
+	TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+
+
+/*
 	//equation system
 	TeX += "\\pagebreak\\section{" + lang._eqSystemTitle + "}\r\n\r\n\\paragraph{} ";
 
@@ -1210,48 +1337,7 @@ function buildTeXRRich(file, meshImages){
 	TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\section{" + lang._resMesh + "}\r\n\r\n";
 	TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
 
-	//mesh current results
-	TeX += "\\section{" + lang._branchIden + "}\n\r\n\r\\subsection{" + lang._currents + "}\n\r\n\r";
-	TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
-	TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
-
-	for( let i = 0; i < currents.length; i++){
-		let branchIndex = branches.findIndex(item => item.currentId == currents[i].id);
-
-		TeX += currents[i].ref + " & " + currents[i].noP + " & " + currents[i].noN + " & ";
-
-		// Add Components
-		for(let k = 0; k < branches[branchIndex].acAmpPwSupplies.length; k++){
-			TeX += branches[branchIndex].acAmpPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].acVoltPwSupplies.length; k++){
-			TeX += branches[branchIndex].acVoltPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].dcAmpPwSupplies.length; k++){
-			TeX += branches[branchIndex].dcAmpPwSupplies[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].dcVoltPwSupplies.length; k++){
-			TeX += branches[branchIndex].dcVoltPwSupplies[k].ref+ ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].capacitors.length; k++){
-			TeX += branches[branchIndex].capacitors[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].coils.length; k++){
-			TeX += branches[branchIndex].coils[k].ref + ', ';
-		}
-		for(let k = 0; k < branches[branchIndex].resistors.length; k++){
-			TeX += branches[branchIndex].resistors[k].ref + ', ';
-		}
-		
-		// Remove last comma
-		if(TeX[TeX.length-2] == ','){
-			TeX = TeX.slice(0,TeX.length-2);
-		}
-
-		TeX += "\\\\\r\n";
-	}
-
-	TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+	
 
 	if(currents.length > 0){
         // Create Equations
@@ -1296,7 +1382,7 @@ function buildTeXRRich(file, meshImages){
         TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
         TeX += lang._currResNotes1MCM.slice(6) + "\r\n\\end{footnotesize}\r\n\r\n";
 	}
-
+*/
 	TeX += "\\end{document}\r\n";
 	return TeX;
 }
@@ -1370,7 +1456,7 @@ function buildTeXOv2(file, meshImages, nodeImages){
 	let Amps = file.probes.ammeters.length;
 	let E = R - (N - 1) - C;
 	let simpEquations =  file.analysisObj.equations;
-	let meshes = file.analysisObj.choosenMeshes;
+	let meshes = file.analysisObj.chosenMeshes;
     let resultsMCR=file.analysisObj.result.cuurentResult;
 
 	let currents = file.analysisObj.currents;
@@ -1573,7 +1659,7 @@ function buildTeXOv2(file, meshImages, nodeImages){
 
         }
         str += '\\end{cases}';
-        TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small} " +lang._eqStep5 +"\r\n";
+        TeX += "\\begin{small}\\textbf{\\textit{Step 2:}}\\end{small} " +lang._eqStep3MCM +"\r\n";
         TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n"
         //step 3
        /* str = '\\large \\begin{cases}';
@@ -1625,52 +1711,7 @@ function buildTeXOv2(file, meshImages, nodeImages){
 	TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
     
 	
-    /*
-
-	if(currents.length > 0){
-        // Create Equations
-        str = '\\large \\begin{cases}';
-        for(let k = 0; k<currents.length; k++){
-            str += currents[k].meshEquation;
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-        str += '\\end{cases}';
-
-        str += ' \\Leftrightarrow';
-
-        str += '\\large \\begin{cases}';
-
-        for(let k = 0; k<currents.length; k++){
-
-            if(currents[k].complex){
-                let resultMag = resultDecimals(Math.sqrt(Math.pow(currents[k].valueRe, 2) + Math.pow(currents[k].valueIm, 2)), 2, false);
-                let resultAng = resultDecimals(Math.atan(currents[k].valueIm/currents[k].valueRe)*57.2957795, 3, true);
-				if(resultMag.value == 0){
-					str += '\\underline{' + currents[k].ref + '}=' + resultMag.value + resultMag.unit + 'A';
-				}
-				else{
-					str += '\\underline{' + currents[k].ref + '}=' + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}\\;' + resultMag.unit + 'A';
-				}
-			}
-            else{
-                let result = resultDecimals(currents[k].valueRe, 2, false);
-                str += currents[k].ref + '=' + result.value + '\\;' + result.unit +'A';
-            }
-
-            if(k<currents.length-1)
-                str += ' \\\\[0.7em] ';
-        }
-
-        str += '\\end{cases}';
-
-        TeX += "\\par\r\n\r\n\\pagebreak\r\n\r\n\\subsection{" + lang._resultsMCR + "}\r\n\r\n"
-
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
-        TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
-        TeX += lang._currResNotes1MCM.slice(6) + "\r\n\\end{footnotesize}\r\n\r\n";
-	}
-*/
+    
 	TeX += "\\end{document}\r\n";
 	return TeX;
 }
@@ -1680,9 +1721,10 @@ function buildTeXOv2(file, meshImages, nodeImages){
 /**
  * Main function to build the pdf for printing
  * @param {object} file output jsonFile
- * @param {array} meshImages array with the images information
+ * @param {array} meshImages array with the mesh images information
+ * * @param {array} nodeImages array with the node images information
  */
-function buildPrintPDF(file, meshImages){
+function buildPrintPDFMCR(file, meshImages, nodeImages){
 	window.jsPDF = window.jspdf.jsPDF;
 
     const marginSides = 0.2;
@@ -1709,22 +1751,25 @@ function buildPrintPDF(file, meshImages){
 
 
     //print head
-    doc = printBuildHead(doc, lang);
+    doc = printBuildHeadMCR(doc, lang);
 
     doc.addPage();
     doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
     line = height*marginTop;
 
     //print information
-    line = printCircuitImage(doc, line, marginSides, marginTop, marginBottom, lang);
-    line = printFundVars(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+    line = printCircuitImageMCR(doc, line, marginSides, marginTop, marginBottom, lang);
+    line = printFundVarsMCR(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
     line = printCircInfo(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
-    line = printMeshCalc(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
-    line = printCircuitMeshes(doc, file, meshImages, line, marginSides, marginBottom, marginTop, lang);
-    line = printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, lang);
-    line = printMeshResults(doc, file, line, marginSides, marginTop, marginBottom, lang);
-    line = printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom, lang);
-    line = printBranchResults(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    line = printCurrentsInfoMCR(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    line = printNodesInfo(doc, file, nodeImages, line, marginSides, marginBottom, marginTop, lang);
+    line = printMeshCalcMCR(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+    line = printCircuitMeshesMCR(doc, file, meshImages, line, marginSides, marginBottom, marginTop, lang);
+    line = printEqSystemMCR(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    line = printMeshResultsMCR(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    //line = printNodesInfo(doc, file, nodeImages, line, marginSides, marginBottom, marginTop, lang);
+    //line = printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    //line = printBranchResults(doc, file, line, marginSides, marginTop, marginBottom, lang);
 
 	doc.autoPrint();
 	doc.output("dataurlnewwindow", {filename: "output.pdf"});
@@ -1733,7 +1778,7 @@ function buildPrintPDF(file, meshImages){
  * Function to build the print pdf head
  * @param {object} doc jsPDF document
  */
-function printBuildHead(doc, lang){
+function printBuildHeadMCR(doc, lang){
     let line = 170;
     const width = doc.internal.pageSize.width;
 
@@ -1766,7 +1811,7 @@ function printBuildHead(doc, lang){
 
     doc.setFontSize(12);
     doc.text('v2.0.0 - 07/2022', width/2, line+=40, null, null, 'center');
-    doc.text('Ângelo Pinheiro - 1190398@isep.ipp.pt', width/2, line+=15, null, null, 'center');
+    doc.text('Helder Casanova - 1171114@isep.ipp.pt', width/2, line+=15, null, null, 'center');
 
     doc.text('v1.0.0 - 09/2019', width/2, line+=30, null, null, 'center');
     doc.text('Miguel Duarte - 1131201@isep.ipp.pt', width/2, line+=15, null, null, 'center');
@@ -1776,8 +1821,8 @@ function printBuildHead(doc, lang){
     doc.text('Abstract', width/2, line+=100, null, null, 'center');
 
     doc.setFontSize(8);
-    doc.text(lang._abstract.slice(0, 64), width/2, line+=10, null, null, 'center');
-    doc.text(lang._abstract.slice(64), width/2, line+=10, null, null, 'center');
+    doc.text(lang._abstractMCR.slice(0, 64), width/2, line+=10, null, null, 'center');
+    doc.text(lang._abstractMCR.slice(64), width/2, line+=10, null, null, 'center');
 
 
     doc.setFontSize(10);
@@ -1825,7 +1870,7 @@ function printBuildFoot(doc, marginSides, marginBottom, marginTop, lang){
  * @param {number} marginBottom bottom margin 0-1
  * @returns {number} line vertical height
  */
-function printCircuitImage(doc, line, marginSides, marginBottom, marginTop, lang){
+function printCircuitImageMCR(doc, line, marginSides, marginBottom, marginTop, lang){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
 
@@ -1857,7 +1902,7 @@ function printCircuitImage(doc, line, marginSides, marginBottom, marginTop, lang
  * @param {number} marginSides sides margin 0-1
  * @returns {number} line vertical height
  */
-function printFundVars(doc, file, line, marginSides, marginTop, marginBottom, lang){
+function printFundVarsMCR(doc, file, line, marginSides, marginTop, marginBottom, lang){
     
     let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -1949,7 +1994,7 @@ function printCircInfo(doc, file, line, marginSides, marginTop, marginBottom, la
  * @param {number} marginSides sides margin 0-1
  * @returns {number} line vertical height
  */
-function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, lang){
+function printMeshCalcMCR(doc, file, line, marginSides, marginTop, marginBottom, lang){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
 
@@ -1965,15 +2010,15 @@ function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, la
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('4.  ' + lang._MeshNumberTitleMcr, marginSides*width, line+=25, null, null, 'left');
+    doc.text('6.  ' + lang._MeshNumberTitleMcr, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(subsubtitleSize);
-    doc.text(' 4.1  ' + lang._MainMeshes, marginSides*width, line+=25, null, null, 'left');
+    doc.text(' 6.1  ' + lang._MCRMeshEq, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(smallInfoSize);
-    doc.text("Mp = R - (N - 1) - C <=>", width/2, line+=20, null, null, 'center');
-    doc.text("<=> Mp = "+ R +" - ("+ N +" - 1) - " + C + " <=> ", width/2, line+=20, null, null, 'center');
-    doc.text("Mp = " + E, width/2, line+=20, null, null, 'center');
+    doc.text("M = R - (N - 1) - C <=>", width/2, line+=20, null, null, 'center');
+    doc.text("<=> M = "+ R +" - ("+ N +" - 1) - " + C + " <=> ", width/2, line+=20, null, null, 'center');
+    doc.text("M = " + E, width/2, line+=20, null, null, 'center');
 
     if(lang == dictionary.portuguese){
         var slice1 = 85;
@@ -1990,7 +2035,7 @@ function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, la
         var slice5 = 271;
     }
 
-    doc.setFontSize(smallInfoSize);
+    /*doc.setFontSize(smallInfoSize);
     doc.text(lang._nrOfEquations.slice(0, slice1), marginSides*width, line+=20, null, null, 'left');
     doc.text(lang._nrOfEquations.slice(slice1, slice2), marginSides*width, line+=10, null, null, 'left');
     doc.text(lang._nrOfEquations.slice(slice2), marginSides*width, line+=10, null, null, 'left');
@@ -2011,7 +2056,7 @@ function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, la
     doc.text(lang._nrOfCurrSrc.slice(slice5), marginSides*width, line+=10, null, null, 'left');
 
     doc.setFontSize(smallInfoSize);
-    doc.text("Ma = C <=> Mp = " + C, width/2, line+=20, null, null, 'center');
+    doc.text("Ma = C <=> Mp = " + C, width/2, line+=20, null, null, 'center');*/
     return line;
 }
 /**
@@ -2025,7 +2070,7 @@ function printMeshCalc(doc, file, line, marginSides, marginTop, marginBottom, la
  * @param {number} marginBottom bottom margin 0-1
  * @returns {number} line vertical height
  */
-function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, marginTop, lang){
+function printCircuitMeshesMCR(doc, file, images, line, marginSides, marginBottom, marginTop, lang){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
     let meshes = file.analysisObj.chosenMeshes;
@@ -2044,7 +2089,7 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('5.  ' + lang._MeshTitleMCR.slice(0, slice1), marginSides*width, line+=25, null, null, 'left');
+    doc.text('7.  ' + lang._MeshTitleMCR.slice(0, slice1), marginSides*width, line+=25, null, null, 'left');
     doc.text(lang._MeshTitleMCR.slice(slice1), marginSides*width, line+=15, null, null, 'left');
 
     for(let i = 0; i < meshes.length; i++){
@@ -2055,10 +2100,10 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
             line = height*marginTop;
         }
-        let aux = lang._typePMCR;
-        if(meshes[i].type == 0) aux = lang._typeA;
+        //let aux = lang._typePMCR;
+        //if(meshes[i].type == 0) aux = lang._typeA;
         doc.setFontSize(subsubtitleSize);
-        doc.text(' 5.' + String(i+1) + '  ' +  lang._kmlMesh + ' ' + String(i+1) + ' - ' + aux, marginSides*width, line+=22, null, null, 'left');
+        doc.text(' 7.' + String(i+1) + '  ' +  lang._kmlMesh + ' ' + String(i+1)  , marginSides*width, line+=22, null, null, 'left');
 
 
         var svg = document.getElementById("mesh#Mesh" + String(i+1));
@@ -2084,12 +2129,9 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
             }
         }
         else{
-            if(meshes[i].currValue.complex){
-                printEquation(doc, "\\underline{I_{Mp"+meshes[i].displayId+"}}:~"+meshes[i].incognitoEq, width/2, line, 'center');  
-            }
-            else{
-                printEquation(doc, "I_{Mp"+meshes[i].displayId+"}:~"+meshes[i].incognitoEq, width/2, line, 'center');  
-            }
+           
+                printEquation(doc, "I{M"+meshes[i].displayId+"}:~"+meshes[i].incognitoEq, width/2, line, 'center');  
+            
         }
     }
     return line;
@@ -2104,33 +2146,33 @@ function printCircuitMeshes(doc, file, images, line, marginSides, marginBottom, 
  * @param {number} marginBottom bottom margin 0-1
  * @returns {number} line vertical height
  */
-function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, lang){
+function printEqSystemMCR(doc, file, line, marginSides, marginTop, marginBottom, lang){
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
     let equations =  file.analysisObj.equations;
 
-    if(equations.allVariableEq.length > 0){
+    if(equations.allRealEq.length > 0){
         //head + FINAL equation
-        if(line+equations.allVariableEq.length*18+25+15 > height-height*marginBottom-10){
+        if(line+equations.allRealEq.length*18+25+15 > height-height*marginBottom-10){
             doc.addPage();
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
             line = height*marginTop;
         }
         doc.setFontSize(subtitleSize);
-        doc.text('6.  ' + lang._eqSystemTitle, marginSides*width, line+=25, null, null, 'left');
+        doc.text('8.  ' + lang._eqSystemTitle, marginSides*width, line+=25, null, null, 'left');
 
         doc.setFontSize(bigInfoSize);
         doc.text(lang._snEquat, marginSides*width+10, line+=15, null, null, 'left');
         line+=5;
         doc.setLineWidth(1);
-        doc.line(marginSides*width+13, line+5, marginSides*width+13, line+equations.allRevealedEq.length*18);
+        doc.line(marginSides*width+13, line+5, marginSides*width+13, line+equations.allRealEq.length*18);
         for(let i = 0; i < equations.allRevealedEq.length; i++){
-            printEquation(doc, equations.allRevealedEq[i], marginSides*width+15, line+=18, 'left');  
+            printEquation(doc, equations.allRevealedEq[i].equation, marginSides*width+15, line+=18, 'left');  
         }
         line+=5;
 
         //STEP 1
-        if(line+equations.allVariableEq.length*18+25+15 > height-height*marginBottom-10){
+        if(line+equations.allRealEq.length*18+25+15 > height-height*marginBottom-10){
             doc.addPage();
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
             line = height*marginTop;
@@ -2139,43 +2181,28 @@ function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, la
         doc.text(lang._step + ' 1 - ' + lang._eqStep1MCM, marginSides*width+13, line+=15, null, null, 'left');
         line+=5;
         doc.setLineWidth(1);
-        doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allVariableEq.length*18);
-        for(let i = 0; i < equations.allVariableEq.length; i++){
-            printEquation(doc, equations.allVariableEq[i], marginSides*width+18, line+=18, 'left');  
+        doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allRealEq.length*18);
+        for(let i = 0; i < equations.allRealEq.length; i++){
+            printEquation(doc, equations.allRealEq[i].equation, marginSides*width+18, line+=18, 'left');  
         }
         line+=5;
 
         //STEP 2
-        if(line+equations.allVariableEq.length*18+25+15 > height-height*marginBottom-10){
+        if(line+equations.allRealEq.length*18+25+15 > height-height*marginBottom-10){
             doc.addPage();
             doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
             line = height*marginTop;
         }
         doc.setFontSize(smallInfoSize);
-        doc.text(lang._step + ' 2 - ' + lang._eqStepMCM, marginSides*width+13, line+=15, null, null, 'left');
+        doc.text(lang._step + ' 2 - ' + lang._eqStep3MCM, marginSides*width+13, line+=15, null, null, 'left');
         line+=5;
         doc.setLineWidth(1);
-        doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.meshCurrRevealedEq.length*18);
-        for(let i = 0; i < equations.meshCurrRevealedEq.length; i++){
-            printEquation(doc, equations.meshCurrRevealedEq[i], marginSides*width+18, line+=18, 'left');  
+        doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allRealEq.length*18);
+        for(let i = 0; i < equations.allRealEq.length; i++){
+            printEquation(doc, equations.allRevealedEq[i].equation, marginSides*width+18, line+=18, 'left');  
         }
         line+=5;
 
-        //STEP 3
-        if(line+equations.allVariableEq.length*18+25+15 > height-height*marginBottom-10){
-            doc.addPage();
-            doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
-            line = height*marginTop;
-        }
-        doc.setFontSize(smallInfoSize);
-        doc.text(lang._step + ' 3 - ' + lang._eqStep3MCM, marginSides*width+13, line+=15, null, null, 'left');
-        line+=5;
-        doc.setLineWidth(1);
-        doc.line(marginSides*width+17, line+5, marginSides*width+17, line+equations.allRevealedEq.length*18);
-        for(let i = 0; i < equations.allRevealedEq.length; i++){
-            printEquation(doc, equations.allRevealedEq[i], marginSides*width+18, line+=18, 'left');  
-        }
-        line+=5;
         return line;        
     }
     else{
@@ -2186,7 +2213,7 @@ function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, la
             line = height*marginTop;
         }
         doc.setFontSize(subtitleSize);
-        doc.text('6.  ' + lang._eqSystemTitle, marginSides*width, line+=25, null, null, 'left');
+        doc.text('7.  ' + lang._eqSystemTitle, marginSides*width, line+=25, null, null, 'left');
 
         doc.setFontSize(smallInfoSize);
         doc.text(lang._noSystem, marginSides*width+10, line+=15, null, null, 'left');
@@ -2205,43 +2232,30 @@ function printEqSystem(doc, file, line, marginSides, marginTop, marginBottom, la
  * @param {number} marginBottom bottom margin 0-1
  * @returns {number} line vertical height
  */
-function printMeshResults(doc, file, line, marginSides, marginTop, marginBottom, lang){
+function printMeshResultsMCR(doc, file, line, marginSides, marginTop, marginBottom, lang){
 
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
     let meshes = file.analysisObj.chosenMeshes;
+    //let branches = file.analysisObj.branches;
+    let results = file.analysisObj.result
 
-    if(line+meshes.length*12+25+15 > height-height*marginBottom-10){
+    if(line+results.cuurentResult.length*12+25+15 > height-height*marginBottom-10){
         doc.addPage();
         doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
         line = height*marginTop;
     }
     doc.setFontSize(subtitleSize);
-    doc.text('7.  ' + lang._resMesh, marginSides*width, line+=25, null, null, 'left');
+    doc.text('9.  ' + lang._resBranch, marginSides*width, line+=25, null, null, 'left');
 
     line+=5;
     doc.setLineWidth(1);
-    doc.line(width/2-0.1*width, line+5, width/2-0.1*width, line+meshes.length*13+5);
-    for(let i = 0; i < meshes.length; i++){
-        let aux = '';
-        if(meshes[i].type == 0) aux = 'a';
-        else  aux = 'p';
-        aux += String(meshes[i].displayId); 
-        let str = '';
-        if(meshes[i].currValue.complex){ //malha é complexa
-            let resultAng = resultDecimals(meshes[i].currValue.angle, 3, true);
-            let resultMag = resultDecimals(meshes[i].currValue.magnitude, 2, false);
-            if(resultMag.value == 0){
-                str += "\\underline{I_{M" + aux + "}}~=~" + resultMag.value + '~' + resultMag.unit + 'A';
-            }
-            else{
-                str += "\\underline{I_{M" + aux + "}}~=~" + resultMag.value + '\\angle ' + resultAng.value + '^{\\circ}' + '~' + resultMag.unit + 'A';
-            }
-        }
-        else{ //malha é real
-            let result = resultDecimals(meshes[i].currValue.value, 2, false);
-            str += "I_{M" + aux + "}~=~" + result.value + '~' + result.unit + 'A';
-        }
+    doc.line(width/2-0.1*width, line+5, width/2-0.1*width, line+results.cuurentResult.length*13+5);
+    let str ="";
+    for(let i = 0; i < results.cuurentResult.length; i++){
+        
+        str = results.cuurentResult[i];
+        //doc.text(results[i].cuurentResult,width/2-0.1*width, line+=14, 'left');
         printEquation(doc, str, width/2-0.1*width, line+=14, 'left');  
     }
 
@@ -2257,7 +2271,7 @@ function printMeshResults(doc, file, line, marginSides, marginTop, marginBottom,
  * @param {number} marginBottom bottom margin 0-1
  * @returns {number} line vertical height
  */
-function printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom, lang){
+function printCurrentsInfoMCR(doc, file, line, marginSides, marginTop, marginBottom, lang){
     let width = doc.internal.pageSize.width;
     let innerWidth = width - 2 * width * marginSides;
     let currents = file.analysisObj.currents;
@@ -2270,10 +2284,10 @@ function printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('8.  ' + lang._branchIden, marginSides*width, line+=25, null, null, 'left');
+    doc.text('4.  ' + lang._branchIden, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(subsubtitleSize);
-    doc.text(' 8.1  ' + lang._currents, marginSides*width, line+=25, null, null, 'left');
+    doc.text(' 4.1  ' + lang._currents, marginSides*width, line+=25, null, null, 'left');
 
     if(lang == dictionary.portuguese){
         var table = 'Tabela 1 - ';
@@ -2328,6 +2342,62 @@ function printCurrentsInfo(doc, file, line, marginSides, marginTop, marginBottom
     }
     return line;
 }
+/**
+ * Function to print the meshes
+ * @param {object} doc jsPDF document
+ * @param {object} file output jsonFile
+ * @param {array} images images data
+ * @param {number} line line vertical height
+ * @param {number} marginSides sides margin 0-1
+ * @param {number} marginTop top margin 0-1
+ * @param {number} marginBottom bottom margin 0-1
+ * @returns {number} line vertical height
+ */
+ function printNodesInfo(doc, file, images, line, marginSides, marginBottom, marginTop, lang){
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    if(line+200 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    } 
+
+    if(lang == dictionary.portuguese){
+        var slice1 = 48;
+    }
+    else if(lang == dictionary.english){
+        var slice1 = 45;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('5.  ' + lang._knlTitle.slice(0, slice1), marginSides*width, line+=25, null, null, 'left');
+    doc.text(lang._knlTitle.slice(slice1), marginSides*width, line+=15, null, null, 'left');
+
+
+    for(i=0;i<images.length;i++){
+    if(line+150+30 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    } 
+
+    doc.setFontSize(subsubtitleSize);
+    doc.text(' 5.' + String(i+1) + '  ' +  lang._knlNode + " " + file.analysisObj.equations.nodeEquationsReal[i].node  , marginSides*width, line+=22, null, null, 'left');
+    
+    let align = (width-1*150)/2;
+    doc.addImage(images[i].dataURL, "PNG", align, line+=10, 150,150);
+    
+    line+=100;
+    printEquation(doc,file.analysisObj.equations.nodeEquationsReal[i].equation, width/2, line, 'center');
+    line+=20
+}
+
+return line;
+
+ }
+
 /**
  * Function to output circuit branch currents
  * @param {object} doc jsPDF document
