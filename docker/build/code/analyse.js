@@ -2132,7 +2132,9 @@ function analyseCircuit(analysismet) {
                 let successFlag = false;
                 for (let i = 0; i < retriesNumber; i++) {
                     try {
-                        loadFileAsTextMTN();
+						$("#pdfPrintButton").hide();
+						$("#print").hide();
+						loadFileAsTextMTN();
                         successFlag = true;
                     } catch (error) {
                         console.log("Error in MTN: " + error);
@@ -2156,6 +2158,8 @@ function analyseCircuit(analysismet) {
                     try {
 						let data = common(analysismet);
                         if(!data.first){
+							$("#pdfPrintButton").hide();
+							$("#print").show();
 							loadFileAsTextMCR(data.third);
                         }
                         successFlag = true;
@@ -2181,6 +2185,8 @@ function analyseCircuit(analysismet) {
                     try {
                         let data = common(analysismet);
                         if(!data.first){
+							$("#pdfPrintButton").hide();
+							$("#print").show();
 							loadFileAsTextMCM(data.third);
                         }
                         successFlag = true;

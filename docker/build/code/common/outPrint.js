@@ -1054,10 +1054,11 @@ function outCurrentsKNL(knlCurrEquations,supernodes){
     }
     let pagebreakCounter = 0;
 
+    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
     //Generate the cards and insert Node and Equation
     for(let i = 0; i< KNLeqs.length; i++){
         htmlstr +='<div class="col-sm-12 col-md-6 mt-3"><div class="card bg-light mb-3">'
-        let canvasID = "currCanvas"+i;
+        let canvasID = "currCanvas"+ substitutions[i];
         htmlstr += '<div class="card-body text-secondary">';
         htmlstr += '<h5 class="card-title ml-3 text-center border rounded-top"><span data-translate="_knlNode"></span> ';
         htmlstr += '<span class="font-weight-bold text-dark"> &nbsp;&nbsp;'+KNLeqs[i].node + '</span></h5>';
@@ -1066,8 +1067,8 @@ function outCurrentsKNL(knlCurrEquations,supernodes){
         htmlstr += katex.renderToString(KNLeqs[i].equation, {throwOnError: false});
         htmlstr += '</p></div></div></div>';
 
-        TeXData += "\\subsubsection{Node " + KNLeqs[i].node + "}\r\n\\begin{figure}[hbt]\r\n\\centering{\\includegraphics[height=4cm, keepaspectratio]{";
-        TeXData += canvasID + "}}\r\n\\caption{Node " + KNLeqs[i].node + " currents.}\r\n\\label{" + KNLeqs[i].node + "currents}\r\n\\end{figure}\r\n";
+        TeXData += "\\subsubsection{Node " + KNLeqs[i].node + "}\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{ 150 pt}{!}{\\inlineimages{";
+        TeXData += canvasID + ".png}{\\" + canvasID + "}}}\r\n\\caption{Node " + KNLeqs[i].node + " currents.}\r\n\\label{" + KNLeqs[i].node + "currents}\r\n\\end{figure}\r\n";
         TeXData += "\\begin{equation}\r\n \\textrm{Equation}: \\quad "+ KNLeqs[i].equation +"\r\n\\end{equation}\r\n\r\n";
         pagebreakCounter++;
         if(pagebreakCounter == 2){
@@ -1102,10 +1103,11 @@ function createCanvasCurrents(currentsData){
     //Canvas dataURL Object array
     let canvasObjects = new Array();
 
+    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
     for(let i = 0; i<currentsData.length; i++){
 
         // Get Canvas HTML ID
-        let canvasID = "currCanvas" + i;
+        let canvasID = "currCanvas" + substitutions[i];
         let canvas = document.getElementById(canvasID);
         let context = canvas.getContext('2d');
         let centerX = canvas.width / 2;
@@ -2184,9 +2186,9 @@ function outShowAllBtn(supernodesCollapse){
 
 function getTexFileHeader(){
     let texHeader = '';
-    texHeader = "\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Node Voltage Method (Supernode approach)}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{Node Voltage Method} \\\\\r\n\\textsc{(Supernode approach)} \\\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n\\author{\r\n\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}\r\nLino Sousa           & M\u00E1rio Alves          \\\\\r\nsss@isep.ipp.pt  & mjf@isep.ipp.pt      \\\\\r\n\t\t\t\t\t &                      \\\\\r\nAndr\u00E9 Rocha          & Francisco Pereira    \\\\\r\nanr@isep.ipp.pt      & fdp@isep.ipp.pt      \\\\\r\n\\end{tabular}\r\n}\r\n\r\n\\date{}\r\n\r\n";
-
-    texHeader += "\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\nThis document provides a step by step solution for the submitted circuit, using the Node Voltage Method (NVM). If possible, it's implemented the Supernode approach to simplify the circuit analysis.\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
+//    texHeader = "\\documentclass[a4paper]{article}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Node Voltage Method (Supernode approach)}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{Node Voltage Method} \\\\\r\n\\textsc{(Supernode approach)} \\\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n\\author{\r\n\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}\r\nLino Sousa           & M\u00E1rio Alves          \\\\\r\nsss@isep.ipp.pt  & mjf@isep.ipp.pt      \\\\\r\n\t\t\t\t\t &                      \\\\\r\nAndr\u00E9 Rocha          & Francisco Pereira    \\\\\r\nanr@isep.ipp.pt      & fdp@isep.ipp.pt      \\\\\r\n\\end{tabular}\r\n}\r\n\r\n\\date{}\r\n\r\n";
+    texHeader = '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\r\n\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{Node Voltage Method (Supernode approach)}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{Node Voltage Method} \\\\\r\n\\textsc{(Supernode approach)} \\\\\r\nStep by Step Solution \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n\\author{\r\n\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}\r\nLino Sousa           & M\u00E1rio Alves          \\\\\r\nsss@isep.ipp.pt  & mjf@isep.ipp.pt      \\\\\r\n\t\t\t\t\t &                      \\\\\r\nAndr\u00E9 Rocha          & Francisco Pereira    \\\\\r\nanr@isep.ipp.pt      & fdp@isep.ipp.pt      \\\\\r\n\\end{tabular}\r\n}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += "\\begin{document}\r\n\\include{images}\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\nThis document provides a step by step solution for the submitted circuit, using the Node Voltage Method (NVM). If possible, it's implemented the Supernode approach to simplify the circuit analysis.\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n";
     return texHeader;
 }
 
