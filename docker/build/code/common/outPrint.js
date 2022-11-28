@@ -182,9 +182,11 @@ function errorOutput(errList, method){
                 if(method == 'MTN'){
                     warnString += '<div><span data-translate="_errCode15"></span></div>';
                 }
-                else if(method == 'MCM'){
+                else if((method == 'MCM')||(method == 'MCR')){
                     warnString += '<div><span data-translate="_errCode15MCM"></span></div>';
                 }
+                
+
                 warnString += '</div></div>';
                 break;
 

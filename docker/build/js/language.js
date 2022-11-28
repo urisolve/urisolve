@@ -78,7 +78,7 @@ $(function () {
             "_step": "Step",
             "_notes":"Notes: ",
             "_resMesh" : "Mesh Current Values",
-            "_resBranch" : "Branch Currents computation",
+            "_resBranch" : "Branch Currents Values",
             "_and": "and",
             "_nodeVoltages": "Node Voltages",
             "_meshCurrents": "Mesh Currents",
