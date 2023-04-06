@@ -236,6 +236,9 @@ $(function () {
             "_btn_mcr_p2": "Correntes nos Ramos",
             "_btn_mcm_p1": "Método das",
             "_btn_mcm_p2": "Correntes nas Malhas",
+            //new button smp - simplificação de circuitos
+            "_btn_smp_p1": "Simplificação de",
+            "_btn_smp_p2": "Circuitos",
             "_btn-edit-acc":"Alterar perfil",
             "_sect_instruct": "Instruções",
             "_sect_examples": "Circuitos exemplo",

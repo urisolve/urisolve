@@ -4,11 +4,11 @@
  * Loads the file and validates the netlist
  * @returns netlist
  */
- function loadFile(method){
+function loadFile(method) {
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
 		alert("Submit netlist first!!");
-		return{
+		return {
 			first: true,
 			second: 1,
 			third: "No netlist file found"
@@ -21,14 +21,14 @@
 	// Validate submitted Netlist File
 	var netlistTxt = validateNetlist(fileContents[1]);
 	// Check for previous ground alteration
-	if(fileContents[2])
+	if (fileContents[2])
 		netlistTxt.first.push(fileContents[2]);
 	// Deal With Netlist Error Codes
 	let warningsText
 	$('#errors').hide();
 	$('#warnings').hide();
-	if(netlistTxt.first.length > 0) {
-		if(foundCriticalErr(netlistTxt.first)){
+	if (netlistTxt.first.length > 0) {
+		if (foundCriticalErr(netlistTxt.first)) {
 			$("#loadpage").fadeOut(1000);
 			$("#results").show();
 			$("#contResults").hide();
@@ -40,22 +40,22 @@
 			document.getElementById("buttons-div").hidden = true;
 
 			let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
-			if(language == "english")
+			if (language == "english")
 				set_lang(dictionary.english);
-			else	
+			else
 				set_lang(dictionary.portuguese);
-				return{
-					first: true,
-					second: 2,
-					third: "Error"
-				};	
+			return {
+				first: true,
+				second: 2,
+				third: "Error"
+			};
 		}
 	}
 	document.getElementById("output-info-global").hidden = false;
 	document.getElementById("buttons-div").hidden = false;
 	// Remove codigo de erro 14
-	if(fileContents[2]) netlistTxt.first.splice(netlistTxt.first.length-1);
-	return{
+	if (fileContents[2]) netlistTxt.first.splice(netlistTxt.first.length - 1);
+	return {
 		first: false,
 		second: 0,
 		third: netlistTxt
@@ -66,31 +66,31 @@
  * Imports data to local variables
  * @param {String} netlistTxt validated file 
  */
-function importData(netlistTxt){
+function importData(netlistTxt) {
 
 	var netListLines = netlistTxt.second;
 
 	var netListLineCnt = {
-		Vdc: 	0,
-		Idc: 	0,
-		Vac: 	0,
-		Iac:	0,
-		R:		0,
-		L:		0,
-		C:		0,
-		Vprob: 	0,
-		Iprob:  0,
+		Vdc: 0,
+		Idc: 0,
+		Vac: 0,
+		Iac: 0,
+		R: 0,
+		L: 0,
+		C: 0,
+		Vprob: 0,
+		Iprob: 0,
 	};
 
 	// Import data to local variables
-    for(var line = 0; line < netListLines.length; line++){
+	for (var line = 0; line < netListLines.length; line++) {
 		var cpData = acquireCpData(netListLines[line], netListLineCnt);
 
-		if(cpData.third){
+		if (cpData.third) {
 			connections.push(cpData.third);
 		}
 
-		if(!cpData.first) {
+		if (!cpData.first) {
 			switch (cpData.second.type) {
 				case cpRefTest("Vdc"): {
 					var newDcVoltPs = new dcVoltPower(cpData.second.id, cpData.second.ref, cpData.second.noP, cpData.second.noN, cpData.second.type, cpData.second.value, cpData.second.unitMult, cpData.second.intRes, cpData.second.intResMult, null, null, null);
@@ -160,16 +160,16 @@ function importData(netlistTxt){
 
 	// Verify and set circuit frequency
 	let errCodeIndex = netlistTxt.first.findIndex(item => item.errorCode == 10);
-	if(errCodeIndex > -1){
+	if (errCodeIndex > -1) {
 		circuitAnalData.frequency.value = netlistTxt.first[errCodeIndex].chosenFreq;
 		circuitAnalData.frequency.mult = netlistTxt.first[errCodeIndex].chosenFreqUnit;
 	}
-	else{
-		for(var line = 0; line < netListLines.length; line++){
+	else {
+		for (var line = 0; line < netListLines.length; line++) {
 			var cpData = acquireCpData(netListLines[line], netListLineCnt);
 
-			if(!cpData.first) {
-				if(cpData.second.value != null && cpData.second.type === 'acFreq') {
+			if (!cpData.first) {
+				if (cpData.second.value != null && cpData.second.type === 'acFreq') {
 					circuitAnalData.frequency.value = cpData.second.value;
 					circuitAnalData.frequency.mult = cpData.second.mult;
 				}
@@ -181,15 +181,15 @@ function importData(netlistTxt){
 /**
  * Saves the ammeter position and the component in series with it
  */
-function manageAmpmeters(){
-	for(var i=0; i<ampsMeters.length; i++) {
+function manageAmpmeters() {
+	for (var i = 0; i < ampsMeters.length; i++) {
 		var newNodes = ampsMeters[i].getNodes();
 
 		var found = iProbeNodesLoc.find(element => element == newNodes);
 		if (typeof found == 'undefined') {
 			iProbeNodesLoc.push(newNodes);
 			// Save location of the ammeters in the iProbeNodesLoc and next series connected component Reference
-			iProbeLocVsAmpId.push({iProbLocPos: (iProbeNodesLoc.length-1), ampId: ampsMeters[i].id, ampRef: ampsMeters[i].ref, serieConCpRef: '', branchId: '', jointNodeP: '', jointNodeN: ''});
+			iProbeLocVsAmpId.push({ iProbLocPos: (iProbeNodesLoc.length - 1), ampId: ampsMeters[i].id, ampRef: ampsMeters[i].ref, serieConCpRef: '', branchId: '', jointNodeP: '', jointNodeN: '' });
 		}
 
 		found = iProbeNodesArr.find(element => element == newNodes.fromNode);
@@ -208,17 +208,17 @@ function manageAmpmeters(){
 /**
  * Encounters the number and type of knots (real or virtual)
  */
-function findNodes(){
+function findNodes() {
 
 	//find nodes
 	var foundNodes = new Array();
 
-	for(var i=0; i<resistors.length; i++) {
+	for (var i = 0; i < resistors.length; i++) {
 		var newNodes = resistors[i].getNodes();
 		var found = 0;
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -227,8 +227,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(resistors[i].noN == found) resistors[i].noN = found2.toNode;
-					if(resistors[i].noP == found) resistors[i].noP = found2.toNode;
+					if (resistors[i].noN == found) resistors[i].noN = found2.toNode;
+					if (resistors[i].noP == found) resistors[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -247,8 +247,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(resistors[i].noN == found) resistors[i].noN = found2.fromNode;
-					if(resistors[i].noP == found) resistors[i].noP = found2.fromNode;
+					if (resistors[i].noN == found) resistors[i].noN = found2.fromNode;
+					if (resistors[i].noP == found) resistors[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -267,7 +267,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -275,8 +275,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(resistors[i].noN == found) resistors[i].noN = found2.toNode;
-					if(resistors[i].noP == found) resistors[i].noP = found2.toNode;
+					if (resistors[i].noN == found) resistors[i].noN = found2.toNode;
+					if (resistors[i].noP == found) resistors[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -295,8 +295,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(resistors[i].noN == found) resistors[i].noN = found2.fromNode;
-					if(resistors[i].noP == found) resistors[i].noP = found2.fromNode;
+					if (resistors[i].noN == found) resistors[i].noN = found2.fromNode;
+					if (resistors[i].noP == found) resistors[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -321,11 +321,11 @@ function findNodes(){
 		if (typeof found == 'undefined') foundNodes.push(newNodes.toNode);
 	}
 
-	for(var i=0; i<coils.length; i++) {
+	for (var i = 0; i < coils.length; i++) {
 		var newNodes = coils[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -334,8 +334,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(coils[i].noN == found) coils[i].noN = found2.toNode;
-					if(coils[i].noP == found) coils[i].noP = found2.toNode;
+					if (coils[i].noN == found) coils[i].noN = found2.toNode;
+					if (coils[i].noP == found) coils[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -354,8 +354,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(coils[i].noN == found) coils[i].noN = found2.fromNode;
-					if(coils[i].noP == found) coils[i].noP = found2.fromNode;
+					if (coils[i].noN == found) coils[i].noN = found2.fromNode;
+					if (coils[i].noP == found) coils[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -374,7 +374,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -382,8 +382,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(coils[i].noN == found) coils[i].noN = found2.toNode;
-					if(coils[i].noP == found) coils[i].noP = found2.toNode;
+					if (coils[i].noN == found) coils[i].noN = found2.toNode;
+					if (coils[i].noP == found) coils[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -402,8 +402,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(coils[i].noN == found) coils[i].noN = found2.fromNode;
-					if(coils[i].noP == found) coils[i].noP = found2.fromNode;
+					if (coils[i].noN == found) coils[i].noN = found2.fromNode;
+					if (coils[i].noP == found) coils[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -429,11 +429,11 @@ function findNodes(){
 
 	}
 
-	for(var i=0; i<capacitors.length; i++) {
+	for (var i = 0; i < capacitors.length; i++) {
 		var newNodes = capacitors[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -442,8 +442,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(capacitors[i].noN == found) capacitors[i].noN = found2.toNode;
-					if(capacitors[i].noP == found) capacitors[i].noP = found2.toNode;
+					if (capacitors[i].noN == found) capacitors[i].noN = found2.toNode;
+					if (capacitors[i].noP == found) capacitors[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -462,8 +462,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(capacitors[i].noN == found) capacitors[i].noN = found2.fromNode;
-					if(capacitors[i].noP == found) capacitors[i].noP = found2.fromNode;
+					if (capacitors[i].noN == found) capacitors[i].noN = found2.fromNode;
+					if (capacitors[i].noP == found) capacitors[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -482,7 +482,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -490,8 +490,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(capacitors[i].noN == found) capacitors[i].noN = found2.toNode;
-					if(capacitors[i].noP == found) capacitors[i].noP = found2.toNode;
+					if (capacitors[i].noN == found) capacitors[i].noN = found2.toNode;
+					if (capacitors[i].noP == found) capacitors[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -510,8 +510,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(capacitors[i].noN == found) capacitors[i].noN = found2.fromNode;
-					if(capacitors[i].noP == found) capacitors[i].noP = found2.fromNode;
+					if (capacitors[i].noN == found) capacitors[i].noN = found2.fromNode;
+					if (capacitors[i].noP == found) capacitors[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -537,11 +537,11 @@ function findNodes(){
 
 	}
 
-	for(var i=0; i<dcVoltPs.length; i++) {
+	for (var i = 0; i < dcVoltPs.length; i++) {
 		var newNodes = dcVoltPs[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -550,8 +550,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.toNode;
-					if(dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.toNode;
+					if (dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.toNode;
+					if (dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -570,8 +570,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.fromNode;
-					if(dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.fromNode;
+					if (dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.fromNode;
+					if (dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -590,7 +590,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -598,8 +598,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.toNode;
-					if(dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.toNode;
+					if (dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.toNode;
+					if (dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -618,8 +618,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.fromNode;
-					if(dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.fromNode;
+					if (dcVoltPs[i].noN == found) dcVoltPs[i].noN = found2.fromNode;
+					if (dcVoltPs[i].noP == found) dcVoltPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -645,11 +645,11 @@ function findNodes(){
 
 	}
 
-	for(var i=0; i<acVoltPs.length; i++) {
+	for (var i = 0; i < acVoltPs.length; i++) {
 		var newNodes = acVoltPs[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -658,8 +658,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(acVoltPs[i].noN == found) acVoltPs[i].noN = found2.toNode;
-					if(acVoltPs[i].noP == found) acVoltPs[i].noP = found2.toNode;
+					if (acVoltPs[i].noN == found) acVoltPs[i].noN = found2.toNode;
+					if (acVoltPs[i].noP == found) acVoltPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -678,8 +678,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(acVoltPs[i].noN == found) acVoltPs[i].noN = found2.fromNode;
-					if(acVoltPs[i].noP == found) acVoltPs[i].noP = found2.fromNode;
+					if (acVoltPs[i].noN == found) acVoltPs[i].noN = found2.fromNode;
+					if (acVoltPs[i].noP == found) acVoltPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -698,7 +698,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -706,8 +706,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(acVoltPs[i].noN == found) acVoltPs[i].noN = found2.toNode;
-					if(acVoltPs[i].noP == found) acVoltPs[i].noP = found2.toNode;
+					if (acVoltPs[i].noN == found) acVoltPs[i].noN = found2.toNode;
+					if (acVoltPs[i].noP == found) acVoltPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -726,8 +726,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(acVoltPs[i].noN == found) acVoltPs[i].noN = found2.fromNode;
-					if(acVoltPs[i].noP == found) acVoltPs[i].noP = found2.fromNode;
+					if (acVoltPs[i].noN == found) acVoltPs[i].noN = found2.fromNode;
+					if (acVoltPs[i].noP == found) acVoltPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -753,11 +753,11 @@ function findNodes(){
 
 	}
 
-	for(var i=0; i<dcAmpsPs.length; i++) {
+	for (var i = 0; i < dcAmpsPs.length; i++) {
 		var newNodes = dcAmpsPs[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -766,8 +766,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.toNode;
-					if(dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.toNode;
+					if (dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.toNode;
+					if (dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -786,8 +786,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.fromNode;
-					if(dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.fromNode;
+					if (dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.fromNode;
+					if (dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -806,7 +806,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -814,8 +814,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.toNode;
-					if(dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.toNode;
+					if (dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.toNode;
+					if (dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -834,8 +834,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.fromNode;
-					if(dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.fromNode;
+					if (dcAmpsPs[i].noN == found) dcAmpsPs[i].noN = found2.fromNode;
+					if (dcAmpsPs[i].noP == found) dcAmpsPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -861,11 +861,11 @@ function findNodes(){
 
 	}
 
-	for(var i=0; i<acAmpsPs.length; i++) {
+	for (var i = 0; i < acAmpsPs.length; i++) {
 		var newNodes = acAmpsPs[i].getNodes();
 
 		var pos = newNodes.fromNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			// Verify ammeters Nodes
 			found = iProbeNodesArr.find(element => element == newNodes.fromNode);
 			// If was found in the general array, do the change
@@ -874,8 +874,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.toNode;
-					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.toNode;
-					if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
+					if (acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.toNode;
+					if (acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -894,8 +894,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.fromNode = found2.fromNode;
-					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.fromNode;
-					if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
+					if (acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.fromNode;
+					if (acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -914,7 +914,7 @@ function findNodes(){
 		}
 
 		var pos = newNodes.toNode.search('_net');
-        if(pos > -1 ) {
+		if (pos > -1) {
 			found = iProbeNodesArr.find(element => element == newNodes.toNode);
 			// If was found in the general array, do the change
 			if (typeof found != 'undefined') {
@@ -922,8 +922,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.toNode;
-					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.toNode;
-					else if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
+					if (acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.toNode;
+					else if (acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.toNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -942,8 +942,8 @@ function findNodes(){
 				if (typeof found2 != 'undefined') {
 					// First in the fromNode
 					newNodes.toNode = found2.fromNode;
-					if(acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.fromNode;
-					else if(acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
+					if (acAmpsPs[i].noN == found) acAmpsPs[i].noN = found2.fromNode;
+					else if (acAmpsPs[i].noP == found) acAmpsPs[i].noP = found2.fromNode;
 
 					// Save component Ref in iProbeLocVsAmpId
 					var index = iProbNodesLocFilled.indexOf(found2);
@@ -972,11 +972,11 @@ function findNodes(){
 	let foundnodeInstances = [].concat(...connections);
 
 	// Push nodes data to nodes array
-	for(var i=0; i<foundNodes.length; i++) {
+	for (var i = 0; i < foundNodes.length; i++) {
 		var nodeId = ++circuitAnalCnt.node;
 		var nodeType = 1;	// Virtual Node
-		var pos = foundnodeInstances.filter(function(x){ return x === foundNodes[i]; }).length;
-        if(pos > 2 ) nodeType = 0;	// Real Node
+		var pos = foundnodeInstances.filter(function (x) { return x === foundNodes[i]; }).length;
+		if (pos > 2) nodeType = 0;	// Real Node
 		var newNode = new node(nodeId, foundNodes[i], [], nodeType, null);
 		nodes.push(newNode);
 	}
@@ -996,7 +996,7 @@ function findNodes(){
 	}
 	*/
 
-	return{
+	return {
 		first: false,
 		second: 0
 	}
@@ -1005,7 +1005,7 @@ function findNodes(){
 /**
  * Encouters the number and content of the branches of the circuit
  */
-function makeBranches(){
+function makeBranches() {
 	// Insert components into branches and Count Branches
 
 	// Get a copy of components
@@ -1020,32 +1020,32 @@ function makeBranches(){
 	// For each node, follow components until reach another Real Node, while creating Branches and set its data
 	// This Operation is Successful if ends up with every array copy of components empty
 
-	for(var i=0; i<nodes.length; i++) {
+	for (var i = 0; i < nodes.length; i++) {
 		// If it is a Real Node
-		if(nodes[i].type == 0) {
+		if (nodes[i].type == 0) {
 			nodeRef = nodes[i].ref;
 
 			// Count occurrences
 			var foundCnt = 0;
-			for(var j=0; j<resisTemp.length; j++) { if(resisTemp[j].noP == nodeRef || resisTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<coilsTemp.length; j++) { if(coilsTemp[j].noP == nodeRef || coilsTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<capacTemp.length; j++) { if(capacTemp[j].noP == nodeRef || capacTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<dcVPsTemp.length; j++) { if(dcVPsTemp[j].noP == nodeRef || dcVPsTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<dcAPsTemp.length; j++) { if(dcAPsTemp[j].noP == nodeRef || dcAPsTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<acVPsTemp.length; j++) { if(acVPsTemp[j].noP == nodeRef || acVPsTemp[j].noN == nodeRef) foundCnt++; }
-			for(var j=0; j<acAPsTemp.length; j++) { if(acAPsTemp[j].noP == nodeRef || acAPsTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < resisTemp.length; j++) { if (resisTemp[j].noP == nodeRef || resisTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < coilsTemp.length; j++) { if (coilsTemp[j].noP == nodeRef || coilsTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < capacTemp.length; j++) { if (capacTemp[j].noP == nodeRef || capacTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < dcVPsTemp.length; j++) { if (dcVPsTemp[j].noP == nodeRef || dcVPsTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < dcAPsTemp.length; j++) { if (dcAPsTemp[j].noP == nodeRef || dcAPsTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < acVPsTemp.length; j++) { if (acVPsTemp[j].noP == nodeRef || acVPsTemp[j].noN == nodeRef) foundCnt++; }
+			for (var j = 0; j < acAPsTemp.length; j++) { if (acAPsTemp[j].noP == nodeRef || acAPsTemp[j].noN == nodeRef) foundCnt++; }
 
-			
-		//		* CP Search States Machine (cpSearchSM):
-		//			1 - Resistors;
-		//			2 - Coils;
-		//			3 - Capacitors;
-		//			4 - DC Volt PS;
-		//			5 - DC Amp PS;
-		//			6 - AC Volt PS;
-		//			7 - AC Amp PS.
-			
-			for(var j=0; j<foundCnt; j++) {
+
+			//		* CP Search States Machine (cpSearchSM):
+			//			1 - Resistors;
+			//			2 - Coils;
+			//			3 - Capacitors;
+			//			4 - DC Volt PS;
+			//			5 - DC Amp PS;
+			//			6 - AC Volt PS;
+			//			7 - AC Amp PS.
+
+			for (var j = 0; j < foundCnt; j++) {
 				var end = 0;
 				var cpSearchSM = 1;
 				var branchId = ++circuitAnalCnt.branch;
@@ -1053,9 +1053,9 @@ function makeBranches(){
 				do {
 					switch (cpSearchSM) {
 						case 1: {
-							if(resisTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<resisTemp.length; k++) {
-								if(resisTemp[k].noP == nodeRef) {
+							if (resisTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < resisTemp.length; k++) {
+								if (resisTemp[k].noP == nodeRef) {
 									var nextNode = resisTemp[k].noN;
 									newBranch.resistors.push(resisTemp[k]);
 
@@ -1064,7 +1064,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1082,7 +1082,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(resisTemp[k].noN == nodeRef) {
+								if (resisTemp[k].noN == nodeRef) {
 									var nextNode = resisTemp[k].noP;
 									newBranch.resistors.push(resisTemp[k]);
 
@@ -1091,7 +1091,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1109,15 +1109,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (resisTemp.length-1)) cpSearchSM++;
+								if (k == (resisTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 2: {
-							if(coilsTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<coilsTemp.length; k++) {
-								if(coilsTemp[k].noP == nodeRef) {
+							if (coilsTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < coilsTemp.length; k++) {
+								if (coilsTemp[k].noP == nodeRef) {
 									var nextNode = coilsTemp[k].noN;
 									newBranch.coils.push(coilsTemp[k]);
 
@@ -1126,7 +1126,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1144,7 +1144,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(coilsTemp[k].noN == nodeRef) {
+								if (coilsTemp[k].noN == nodeRef) {
 									var nextNode = coilsTemp[k].noP;
 									newBranch.coils.push(coilsTemp[k]);
 
@@ -1153,7 +1153,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1171,15 +1171,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (coilsTemp.length-1)) cpSearchSM++;
+								if (k == (coilsTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 3: {
-							if(capacTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<capacTemp.length; k++) {
-								if(capacTemp[k].noP == nodeRef) {
+							if (capacTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < capacTemp.length; k++) {
+								if (capacTemp[k].noP == nodeRef) {
 									var nextNode = capacTemp[k].noN;
 									newBranch.capacitors.push(capacTemp[k]);
 
@@ -1188,7 +1188,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1206,7 +1206,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(capacTemp[k].noN == nodeRef) {
+								if (capacTemp[k].noN == nodeRef) {
 									var nextNode = capacTemp[k].noP;
 									newBranch.capacitors.push(capacTemp[k]);
 
@@ -1215,7 +1215,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1233,15 +1233,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (capacTemp.length-1)) cpSearchSM++;
+								if (k == (capacTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 4: {
-							if(dcVPsTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<dcVPsTemp.length; k++) {
-								if(dcVPsTemp[k].noP == nodeRef) {
+							if (dcVPsTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < dcVPsTemp.length; k++) {
+								if (dcVPsTemp[k].noP == nodeRef) {
 									var nextNode = dcVPsTemp[k].noN;
 									newBranch.dcVoltPwSupplies.push(dcVPsTemp[k]);
 
@@ -1250,7 +1250,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1268,7 +1268,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(dcVPsTemp[k].noN == nodeRef) {
+								if (dcVPsTemp[k].noN == nodeRef) {
 									var nextNode = dcVPsTemp[k].noP;
 									newBranch.dcVoltPwSupplies.push(dcVPsTemp[k]);
 
@@ -1277,7 +1277,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1295,15 +1295,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (dcVPsTemp.length-1)) cpSearchSM++;
+								if (k == (dcVPsTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 5: {
-							if(dcAPsTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<dcAPsTemp.length; k++) {
-								if(dcAPsTemp[k].noP == nodeRef) {
+							if (dcAPsTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < dcAPsTemp.length; k++) {
+								if (dcAPsTemp[k].noP == nodeRef) {
 									var nextNode = dcAPsTemp[k].noN;
 									newBranch.dcAmpPwSupplies.push(dcAPsTemp[k]);
 
@@ -1312,7 +1312,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1330,7 +1330,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(dcAPsTemp[k].noN == nodeRef) {
+								if (dcAPsTemp[k].noN == nodeRef) {
 									var nextNode = dcAPsTemp[k].noP;
 									newBranch.dcAmpPwSupplies.push(dcAPsTemp[k]);
 
@@ -1339,7 +1339,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1357,15 +1357,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (dcAPsTemp.length-1)) cpSearchSM++;
+								if (k == (dcAPsTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 6: {
-							if(acVPsTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<acVPsTemp.length; k++) {
-								if(acVPsTemp[k].noP == nodeRef) {
+							if (acVPsTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < acVPsTemp.length; k++) {
+								if (acVPsTemp[k].noP == nodeRef) {
 									var nextNode = acVPsTemp[k].noN;
 									newBranch.acVoltPwSupplies.push(acVPsTemp[k]);
 
@@ -1374,7 +1374,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1392,7 +1392,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(acVPsTemp[k].noN == nodeRef) {
+								if (acVPsTemp[k].noN == nodeRef) {
 									var nextNode = acVPsTemp[k].noP;
 									newBranch.acVoltPwSupplies.push(acVPsTemp[k]);
 
@@ -1401,7 +1401,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1419,15 +1419,15 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (acVPsTemp.length-1)) cpSearchSM++;
+								if (k == (acVPsTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
 
 						case 7: {
-							if(acAPsTemp.length == 0) cpSearchSM++;
-							for(var k=0; k<acAPsTemp.length; k++) {
-								if(acAPsTemp[k].noP == nodeRef) {
+							if (acAPsTemp.length == 0) cpSearchSM++;
+							for (var k = 0; k < acAPsTemp.length; k++) {
+								if (acAPsTemp[k].noP == nodeRef) {
 									var nextNode = acAPsTemp[k].noN;
 									newBranch.acAmpPwSupplies.push(acAPsTemp[k]);
 
@@ -1436,7 +1436,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1454,7 +1454,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(acAPsTemp[k].noN == nodeRef) {
+								if (acAPsTemp[k].noN == nodeRef) {
 									var nextNode = acAPsTemp[k].noP;
 									newBranch.acAmpPwSupplies.push(acAPsTemp[k]);
 
@@ -1463,7 +1463,7 @@ function makeBranches(){
 
 									// If next node is Real, Branch is Complete
 									var c1 = nextNode.search('_net');
-									if(c1 < 0) {
+									if (c1 < 0) {
 										// Set final branch node
 										newBranch.endNode = nextNode;
 										// Save branch data into Branches Array
@@ -1481,7 +1481,7 @@ function makeBranches(){
 									// Exit States Machine
 									break;
 								}
-								if(k == (acAPsTemp.length-1)) cpSearchSM++;
+								if (k == (acAPsTemp.length - 1)) cpSearchSM++;
 							}
 							break;
 						}
@@ -1500,7 +1500,7 @@ function makeBranches(){
 /**
  * Gives direction to the currents in the branches
  */
-function branchCurrents(){
+function branchCurrents() {
 
 	// Analyse Branches vs ammeterss (Currents Names)
 	// Now its possible to analyse if it was provided One ammeters for the branch
@@ -1510,21 +1510,21 @@ function branchCurrents(){
 	// Produce below a function to search for ammeters Nodes
 
 	// Update branches information with ammeterss Data and Next component
-	for(var i=0; i<iProbeLocVsAmpId.length; i++) {
+	for (var i = 0; i < iProbeLocVsAmpId.length; i++) {
 		let ampRef = iProbeLocVsAmpId[i].ampRef;
 		let serieConCpRef = iProbeLocVsAmpId[i].serieConCpRef;
 
-		for(var j=0; j<branches.length; j++) {
-			if(branches[j].resistors.length > 0) {
+		for (var j = 0; j < branches.length; j++) {
+			if (branches[j].resistors.length > 0) {
 				const refIndex = branches[j].resistors.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].resistors[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].resistors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].resistors[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1532,16 +1532,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].coils.length > 0) {
+			if (branches[j].coils.length > 0) {
 				refIndex = branches[j].coils.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].coils[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].coils[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].coils[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1549,16 +1549,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].capacitors.length > 0) {
+			if (branches[j].capacitors.length > 0) {
 				refIndex = branches[j].capacitors.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].capacitors[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].capacitors[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].capacitors[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1566,16 +1566,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].dcVoltPwSupplies.length > 0) {
+			if (branches[j].dcVoltPwSupplies.length > 0) {
 				refIndex = branches[j].dcVoltPwSupplies.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcVoltPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].dcVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcVoltPwSupplies[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1583,16 +1583,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].acVoltPwSupplies.length > 0) {
+			if (branches[j].acVoltPwSupplies.length > 0) {
 				refIndex = branches[j].acVoltPwSupplies.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acVoltPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].acVoltPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acVoltPwSupplies[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1600,16 +1600,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].dcAmpPwSupplies.length > 0) {
+			if (branches[j].dcAmpPwSupplies.length > 0) {
 				refIndex = branches[j].dcAmpPwSupplies.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].dcAmpPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].dcAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].dcAmpPwSupplies[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1617,16 +1617,16 @@ function branchCurrents(){
 				}
 			}
 
-			if(branches[j].acAmpPwSupplies.length > 0) {
+			if (branches[j].acAmpPwSupplies.length > 0) {
 				refIndex = branches[j].acAmpPwSupplies.findIndex(item => item.ref == serieConCpRef);
-				if(refIndex > -1) {
+				if (refIndex > -1) {
 					const ampIndex = ampsMeters.findIndex(item => item.ref == ampRef);
-					if(ampIndex > -1) {
+					if (ampIndex > -1) {
 						// Save JointNode for ammeters
-						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noN;
-						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noP;
-						if(ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noP == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeP = branches[j].acAmpPwSupplies[refIndex].noN;
+						if (ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noP) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noP;
+						if (ampsMeters[ampIndex].noN == branches[j].acAmpPwSupplies[refIndex].noN) iProbeLocVsAmpId[i].jointNodeN = branches[j].acAmpPwSupplies[refIndex].noN;
 						// Save ammeters data to branch
 						branches[j].ammeters = ampsMeters[ampIndex];
 					}
@@ -1636,24 +1636,24 @@ function branchCurrents(){
 		}
 	}
 
-	for(let i=0; i<branches.length; i++) {
+	for (let i = 0; i < branches.length; i++) {
 		if (typeof branches[i].ammeters != 'undefined') {
 			let ampNoP = branches[i].ammeters.noP;
 			let ampNoN = branches[i].ammeters.noN;
 			// Verify if the ammeters is already connected to a Real Node
-			if(ampNoP == branches[i].startNode) {
+			if (ampNoP == branches[i].startNode) {
 				branches[i].ammeters.noN = branches[i].endNode;
 				continue;
 			}
-			if(ampNoP == branches[i].endNode) {
+			if (ampNoP == branches[i].endNode) {
 				branches[i].ammeters.noN = branches[i].startNode;
 				continue;
 			}
-			if(ampNoN == branches[i].startNode) {
+			if (ampNoN == branches[i].startNode) {
 				branches[i].ammeters.noP = branches[i].endNode;
 				continue;
 			}
-			if(ampNoN == branches[i].endNode) {
+			if (ampNoN == branches[i].endNode) {
 				branches[i].ammeters.noP = branches[i].startNode;
 				continue;
 			}
@@ -1661,107 +1661,107 @@ function branchCurrents(){
 			let nodeIndex = iProbeLocVsAmpId.findIndex(item => item.ampRef == branches[i].ammeters.ref);
 			let nextNode;
 			let ampJoint;	// True - noP; False - noN;
-			if(iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoP || iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoN) { nextNode = ampNoP; ampJoint = true; }
-			if(iProbeLocVsAmpId[nodeIndex].jointNodeN == ampNoN || iProbeLocVsAmpId[nodeIndex].jointNodeN == ampNoP) { nextNode = ampNoN; ampJoint = false; }
+			if (iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoP || iProbeLocVsAmpId[nodeIndex].jointNodeP == ampNoN) { nextNode = ampNoP; ampJoint = true; }
+			if (iProbeLocVsAmpId[nodeIndex].jointNodeN == ampNoN || iProbeLocVsAmpId[nodeIndex].jointNodeN == ampNoP) { nextNode = ampNoN; ampJoint = false; }
 			let thisBranch = JSON.parse(JSON.stringify(branches[i]));
 			// If not, follow the branch, starting with the next component
 			let end = false;
 			do {
 				let pos = nextNode.search('_net');
-				if(pos > -1 ) {
+				if (pos > -1) {
 					nodeIndex = thisBranch.resistors.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.resistors[nodeIndex].noN;
-						thisBranch.resistors.splice(nodeIndex,1);
+						thisBranch.resistors.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.resistors.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.resistors[nodeIndex].noP;
-						thisBranch.resistors.splice(nodeIndex,1);
+						thisBranch.resistors.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.coils.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.coils[nodeIndex].noN;
-						thisBranch.coils.splice(nodeIndex,1);
+						thisBranch.coils.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.coils.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.coils[nodeIndex].noP;
-						thisBranch.coils.splice(nodeIndex,1);
+						thisBranch.coils.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.capacitors.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.capacitors[nodeIndex].noN;
-						thisBranch.capacitors.splice(nodeIndex,1);
+						thisBranch.capacitors.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.capacitors.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.capacitors[nodeIndex].noP;
-						thisBranch.capacitors.splice(nodeIndex,1);
+						thisBranch.capacitors.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.dcVoltPwSupplies.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.dcVoltPwSupplies[nodeIndex].noN;
-						thisBranch.dcVoltPwSupplies.splice(nodeIndex,1);
+						thisBranch.dcVoltPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.dcVoltPwSupplies.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.dcVoltPwSupplies[nodeIndex].noP;
-						thisBranch.dcVoltPwSupplies.splice(nodeIndex,1);
+						thisBranch.dcVoltPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.acVoltPwSupplies.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.acVoltPwSupplies[nodeIndex].noN;
-						thisBranch.acVoltPwSupplies.splice(nodeIndex,1);
+						thisBranch.acVoltPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.acVoltPwSupplies.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.acVoltPwSupplies[nodeIndex].noP;
-						thisBranch.acVoltPwSupplies.splice(nodeIndex,1);
+						thisBranch.acVoltPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.dcAmpPwSupplies.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.dcAmpPwSupplies[nodeIndex].noN;
-						thisBranch.dcAmpPwSupplies.splice(nodeIndex,1);
+						thisBranch.dcAmpPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.dcAmpPwSupplies.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.dcAmpPwSupplies[nodeIndex].noP;
-						thisBranch.dcAmpPwSupplies.splice(nodeIndex,1);
+						thisBranch.dcAmpPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.acAmpPwSupplies.findIndex(item => item.noP == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.acAmpPwSupplies[nodeIndex].noN;
-						thisBranch.acAmpPwSupplies.splice(nodeIndex,1);
+						thisBranch.acAmpPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 					nodeIndex = thisBranch.acAmpPwSupplies.findIndex(item => item.noN == nextNode);
-					if(nodeIndex > -1) {
+					if (nodeIndex > -1) {
 						nextNode = thisBranch.acAmpPwSupplies[nodeIndex].noP;
-						thisBranch.acAmpPwSupplies.splice(nodeIndex,1);
+						thisBranch.acAmpPwSupplies.splice(nodeIndex, 1);
 						continue;
 					}
 				}
 				else {
-					if(nextNode == thisBranch.startNode) {
-						if(!ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode;}
-						if(ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode;}
+					if (nextNode == thisBranch.startNode) {
+						if (!ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode; }
+						if (ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode; }
 					}
-					if(nextNode == thisBranch.endNode) {
-						if(!ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode;}
-						if(ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode;}
+					if (nextNode == thisBranch.endNode) {
+						if (!ampJoint) { branches[i].ammeters.noN = branches[i].startNode; branches[i].ammeters.noP = branches[i].endNode; }
+						if (ampJoint) { branches[i].ammeters.noN = branches[i].endNode; branches[i].ammeters.noP = branches[i].startNode; }
 					}
 					end = true;
 				}
@@ -1777,11 +1777,11 @@ function branchCurrents(){
 
 	// Get Currents Refs
 	let ampsRefs = new Array();
-	for(let i=0; i<dcAmpsPs.length; i++) { if(ampsRefs.indexOf(dcAmpsPs[i].ref) < 0) ampsRefs.push(dcAmpsPs[i].ref); }
-	for(let i=0; i<acAmpsPs.length; i++) { if(ampsRefs.indexOf(acAmpsPs[i].ref) < 0) ampsRefs.push(acAmpsPs[i].ref); }
-	for(let i=0; i<ampsMeters.length; i++) { if(ampsRefs.indexOf(ampsMeters[i].ref) < 0) ampsRefs.push(ampsMeters[i].ref); }
+	for (let i = 0; i < dcAmpsPs.length; i++) { if (ampsRefs.indexOf(dcAmpsPs[i].ref) < 0) ampsRefs.push(dcAmpsPs[i].ref); }
+	for (let i = 0; i < acAmpsPs.length; i++) { if (ampsRefs.indexOf(acAmpsPs[i].ref) < 0) ampsRefs.push(acAmpsPs[i].ref); }
+	for (let i = 0; i < ampsMeters.length; i++) { if (ampsRefs.indexOf(ampsMeters[i].ref) < 0) ampsRefs.push(ampsMeters[i].ref); }
 
-	for(let i=0; i<branches.length; i++) {
+	for (let i = 0; i < branches.length; i++) {
 		// Increment Internal Auto Reference
 		let currId = ++circuitAnalCnt.current;
 
@@ -1789,13 +1789,13 @@ function branchCurrents(){
 		let currNoP = branches[i].startNode;
 		let currNoN = branches[i].endNode;
 
-		if(!branches[i].ammeters) {
+		if (!branches[i].ammeters) {
 
 			// Has Current Power Supplies?
-			if(branches[i].dcAmpPwSupplies.length > 0) {
+			if (branches[i].dcAmpPwSupplies.length > 0) {
 				currRef = branches[i].dcAmpPwSupplies[0].ref;
 			}
-			if(branches[i].acAmpPwSupplies.length > 0) {
+			if (branches[i].acAmpPwSupplies.length > 0) {
 				currRef = branches[i].acAmpPwSupplies[0].ref;
 			}
 		}
@@ -1805,8 +1805,8 @@ function branchCurrents(){
 			if (typeof branches[i].ammeters != 'undefined') {
 
 				// Has Current Power Supplies?
-				if(branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeters, currPs: branches[i].dcAmpPwSupplies[0]});
-				if(branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push( { ampMeter: branches[i].ammeters, currPs: branches[i].acAmpPwSupplies[0]});
+				if (branches[i].dcAmpPwSupplies.length > 0) ampMeterVsampCurr.push({ ampMeter: branches[i].ammeters, currPs: branches[i].dcAmpPwSupplies[0] });
+				if (branches[i].acAmpPwSupplies.length > 0) ampMeterVsampCurr.push({ ampMeter: branches[i].ammeters, currPs: branches[i].acAmpPwSupplies[0] });
 
 				currRef = branches[i].ammeters.ref;
 				currNoP = branches[i].ammeters.noP;
@@ -1814,17 +1814,17 @@ function branchCurrents(){
 			}
 		}
 		// If there's no name, create a unique one
-		if(currRef == '') {
+		if (currRef == '') {
 			var alreadyExists = 0;
 			var currNb = 1;
 			do {
 				currRef = 'I' + currNb;
 				alreadyExists = ampsRefs.indexOf(currRef);
-				if(alreadyExists > -1) currNb++;
+				if (alreadyExists > -1) currNb++;
 			} while (alreadyExists > -1);
 		}
 
-		if(ampsRefs.indexOf(currRef) < 0) ampsRefs.push(currRef);
+		if (ampsRefs.indexOf(currRef) < 0) ampsRefs.push(currRef);
 		let newCurr = new current(currId, currRef, currNoP, currNoN);
 		currents.push(newCurr);
 
@@ -1838,30 +1838,30 @@ function branchCurrents(){
 
 	let nodesArr = connections;
 	// Compute dcAmps global nodes
-	for(let i = 0; i < dcAmpsPs.length; i++){
+	for (let i = 0; i < dcAmpsPs.length; i++) {
 		// Remove the index from the array
-		for(let k = 0; k < nodesArr.length; k++){
-			if(nodesArr[k][0] == dcAmpsPs[i].noP && nodesArr[k][1] == dcAmpsPs[i].noN ||
-			nodesArr[k][0] == dcAmpsPs[i].noN && nodesArr[k][1] == dcAmpsPs[i].noP){
-				nodesArr.splice(k,1);
+		for (let k = 0; k < nodesArr.length; k++) {
+			if (nodesArr[k][0] == dcAmpsPs[i].noP && nodesArr[k][1] == dcAmpsPs[i].noN ||
+				nodesArr[k][0] == dcAmpsPs[i].noN && nodesArr[k][1] == dcAmpsPs[i].noP) {
+				nodesArr.splice(k, 1);
 				break;
 			}
 		}
 		// Proccess positive Node
-		if(!dcAmpsPs[i].noP.includes('_net'))
+		if (!dcAmpsPs[i].noP.includes('_net'))
 			dcAmpsPs[i].globalNoP = dcAmpsPs[i].noP;
 		// If it isnt a real node find the end of the branch
-		else{
+		else {
 			let finalNode = dcAmpsPs[i].noP;
-			while(finalNode.includes('_net')){
+			while (finalNode.includes('_net')) {
 				// Search for the virtual node
-				for(let k = 0; k < nodesArr.length; k++){
-					if(nodesArr[k].indexOf(finalNode) >= 0){
-						if(nodesArr[k].indexOf(finalNode) == 0)
+				for (let k = 0; k < nodesArr.length; k++) {
+					if (nodesArr[k].indexOf(finalNode) >= 0) {
+						if (nodesArr[k].indexOf(finalNode) == 0)
 							finalNode = nodesArr[k][1];
 						else
 							finalNode = nodesArr[k][0];
-						nodesArr.splice(k,1);
+						nodesArr.splice(k, 1);
 						break;
 					}
 				}
@@ -1870,20 +1870,20 @@ function branchCurrents(){
 			dcAmpsPs[i].globalNoP = finalNode;
 		}
 		// Proccess negative Node
-		if(!dcAmpsPs[i].noN.includes('_net'))
+		if (!dcAmpsPs[i].noN.includes('_net'))
 			dcAmpsPs[i].globalNoN = dcAmpsPs[i].noN;
 		// If it isnt a real node find the end of the branch
-		else{
+		else {
 			let finalNode = dcAmpsPs[i].noN;
-			while(finalNode.includes('_net')){
+			while (finalNode.includes('_net')) {
 				// Search for the virtual node
-				for(let k = 0; k < nodesArr.length; k++){
-					if(nodesArr[k].indexOf(finalNode) >= 0){
-						if(nodesArr[k].indexOf(finalNode) == 0)
+				for (let k = 0; k < nodesArr.length; k++) {
+					if (nodesArr[k].indexOf(finalNode) >= 0) {
+						if (nodesArr[k].indexOf(finalNode) == 0)
 							finalNode = nodesArr[k][1];
 						else
 							finalNode = nodesArr[k][0];
-						nodesArr.splice(k,1);
+						nodesArr.splice(k, 1);
 						break;
 					}
 				}
@@ -1894,30 +1894,30 @@ function branchCurrents(){
 	}
 
 	// Compute acAmps global nodes
-	for(let i = 0; i < acAmpsPs.length; i++){
+	for (let i = 0; i < acAmpsPs.length; i++) {
 		// Remove the index from the array
-		for(let k = 0; k < nodesArr.length; k++){
-			if(nodesArr[k][0] == acAmpsPs[i].noP && nodesArr[k][1] == acAmpsPs[i].noN ||
-			nodesArr[k][0] == acAmpsPs[i].noN && nodesArr[k][1] == acAmpsPs[i].noP){
-				nodesArr.splice(k,1);
+		for (let k = 0; k < nodesArr.length; k++) {
+			if (nodesArr[k][0] == acAmpsPs[i].noP && nodesArr[k][1] == acAmpsPs[i].noN ||
+				nodesArr[k][0] == acAmpsPs[i].noN && nodesArr[k][1] == acAmpsPs[i].noP) {
+				nodesArr.splice(k, 1);
 				break;
 			}
 		}
 		// Proccess positive Node
-		if(!acAmpsPs[i].noP.includes('_net'))
-		acAmpsPs[i].globalNoP = acAmpsPs[i].noP;
+		if (!acAmpsPs[i].noP.includes('_net'))
+			acAmpsPs[i].globalNoP = acAmpsPs[i].noP;
 		// If it isnt a real node find the end of the branch
-		else{
+		else {
 			let finalNode = acAmpsPs[i].noP;
-			while(finalNode.includes('_net')){
+			while (finalNode.includes('_net')) {
 				// Search for the virtual node
-				for(let k = 0; k < nodesArr.length; k++){
-					if(nodesArr[k].indexOf(finalNode) >= 0){
-						if(nodesArr[k].indexOf(finalNode) == 0)
+				for (let k = 0; k < nodesArr.length; k++) {
+					if (nodesArr[k].indexOf(finalNode) >= 0) {
+						if (nodesArr[k].indexOf(finalNode) == 0)
 							finalNode = nodesArr[k][1];
 						else
 							finalNode = nodesArr[k][0];
-						nodesArr.splice(k,1);
+						nodesArr.splice(k, 1);
 						break;
 					}
 				}
@@ -1926,20 +1926,20 @@ function branchCurrents(){
 			acAmpsPs[i].globalNoP = finalNode;
 		}
 		// Proccess negative Node
-		if(!acAmpsPs[i].noN.includes('_net'))
+		if (!acAmpsPs[i].noN.includes('_net'))
 			acAmpsPs[i].globalNoN = acAmpsPs[i].noN;
 		// If it isnt a real node find the end of the branch
-		else{
+		else {
 			let finalNode = acAmpsPs[i].noN;
-			while(finalNode.includes('_net')){
+			while (finalNode.includes('_net')) {
 				// Search for the virtual node
-				for(let k = 0; k < nodesArr.length; k++){
-					if(nodesArr[k].indexOf(finalNode) >= 0){
-						if(nodesArr[k].indexOf(finalNode) == 0)
+				for (let k = 0; k < nodesArr.length; k++) {
+					if (nodesArr[k].indexOf(finalNode) >= 0) {
+						if (nodesArr[k].indexOf(finalNode) == 0)
 							finalNode = nodesArr[k][1];
 						else
 							finalNode = nodesArr[k][0];
-						nodesArr.splice(k,1);
+						nodesArr.splice(k, 1);
 						break;
 					}
 				}
@@ -1950,14 +1950,14 @@ function branchCurrents(){
 	}
 
 	// Update Branches start and end Nodes with Current Sources
-	for(let i = 0; i<branches.length;i++){
-		if(branches[i].dcAmpPwSupplies.length > 0){
+	for (let i = 0; i < branches.length; i++) {
+		if (branches[i].dcAmpPwSupplies.length > 0) {
 			branches[i].startNode = branches[i].dcAmpPwSupplies[0].globalNoN;
 			branches[i].endNode = branches[i].dcAmpPwSupplies[0].globalNoP;
 			branches[i].currentData.noP = branches[i].dcAmpPwSupplies[0].globalNoN;
 			branches[i].currentData.noN = branches[i].dcAmpPwSupplies[0].globalNoP;
 		}
-		else if(branches[i].acAmpPwSupplies.length > 0){
+		else if (branches[i].acAmpPwSupplies.length > 0) {
 			branches[i].startNode = branches[i].acAmpPwSupplies[0].globalNoP;
 			branches[i].endNode = branches[i].acAmpPwSupplies[0].globalNoN;
 			branches[i].currentData.noP = branches[i].acAmpPwSupplies[0].globalNoN;
@@ -1967,15 +1967,15 @@ function branchCurrents(){
 
 
 	// Update Nodes with Branches Objects
-	for(let i=0; i<branches.length; i++) {
+	for (let i = 0; i < branches.length; i++) {
 		let currNoP = branches[i].startNode;
 		let currNoN = branches[i].endNode;
 		let nodeIndex;
 		nodeIndex = nodes.findIndex(item => item.ref == currNoP);
-		if(nodeIndex > -1) { nodes[nodeIndex].branches.push(branches[i]); }
+		if (nodeIndex > -1) { nodes[nodeIndex].branches.push(branches[i]); }
 
 		nodeIndex = nodes.findIndex(item => item.ref == currNoN);
-		if(nodeIndex > -1) { nodes[nodeIndex].branches.push(branches[i]); }
+		if (nodeIndex > -1) { nodes[nodeIndex].branches.push(branches[i]); }
 	}
 
 }
@@ -1983,7 +1983,7 @@ function branchCurrents(){
 /**
  * Cleans the variables
  */
-function cleanData(){
+function cleanData() {
 	resistors = [];
 	coils = [];
 	capacitors = [];
@@ -2007,26 +2007,26 @@ function cleanData(){
 
 	// Circuit analysis counters
 	circuitAnalCnt = {
-		node: 		0,
-		branch: 	0,
-		current:	0,
-		fsupernode:	0,
-		gsupernode:	0
+		node: 0,
+		branch: 0,
+		current: 0,
+		fsupernode: 0,
+		gsupernode: 0
 	};
 
 	// Circuit analysis global data
 	circuitAnalData = {
-		frequency:	{value: 0, mult: ''}
-	};	
+		frequency: { value: 0, mult: '' }
+	};
 
 }
 
 /**
  * Agregates voltPowerSources in series
  */
-function agregatePowerSupplies(){
+function agregatePowerSupplies() {
 
-	for(let i=0; i<branches.length; i++) {
+	for (let i = 0; i < branches.length; i++) {
 		branches[i].setVoltPsEndNodes();
 		branches[i].setEquivVoltPs();
 		branches[i].setEquivImpedance(circuitAnalData.frequency.value, circuitAnalData.frequency.mult);
@@ -2038,7 +2038,7 @@ function agregatePowerSupplies(){
  * Builds json file for further method analisys
  * @returns {String} stringyfied json file
  */
-function buildJson(netlist){
+function buildJson(netlist) {
 
 	var circuitFrequency = { value: circuitAnalData.frequency.value, mult: circuitAnalData.frequency.mult }
 	var componentsObj = { resistors: resistors, coils: coils, capacitors: capacitors, dcVoltPs: dcVoltPs, dcAmpsPs: dcAmpsPs, acVoltPs: acVoltPs, acAmpsPs: acAmpsPs };
@@ -2063,7 +2063,7 @@ function buildJson(netlist){
 	};
 
 	let jsonStr = JSON.stringify(outputJson);
-    return jsonStr;
+	return jsonStr;
 }
 
 
@@ -2072,7 +2072,7 @@ function buildJson(netlist){
  * commom - loads file and prepares info for all mehods
  * @returns stringyfied json file
  */
-function common(method){
+function common(method) {
 	resistors = new Array();
 	coils = new Array();
 	capacitors = new Array();
@@ -2085,16 +2085,16 @@ function common(method){
 	connections = new Array();
 	// Circuit analysis global data
 	circuitAnalData = {
-		frequency:	{value: 0, mult: ''}
+		frequency: { value: 0, mult: '' }
 	};
 	nodes = new Array();
 	branches = new Array();
 	currents = new Array();
 	// Circuit analysis counters
 	circuitAnalCnt = {
-		node: 		0,
-		branch: 	0,
-		current:	0
+		node: 0,
+		branch: 0,
+		current: 0
 	};
 	//Manage ampmeters
 	iProbeNodesLoc = new Array();
@@ -2102,8 +2102,8 @@ function common(method){
 	iProbeLocVsAmpId = new Array();
 
 	let load = loadFile(method);
-	if(load.first){
-		return{
+	if (load.first) {
+		return {
 			first: load.first,
 			second: load.second,
 			third: load.third
@@ -2115,7 +2115,7 @@ function common(method){
 	findNodes();
 	makeBranches();
 	branchCurrents();
-    agregatePowerSupplies();
+	agregatePowerSupplies();
 	return {
 		first: false,
 		second: 0,
@@ -2124,89 +2124,127 @@ function common(method){
 }
 
 function analyseCircuit(analysismet) {
-    loadingModalResults();
-    switch (analysismet) {
-        case "MTN":
-            setTimeout(function() {
-                let retriesNumber = 5;
-                let successFlag = false;
-                for (let i = 0; i < retriesNumber; i++) {
-                    try {
+	loadingModalResults();
+	switch (analysismet) {
+		case "MTN":
+			setTimeout(function () {
+				let retriesNumber = 5;
+				let successFlag = false;
+				for (let i = 0; i < retriesNumber; i++) {
+					try {
 						$("#pdfPrintButton").hide();
 						$("#print").hide();
 						loadFileAsTextMTN();
-                        successFlag = true;
-                    } catch (error) {
-                        console.log("Error in MTN: " + error);
-                        successFlag = false;
-                    }
-                    if (successFlag) {
-                        break;
-                    }
-                    if(i== (retriesNumber-1)) {
-                        alert("An error occurred. Please try again!");
-                    }
-                }
-                $("#loadpage").hide();
-            }, 500);
-        break;
-        case "MCR":
-            setTimeout(function() {
-                let retriesNumber = 5;
-                let successFlag = false;
-                for (let i = 0; i < retriesNumber; i++) {
-                    try {
+						successFlag = true;
+					} catch (error) {
+						console.log("Error in MTN: " + error);
+						successFlag = false;
+					}
+					if (successFlag) {
+						break;
+					}
+					if (i == (retriesNumber - 1)) {
+						alert("An error occurred. Please try again!");
+					}
+				}
+				$("#loadpage").hide();
+			}, 500);
+			break;
+		case "MCR":
+			setTimeout(function () {
+				let retriesNumber = 5;
+				let successFlag = false;
+				for (let i = 0; i < retriesNumber; i++) {
+					try {
 						let data = common(analysismet);
-                        if(!data.first){
+						if (!data.first) {
 							$("#pdfPrintButton").hide();
 							$("#print").show();
 							loadFileAsTextMCR(data.third);
-                        }
-                        successFlag = true;
-                    } catch (error) {
-                        console.log("Error in MCR: " + error);
-                        successFlag = false;
-                    }
-                    if (successFlag) {
-                        break;
-                    }
-                    if(i== (retriesNumber-1)) {
-                        alert("An error occurred. Please try again!");
-                    }
-                }
-                $("#loadpage").hide();
-            }, 500);
-        break;
-        case "MCM":
-            setTimeout(function() {
-                let retriesNumber = 5;
-                let successFlag = false;
-                for (let i = 0; i < retriesNumber; i++) {
-                    try {
-                        let data = common(analysismet);
-                        if(!data.first){
+						}
+						successFlag = true;
+					} catch (error) {
+						console.log("Error in MCR: " + error);
+						successFlag = false;
+					}
+					if (successFlag) {
+						break;
+					}
+					if (i == (retriesNumber - 1)) {
+						alert("An error occurred. Please try again!");
+					}
+				}
+				$("#loadpage").hide();
+			}, 500);
+			break;
+		case "MCM":
+			setTimeout(function () {
+				let retriesNumber = 5;
+				let successFlag = false;
+				for (let i = 0; i < retriesNumber; i++) {
+					try {
+						let data = common(analysismet);
+						if (!data.first) {
 							$("#pdfPrintButton").hide();
 							$("#print").show();
 							loadFileAsTextMCM(data.third);
-                        }
-                        successFlag = true;
-                    } catch (error) {
-                        console.log("Error in MCM: " + error);
-                        successFlag = false;
-                    }
-                    if (successFlag) {
-                        break;
-                    }
-                    if(i== (retriesNumber-1)) {
-                        alert("An error occurred. Please try again!");
-                    }
-                }
-                $("#loadpage").hide();
-            }, 500);
-        break;
-        default:
-            $("#loadpage").hide();
-            alert('Please select a valid analysis method.');
-        break;
-    }
+						}
+						successFlag = true;
+					} catch (error) {
+						console.log("Error in MCM: " + error);
+						successFlag = false;
+					}
+					if (successFlag) {
+						break;
+					}
+					if (i == (retriesNumber - 1)) {
+						alert("An error occurred. Please try again!");
+					}
+				}
+				$("#loadpage").hide();
+			}, 500);
+			break;
+		//Case para simplificação de circuitos
+		case "SMP":
+			setTimeout(function () {
+
+				//teste();
+				let retriesNumber = 5;
+				let successFlag = false;
+				for (let i = 0; i < retriesNumber; i++) {
+					try {
+						let data = common(analysismet);
+						if (!data.first) {
+							$("#pdfPrintButton").hide();
+							$("#print").show();
+							//Main Function
+							//let equivalentResistance = calculateEquivalentResistance(data.third);
+							//console.log(`The equivalent resistance is ${equivalentResistance} ohms`);
+							/*	return {
+								first: false,
+								second: 0,
+								third: buildJson(load.third)
+							}*/
+							loadFileAsTextSMP(data.third);
+						}
+						successFlag = true;
+					} catch (error) {
+						console.log("Error in MCM: " + error);
+						successFlag = false;
+					}
+					if (successFlag) {
+						break;
+					}
+					if (i == (retriesNumber - 1)) {
+						alert("An error occurred. Please try again!");
+					}
+				}
+				$("#loadpage").hide();
+			}, 500);
+			break;
+		default:
+			$("#loadpage").hide();
+			alert('Please select a valid analysis method.');
+			break;
+	}
 };
