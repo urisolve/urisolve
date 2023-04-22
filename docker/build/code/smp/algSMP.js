@@ -14,127 +14,208 @@ Criar as Matrizes que modelizam o circuito:
 4. Matriz de Incidência (estabelecimento de malhas - ramos).
 */
 
-let netlist_test = `
-# Qucs 0.0.19  C:/Users/Filipe/.qucs/Circuito_base_prj/BASE.sch
-Vdc:V1 _net0 _net1 U="15 V"
-R:R5 A _net2 R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
-.DC:DC1 Temp="26.85" reltol="0.001" abstol="1 pA" vntol="1 uV" saveOPs="no" MaxIter="150" saveAll="no" convHelper="none" Solver="CroutLU"
-R:R1 _net0 _net3 R="10 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
-R:R3 _net3 A R="30 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
-R:R4 A _net2 R="40 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
-R:R2 A _net2 R="20 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"
-R:R7 _net2 _net4 R="70 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"`
-/*
-/**
- * Count Nodes By Type (0 = Real, 1 - Virtual)
- * @param {Array} objArr Array of Nodes objects
- * @param {Int} type Desired type of node to return
- * @returns Number of Nodes
- */
 function countNodesByType(objArr, type) {
 	let cnt = 0;
-	for(let i=0; i<objArr.length; i++) { if(objArr[i].type == type) cnt++;}
+	for (let i = 0; i < objArr.length; i++) { if (objArr[i].type == type) cnt++; }
 	return cnt;
 }
 
-/**
- * Encounters the number and type of knots (real or virtual)
- */
-//function findNodes()
-
-/**
- * Finds all circuit meshes
- * @returns first: error; second: errorCode; third: array with all the meshes
- /*
-function findMeshes(){
-
-	const nr_nos = countNodesByType(nodes, 0);
-	const nr_ramos = branches.length;
-	let real_nodes = [];
-
-
-	for(let i = 0; i<nodes.length; i++){
-		if(nodes[i].type == 0) real_nodes.push(nodes[i].ref);
+function getAdjacencyMatrix(numberOfNodes, nodes) {
+	let adjacencyMatrix = [];
+	for (let i = 0; i < numberOfNodes; i++) {
+		adjacencyMatrix[i] = [];
 	}
-
-
-	let branches_id = [];
-	for(let i = 0; i<branches.length; i++){
-		branches_id.push(branches[i].id);
-	}
-
-
-	//cria matriz de adjacencia
-	let matriz_adj = [];
-	for(let i = 0; i< nr_nos; i++){
-		matriz_adj[i] = [];
-	}
-	for(let i = 0; i < nr_nos; i++){
-		for(let j = 0; j < nr_nos; j++){
-			if(adjNodes(real_nodes, i, j)){
-				matriz_adj[i][j] = 1;
+	for (let i = 0; i < numberOfNodes; i++) {
+		for (let j = 0; j < numberOfNodes; j++) {
+			if (adjNodes(nodes, i, j)) {
+				// console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 1');
+				adjacencyMatrix[i][j] = 1;
 			}
-			else{
-				matriz_adj[i][j] = 0;
-			}					
-		}			
-	}
-	
-	//cria matriz de incicendia
-	let matriz_inc = [];
-	for(let i = 0; i< nr_nos; i++){
-		matriz_inc[i] = [];
-	}
-	for(let i = 0; i < nr_nos; i++){
-		for(let j = 0; j < nr_ramos; j++){
-			if(nodeBranchCon(real_nodes, i, j)){
-				matriz_inc[i][j] = 1;
+			else {
+				// console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 0');
+				adjacencyMatrix[i][j] = 0;
 			}
-			else{
-				matriz_inc[i][j] = 0;
-			}					
-		}			
+		}
 	}
 
-	//Meshes finder
-	let circuit = new MeshesFinder();
-	circuit.initGraph(matriz_adj, matriz_inc, real_nodes, branches_id);
-	let meshes = circuit.getMeshes();
-	
-	if(meshes.error.state == true) {
-	  return{
-		  first: true,
-		  second: 3,
-		  third: meshes.error.reason
-	  };
+	return adjacencyMatrix;
+}
+
+function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
+	let incidenceMatrix = [];
+	for (let i = 0; i < numberOfNodes; i++) {
+		incidenceMatrix[i] = [];
 	}
-	
-	return{
-		first: false,
-		second: 0,
-		third: meshes.data
+	for (let i = 0; i < numberOfNodes; i++) {
+		for (let j = 0; j < numberOfBranches; j++) {
+			if (nodeBranchCon(nodes, i, j)) {
+				incidenceMatrix[i][j] = 1;
+			}
+			else {
+				incidenceMatrix[i][j] = 0;
+			}
+		}
+	}
+
+	return incidenceMatrix;
+}
+
+function getRealNodes(nodes) {
+	let realNodes = [];
+	for (let i = 0; i < nodes.length; i++) {
+		if (nodes[i].type == 0) {
+			realNodes.push(nodes[i].ref);
+		}
+	}
+
+	return realNodes;
+}
+
+function printMatrix(matrix) {
+	let arrText = '';
+	for (var i = 0; i < matrix.length; i++) {
+		for (var j = 0; j < matrix[i].length; j++) {
+			arrText += matrix[i][j] + ' ';
+		}
+		console.log(arrText);
+		arrText = '';
 	}
 }
-*/
+
+function getBranchComponents(branch) {
+	branch.components = branch.components.concat(branch.dcAmpPwSupplies,
+		branch.acAmpPwSupplies, branch.dcVoltPwSupplies, branch.acVoltPwSupplies,
+		branch.resistors, branch.coils, branch.capacitors);
+
+	return branch.components;
+}
+
+function simplifySequentialResistance(startNode, endNode, resistors) {
+	let totalSequentialResistance = 0;
+	for (let i = 0; i < resistors.length; i++) {
+		totalSequentialResistance += parseInt(resistors[i].value);
+	}
+
+	let simplifiedResistor = {
+		startNode: startNode,
+		endNode: endNode,
+		resistors: [
+			{ value: totalSequentialResistance }
+		]
+	};
+
+	return simplifiedResistor;
+}
+
+function simplifyParallelResistance(startNode, endNode, resistors) {
+	let totalParallelResistance = 0;
+	for (let i = 0; i < resistors.length; i++) {
+		totalParallelResistance += 1 / parseInt(resistors[i].value);
+	}
+
+	let simplifiedResistor = {
+		startNode: startNode,
+		endNode: endNode,
+		resistors: [
+			{ value: 1 / totalParallelResistance }
+		]
+	};
+
+	return simplifiedResistor;
+}
+
+function processParallelBranches(simplifiedBranches) {
+	let simplifiedParallelBranches = [];
+	for (let i = 0; i < simplifiedBranches.length; i++) {
+		let branch = simplifiedBranches[i];
+		let parallelBranch = {
+			resistors: new Array()
+		};
+
+		parallelBranch.resistors = branch.resistors;
+
+		for (let j = 0; j < simplifiedBranches.length; j++) {
+			if (i == j) {
+				continue;
+			}
+			if (simplifiedBranches[j].startNode == branch.startNode
+				&& simplifiedBranches[j].endNode == branch.endNode
+				&& simplifiedBranches[j].resistors.length > 0) {
+				parallelBranch.resistors = parallelBranch.resistors.concat(
+					simplifiedBranches[j].resistors);
+			}
+		}
+
+		let simplifiedParallelBranch = simplifyParallelResistance(branch.startNode,
+			branch.endNode, parallelBranch.resistors);
+		simplifiedParallelBranches.push(simplifiedParallelBranch);
+	}
+
+	let simplifiedBranchesWithoutDuplicates = simplifiedParallelBranches.filter((v, i, a) => a.findIndex(v2 => ['startNode',
+		'endNode'].every(k => v2[k] === v[k])) === i);
+
+	return simplifiedBranchesWithoutDuplicates;
+}
+
+function processSequentialBranches(simplifiedBranches) {
+	for (let i = 0; i < simplifiedBranches.length; i++) {
+		if (simplifiedBranches[i].resistors.length > 0) {
+			let simplified = simplifySequentialResistance(
+				simplifiedBranches[i].startNode,
+				simplifiedBranches[i].endNode,
+				simplifiedBranches[i].resistors);
+			simplifiedBranches[i].resistors = new Array();
+			simplifiedBranches[i].resistors.push(simplified);
+		} else {
+			simplifiedBranches[i].resistors = new Array();
+		}
+	}
+
+	return simplifiedBranches;
+}
 
 function loadFileAsTextSMP(data) {
 
-	//countNodesByType();
 	let jsonFile = JSON.parse(data);
 
 	branches = jsonFile.branches;
 	nodes = jsonFile.nodes;
 	components = jsonFile.components;
-	simInfo = jsonFile.analysisObj;
 
-	//1. Criar Array com Referência dos Nós (Vértices);
-	//* Encounters the number and type of knots (real or virtual)
-	//findNodes();
+	let simplifiedBranches = new Array();
+	for (let i = 0; i < branches.length; i++) {
+		simplifiedBranches[i] = {
+			startNode: branches[i].startNode,
+			endNode: branches[i].endNode,
+			resistors: branches[i].resistors
+		};
+	}
 
-	//2. Criar Array com Referência dos Ramos (Arestas);
+	while (simplifiedBranches.length > 1) {
+		simplifiedBranches = processSequentialBranches(simplifiedBranches);
+		if (simplifiedBranches.length == 1) {
+			break;
+		} else {
+			simplifiedBranches = processParallelBranches(simplifiedBranches);
+		}
+	}
 
-	//3. Matriz de Adjacência (fase de pesquisa);
-	
-	//4. Matriz de Incidência (estabelecimento de malhas - ramos).
-	
+	// console.log('\n\n Simplified: \n');
+	// console.log(simplifiedBranches);
+
+	console.log('\n**** Equivalent resistance: ****\n')
+	console.log(simplifiedBranches);
+
+	// const numberOfNodes = countNodesByType(nodes, 0);
+	// const numberOfBranches = branches.length;
+
+	// let realNodes = getRealNodes(nodes);
+	// let adjacencyMatrix = getAdjacencyMatrix(numberOfNodes, realNodes);
+	// let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
+
+	// console.log('\n ******* Adjacency Matrix: ******* \n');
+	// printMatrix(adjacencyMatrix);
+
+	// console.log('\n ******* Incidence Matrix: ******* \n');
+	// printMatrix(incidenceMatrix);
 }

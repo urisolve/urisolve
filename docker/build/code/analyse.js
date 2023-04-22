@@ -2217,14 +2217,6 @@ function analyseCircuit(analysismet) {
 						if (!data.first) {
 							$("#pdfPrintButton").hide();
 							$("#print").show();
-							//Main Function
-							//let equivalentResistance = calculateEquivalentResistance(data.third);
-							//console.log(`The equivalent resistance is ${equivalentResistance} ohms`);
-							/*	return {
-								first: false,
-								second: 0,
-								third: buildJson(load.third)
-							}*/
 							loadFileAsTextSMP(data.third);
 						}
 						successFlag = true;
