@@ -13,6 +13,173 @@ Criar as Matrizes que modelizam o circuito:
 3. Matriz de Adjacência (fase de pesquisa);
 4. Matriz de Incidência (estabelecimento de malhas - ramos).
 */
+// constructor() {
+// 	this.simplifiedJson = { nodes: [] };
+// 	this.adjacencyList = {};
+// 	let adjMatrix = null;
+// 	let incMatrix = null;
+// 	let edges = null;
+// 	let vertices = null;
+// }
+
+function simplifyCircuit(data) {
+
+	let jsonFile = JSON.parse(data);
+
+	let branches = jsonFile.branches;
+	let nodes = jsonFile.nodes;
+
+	const numberOfNodes = countNodesByType(nodes, 0);
+	const numberOfBranches = branches.length;
+	let realNodes = getRealNodes(nodes);
+	let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
+	printMatrix(incidenceMatrix);
+
+	let simplifiedJson = simplifyJson(jsonFile);
+
+	let seriesSimplified = getSeries(simplifiedJson);
+	console.log(seriesSimplified);
+
+	let parallelSimplified = getParallels(seriesSimplified, incidenceMatrix);
+
+}
+
+function simplifyJson(data) {
+	let simplifiedJson = { nodes: [] };
+	let nodes = data.nodes;
+	for (let i = 0; i < nodes.length; i++) {
+		let branches = nodes[i].branches;
+		if (nodes[i].ref.startsWith("_net")) {
+			continue;
+		} else {
+			let simplifiedNode = {
+				reference: nodes[i].ref,
+				branches: branches.map(branch => ({
+					id: branch.id,
+					resistors: branch.resistors.map(resistor => ({
+						id: resistor.id,
+						reference: resistor.ref,
+						value: parseInt(resistor.value),
+						unit: resistor.unitMult
+					})),
+					coils: branch.coils,
+					capacitors: branch.capacitors
+				}))
+			};
+			simplifiedJson.nodes.push(simplifiedNode);
+		}
+	}
+
+	return simplifiedJson;
+}
+
+//Métodos:
+// brief: Encontra a resistência dos ramos 
+// args:
+// json simplificado
+// returns:
+// Operações de simplificaçãos
+// Circuito simplificado
+function getSeries(simplifiedJson) {
+	for (let i = 0; i < simplifiedJson.nodes.length; i++) {
+		let node = simplifiedJson.nodes[i];
+		for (let j = 0; j < node.branches.length; j++) {
+			let branch = node.branches[j];
+			let sumOfResistors = branch.resistors
+				.map(r => r.value)
+				.reduce((prev, next) => {
+					return prev + next
+				}, 0);
+			let summedResistorReferences = branch.resistors
+				.map(r => r.reference)
+				.reduce((prev, next) => prev += (' + ' + next));
+			// console.log('sum of resistors: ' + sumOfResistors);
+			// console.log('summed resistors: ' + summedResistorReferences + '\n\n');
+
+			delete simplifiedJson.nodes[i].branches[j].resistors;
+			simplifiedJson.nodes[i].branches[j].resistorSum = sumOfResistors;
+			simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
+		}
+	}
+
+	return simplifiedJson;
+}
+
+// brief: Encontra a resistência dos ramos 
+// args:
+// json simplificado
+// matrix de incidencia (IDS DOS BRANCHES)
+// returns:
+// Operações de simplificação
+// Circuito simplificado
+function getParallels(simplifiedJson, incidenceMatrix) {
+	if (incidenceMatrix.length >= 2) { // there are still two nodes
+		let nodeOne = incidenceMatrix[0];
+		let nodeTwo = incidenceMatrix[1];
+		let simplifiedNode = new Array(nodeOne.length);
+		for (let i = 0; i < nodeOne.length; i++) {
+			if (nodeOne[i] & nodeTwo[i] == 1) {
+				// iterate simplified json with same index and sum parallel
+			}
+			simplifiedNode[i] = nodeOne[i] & nodeTwo[i];
+		}
+		delete incidenceMatrix[0];
+		incidenceMatrix[1] = simplifiedNode;
+	}
+	console.log(incidenceMatrix);
+}
+
+function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
+	let incidenceMatrix = [];
+	for (let i = 0; i < numberOfNodes; i++) {
+		incidenceMatrix[i] = [];
+	}
+	for (let i = 0; i < numberOfNodes; i++) {
+		for (let j = 0; j < numberOfBranches; j++) {
+			if (nodeBranchCon(nodes, i, j)) {
+				incidenceMatrix[i][j] = 1;
+			}
+			else {
+				incidenceMatrix[i][j] = 0;
+			}
+		}
+	}
+
+	return incidenceMatrix;
+}
+
+// brief: Encontra a resistência dos ramos 
+// args:
+// json simplificado
+// returns:
+// Operações de simplificação
+// Circuito simplificado
+//funcao que deteta triangulos:
+//pela matrix de adjacencia vamos pesquisar todos o grafo:
+//começando num nó
+//transitamos para o no seguinte
+//transitamos para o no seguinte
+//verificamos se conseguimos chegar ao primeiro (excell)
+getTriangleStar()
+
+// brief: Encontra a resistência dos ramos 
+// args:
+// json simplificado
+// returns:
+// Operações de simplificação
+// Circuito simplificado
+//funcao que deteta estrelas:
+//percorrer todos os nos 
+//dentro do no percorrer todos os ramos
+//a cada nova referencia/letra (no) enviar para o array
+//no final, conta dentro do array o numero de letras iguais (3 LETRAS - 1 NÓ)
+//EXEMPLO:
+//	B A G A C A
+//						B A B C B G
+//						C A B C G C 
+//						G A B G G C
+getStarTriangle()
+
 
 function countNodesByType(objArr, type) {
 	let cnt = 0;
@@ -41,24 +208,7 @@ function getAdjacencyMatrix(numberOfNodes, nodes) {
 	return adjacencyMatrix;
 }
 
-function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
-	let incidenceMatrix = [];
-	for (let i = 0; i < numberOfNodes; i++) {
-		incidenceMatrix[i] = [];
-	}
-	for (let i = 0; i < numberOfNodes; i++) {
-		for (let j = 0; j < numberOfBranches; j++) {
-			if (nodeBranchCon(nodes, i, j)) {
-				incidenceMatrix[i][j] = 1;
-			}
-			else {
-				incidenceMatrix[i][j] = 0;
-			}
-		}
-	}
 
-	return incidenceMatrix;
-}
 
 function getRealNodes(nodes) {
 	let realNodes = [];
@@ -200,22 +350,23 @@ function loadFileAsTextSMP(data) {
 		}
 	}
 
-	// console.log('\n\n Simplified: \n');
-	// console.log(simplifiedBranches);
+	console.log('\n\n Simplified: \n');
+	console.log(simplifiedBranches);
 
 	console.log('\n**** Equivalent resistance: ****\n')
 	console.log(simplifiedBranches);
 
-	// const numberOfNodes = countNodesByType(nodes, 0);
-	// const numberOfBranches = branches.length;
+	const numberOfNodes = countNodesByType(nodes, 0);
+	const numberOfBranches = branches.length;
 
-	// let realNodes = getRealNodes(nodes);
-	// let adjacencyMatrix = getAdjacencyMatrix(numberOfNodes, realNodes);
-	// let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
+	let realNodes = getRealNodes(nodes);
+	let adjacencyMatrix = getAdjacencyMatrix(numberOfNodes, realNodes);
+	let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
 
-	// console.log('\n ******* Adjacency Matrix: ******* \n');
-	// printMatrix(adjacencyMatrix);
+	console.log('\n ******* Adjacency Matrix: ******* \n');
+	printMatrix(adjacencyMatrix);
 
-	// console.log('\n ******* Incidence Matrix: ******* \n');
-	// printMatrix(incidenceMatrix);
+	console.log('\n ******* Incidence Matrix: ******* \n');
+	printMatrix(incidenceMatrix);
+
 }

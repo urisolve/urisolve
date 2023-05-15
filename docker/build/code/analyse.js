@@ -2217,7 +2217,8 @@ function analyseCircuit(analysismet) {
 						if (!data.first) {
 							$("#pdfPrintButton").hide();
 							$("#print").show();
-							loadFileAsTextSMP(data.third);
+							// loadFileAsTextSMP(data.third);
+							simplifyCircuit(data.third);
 						}
 						successFlag = true;
 					} catch (error) {
