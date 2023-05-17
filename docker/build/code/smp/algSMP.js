@@ -40,6 +40,8 @@ function simplifyCircuit(data) {
 	let seriesSimplified = getSeries(simplifiedJson);
 	console.log(seriesSimplified);
 
+	simplifyJsonBranches(data);
+
 	let parallelSimplified = getParallels(seriesSimplified, incidenceMatrix);
 
 }
@@ -69,8 +71,34 @@ function simplifyJson(data) {
 			simplifiedJson.nodes.push(simplifiedNode);
 		}
 	}
-
 	return simplifiedJson;
+}
+
+function simplifyJsonBranches(data) {
+	let simplifyBranchesJson = { branches: [] };
+	let branches = data.branches;
+	for (let i = 0; i < branches.length; i++) {
+		let branches = branches[i];
+		let simplifiedBranch = {
+			reference: branches[i].ref,
+			startNode: branches[i].startNode,
+			endNode: branches[i].endNode,
+			id: branch.id,
+			resistors: branch[i].resistors.map(resistor => ({
+				id: resistor.id,
+				reference: resistor.ref,
+				value: parseInt(resistor.value),
+				unit: resistor.unitMult
+			})),
+			coils: branch.coils,
+			capacitors: branch.capacitors
+		}
+
+		simplifyBranchesJson.branches.push(simplifiedBranch);
+	};
+	console.log('Simplified Branch Object')
+	console.log(simplifyBranchesJson);
+	return simplifyBranchesJson;
 }
 
 //Métodos:
@@ -101,17 +129,19 @@ function getSeries(simplifiedJson) {
 			simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
 		}
 	}
-
+	console.log('Simplified Json after Series');
+	console.log(simplifiedJson);
 	return simplifiedJson;
 }
 
 // brief: Encontra a resistência dos ramos 
 // args:
-// json simplificado
-// matrix de incidencia (IDS DOS BRANCHES)
-// returns:
-// Operações de simplificação
-// Circuito simplificado
+	// json simplificado
+	// matrix de incidencia (IDS DOS BRANCHES)
+	// returns:
+		// Operações de simplificação
+		// Circuito simplificado
+/*
 function getParallels(simplifiedJson, incidenceMatrix) {
 	if (incidenceMatrix.length >= 2) { // there are still two nodes
 		let nodeOne = incidenceMatrix[0];
@@ -127,6 +157,22 @@ function getParallels(simplifiedJson, incidenceMatrix) {
 		incidenceMatrix[1] = simplifiedNode;
 	}
 	console.log(incidenceMatrix);
+}
+*/
+function getParallels(simplifiedJson, incidenceMatrix) {
+	for (let i = 0; i < incidenceMatrix.length - 1; i++) {
+		for (let j = 0; j < incidenceMatrix[0].length - 1; j++) {
+
+			if (incidenceMatrix[i][j] == 1 && incidenceMatrix[i + 1][j] == 1 && 
+				incidenceMatrix[i][j + 1] == 1 && incidenceMatrix[i + 1][j + 1] == 1) {
+				//onde calculo as resistencias equivalentes no smp json
+				1/simplifiedJson.nodes[i].branches[j].resistorSum + 1/simplifiedJson.nodes[i + 1].branches[j].resistorSum
+				simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
+				delete simplifiedJson.nodes[i].branches[j].resistors;
+				//console.log("paralelo entre " + array2[i] + " " + array2[i + 1]);
+			}
+		}
+	}
 }
 
 function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
@@ -195,11 +241,11 @@ function getAdjacencyMatrix(numberOfNodes, nodes) {
 	for (let i = 0; i < numberOfNodes; i++) {
 		for (let j = 0; j < numberOfNodes; j++) {
 			if (adjNodes(nodes, i, j)) {
-				// console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 1');
+				 console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 1');
 				adjacencyMatrix[i][j] = 1;
 			}
 			else {
-				// console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 0');
+				 console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 0');
 				adjacencyMatrix[i][j] = 0;
 			}
 		}
