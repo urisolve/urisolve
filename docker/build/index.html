@@ -78,6 +78,22 @@
     <script type="text/javascript">
     // Global Arrays
     fileContents = new Array(2);
+      // Schematic object arrays
+    vectComponents = new Array();
+    vectResistor = new Array();
+    vectCapacitor = new Array();
+    vectInductor = new Array();
+    vectDcVoltPower = new Array();
+    vectAcVoltPower = new Array();
+    vectDcCurrPower = new Array();
+    vectAcCurrPower = new Array();
+    vectGND = new Array();
+    vectVProbe = new Array();
+    vectIProbe = new Array();
+    vectWires = new Array();
+    vectConnections = new Array();
+    vectNodes = new Array();
+    vectPorts = new Array();
     </script>
 
     <script> $(window).on('load', function(){ 
@@ -158,7 +174,7 @@
                             </p>
                             <div class="input-group mb-3" >
                               <div class="custom-file">
-                                <form id="input-form"><input type="file" class="custom-file-input"  accept="text/plain, image/*" id="fileInput" multiple="multiple"/></form>
+                                <form id="input-form"><input type="file" class="custom-file-input"  accept=".sch" id="fileInput" multiple="multiple"/></form>
                                 <label class="custom-file-label text-muted font-weight-light" for="fileToLoad"><span data-translate="_main-upload_in"></span></label>
                               </div>
                             </div>

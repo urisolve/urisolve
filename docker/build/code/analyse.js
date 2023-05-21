@@ -1,4 +1,4 @@
-
+include("code/common/makeNetlist.js");
 
 /**
  * Loads the file and validates the netlist
@@ -15,11 +15,37 @@
 		};
 	}
 
+	//Parse the schematic file
+	var schematic = parseSchematic(fileContents[1]);
+
+	// Check for errors
+	if(schematic.errorFlag){
+		alert("Error parsing schematic file!!");
+		return{
+			first: true,
+			second: 1,
+			third: schematic.errorReasonCodes
+		};
+	}
+
+	// Get the netlist
+	var netlist = makeNetlist(schematic.data.object);
+
+	// Check for errors
+	if(netlist.errorFlag){
+		alert("Error creating netlist!!");
+		return{
+			first: true,
+			second: 1,
+			third: netlist.errorReasonCodes
+		};
+	}
+
 	// Print sections
 	document.getElementById('results-board').innerHTML = outHTMLSections();
 
 	// Validate submitted Netlist File
-	var netlistTxt = validateNetlist(fileContents[1]);
+	var netlistTxt = validateNetlist(netlist.data);
 	// Check for previous ground alteration
 	if(fileContents[2])
 		netlistTxt.first.push(fileContents[2]);
@@ -977,7 +1003,7 @@ function findNodes(){
 		var nodeType = 1;	// Virtual Node
 		var pos = foundnodeInstances.filter(function(x){ return x === foundNodes[i]; }).length;
         if(pos > 2 ) nodeType = 0;	// Real Node
-		var newNode = new node(nodeId, foundNodes[i], [], nodeType, null);
+		var newNode = new nnode(nodeId, foundNodes[i], [], nodeType, null);
 		nodes.push(newNode);
 	}
 

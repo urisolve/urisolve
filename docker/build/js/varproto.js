@@ -626,7 +626,7 @@ class supernode {
  * @param {String} cpVoltage Current Equivalent Voltage
  * @param {Function} getCurrents(): Returns Signed Currents Array
  */
-class node {
+class nnode {
     constructor(cpId, cpRef, cpBranchesArr = [], cpType, cpVoltage) {
         this.id = cpId,
         this.ref = cpRef,
@@ -1531,5 +1531,454 @@ class genericCp {
         this.initValue = cpInitValue,
         this.posX = cpPosX,
         this.posY = cpPosY
+    }
+}
+
+// Schematic Prototypes
+class Schematic {
+    /**
+     * Creates the schematic object from the parsed data
+     * @param {string} version Qucs version
+     * @param {View} view View object
+     * @param {Grid} grid Grid object
+     */
+    constructor(version, view, grid) {
+        this.qucs_version = version;
+        this.properties = {view: view, grid: grid};
+        this.components = vectComponents;
+        this.connections = vectConnections;
+        this.nodes = vectNodes;
+    }
+}
+
+
+class View {
+    /**
+     * Creates the view object
+     * @param {string} x1 x coordenate of the top left corner of the schematic window
+     * @param {string} y1 y coordenate of the top left corner of the schematic window
+     * @param {string} x2 x coordenate of the bottom right corner of the schematic window
+     * @param {string} y2 y coordenate of the bottom right corner of the schematic window
+     * @param {string} scale current scale
+     * @param {string} xpos x coordenate of top left corner the view window
+     * @param {string} ypos y coordenate of top left corner the view window
+     */
+    constructor(x1,y1,x2,y2,scale,xpos,ypos) {
+        this.x1 = Number(x1);
+        this.y1 = Number(y1);
+        this.x2 = Number(x2);
+        this.y2 = Number(y2);
+        this.scale = 1;
+        this.xpos = Number(xpos);
+        this.ypos = Number(ypos);
+        }
+  }
+
+class Grid {
+    /**
+     * Creates the Grid object
+     * @param {string} x distance between vertical grid lines
+     * @param {string} y distance between horizontal grid lines
+     * @param {string} on state of the grid (0 or 1)
+     */
+    constructor(x,y,on) {
+        this.x = Number(x);
+        this.y = Number(y);
+        this.active = on;
+        }
+}
+
+class Component {
+    /**
+     * Creates the component object and adds it to the components array
+     * @param {Object} cp component properties passed from subclass 
+     */
+    constructor(cp){
+        this.id = cp.id;
+        this.type = cp.type;
+        this.active = cp.active;
+        this.name = {
+            value: cp.nameValue,
+            position: {x: Number(cp.namePositionX), y: Number(cp.namePositionY)},
+        };
+        this.value = {
+            value: cp.valueValue,
+            unit: cp.valueUnit,
+            visible: cp.valueVisible
+        }
+        this.position = {
+            x: cp.positionX,
+            y: cp.positionY,
+            angle: cp.positionAngle,
+            mirrorx: cp.positionMirror
+        };
+        this.symbol = {reference: cp.symbol, visible: cp.symbolVisible};
+        this.frequency = {
+            value: cp.frequencyValue,
+            unit: cp.frequencyUnit,
+            visible: cp.frequencyVisible
+        };
+        this.phase = {
+            value: cp.phaseValue,
+            unit: cp.phaseUnit,
+            visible: cp.phaseVisible
+        };
+        this.properties = {
+            impedance: {value: cp.impedanceValue, unit: cp.impedanceUnit, visible: cp.impedanceVisible},
+            temperature: {value: cp.temperature, visible: cp.temperatureVisible},
+            tc1: {value: cp.tc1, visible: cp.tc1Visible},
+            tc2: {value: cp.tc2, visible: cp.tc2Visible},
+            tnom: {value: cp.tnom, visible: cp.tnomVisible},
+            initialValue: {value: cp.initialValue, visible: cp.initialVisible},
+            damping: {value: cp.dampingValue, visible: cp.dampingVisible},
+        };
+        this.port = cp.ports;
+
+        vectComponents.push(this);
+        }
+}
+
+class Resistor extends Component {
+    /**
+     * Creates the resistor object and adds it to the resistor array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id, 
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],
+            temperature: caracteristics[12],
+            temperatureVisible: caracteristics[13],
+            tc1: caracteristics[14],
+            tc1Visible: caracteristics[15],
+            tc2: caracteristics[16],
+            tc2Visible: caracteristics[17],
+            tnom: caracteristics[18],
+            tnomVisible: caracteristics[19],
+            symbol: caracteristics[20],
+            symbolVisible: caracteristics[21],
+            ports: ports})
+        
+        vectResistor.push(this);
+        }
+}
+
+class Capacitor extends Component {
+    /**
+     * Creates the capacitor object and adds it to the capacitor array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1], 
+            active: caracteristics[2],  
+            positionX: caracteristics[3],  
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],  
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10], 
+            valueVisible: caracteristics[11],
+            initialValue: caracteristics[12],
+            initialVisible: caracteristics[13],
+            symbol: caracteristics[14],
+            symbolVisible: caracteristics[15],          
+            ports: ports})
+        vectCapacitor.push(this);
+        }
+}
+
+class Inductor extends Component {
+    /**
+     * Creates the inductor object and adds it to the inductor array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */    
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],           
+            initialValue: caracteristics[12],
+            initialVisible: caracteristics[13],
+            ports: ports})    
+        vectInductor.push(this);
+        }
+}
+
+class DcVoltPower extends Component {
+    /**
+     * Creates the dc voltage source object and adds it to the dc voltage source array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],
+            impedanceValue: caracteristics[12],
+            impedanceUnit: caracteristics[13],   
+            impedanceVisible: caracteristics[14],
+            ports: ports})
+        vectDcVoltPower.push(this);
+        }
+}   
+
+class DcCurrPower extends Component {
+    /**
+     * Creates the dc current source object and adds it to the dc current source array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],
+            impedanceValue: caracteristics[12],
+            impedanceUnit: caracteristics[13],  
+            impedanceVisible: caracteristics[14],
+            ports: ports})
+        vectDcCurrPower.push(this);
+        }
+}
+
+class AcVoltPower extends Component {
+    /**
+     * Creates the ac voltage source object and adds it to the ac voltage source array 
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],
+            frequencyValue: caracteristics[12],
+            frequencyUnit: caracteristics[13],
+            frequencyVisible: caracteristics[14], 
+            phaseValue: caracteristics[15],
+            phaseVisible: caracteristics[16],
+            dampingValue: caracteristics[17],
+            dampingVisible: caracteristics[18],
+            impedanceValue: caracteristics[19],
+            impedanceUnit: caracteristics[20],  
+            impedanceVisible: caracteristics[21],
+            ports: ports})
+        vectAcVoltPower.push(this);
+        }
+}
+
+class AcCurrPower extends Component {
+    /**
+     * Creates the ac current source object and adds it to the ac current source array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            valueValue: caracteristics[9],
+            valueUnit: caracteristics[10],
+            valueVisible: caracteristics[11],
+            frequencyValue: caracteristics[12],
+            frequencyUnit: caracteristics[13],
+            frequencyVisible: caracteristics[14], 
+            phaseValue: caracteristics[15],
+            phaseVisible: caracteristics[16],
+            dampingValue: caracteristics[17],
+            dampingVisible: caracteristics[18],
+            impedanceValue: caracteristics[19],
+            impedanceUnit: caracteristics[20],  
+            impedanceVisible: caracteristics[21],
+            ports: ports})
+        vectAcCurrPower.push(this);
+        }
+}
+
+class GND extends Component {
+    /**
+     * Creates the ground object and adds it to the ground array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            active: caracteristics[2],
+            nameValue: caracteristics[1],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            positionAngle: caracteristics[8],
+            positionMirror: caracteristics[7],
+            ports: ports})
+        vectGND.push(this);
+        }
+}
+
+class VProbe extends Component {
+    /**
+     * Creates the voltage probe object and adds it to the voltage probe array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6], 
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            impedanceValue: caracteristics[9],
+            impedanceUnit: caracteristics[10],
+            impedanceVisible: caracteristics[11],
+            ports: ports})
+        vectVProbe.push(this);
+        }
+}
+
+class IProbe extends Component {
+    /**
+     * Creates the current probe object and adds it to the current probe array
+     * @param {string} id component id
+     * @param {string[]} caracteristics array with the component caracteristics
+     */
+    constructor(id, caracteristics, ports) {
+        super({id: id,
+            type: caracteristics[0],
+            nameValue: caracteristics[1],
+            active: caracteristics[2],
+            positionX: caracteristics[3],
+            positionY: caracteristics[4],
+            namePositionX: caracteristics[5],
+            namePositionY: caracteristics[6], 
+            positionMirror: caracteristics[7],
+            positionAngle: caracteristics[8],
+            impedanceValue: caracteristics[9],
+            impedanceUnit: caracteristics[10],
+            impedanceVisible: caracteristics[11],
+            ports: ports})
+        vectIProbe.push(this);
+        }
+}
+
+class Connection {
+    /**
+     * Creates the connection object and adds it to the connections array
+     * @param {string} id connection id
+     * @param {Wire[]} wires the list of wires that compose the connection
+     * @param {Port[]} ports the list of the connected component ports
+     */
+    constructor(id, wires, ports) {
+        this.id = id;
+        this.wires = wires;
+        this.ports = ports;
+        vectConnections.push(this);
+    }
+}
+
+class Wire {
+    /**
+     * Creates the wire object and adds it to the wire array
+     * @param {string} id wire id
+     * @param {string[]} caracteristics array with the wire caracteristics
+     */
+    constructor(id, caracteristics) {
+    this.id = id;
+    this.begin = {x: Number(caracteristics[0]), y: Number(caracteristics[1]), connectedWires: [], connectedPorts: []};
+    this.end = {x: Number(caracteristics[2]), y: Number(caracteristics[3]), connectedWires: [], connectedPorts: []};
+    this.label = {
+        text: caracteristics[4],
+        position: {x: Number(caracteristics[5]), y: Number(caracteristics[6])}, 
+        distance: Number(caracteristics[7])};
+    this.node_set = caracteristics[8];
+    this.wire = "";
+
+    vectWires.push(this);
+    }
+}
+
+class CircuitNode {
+    static index = 0;
+    /**
+     * This function creates a node object and adds it to the nodes array
+     * @param {Number} x x coordinate of the node
+     * @param {Number} y y coordinate of the node
+     * @param {Object[]} connect all the ports and wires connected to the node
+     * @param {string} net the net name of the node
+     */
+    constructor(x,y, connect, net){   
+        this.position = {x: x, y: y};
+        this.id = 'n' + CircuitNode.index;
+        this.name = net;
+        this.connection = connect;
+        CircuitNode.index++;
+        vectNodes.push(this);
     }
 }

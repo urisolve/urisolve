@@ -18,6 +18,10 @@ function cleanFileHtmlOutput(){
     }
 };
 
+///////////////////////////////////////////////////////
+// Function to handle netlist and image files upload //
+///////////////////////////////////////////////////////
+/*
 function handleFileSelect (e) {
     e.stopPropagation();
     e.preventDefault();
@@ -100,7 +104,61 @@ function handleFileSelect (e) {
     }
     console.log(fileContents);
 };
+*/
 
+//////////////////////////////////////////////
+// Function to handle schematic file upload //
+//////////////////////////////////////////////
+function handleFileSelect (e) {
+    e.stopPropagation();
+    e.preventDefault();
+    cleanFileHtmlOutput();
+    var image_holder = $("#image-holder");
+    var files_det = $("#files-img-det");
+
+    var files = e.target.files;
+    var countFiles = $(this)[0].files.length;
+
+    if(countFiles > 1) {
+        alert("Please upload only 1 schematic file.");
+        $(this).val('');
+        cleanFileHtmlOutput();
+        return;
+    }
+
+    file = files[0];
+    // Verify if a schematic file was submited
+    if(file.name.split('.').pop() != 'sch') {
+        alert("Please provide a schematic file.");
+        $(this).val('');
+        cleanFileHtmlOutput();
+        return;
+    }
+    
+    files_det.show();
+    document.getElementById('files-details').innerHTML = 'Uploaded Files:';
+
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate.toLocaleDateString(), '</li>');
+        var d = new Date();
+        d = new Date(f.lastModified);
+        output.push('<li><strong>', escape(f.name), '</strong> <small> (', f.type || 'n/a', ') Modified: ', d.toUTCString(), '</small></li>');
+        //output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') </li>');
+        document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+
+        if (file.name.split('.').pop() == 'sch') {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                //alert(e.target.result);
+                fileContents[1] = e.target.result;
+            };
+            reader.readAsText(files[i]);
+            //$("#input-form")[0].reset();
+        }
+    }
+    console.log(fileContents);
+};
 
 
 function localHandleFileSelect (ID) {

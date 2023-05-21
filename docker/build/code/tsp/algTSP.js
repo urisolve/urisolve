@@ -1,6 +1,6 @@
-include('docker/build/code/common/outPrintTSP.js'); // To generate modal sections
-include('docker/build/code/common/makeNetlist.js'); // To generate the netlists to send to the methods
-include('docker/build/code/common/redraw.js'); // To add circuit drawings to the modal sections
+include('code/common/outPrintTSP.js'); // To generate modal sections
+include('code/common/makeNetlist.js'); // To generate the netlists to send to the methods
+include('code/common/redraw.js'); // To add circuit drawings to the modal sections
 
 /**
  * This function generates the schematic object containing only the passed power source
