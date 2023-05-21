@@ -25,30 +25,27 @@ Criar as Matrizes que modelizam o circuito:
 function simplifyCircuit(data) {
 
 	let jsonFile = JSON.parse(data);
-
-	let branches = jsonFile.branches;
-	let nodes = jsonFile.nodes;
-
-	const numberOfNodes = countNodesByType(nodes, 0);
-	const numberOfBranches = branches.length;
-	let realNodes = getRealNodes(nodes);
-	let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
-	printMatrix(incidenceMatrix);
-
 	let simplifiedJson = simplifyJson(jsonFile);
 
 	let seriesSimplified = getSeries(simplifiedJson);
 	console.log(seriesSimplified);
 
-	simplifyJsonBranches(data);
+	const numberOfNodes = seriesSimplified.nodes.length;
+	const numberOfBranches = seriesSimplified.branches.length;
+	let realNodes = getRealNodes(seriesSimplified.nodes);
+	let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes);
+	printMatrix(incidenceMatrix);
 
-	let parallelSimplified = getParallels(seriesSimplified, incidenceMatrix);
-
+	let parallelSimplified = findParallels(seriesSimplified, incidenceMatrix);
+	console.log('parallel simplfied: \n')
+	console.log(parallelSimplified);
 }
 
 function simplifyJson(data) {
-	let simplifiedJson = { nodes: [] };
+	let simplifiedJson = { nodes: [], branches: [] };
 	let nodes = data.nodes;
+	let jsonBranches = data.branches;
+
 	for (let i = 0; i < nodes.length; i++) {
 		let branches = nodes[i].branches;
 		if (nodes[i].ref.startsWith("_net")) {
@@ -56,8 +53,11 @@ function simplifyJson(data) {
 		} else {
 			let simplifiedNode = {
 				reference: nodes[i].ref,
+				type: nodes[i].type,
 				branches: branches.map(branch => ({
 					id: branch.id,
+					startNode: branch.startNode,
+					endNode: branch.endNode,
 					resistors: branch.resistors.map(resistor => ({
 						id: resistor.id,
 						reference: resistor.ref,
@@ -71,34 +71,13 @@ function simplifyJson(data) {
 			simplifiedJson.nodes.push(simplifiedNode);
 		}
 	}
+
+	for (let i = 0; i < jsonBranches.length; i++) {
+		let branch = jsonBranches[i];
+		simplifiedJson.branches.push(branch.startNode + branch.endNode + branch.id);
+	}
+
 	return simplifiedJson;
-}
-
-function simplifyJsonBranches(data) {
-	let simplifyBranchesJson = { branches: [] };
-	let branches = data.branches;
-	for (let i = 0; i < branches.length; i++) {
-		let branches = branches[i];
-		let simplifiedBranch = {
-			reference: branches[i].ref,
-			startNode: branches[i].startNode,
-			endNode: branches[i].endNode,
-			id: branch.id,
-			resistors: branch[i].resistors.map(resistor => ({
-				id: resistor.id,
-				reference: resistor.ref,
-				value: parseInt(resistor.value),
-				unit: resistor.unitMult
-			})),
-			coils: branch.coils,
-			capacitors: branch.capacitors
-		}
-
-		simplifyBranchesJson.branches.push(simplifiedBranch);
-	};
-	console.log('Simplified Branch Object')
-	console.log(simplifyBranchesJson);
-	return simplifyBranchesJson;
 }
 
 //Métodos:
@@ -121,11 +100,20 @@ function getSeries(simplifiedJson) {
 			let summedResistorReferences = branch.resistors
 				.map(r => r.reference)
 				.reduce((prev, next) => prev += (' + ' + next));
+
+			let newResistorName = branch.resistors
+				.map(r => r.reference)
+				.reduce((prev, next) => prev += next);
 			// console.log('sum of resistors: ' + sumOfResistors);
 			// console.log('summed resistors: ' + summedResistorReferences + '\n\n');
 
-			delete simplifiedJson.nodes[i].branches[j].resistors;
-			simplifiedJson.nodes[i].branches[j].resistorSum = sumOfResistors;
+			simplifiedJson.nodes[i].branches[j].resistors = [{
+				id: 1,
+				reference: newResistorName,
+				value: sumOfResistors,
+				unit: "Ohm"
+			}]
+			// simplifiedJson.nodes[i].branches[j].resistorSum = sumOfResistors;
 			simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
 		}
 	}
@@ -134,52 +122,196 @@ function getSeries(simplifiedJson) {
 	return simplifiedJson;
 }
 
+function circuitSimplify(circuit) {
+	const numberOfNodes = circuit.nodes.length;
+	const numberOfBranches = circuit.branches.length;
+	let realNodes = getRealNodes(circuit.nodes);
+	let incidenceMatrix = getIncidenceMatrix(numberOfNodes, numberOfBranches, realNodes, circuit.branches);
+
+	let simplifications = [];
+	let over = false;
+	while (!over) {
+		let parallels = findParallels(circuit, incidenceMatrix);
+		for (let i = 0; i < parallels.length; i++) {
+			let parallel = parallels[i];
+			let branches = parallels[i].branches;
+			for (let j = 0; j < branches.length; j++) {
+				let series = findSeries(circuit);
+				for (let k = 0; k < series.length; k++) {
+					let simplification = simplifySeries(circuit, series);
+					simplifications.push(simplification);
+					circuit = updateCircuit(circuit);
+				}
+			}
+			let simplification = simplifyParallel(circuit, parallel);
+			simplifications.push(simplification);
+			circuit = updateCircuit(circuit);
+		}
+		let stars = findStars(incidenceMatrix, max);
+		if (stars.length == 0) {
+			over = true;
+		}
+		for (let i = 0; i < stars.length; i++) {
+			let star = getStarNodes(incidenceMatrix, star, circuit.nodes);
+			let simplification = starToDelta(circuit, star);
+			simplifications.push(simplification);
+			circuit = updateCircuit(circuit);
+		}
+	}
+}
+
+function findSeries(circuit) {
+	let branches = circuit.branches;
+	let seriesComponents = [];
+	for (let i = 0; i < branches.length; i++) {
+		let branch = branches[i];
+		let resistors = [];
+		let inductors = [];
+		let capacitors = [];
+		for (let j = 0; j < branch.components.length; j++) {
+			let component = branch.components[j];
+			switch (component.type) {
+				case 5: // resistor
+					resistors.push(component);
+					break;
+				case 4: // inductor
+					inductors.push(component);
+					break;
+				case 3: // capacitor
+					capacitors.push(component);
+					break;
+			}
+		}
+		seriesComponents.push({
+			resistors: resistors,
+			inductors: inductors,
+			capacitors: capacitors
+		});
+	}
+
+	return seriesComponents;
+}
+
 // brief: Encontra a resistência dos ramos 
 // args:
-	// json simplificado
-	// matrix de incidencia (IDS DOS BRANCHES)
-	// returns:
-		// Operações de simplificação
-		// Circuito simplificado
-/*
-function getParallels(simplifiedJson, incidenceMatrix) {
-	if (incidenceMatrix.length >= 2) { // there are still two nodes
-		let nodeOne = incidenceMatrix[0];
-		let nodeTwo = incidenceMatrix[1];
-		let simplifiedNode = new Array(nodeOne.length);
-		for (let i = 0; i < nodeOne.length; i++) {
-			if (nodeOne[i] & nodeTwo[i] == 1) {
-				// iterate simplified json with same index and sum parallel
-			}
-			simplifiedNode[i] = nodeOne[i] & nodeTwo[i];
-		}
-		delete incidenceMatrix[0];
-		incidenceMatrix[1] = simplifiedNode;
-	}
-	console.log(incidenceMatrix);
-}
-*/
-function getParallels(simplifiedJson, incidenceMatrix) {
+// json simplificado
+// matrix de incidencia (IDS DOS BRANCHES)
+// returns:
+// Operações de simplificação
+// Circuito simplificado
+function findParallels(simplifiedjson, incidenceMatrix) {
+	let parallels = [];
+	let numberOfBranches = simplifiedjson.branches.length;
 	for (let i = 0; i < incidenceMatrix.length - 1; i++) {
-		for (let j = 0; j < incidenceMatrix[0].length - 1; j++) {
+		let bitwiseResult = new Array(numberOfBranches);
 
-			if (incidenceMatrix[i][j] == 1 && incidenceMatrix[i + 1][j] == 1 && 
-				incidenceMatrix[i][j + 1] == 1 && incidenceMatrix[i + 1][j + 1] == 1) {
-				//onde calculo as resistencias equivalentes no smp json
-				1/simplifiedJson.nodes[i].branches[j].resistorSum + 1/simplifiedJson.nodes[i + 1].branches[j].resistorSum
-				simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
-				delete simplifiedJson.nodes[i].branches[j].resistors;
-				//console.log("paralelo entre " + array2[i] + " " + array2[i + 1]);
+		for (let j = 0; j <= incidenceMatrix[0].length; j++) {
+			bitwiseResult[j] = incidenceMatrix[i][j] & incidenceMatrix[i + 1][j];
+		}
+
+		let parallelBranches = [];
+		for (let x = 0; x < bitwiseResult.length; x++) {
+			if (bitwiseResult[x] == 1) {
+				parallelBranches.push(simplifiedjson.branches[x]);
+			}
+		}
+
+		if (parallelBranches.length > 0) {
+			let nodeOne = simplifiedjson.nodes[i].reference;
+			let nodeTwo = simplifiedjson.nodes[i + 1].reference;
+			parallels.push({
+				nodes: [nodeOne, nodeTwo],
+				branches: parallelBranches
+			});
+		}
+	}
+	return parallels;
+}
+
+function findStars(incidenceMatrix, max) {
+	let stars = [];
+	let starCount = 0;
+	for (let i = 1; i < incidenceMatrix.length; i++) {
+		let connectedBranches = [];
+		for (let j = 1; j < incidenceMatrix[0].length; j++) {
+			if (incidenceMatrix[i][j] == 1) {
+				connectedBranches.push(j - 1);
+			}
+		}
+		if (connectedBranches.length == 3) {
+			let branches = [];
+			for (let k = 0; k < connectedBranches.length; k++) {
+				branches.push({
+					ref: k,
+					nodes: {
+						start: i,
+						end: null
+					}
+				});
+			}
+			let star = {
+				centerNode: i,
+				branches: connectedBranches
+			}
+			stars.push(star);
+			starCount += 1;
+			if (starCount >= max) {
+				return stars;
 			}
 		}
 	}
+
+	return stars;
 }
+
+function getStarNodes(incidenceMatrix, star, nodes) {
+	for (let i = 0; i < incidenceMatrix.length; i++) {
+		for (let j = 0; j < incidenceMatrix[0].length; j++) {
+			if (nodes[i] != star.centerNode && nodes[j] != star.centerNode) {
+				continue;
+			}
+			for (let k = 0; k < star.branches; k++) {
+				let bitwiseResult = incidenceMatrix[i][j] & incidenceMatrix[i + 1][j];
+				if (bitwiseResult == 1) {
+					if (nodes[i] == star.centerNode) {
+						star.branches[k].nodes = [nodes[i], nodes[j]];
+					} else {
+						star.branches[k].nodes = [nodes[j], nodes[i]];
+					}
+					return star;
+				}
+			}
+		}
+	}
+	return null;
+}
+
+function starToDelta(circuit, star) {
+
+}
+
+// function getParallels(simplifiedJson, incidenceMatrix) {
+// 	for (let i = 0; i < incidenceMatrix.length - 1; i++) {
+// 		for (let j = 0; j < incidenceMatrix[0].length - 1; j++) {
+
+// 			if (incidenceMatrix[i][j] == 1 && incidenceMatrix[i + 1][j] == 1 && 
+// 				incidenceMatrix[i][j + 1] == 1 && incidenceMatrix[i + 1][j + 1] == 1) {
+// 				//onde calculo as resistencias equivalentes no smp json
+// 				1/simplifiedJson.nodes[i].branches[j].resistorSum + 1/simplifiedJson.nodes[i + 1].branches[j].resistorSum
+// 				simplifiedJson.nodes[i].branches[j].resistorSumOperations = summedResistorReferences;
+// 				delete simplifiedJson.nodes[i].branches[j].resistors;
+// 				//console.log("paralelo entre " + array2[i] + " " + array2[i + 1]);
+// 			}
+// 		}
+// 	}
+// }
 
 function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
 	let incidenceMatrix = [];
 	for (let i = 0; i < numberOfNodes; i++) {
 		incidenceMatrix[i] = [];
 	}
+
 	for (let i = 0; i < numberOfNodes; i++) {
 		for (let j = 0; j < numberOfBranches; j++) {
 			if (nodeBranchCon(nodes, i, j)) {
@@ -190,7 +322,6 @@ function getIncidenceMatrix(numberOfNodes, numberOfBranches, nodes) {
 			}
 		}
 	}
-
 	return incidenceMatrix;
 }
 
@@ -233,37 +364,13 @@ function countNodesByType(objArr, type) {
 	return cnt;
 }
 
-function getAdjacencyMatrix(numberOfNodes, nodes) {
-	let adjacencyMatrix = [];
-	for (let i = 0; i < numberOfNodes; i++) {
-		adjacencyMatrix[i] = [];
-	}
-	for (let i = 0; i < numberOfNodes; i++) {
-		for (let j = 0; j < numberOfNodes; j++) {
-			if (adjNodes(nodes, i, j)) {
-				 console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 1');
-				adjacencyMatrix[i][j] = 1;
-			}
-			else {
-				 console.log('node ' + nodes[i] + ' to ' + nodes[j] + ' = 0');
-				adjacencyMatrix[i][j] = 0;
-			}
-		}
-	}
-
-	return adjacencyMatrix;
-}
-
-
-
 function getRealNodes(nodes) {
 	let realNodes = [];
 	for (let i = 0; i < nodes.length; i++) {
 		if (nodes[i].type == 0) {
-			realNodes.push(nodes[i].ref);
+			realNodes.push(nodes[i].reference);
 		}
 	}
-
 	return realNodes;
 }
 
@@ -276,14 +383,6 @@ function printMatrix(matrix) {
 		console.log(arrText);
 		arrText = '';
 	}
-}
-
-function getBranchComponents(branch) {
-	branch.components = branch.components.concat(branch.dcAmpPwSupplies,
-		branch.acAmpPwSupplies, branch.dcVoltPwSupplies, branch.acVoltPwSupplies,
-		branch.resistors, branch.coils, branch.capacitors);
-
-	return branch.components;
 }
 
 function simplifySequentialResistance(startNode, endNode, resistors) {
