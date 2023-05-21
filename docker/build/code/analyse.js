@@ -2204,6 +2204,10 @@ function analyseCircuit(analysismet) {
                 $("#loadpage").hide();
             }, 500);
         break;
+		case "TSP":
+			$("#loadpage").hide();
+			alert("Not implemented yet!");
+		break;
         default:
             $("#loadpage").hide();
             alert('Please select a valid analysis method.');

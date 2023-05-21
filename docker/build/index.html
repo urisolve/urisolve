@@ -97,7 +97,7 @@
             <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
               <div class="container">
                 <a class="navbar-brand js-scroll-trigger" href="http://isep.ipp.pt/Department/Department/13"><img src="img/logo.png" alt="" class="img-fluid"></a>
-                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                   Menu
                   <i class="fas fa-bars"></i>
                 </button>
@@ -113,26 +113,26 @@
                       <a class="nav-link js-scroll-trigger" href="#examples"><i class="fas fa-clipboard-check"></i>&nbsp;<span data-translate="_menu-examples"></span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openPublicationsModal();"><i class="fas fa-book"></i>&nbsp;<span data-translate="_menu-docs"></span></a>
+                        <a class="nav-link" data-bs-toggle="modal" href="javascript:void(0)" onclick="openPublicationsModal();"><i class="fas fa-book"></i>&nbsp;<span data-translate="_menu-docs"></span></a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link js-scroll-trigger" href="#topct"><i class="fas fa-arrow-up"></i>&nbsp;<span data-translate="_menu-movetop"></span></a>
                     </li>
                     <li class="nav-item" id="login-nav-item">
-                      <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openLoginModal();"><i class="fas fa-sign-in-alt"></i>&nbsp;<span>LOGIN</span></a>
+                      <a class="nav-link" data-bs-toggle="modal" href="javascript:void(0)" onclick="openLoginModal();"><i class="fas fa-sign-in-alt"></i>&nbsp;<span>LOGIN</span></a>
                     </li>
                     <li class="nav-item hidden" id="login-user-data">
-                      <a class="nav-link" data-toggle="modal" href="javascript:void(0)" onclick="openLogoutModal();"><i class="fas fa-user"></i>&nbsp;<span data-translate="_menu-account"></span></a>
+                      <a class="nav-link" data-bs-toggle="modal" href="javascript:void(0)" onclick="openLogoutModal();"><i class="fas fa-user"></i>&nbsp;<span data-translate="_menu-account"></span></a>
                     </li>
                     <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span id="lang-sel-flag" class="flag-icon flag-icon-en"></span> <span id="lang-sel-txt">English</span></a>
+                      <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span id="lang-sel-flag" class="flag-icon flag-icon-en"></span> <span id="lang-sel-txt">English</span></a>
                       <div class="dropdown-menu" aria-labelledby="dropdown09">
                           <a id="lang-en" class="dropdown-item" href="#en"><span class="flag-icon flag-icon-gb"> </span> <small>English</small></a>
                           <a id="lang-pt" class="dropdown-item" href="#pt"><span class="flag-icon flag-icon-pt"> </span>  <small>Português</small></a>
                       </div>
                     </li>
                   </ul>
-                  <!--<input id="paintbtn" type="checkbox" unchecked data-toggle="toggle" data-size="mini" data-style="android" data-on="<i class='fas fa-paint-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>" data-off="<i class='fas fa-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>">-->
+                  <!--<input id="paintbtn" type="checkbox" unchecked data-bs-toggle="toggle" data-size="mini" data-style="android" data-on="<i class='fas fa-paint-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>" data-off="<i class='fas fa-brush fa-xs' style='color:#FFFFFF;' aria-hidden='true'></i>">-->
                 </div>
               </div>
             </nav>
@@ -185,6 +185,11 @@
                         <div class="col-md-4 d-flex justify-content-center" >
                           <button id="btnMCM" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick = "analyseCircuit('MCM')"> <span data-translate="_btn_mcm_p1"></span> <br> <span data-translate="_btn_mcm_p2"></span> </button>
                         </div>
+
+                        <div class="col-md-4 d-flex justify-content-center" >
+                          <button id="btnTSP" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick = "analyseCircuit('TSP')"> <span data-translate="_btn_tsp_p1"></span> <br> <span data-translate="_btn_tsp_p2"></span> </button>
+                        </div>
+                        
                       </div>
                       <br>
                     </div>
@@ -285,16 +290,16 @@
                     <div class="card-header">
                         <ul class="nav nav-tabs card-header-tabs pull-right"  id="myTab" role="tablist">
                             <li class="nav-item">
-                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#DC1" role="tab" aria-controls="home" aria-selected="true"><span data-translate="_exampleTxt"></span><span> 1 </span></a>
+                                <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#DC1" role="tab" aria-controls="home" aria-selected="true"><span data-translate="_exampleTxt"></span><span> 1 </span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#DC2" role="tab" aria-controls="profile" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 2 </span></a>
+                                <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#DC2" role="tab" aria-controls="profile" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 2 </span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#DC3" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 3 </span></a>
+                                <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#DC3" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 3 </span></a>
                             </li>
                             <li class="nav-item">
-                              <a class="nav-link" id="contact-tab" data-toggle="tab" href="#DC4" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 4 </span></a>
+                              <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#DC4" role="tab" aria-controls="contact" aria-selected="false"><span data-translate="_exampleTxt"></span><span> 4 </span></a>
                           </li>
                         </ul>
                     </div>
@@ -752,7 +757,7 @@
                   <div class="modal-content border-dark no-print-border" id="modalcont">
                     <div class="modal-header">
                       <h5 class="modal-title" id="exampleModalLongTitle">URIsolve Analysis Results</h5>
-                      <button type="button" class="close no-print" data-dismiss="modal" aria-label="Close">
+                      <button type="button" class="close no-print" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
@@ -806,7 +811,7 @@
 
                         <button id="print" type="button" class="btn btn-secondary font-weight-light align-bottom col-md-1">
                             <img src="img/print.png" style="width: 22px;"></img>&nbsp;&nbsp;Print </button>
-                        <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-dismiss="modal">
+                        <button id="modal-btn-cancel" type="button" class="btn btn-primary font-weight-light align-bottom float-right col-md-2" data-bs-dismiss="modal">
                           <i class="fas fa-angle-double-left mr-2" aria-hidden="true"></i><span data-translate="_return"></span></button>
                       </fieldset>
                     </div>
@@ -822,7 +827,7 @@
                   <div class="modal-content">
                       <div class="modal-header">
                             <h4 class="modal-title text-center"><span data-translate="_login-welcome"></span></h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">&times;</button>
                       </div>
                       <div class="modal-body">
                           <div class="box">
@@ -952,7 +957,7 @@
               <div class="modal-content">
                 <div class="modal-header">
                   <h4 class=" text-center" id="logout-modal-title"><span data-translate="_hi-hello"></span></h4>
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <div class="modal-body">
                   <div class="box">
@@ -1103,10 +1108,12 @@
         <script type="text/javascript" src="js/fileup.js"></script>
         <script type="text/javascript" src="js/modalresults.js"></script>
         <script type="text/javascript" src="js/language.js"></script>
+        <script type="text/javascript" src="js/parseSchematic.js"></script>
 
         <script type="text/javascript" src="code/mcr/algMCR.js"></script>
         <script type="text/javascript" src="code/mtn/algMTN.js"></script>
         <script type="text/javascript" src="code/mcm/algMCM.js"></script>
+        <script type="text/javascript" src="code/tsp/algTSP.js"></script>
         <script type="text/javascript" src="code/analyse.js"></script>
 
         <script src="vendor/jsonviewer/app/App.js"></script>

@@ -211,7 +211,9 @@ $(function () {
             "_resultsMCR" :"Results",
             "_calcResultMCR": "Branch currents calculation",
             "_singleeq": "Equation",
-            "_table": "Table"
+            "_table": "Table",
+            "_btn_tsp_p1": "Superposition",
+            "_btn_tsp_p2": "Theorem"
         },
 
         // Language Switch - PT-PT
@@ -426,7 +428,9 @@ $(function () {
             "_resultsMCR" :"Resultados",
             "_calcResultMCR": "Cálculo das correntes nos ramos",
             "_singleeq": "Equação",
-            "_table":"Tabela"
+            "_table":"Tabela",
+            "_btn_tsp_p1": "Teorema da",
+            "_btn_tsp_p2": "Sobreposição",
         }
     };
 

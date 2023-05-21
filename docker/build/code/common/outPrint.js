@@ -220,10 +220,9 @@ function errorOutput(errList, method){
     }
     htmlstr += warnString;
     // Close button
-    htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button>'; 
+    htmlstr += '<button type="button" class="close" data-bs-dismiss="alert">&times;</button>'; 
     // Close panel
     htmlstr += '</div></div>' ;
-    
     return htmlstr;
 }
 
@@ -468,7 +467,7 @@ function warningOutput(errList){
     }
     htmlstr += warnString;
     // Close button
-    htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button>'; 
+    htmlstr += '<button type="button" class="close" data-bs-dismiss="alert">&times;</button>'; 
     // Close panel
     htmlstr += '</div></div>' ;
     
@@ -509,8 +508,8 @@ function outCircuitFundamentals(R, N, T){
         htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
         htmlstr += '<div class="btn-group btn-block" role="group">';
         htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_fundamentals_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
-        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
-        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-bs-toggle="collapse" ';
+        htmlstr += 'data-bs-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
         htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
 
        
@@ -574,8 +573,8 @@ function outCircuitInfo(F, Asources, Amps, totalCurrents){
         htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
         htmlstr += '<div class="btn-group btn-block" role="group">';
         htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_info_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
-        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
-        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-bs-toggle="collapse" ';
+        htmlstr += 'data-bs-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
         htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
 
        
@@ -599,7 +598,7 @@ function outCircuitInfo(F, Asources, Amps, totalCurrents){
         htmlstr += '<span class="mt-2 mb-2" style="display:inline-block">&nbsp; - ' + missing + '&nbsp;';
         htmlstr += '<span data-translate="_tipAmm1"></span>&nbsp; ' + totalCurrents + '&nbsp;<span data-translate="_tipAmm2"></span>';
         htmlstr += '</span></strong>';
-        htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button></div>';
+        htmlstr += '<button type="button" class="close" data-bs-dismiss="alert">&times;</button></div>';
      
 
         htmlstr += '</div>';
@@ -695,7 +694,7 @@ function outSupernodes(supernodes, orderedEquations, equationsV1){
 		// Add card
         htmlstr += '<div class="col-sm-12 col-lg-6 mt-3"><div class="card bg-light' + color + 'mb-3">';
         // Create Show Steps Collapse Panel
-        let btnstr ='<button class="btn btn-primary btn-sm float-right" type="button" data-toggle="collapse" data-target="#' + collapsePanel;
+        let btnstr ='<button class="btn btn-primary btn-sm float-right" type="button" data-bs-toggle="collapse" data-bs-target="#' + collapsePanel;
         btnstr += '" aria-expanded="false" data-translate="_snStepsBtn"></button>';
         // Add Supernode ID
         htmlstr += '<div class="card-body text-secondary"><h5 class="card-title">' + supernodes[i].ref + ' (' + snType + ') ' + btnstr +'</h5>';
@@ -1523,7 +1522,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
         // Add card
         htmlstr += '<div class="col-sm-12"><div class="card bg-light mb-3">';
         // Create Show Steps Collapse Button
-        let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-toggle="collapse" data-target="#collapseEquations"';
+        let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEquations"';
         btnstr += ' aria-expanded="false" data-translate="_snStepsBtn"></button>';
         // Add card body
         htmlstr += '<div class="card-body text-secondary mt-2 mb-2">';
@@ -1555,7 +1554,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
         
         // STEP #1 
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-1" data-toggle="collapse" data-target="#step1Panel';
+        btnstr += 'id="btn-1" data-bs-toggle="collapse" data-bs-target="#step1Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1570,7 +1569,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
 
         // STEP #2
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-2" data-toggle="collapse" data-target="#step2Panel';
+        btnstr += 'id="btn-2" data-bs-toggle="collapse" data-bs-target="#step2Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1585,7 +1584,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
 
         // STEP #3
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-3" data-toggle="collapse" data-target="#step3Panel';
+        btnstr += 'id="btn-3" data-bs-toggle="collapse" data-bs-target="#step3Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1600,7 +1599,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
 
         // STEP #4
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-4" data-toggle="collapse" data-target="#step4Panel';
+        btnstr += 'id="btn-4" data-bs-toggle="collapse" data-bs-target="#step4Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1615,7 +1614,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
 
         // STEP #5
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-5" data-toggle="collapse" data-target="#step5Panel';
+        btnstr += 'id="btn-5" data-bs-toggle="collapse" data-bs-target="#step5Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1632,7 +1631,7 @@ function outEquationSystem(simpEquations,strStep1, strStep2, strStep3, strStep4,
         if(strStep6.length > 1){
 
             btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-            btnstr += 'id="btn-6" data-toggle="collapse" data-target="#step6Panel" ';
+            btnstr += 'id="btn-6" data-bs-toggle="collapse" data-bs-target="#step6Panel" ';
             btnstr += 'aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
             // Add card
             htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -1884,7 +1883,7 @@ function outGndTip(bestGndPos){
             htmlstr = htmlstr.slice(0,htmlstr.lastIndexOf(','))+htmlstr.slice(htmlstr.lastIndexOf(',')+1);
     }
     htmlstr += '</span></strong>';
-    htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button></div></div>';
+    htmlstr += '<button type="button" class="close" data-bs-dismiss="alert">&times;</button></div></div>';
  
     return htmlstr;
 }
@@ -2169,8 +2168,8 @@ function outHTMLSections(){
 function outShowAllBtn(supernodesCollapse){
     
     // Create Show All Collapse Button
-    let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-toggle="collapse" ';
-    showAllbtn += 'data-target=".multi-collapse" aria-expanded="false" ';
+    let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-bs-toggle="collapse" ';
+    showAllbtn += 'data-bs-target=".multi-collapse" aria-expanded="false" ';
     showAllbtn += 'aria-controls="collapseR collapseN collapseT collapseE collapseF collapseA collapseAmp collapseType ';
     for(let i = 0; i< supernodesCollapse.length; i++){
         showAllbtn += supernodesCollapse[i] + ' ';

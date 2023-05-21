@@ -60,8 +60,8 @@
         htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
         htmlstr += '<div class="btn-group btn-block" role="group">';
         htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_fundamentals_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
-        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
-        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-bs-toggle="collapse" ';
+        htmlstr += 'data-bs-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
         htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
 
        
@@ -120,8 +120,8 @@
         htmlstr += '<div class="container"><div class="row ' + panStyle[i] +'">';
         htmlstr += '<div class="btn-group btn-block" role="group">';
         htmlstr += '<button type="button" class="btn ' + btnStyle[i]+'" data-translate="_info_'+ btnType[i] + '" style="width:100%; pointer-events: none;"></button>';
-        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-toggle="collapse" ';
-        htmlstr += 'data-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
+        htmlstr += '<button class="btn ' + btnStyle[i]+' btn-outline-dark border-0" type="button" data-bs-toggle="collapse" ';
+        htmlstr += 'data-bs-target="#' + btncollapse[i] + '" aria-expanded="false" aria-controls="'+btncollapse[i]+ '" style="height:100%;">';
         htmlstr += '<i class="fas fa-arrows-alt-v"></i> </button></div></div></div>'
 
        
@@ -145,7 +145,7 @@
         htmlstr += '<span class="mt-2 mb-2" style="display:inline-block">&nbsp; - ' + missing + '&nbsp;';
         htmlstr += '<span data-translate="_tipAmm1"></span>&nbsp; ' + totalCurrents + '&nbsp;<span data-translate="_tipAmm2"></span>';
         htmlstr += '</span></strong>';
-        htmlstr += '<button type="button" class="close" data-dismiss="alert">&times;</button></div>';
+        htmlstr += '<button type="button" class="close" data-bs-dismiss="alert">&times;</button></div>';
      
 
         htmlstr += '</div>';
@@ -416,7 +416,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
         // Add card
         htmlstr += '<div class="col-sm-12"><div class="card bg-light mb-3">';
         // Create Show Steps Collapse Button
-        let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-toggle="collapse" data-target="#collapseEquations"';
+        let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEquations"';
         btnstr += ' aria-expanded="false" data-translate="_snStepsBtn"></button>';
         // Add card body
         htmlstr += '<div class="card-body text-secondary mt-2 mb-2">';
@@ -447,7 +447,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
         
         // STEP #1 
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-1" data-toggle="collapse" data-target="#step1Panel';
+        btnstr += 'id="btn-1" data-bs-toggle="collapse" data-bs-target="#step1Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -462,7 +462,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
 
         // STEP #2
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-2" data-toggle="collapse" data-target="#step2Panel';
+        btnstr += 'id="btn-2" data-bs-toggle="collapse" data-bs-target="#step2Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -477,7 +477,7 @@ function outMeshesMCM(branchObjs, meshesObjs){
 
         // STEP #3
         btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
-        btnstr += 'id="btn-3" data-toggle="collapse" data-target="#step3Panel';
+        btnstr += 'id="btn-3" data-bs-toggle="collapse" data-bs-target="#step3Panel';
         btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
         // Add card
         htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
@@ -645,8 +645,8 @@ function outMeshesMCM(branchObjs, meshesObjs){
 function outShowAllBtnMCM(){
     
     // Create Show All Collapse Button
-    let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-toggle="collapse" ';
-    showAllbtn += 'data-target=".multi-collapse" aria-expanded="false" ';
+    let showAllbtn = '<button class="btn btn-primary btn-md lead float-right" id="showALL" type="button" data-bs-toggle="collapse" ';
+    showAllbtn += 'data-bs-target=".multi-collapse" aria-expanded="false" ';
     showAllbtn += 'aria-controls="collapseR collapseN collapseT collapseE collapseF collapseA collapseAmp collapseType ';
 
     showAllbtn += 'collapseEquations step1Panel step2Panel step3Panel step4Panel step5Panel step6Panel" ';

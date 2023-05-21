@@ -40,7 +40,7 @@ function openPublicationsModal(){
 
     let htmlcontent  = '<div class="modal-dialog modal-lg" role="document"><div class="modal-content">';
     htmlcontent += '<div class="modal-header"><h4 class="modal-title text-center"><span>'+title+'</span></h4>';
-    htmlcontent += '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button></div>';
+    htmlcontent += '<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">&times;</button></div>';
     htmlcontent += '<div class="modal-body"><div style="margin:20px;">';
     for (let i = 0; i< pubList.length; i++){
         htmlcontent += '<dl class="row"><dt class="col-1">'+pubList[i].year+'</dt><dd class="col-11 pl-4"">'+ pubList[i].ref+'. ';
