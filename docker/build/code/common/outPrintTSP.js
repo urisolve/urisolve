@@ -1,54 +1,124 @@
+function outHTMLResolutionNavTSP(){
+    var htmlstr = "";
+
+    // Add nav tabs
+    htmlstr += '<div class="container mt-3 sticky-top" style="background-color: #fff;">'
+    htmlstr += '<ul id="results-tabs" class="nav nav-pills nav-justified border border-secondary rounded">';
+    htmlstr += '<li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#main-tab">'
+    htmlstr += '<h5 data-translate="_mainTab"></h5></a></li>';
+    htmlstr += '</ul></div>';
+
+    // Add tab content
+    htmlstr += '<div id="pages-content" class="tab-content">';
+    // Add main tab content
+    htmlstr += '<div id="main-tab" class="container tab-pane fade in show active"></div>';
+
+    return htmlstr;
+}
+
+function outHTMLResolutionTabsTSP(order){
+    var htmlstr = "";
+
+    // Add nav tabs
+    order.forEach(o => {
+        source = o[0];
+        method = o[1];
+        htmlstr += `<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#resolution-${source.name.value}">`;
+        htmlstr += `<h5>${source.name.value}</h5></a></li>`;
+    });
+    // Add results tab
+    htmlstr += '<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#results-tab">'
+    htmlstr += '<h5 data-translate="_resultsTab"></h5></a></li>';
+
+    return htmlstr;
+}
+
+function outHTMLResolutionTabsContentTSP(order){
+    var htmlstr = "";
+
+    // Add results tab content
+    order.forEach(o => {
+        source = o[0];
+        method = o[1];
+
+        htmlstr += `<div id="resolution-${source.name.value}" class="container tab-pane fade in resolution-pages-content"></div>`;
+    });
+
+    htmlstr += '<div id="results-tab" class="container tab-pane fade in resolution-pages-content"></div>';
+
+    return htmlstr;
+}
+
+function outHTMLSectionsTSP(){
+    var htmlstr = "";
+    
+    // errors section
+    htmlstr += '<div id="errors"></div>'
+    // warnings section
+    htmlstr += '<div id="warnings"></div>'
+    // circuit image
+    htmlstr += '<div id="circuitImage">';
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+    htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
+    // selection section
+    htmlstr += '<div id="selection">';
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_selectionTitle"></h5></div></div>';
+    htmlstr += '<div id="selection-body" class="container mt-3"></div></div>';
+
+    return htmlstr;
+}
+
+function outHTMLSelectionTSP(){
+    var htmlstr = "";
+
+    // Add nav tabs
+    htmlstr += '<ul class="nav nav-pills nav-justified">';
+    htmlstr += '<li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#passive" data-translate="_passiveTab"></a></li>';
+    htmlstr += '<li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#interactive" data-translate="_interactiveTab"></a></li></ul>';
+    // Add tab content
+    htmlstr += '<div class="tab-content">';
+    // Add passive tab
+    htmlstr += '<div id="passive" class="container tab-pane fade in show active">';
+    htmlstr += '<div class="info-howto mt-3">';
+    htmlstr += '<p class="m-0" data-translate="_passiveInfo1" style="text-indent: 10px;"></p>';
+    htmlstr += '<p class="m-0" data-translate="_passiveInfo2" style="text-indent: 10px;"></p></div></div>';
+    // Add interactive tab
+    htmlstr += '<div id="interactive" class="container tab-pane fade in">';
+    htmlstr += '<div class="info-howto mt-3">';
+    htmlstr += '<p class="m-0" data-translate="_interactiveInfo1" style="text-indent: 10px;"></p>';
+    htmlstr += '<p class="m-0" data-translate="_interactiveInfo2" style="text-indent: 10px;"></p>';
+    htmlstr += '<ul class="m-0"> <li data-translate="_interactiveStep1" style="text-indent: 20px;"></li>';
+    htmlstr += '<li data-translate="_interactiveStep2" style="text-indent: 20px;"></li>';
+    htmlstr += '<li data-translate="_interactiveStep3" style="text-indent: 20px;"></li>';
+    htmlstr += '<li data-translate="_interactiveStep4" style="text-indent: 20px;"></li></ul>';
+    htmlstr += '<p class="m-0" data-translate="_interactiveInfo3" style="text-indent: 10px;"></p></div>';
+    htmlstr += '<ul class="selection-cards"></ul></div></div>';
+    htmlstr += '<div class="container mt-3 text-center">';
+    htmlstr += '<button id="calc-btn" class="btn btn-primary"><p class="m-0" data-translate="_btn_calcTSP"></button></div>';
+
+    return htmlstr;
+}
+
+    
+
+
 /**
  * This function populates it with the results of the analysis.
  * @param {Schematic} schematic The schematic to be analyzed
  * @param {jQuery} modal The container where to be populated
  */
 function populateModal(schematic, modal) {
-    // Get sources and probes
-    sourceTypes = ['Vdc', 'Vac', 'Idc', 'Iac'];
-    vectSources = vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower);
-    vectProbes = vectVProbe.concat(vectIProbe);
-    methods = ['MTN', 'MCR', 'MCM'];
-
-    // Create the modal
-    var dialog = modal.find('.modal-dialog');
-    var content = modal.find('.modal-content');
-
-    content.empty();
 
     // Add toast stack
     var toastStack = $('<div class="toast-container top-0 start-50 translate-middle-x"></div>');
 
-    // Create header
-    var header = $('<div class="modal-header"></div>');
-    header.append('<h5 class="modal-title">URIsolve Analysis Results</h5>');
-    var close = $('<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>');
-
-    header.append(close);
-
-    // Create body
-    var body = $('<div class="modal-body p-0"></div>');
 
     // Section #1 - Sticky composed of main circuit drawing and contributions table
-    mcHeader = $('<div class="section-header">Imagem do circuito</div>');
-    mainCircuit = $('<div id="main-circuit" class="drawing-container"></div>');
+
     ctHeader = $('<div class="section-header">Tabela de resultados</div>');
     table = $('<table class="contributions-table"></table>');
-    colapseBtn = $('<button id="main-colapse" class="colapse-btn w-100 d-flex align-items-center" data-bs-toggle="collapse" data-bs-target=".main-section" aria-expanded="true">Dados do circuito</button>');
-    colapseBtn.append('<i class="fa-solid fa-chevron-down ms-auto"></i>').click(() => colapseBtn.find('i').toggleClass('fa-chevron-down fa-chevron-up'));
-
-    main = $('<div class="main-section section"></div>');
-    main.append(mcHeader).append(mainCircuit).append(ctHeader).append(table);
-
-    // When the collapsible section is shown (i.e. expanded), set aria-expanded to "true"
-    main.on('shown.bs.collapse', function () {
-        $('button.colapse-btn').attr('aria-expanded', 'false');
-    });
-  
-    // When the collapsible section is hidden (i.e. collapsed), set aria-expanded to "false"
-    main.on('hidden.bs.collapse', function () {
-        $('button.colapse-btn').attr('aria-expanded', 'true');
-    });
 
     // Build results table
     tableHeader = $('<thead><tr></tr></thead>');
@@ -90,50 +160,10 @@ function populateModal(schematic, modal) {
     // Put the progress at 0%
     progress.trigger('updateProgress', {progress: 0});
 
-    //Make sticky
-    sticky = $(`<div class="modal-sticky sticky-sm-top colapsable"></div>`);
-    sticky.append(main).append(colapseBtn).append(progress);
-
-    // Section #2 - Selection
-    selection = $('<div class="modal-section selection-section"></div>');
-    selection.append(`<div class="section-header">Sele&ccedil;&atilde;o do m&eacute;todo de resolu&ccedil;&atilde;o</div>`);
-
-    // Add mode selection navbar
-    navbar = $('<ul class="nav nav-pills nav-justified"></ul>');
-    navbar.append('<li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#passive">Passivo</a></li>');
-    navbar.append('<li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#interactive">Interativo</a></li>');
-
-    // Add mode selection content
-    selContent = $('<div class="tab-content"></div>');
-    passive = $('<div id="passive" class="container tab-pane fade in show active"></div>');
-    interactive = $('<div id="interactive" class="container tab-pane fade in"></div>');
-
-    // Add passive mode content
-    passive.append('<div class="info-howto"><p class="m-0">O modo passivo permite resolver circuitos didaticamente, sem a possibilidade de selecionar a ordem ou m&eacute;todo de resolu&ccedil;&atilde;o dos subcircuitos.</p><p class="m-0">Para utilizar este modo, basta clicar no bot&atilde;o "Calcular", circuito ser&aacute; resolvido automaticamente utilizando o M&eacute;todo da Tens&atilde;o nos N&oacute;s. Este modo &eacute; ideal para quem procura uma solu&ccedil;&atilde;o r&aacute;pida, sem precisar de ajustar par&acirc;metros de resolu&ccedil;&atilde;o.</p></div>');
-    
-    // Add interactive mode content
-    interactive.append('<div class="info-howto"><p class="m-0">O modo interativo permite selecionar a ordem e m&eacute;todo de resolu&ccedil;&atilde;o para cada fonte do circuito.</p><p class="m-0">Para utilizar este modo:</p><ol>  <li>Selecione as fontes na imagem do circuito, presente nos dados do circuito, para as adicionar/remover &agrave; ordem de resolu&ccedil;&atilde;o que estar&aacute; presente abaixo</li>  <li>Posteriormente &eacute; poss&iacute;vel arrastar elementos na ordem para mais facilmente alterar a ordem</li>  <li>Selecione o m&eacute;todo de resolu&ccedil;&atilde;o de cada sub-circuito individualmente atrav&eacute;s do respectivo menu suspenso.</li>  <li>Quando estiver satisfeito com a ordem e os m&eacute;todos selecionados, pressione o bot&atilde;o "Calcular" para obter os resultados.</li></ol><p class="m-0">O modo interativo permite uma maior personaliza&ccedil;&atilde;o na resolu&ccedil;&atilde;o do circuito, permitindo a sele&ccedil;&atilde;o da ordem e m&eacute;todo de resolu&ccedil;&atilde;o mais adequados para cada fonte.</p></div>');
-    selectionCards = $('<ul class="selection-cards"></ul>');
-    interactive.append(selectionCards);
-    selection.sortable({
-        connectWith: ".selection-cards",
-        items: ".card",
-        helper: "clone",
-        tolerance: "touch",
-        handle: '.card-title',
-        cancelable: true,
-      });
-
-    // Add content to navbar
-    selContent.append(passive).append(interactive);
 
     // Add calculate button
-    calcBtn = $('<button class="btn btn-primary calc-btn">Calcular</button>');
     calcBtn.click(function() {
-        if($('#passive').hasClass('active')) {
-            // Passive mode
-            resolutionOrder = vectSources.map(s => [s, methods[0]]);
-        } else {
+
             if (selectionCards.find('.card').length != vectSources.length) {
                 // Show toast
                 var toast = $('<div class="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>');
@@ -156,88 +186,11 @@ function populateModal(schematic, modal) {
               
                 return;
             }  
-            // interactive mode
-            resolutionOrder = [];
 
-            // Get order
-            $('.selection-cards .card').each(function() {
-                source = $(this).find('.card-title').text();
-                method = $(this).find('select').val();
-                source = vectSources.find(s => s.name.value == source);
-                resolutionOrder.push([source, method]);
-            });
 
-        }
-        // Calculate
-        calculateTSP(schematic, modal, resolutionOrder);
-        // Update table
     });
 
-    calcBtnContainer = $('<div class="calc-btn-container text-center"></div>');
-    calcBtnContainer.append(calcBtn);
 
-    // Add navbar and content to selection section
-    selection.append(navbar).append(selContent).append(calcBtnContainer);
-
-    body.append(sticky).append(selection);
-
-    // Create footer
-    var footer = $('<div class="modal-footer"></div>');
-
-    // Create close button
-    var backBtn = $('<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><< Voltar</button>');
-
-    // Add close button to footer
-    footer.append(backBtn);
-
-    // Build modal
-    content.append(header).append(body).append(footer);
-    dialog.append(content);
-    // Add modal to page
-    modal.append(dialog).append(toastStack);
-
-    // Add main circuit drawing
-    redrawSchematic(schematic, mainCircuit);
-
-    // Add source selection cards
-    navbar.find('a[data-bs-toggle="pill"]').click(function() {
-        if($(this).attr('href') == '#interactive') {
-            // Interactive mode
-            $('.selection-cards').empty();
-
-            vectSources.forEach(cp => {
-                cpDiv = $('#main-circuit').find('.'+cp.id);
-                cpDiv.addClass('order-selectable').click(function() {
-                    if($(this).hasClass('order-selected')) {
-                        $('.selection-cards .card').each(function() {
-                            if($(this).find('.card-title').text() == cp.name.value) {
-                                $(this).remove(); 
-                            }
-                        });
-                    } else {
-                        card = $(`<li class="card"></li>`);
-                        card.append(`<div class="card-title">${cp.name.value}</div>`);
-                        card.append(`<select></select>`);
-                        methods.forEach(m => card.find('select').append(`<option>${m}</option>`));
-                        interactive.find('.selection-cards').append(card);
-                    }
-                    $(this).toggleClass('order-selected');
-                    $(this).toggleClass('order-selectable');
-                });
-            });
-        } else {
-            // Passive mode
-            vectSources.forEach(cp => {
-                cpDiv = $('#main-circuit').find('.'+cp.id);
-                cpDiv.removeClass('order-selectable');
-                cpDiv.removeClass('order-selected');
-                cpDiv.off('click');
-            });
-        }
-    });
-
-    // Collapse the main section (must be done after adding the main circuit drawing)
-    main.addClass('collapse');
 
     // Add scroll listener to modal
     modal.scroll(() => {

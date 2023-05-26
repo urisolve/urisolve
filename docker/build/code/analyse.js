@@ -15,6 +15,23 @@ include("code/common/makeNetlist.js");
 		};
 	}
 
+	//Reset schematic arrays
+    vectComponents = [];
+    vectResistor = [];
+    vectCapacitor = [];
+    vectInductor = [];
+    vectDcVoltPower = [];
+    vectAcVoltPower = [];
+    vectDcCurrPower = [];
+    vectAcCurrPower = [];
+    vectGND = [];
+    vectVProbe = [];
+    vectIProbe = [];
+    vectWires = [];
+    vectConnections = [];
+    vectNodes = [];
+    vectPorts = [];
+
 	//Parse the schematic file
 	var schematic = parseSchematic(fileContents[1]);
 
@@ -84,7 +101,8 @@ include("code/common/makeNetlist.js");
 	return{
 		first: false,
 		second: 0,
-		third: netlistTxt
+		third: netlistTxt,
+		fourth: schematic.data.object
 	};
 }
 
@@ -2145,7 +2163,8 @@ function common(method){
 	return {
 		first: false,
 		second: 0,
-		third: buildJson(load.third)
+		third: buildJson(load.third),
+		fourth: load.fourth
 	}
 }
 
@@ -2231,8 +2250,31 @@ function analyseCircuit(analysismet) {
             }, 500);
         break;
 		case "TSP":
-			$("#loadpage").hide();
-			alert("Not implemented yet!");
+			setTimeout(function() {
+				let retriesNumber = 5;
+				let successFlag = false;
+				for (let i = 0; i < retriesNumber; i++) {
+					try {
+						let data = common(analysismet);
+						if(!data.first){
+							$("#pdfPrintButton").hide();
+							$("#print").show();
+							loadFileAsTextTSP(data.third, data.fourth);
+						}
+						successFlag = true;
+					} catch (error) {
+						console.log("Error in TSP: " + error);
+						successFlag = false;
+					}
+					if (successFlag) {
+						break;
+					}
+					if(i== (retriesNumber-1)) {
+						alert("An error occurred. Please try again!");
+					}
+				}
+				$("#loadpage").hide();
+			}, 500);
 		break;
         default:
             $("#loadpage").hide();

@@ -121,3 +121,134 @@ function makeSubcircuit(schematic, source){
         }
     }
 }
+
+function outputTSP(jsonFile, schematic){
+    // Get sources and probes
+    sourceTypes = ['Vdc', 'Vac', 'Idc', 'Iac'];
+    vectSources = vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower);
+    vectProbes = vectVProbe.concat(vectIProbe);
+    methods = ['MTN', 'MCR', 'MCM'];
+
+    // Add navigation tabs
+    $('#results-board').html(outHTMLResolutionNavTSP());
+
+    // Add sections to main tab
+	$('#main-tab').html(outHTMLSectionsTSP());
+
+    // Populate warnings section (if any)
+
+    // Add circuit drawing
+    var mainCircuit = $('#circuitImage .circuit-widget');
+    cropWindow(schematic);
+    var mainDrawing = redrawSchematic(schematic, mainCircuit);
+
+    // Populate selection section
+    $('#selection-body').html(outHTMLSelectionTSP());
+
+
+    // Turn the viz. on
+	$("#contResults").show();
+	$("#loadpage").fadeOut(1000);
+    $("#results").show();
+	$('#results-modal').modal('show');
+
+
+    // Add cards to the selection section
+    $('#selection-body > ul').find('a[data-bs-toggle="pill"]').click(function() {
+        if($(this).attr('href') == '#interactive') {
+            // Interactive mode
+            $('.selection-cards').empty();
+
+            vectSources.forEach(cp => {
+                cpDiv = $('#circuitImage .drawing').find('.'+cp.id);
+                cpDiv.addClass('order-selectable').click(function() {
+                    if($(this).hasClass('order-selected')) {
+                        $('.selection-cards .card').each(function() {
+                            if($(this).find('.card-title').text() == cp.name.value) {
+                                $(this).remove(); 
+                            }
+                        });
+                    } else {
+                        card = $(`<li class="card"></li>`);
+                        card.append(`<div class="card-title">${cp.name.value}</div>`);
+                        card.append(`<select></select>`);
+                        methods.forEach(m => card.find('select').append(`<option>${m}</option>`));
+                        $('#interactive').find('.selection-cards').append(card);
+                    }
+                    $(this).toggleClass('order-selected');
+                    $(this).toggleClass('order-selectable');
+                });
+            });
+        } else {
+            // Passive mode
+            vectSources.forEach(cp => {
+                cpDiv = $('#circuitImage .drawing').find('.'+cp.id);
+                cpDiv.removeClass('order-selectable');
+                cpDiv.removeClass('order-selected');
+                cpDiv.off('click');
+            });
+        }
+    });
+
+    // Make selection cards sortable
+    $('#selection').sortable({
+        connectWith: ".selection-cards",
+        items: ".card",
+        helper: "clone",
+        tolerance: "touch",
+        handle: '.card-title',
+        cancelable: true,
+    });
+
+    // Handle calc button
+    $('#calc-btn').click(function() {
+        if($('#passive').hasClass('active')) {
+            // Passive mode
+            resolutionOrder = vectSources.map(s => [s, methods[0]]);
+        } else {
+            if ($('.selection-cards').find('.card').length != vectSources.length){
+                alert("Please select all sources");
+                return;
+            }
+            // Interactive mode
+            resolutionOrder = [];
+            // Get order
+            $('.selection-cards .card').each(function() {
+                source = $(this).find('.card-title').text();
+                method = $(this).find('select').val();
+                source = vectSources.find(s => s.name.value == source);
+                resolutionOrder.push([source, method]);
+            });
+        }
+        // Add resolution sections
+        $('.resolution-item').remove();
+        $('.resolution-pages-content').remove();
+        $('#results-tabs').append(outHTMLResolutionTabsTSP(resolutionOrder));
+        $('#pages-content').append(outHTMLResolutionTabsContentTSP(resolutionOrder));
+        // Calculate
+        //calculateTSP(schematic, modal, resolutionOrder);
+        // Update table
+
+        // Update Dictionary Language
+	    let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+	    if(language == "english")
+		    set_lang(dictionary.english);
+	    else	
+	    	set_lang(dictionary.portuguese);
+    });
+
+    
+    // Update Dictionary Language
+	let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+	if(language == "english")
+		set_lang(dictionary.english);
+	else	
+		set_lang(dictionary.portuguese);
+}
+
+function loadFileAsTextTSP(data, schematic){
+    jsonFile = JSON.parse(data);
+    console.log(jsonFile);
+
+    outputTSP(jsonFile, schematic);
+}

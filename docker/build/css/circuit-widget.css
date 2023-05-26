@@ -1,0 +1,698 @@
+.drawing{
+    position: relative;
+    margin: auto;
+    background-color: #e7e7e7;
+    background-image: radial-gradient(grey 1px, transparent 0);
+}
+
+.drawing.legacy {
+    background-color: #fff6c8;
+}
+
+.drawing-toolbar {
+    display: flex;
+    text-align: left;
+    align-items: center;
+    position: relative;
+    height: 35px;
+    background-color: steelblue;
+    border-bottom: 1px solid black;
+}
+
+ /* Style for the toolbar buttons */
+.toolbar-button {
+    background-color: steelblue;
+    border: none;
+    border-bottom: 1px solid black;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 0px;
+}
+
+.toolbar-button{
+    width: 35px;
+    height: 35px;
+    background-position: center;
+    margin-right: 5px;
+}
+
+.toolbar-button.active {
+    background-color: #396a92;
+}
+
+.toolbar-button:hover {
+    background-color: #6c9dc5;
+}
+
+.grid-button {
+    background-image: url('../img/circuit-widget-icons/gridIcon.svg');
+}
+
+.wire-button {
+    background-image: url('../img/circuit-widget-icons/cwIcon.svg');
+}
+
+.style-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 35px;
+    width: 120px;
+    margin: 0px;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 25px;
+    margin: auto;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    width: 100px;
+    height: 25px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #fef2b1;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "Modern";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    height: 25px;
+    width: 50px;
+    border-radius: 14px;
+    background-color: steelblue;
+    border: 0.2px solid black;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:after {
+    height: 25px;
+    margin-right: 7px;
+    content: "Legacy";
+    display: flex;
+    align-items: center;
+    justify-content: right;
+  }
+
+  
+  input:checked + .slider {
+    background-color: #dddddd;
+  }
+  
+  input:checked + .slider:before {
+    position: absolute;
+    content: "Legacy";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25px;
+    width: 50px;
+    border-radius: 14px;
+    background-color: steelblue;
+    border: 0.2px solid black;
+    -webkit-transition: .4s;
+    transition: .4s;
+    -webkit-transform: translateX(50px);
+    -ms-transform: translateX(50px);
+    transform: translateX(50px);
+  }
+  
+  input:checked + .slider:after {
+    height: 25px;
+    margin-left: 7px;
+    content: "Modern";
+    display: flex;
+    align-items: center;
+    justify-content: left;
+  }
+
+/* Style for the component container and internal grid */
+.cp-container {
+    width: calc(60px*var(--scale));
+    height: calc(60px*var(--scale));
+    position: absolute;
+    margin: 0px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(12, calc(5px*var(--scale)));
+    grid-template-rows: repeat(12, calc(5px*var(--scale)));
+    align-items: center;
+    justify-items: center;
+}
+/* Style for the component grid cells (other than GND and probes) */
+.cp-port-up {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 1/3;
+    grid-column: 5/9;
+}
+
+.cp-port-left {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 5/9;
+    grid-column: 1/3;
+}
+
+.cp-symbol {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 3/11;
+    grid-column: 3/11;
+}
+
+.cp-port-right {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 5/9;
+    grid-column: 11/13;
+}
+
+.cp-port-down {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 11/13;
+    grid-column: 5/9;
+}
+
+/* Style for the prove cells*/
+.probe-cell-up {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 1/9;
+    grid-column: 3/11;
+}
+
+.probe-cell-up.mirror {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 5/13;
+    grid-column: 3/11;
+}
+
+.probe-cell-down {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 5/13;
+    grid-column: 3/11;
+}
+
+.probe-cell-down.mirror {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 1/9;
+    grid-column: 3/11;
+}
+
+.probe-cell-left {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 3/11;
+    grid-column: 1/9;
+}
+
+.probe-cell-left.mirror {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 3/11;
+    grid-column: 5/13;
+}
+
+.probe-cell-right {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 3/11;
+    grid-column: 5/13;
+}
+.probe-cell-right.mirror {
+    width: calc(40px*var(--scale));
+    height: calc(40px*var(--scale));
+    grid-row: 3/11;
+    grid-column: 1/9;
+}
+
+/* Style for the VProbe connectors */
+.vprobe-port-down1 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 9/11;
+    grid-column: 3/7;
+}
+
+.vprobe-port-down2 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 9/11;
+    grid-column: 7/11;
+}
+
+.vprobe-port-up1 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 3/5;
+    grid-column: 3/7;
+}
+
+.vprobe-port-up2 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 3/5;
+    grid-column: 7/11;
+}
+
+.vprobe-port-left1 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 3/7;
+    grid-column: 3/5;
+}
+
+.vprobe-port-left2 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 7/11;
+    grid-column: 3/5;
+}
+
+.vprobe-port-right1 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 3/7;
+    grid-column: 9/11;
+}
+
+.vprobe-port-right2 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 7/11;
+    grid-column: 9/11;
+}
+
+/* Style for the IProbe connectors */
+.iprobe-port-vertical1 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 1/3;
+    grid-column: 5/9;
+}
+
+.iprobe-port-vertical2 {
+    width: calc(20px*var(--scale));
+    height: calc(10px*var(--scale));
+    grid-row: 11/13;
+    grid-column: 5/9;
+}
+
+.iprobe-port-horizontal1 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 5/9;
+    grid-column: 1/3;
+}
+
+.iprobe-port-horizontal2 {
+    width: calc(10px*var(--scale));
+    height: calc(20px*var(--scale));
+    grid-row: 5/9;
+    grid-column: 11/13;
+}
+/* Style for the cells images*/
+.R.US{
+    background-image: url('../img/circuit-widget-icons/R_US_40px.svg');
+    background-size: 100% 100%;
+}
+.R.US.legacy { background-image: url('../img/circuit-widget-icons/R_US_40px_legacy.svg');}
+
+.R.european{
+    background-image: url('../img/circuit-widget-icons/R_EU_40px.svg');
+    background-size: 100% 100%;
+}
+.R.european.legacy { background-image: url('../img/circuit-widget-icons/R_EU_40px_legacy.svg');}
+
+.C.neutral {
+    background-image: url('../img/circuit-widget-icons/C_neutral_40px.svg');
+    background-size: 100% 100%;
+}
+.C.neutral.legacy { background-image: url('../img/circuit-widget-icons/C_neutral_40px_legacy.svg');}
+
+.C.polar {
+    background-image: url('../img/circuit-widget-icons/C_polar_40px.svg');
+    background-size: 100% 100%;
+}
+.C.polar.legacy { background-image: url('../img/circuit-widget-icons/C_polar_40px_legacy.svg');}
+
+.L {
+    background-image: url('../img/circuit-widget-icons/L_40px.svg');
+    background-size: 100% 100%;
+}
+.L.legacy { background-image: url('../img/circuit-widget-icons/L_40px_legacy.svg');}
+
+.Vac {
+    background-image: url('../img/circuit-widget-icons/Vac_40px.svg');
+    background-size: 100% 100%;
+}
+.Vac.legacy { background-image: url('../img/circuit-widget-icons/Vac_40px_legacy.svg');}
+
+.Vdc {
+    background-image: url('../img/circuit-widget-icons/Vdc_40px.svg');
+    background-size: 100% 100%;
+}
+.Vdc.legacy { background-image: url('../img/circuit-widget-icons/Vdc_40px_legacy.svg');}
+
+.Iac {
+    background-image: url('../img/circuit-widget-icons/Iac_40px.svg');
+    background-size: 100% 100%;
+}
+.Iac.legacy { background-image: url('../img/circuit-widget-icons/Iac_40px_legacy.svg');}
+
+.Idc {
+    background-image: url('../img/circuit-widget-icons/Idc_40px.svg');
+    background-size: 100% 100%;
+}
+.Idc.legacy { background-image: url('../img/circuit-widget-icons/Idc_40px_legacy.svg');}
+
+.VProbe, .VProbe.rotated-180.mirror {
+    background-image: url('../img/circuit-widget-icons/Vprobe_rot0_40px.svg');
+    background-size: 100% 100%;
+}
+.VProbe.rotated-90, .VProbe.mirror.rotated-90 {
+    background-image: url('../img/circuit-widget-icons/Vprobe_rot90_40px.svg');
+}
+.VProbe.rotated-180, .VProbe.mirror {
+    background-image: url('../img/circuit-widget-icons/Vprobe_rot180_40px.svg');
+}
+.VProbe.rotated-270 {
+    background-image: url('../img/circuit-widget-icons/Vprobe_rot270_40px.svg');
+}
+.VProbe.legacy { background-image: url('../img/circuit-widget-icons/Vprobe_40px_legacy.svg');}
+
+.IProbe, .IProbe.rotated-180.mirror {
+    background-image: url('../img/circuit-widget-icons/Iprobe_rot_0_40px.svg');
+    background-size: 100% 100%;
+}
+.IProbe.rotated-90, .IProbe.mirror.rotated-90 {
+    background-image: url('../img/circuit-widget-icons/Iprobe_rot_90_40px.svg');
+}
+.IProbe.rotated-180, .IProbe.mirror {
+    background-image: url('../img/circuit-widget-icons/Iprobe_rot_180_40px.svg');
+}
+.IProbe.rotated-270 {
+    background-image: url('../img/circuit-widget-icons/Iprobe_rot_270_40px.svg');
+}
+.IProbe.legacy { background-image: url('../img/circuit-widget-icons/Iprobe_40px_legacy.svg');}
+
+.gnd {
+    position: absolute;
+    height: calc(24px*var(--scale));
+    width: calc(24px*var(--scale));
+    background-image: url('../img/circuit-widget-icons/GND_24px.svg');
+    background-size: 100% 100%;
+}
+.gnd.legacy { background-image: url('../img/circuit-widget-icons/GND_24px_legacy.svg');}
+
+/* Style for the wires */
+.wire {
+    position:absolute;
+    background-color: #2d2d2d;
+}
+.wire.legacy { background-color: darkblue;}
+
+.node {
+    position: absolute;
+    height: calc(7px*var(--scale));
+    width: calc(7px*var(--scale));
+    background-color: #2d2d2d;
+    border-radius: 50%;
+}
+.node.legacy {background-color: darkblue;}
+
+.wire-label {
+    display: inline-block;
+    text-align: center;
+    height: calc(20px*var(--scale));
+    min-width: calc(20px*var(--scale));
+    border: 1px solid #074d91;
+  }
+    .wire-label.legacy {
+        justify-content: left;
+        padding: 0px;
+        border: none;
+    }
+
+  .wire-label.legacy::before {
+    content: "";
+    position: absolute;
+    left: calc(-2px*var(--scale));
+    bottom: calc(0px*var(--scale));
+    width: calc(10px*var(--scale));
+    height: calc(15px*var(--scale));
+    border: 1px solid purple;
+    border-right: none;
+    border-top: none;
+  }
+
+  .wire-label-line{
+    background-color: #074d91;
+    height: 1px;
+  }
+  .wire-label-line.legacy{
+    background-color: purple;
+  }
+
+/* Style for the connectors images*/
+.connect-vertical {
+    background-image: url('../img/circuit-widget-icons/connector_vert.svg');
+    background-size: 100% 100%;
+}
+.connect-vertical.legacy { background-image: url('../img/circuit-widget-icons/connector_vert_legacy.svg');}
+
+.connect-horizontal {
+    background-image: url('../img/circuit-widget-icons/connector_hor.svg');
+    background-size: 100% 100%;
+}
+.connect-horizontal.legacy { background-image: url('../img/circuit-widget-icons/connector_hor_legacy.svg');}
+
+
+/* Style for image transformations*/
+.rotated-90 { 
+    -webkit-transform:rotate(90deg);
+    -moz-transform:rotate(90deg);
+    -o-transform:rotate(90deg);
+    transform:rotate(90deg);
+}
+.rotated-180 { 
+    -webkit-transform:rotate(180deg);
+    -moz-transform:rotate(180deg);
+    -o-transform:rotate(180deg); 
+    transform:rotate(180deg);
+}
+.rotated-270 { 
+    -webkit-transform:rotate(270deg);
+    -moz-transform:rotate(270deg);
+    -o-transform:rotate(270deg); 
+    transform:rotate(270deg);
+}
+
+.mirror {
+    transform:scaleY(-1);
+    -webkit-transform:scaleY(-1);
+    -moz-transform:scaleY(-1);
+    -o-transform:scaleY(-1);
+}
+
+.mirror.rotated-0 { 
+    -webkit-transform: scaleY(-1);
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+}
+.mirror.rotated-90 { 
+    -webkit-transform: scaleX(-1) rotate(90deg);
+    -moz-transform: scaleX(-1) rotate(90deg);
+    -o-transform: scaleX(-1) rotate(90deg);
+    transform: scaleX(-1) rotate(90deg); 
+}
+.mirror.rotated-180 { 
+    -webkit-transform: scaleY(-1) rotate(180deg);
+    -moz-transform: scaleY(-1) rotate(180deg);
+    -o-transform: scaleY(-1) rotate(180deg);
+    transform: scaleY(-1) rotate(180deg);
+}
+.mirror.rotated-270 { 
+    -webkit-transform: scaleX(-1) rotate(270deg);
+    -moz-transform: scaleX(-1) rotate(270deg);
+    -o-transform: scaleX(-1) rotate(270deg);
+    transform: scaleX(-1) rotate(270deg);
+}
+
+/* Style for the component labels */
+.label > span{
+    display: block;
+    white-space: nowrap;
+    color: black;
+    font-family: "Liberation Sans", sans-serif;
+    font-size: calc(17px*var(--scale));
+    font-weight: 100;
+    text-align: left;
+    padding: 0px;
+}
+
+.h-label {
+    height: auto;
+    width: auto;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+    white-space: nowrap;
+}
+.h-label > span{
+    display: block;
+    color: black;
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 100;
+    text-align: left;
+    padding: 0px;
+}
+
+/* Style for the component menu */
+.menu {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    border: 1px solid black;
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.menu-navbar {
+    width: 100%;
+    height: 8%;
+    color: white;
+    background-color: steelblue;
+    border-bottom: 1px solid grey;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 0px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.menu-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 6%;
+    background-color: indianred;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 100;
+    border-radius: 3px;
+}
+.menu-close:hover {
+    background-color: #f09c9c;
+  }
+
+.menu-title {
+    display: inline-block;
+    width: 95%;
+    text-align: center;
+    padding: 0px;
+}
+
+.menu-content {
+    height: 77%;
+    font-size: 12px;
+    font-weight: 100;
+    margin-bottom: 2px;
+    padding: 0px;
+    margin: 0px;
+    background-color: #dddddd;
+}
+
+.menu-content > div {
+    display: flex;
+    align-items: center;
+    height: auto;
+    padding: 3px;
+}
+
+.menu-content > div > input {
+    height: auto;
+    display: inline-block;
+    text-align: left;
+    margin: 2px;
+    padding: 0px;
+}
+
+.menu-content > div > select{
+    height: auto;
+    display: inline-block;
+    text-align: left;
+    margin: 2px;
+    padding: 0px;
+}
+
+.menu-buttons {
+    height: 15%;
+    background-color: steelblue;
+    border-top: 0.5px solid grey;
+    text-align: right;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 2px;
+    margin: 0px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.menu-button {
+    display: inline-block;
+    position:bottom;
+    border: 0.5px solid grey;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 100;
+    padding: 5px;
+    margin: 5px;
+}
+
+.menu-button:hover {
+    background-color: lightgrey;
+}
+
+.order-selectable {
+    outline: gray solid 1px;
+    outline-offset: -1px;
+}
+
+.order-selectable:hover {
+    outline: #0f4e81 solid 1px;
+    outline-offset: -1px;
+}
+
+.order-selected {
+    outline: green solid 1px;
+    outline-offset: -1px;
+}

@@ -469,6 +469,7 @@ function connectWires(point, pointInfo, checkedWires = []){
 
     let wireConnections = [];
     let portConnections = [];
+    let labelWires = [];
     checkedWires.push(pointInfo.wire);
     // Check if the point is connected to a wire
     vectWires.filter(w => w.id !== pointInfo.wire).forEach(w => {
@@ -492,7 +493,10 @@ function connectWires(point, pointInfo, checkedWires = []){
                     }
                 }
             }
-            else w.wire = 'zerowire';
+            else {
+                w.wire = 'label-wire';
+                labelWires.push(w);
+            }
 
             // Remove the wire from the wires list
             vectWires = vectWires.filter(w2 => w2.id !== w.id);
@@ -501,7 +505,7 @@ function connectWires(point, pointInfo, checkedWires = []){
             // If the wire is connected, add it to the segments list
             segments.push(w);
             // If the wire has size 0, it is a label
-            if(w.end.x === w.begin.x || w.end.y === w.begin.y){
+            if(w.end.x !== w.begin.x || w.end.y !== w.begin.y){
                 wireConnections.push({wire: w.id, point: "end"});
                 if(!checkedWires.includes(w.id)){
                     // And check for connections at the other end of the wire
@@ -517,7 +521,10 @@ function connectWires(point, pointInfo, checkedWires = []){
                     }
                 }
             }
-            else w.wire = 'zerowire';
+            else {
+                w.wire = 'label-wire';
+                labelWires.push(w);
+            }
 
             // Remove the wire from the wires list
             vectWires = vectWires.filter(w2 => w2.id !== w.id);
@@ -545,6 +552,17 @@ function connectWires(point, pointInfo, checkedWires = []){
         wire[c.point].connectedWires.push(pointInfo);
         wire[c.point].connectedPorts = point.connectedPorts;
     });
+
+    // Save connections to zero length wires
+    labelWires.forEach(wire => {
+        wire.begin.connectedWires = wireConnections;
+        wire.begin.connectedWires.push(pointInfo);
+        wire.begin.connectedPorts = point.connectedPorts;
+        wire.end.connectedWires = wireConnections;
+        wire.end.connectedWires.push(pointInfo);
+        wire.end.connectedPorts = point.connectedPorts;
+    });
+
     portConnections.forEach(p => {
         // Get the port object
         port = vectComponents.find(c => c.id === p.component).port[p.port];

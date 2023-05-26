@@ -427,11 +427,12 @@ function redrawSchematic(schematic, container){
         hlabel.hide();
 
         // Add hammer.js touch events to the component so that it can trigger double tap on mobile
-        var myElement = container.find('.'+cp.id)[0];
-        var hammer = new Hammer(myElement);
+        //var myElement = container.find('.'+cp.id)[0];
+        //var hammer = new Hammer(myElement);
 
         // Build the properties menu on double click
-        hammer.on("doubletap", function(event) {
+        //hammer.on("doubletap", function(event) {
+        drawing.find($('.'+cp.id)).dblclick(function(){
             drawing = container.find('.drawing');
             drawing.find(drawing.find($('.menu'))).remove();
             // Build the menu elements
@@ -440,7 +441,7 @@ function redrawSchematic(schematic, container){
             // Build the menu header
             navbar = $(`<div class="menu-navbar col-12"></div>`)
             title = $(`<div class="menu-title">${cp.name.value}</div>`);
-            closeButton = $(`<div class="menu-close "><i class="fa-solid fa-xmark"</div>`);
+            closeButton = $(`<div class="menu-close "><i class="fas fa-times fa-sm"</div>`);
             closeButton.click(function(){
                 drawing.find($('.menu')).remove();
             });
@@ -1215,9 +1216,8 @@ function redrawSchematic(schematic, container){
             var top = Math.max(drawingOffset.top, Math.min(labelOffset.top, drawingOffset.top + drawingHeight - labelHeight));
             label.offset({left: left, top: top});
             }
-            
-            labelPos = label.position();
-            wirePos = label.parent().position();
+            labelPos = {top: parseFloat(label.css('top')), left: parseFloat(label.css('left'))};
+            wirePos = {top: parseFloat(label.parent().css('top')),left: parseFloat(label.parent().css('left'))};
             x2 = labelPos.left + wirePos.left + xLeft;
             y2 = labelPos.top + wirePos.top + yTop +20;
             drawWireLine(wire, x2, y2, xLeft, yTop, scale, drawing);
