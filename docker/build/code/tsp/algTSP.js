@@ -140,7 +140,6 @@ function outputTSP(jsonFile, schematic){
     // Add circuit drawing
     var mainCircuit = $('#circuitImage .circuit-widget');
     cropWindow(schematic);
-    var mainDrawing = redrawSchematic(schematic, mainCircuit);
 
     // Populate selection section
     $('#selection-body').html(outHTMLSelectionTSP());
@@ -152,6 +151,11 @@ function outputTSP(jsonFile, schematic){
     $("#results").show();
 	$('#results-modal').modal('show');
 
+    // Add circuit drawings
+    $('#results-modal').on('shown.bs.modal', function() {
+        var mainDrawing = redrawSchematic(schematic, mainCircuit);
+        // Scale drawing by 50%
+    });
 
     // Add cards to the selection section
     $('#selection-body > ul').find('a[data-bs-toggle="pill"]').click(function() {

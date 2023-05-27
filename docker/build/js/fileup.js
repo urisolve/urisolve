@@ -152,10 +152,42 @@ function handleFileSelect (e) {
             reader.onload = function(e) {
                 //alert(e.target.result);
                 fileContents[1] = e.target.result;
+                //Parse the schematic file
+                var schematic = parseSchematic(e.target.result);
+
+                // Check for errors
+                if(schematic.errorFlag){
+                    alert("Error parsing schematic file!!");
+                    return{
+                        first: true,
+                        second: 1,
+                        third: schematic.errorReasonCodes
+                    };
+                }
+                cropWindow(schematic.data.object);
+                preview = $('<div id="circuit-preview"></div>');
+                image_holder.css('max-height', '150px').css('max-width', '150px').append(preview);
+
+                // Add circuit image to the page
+                var circuitImage = redrawSchematic(schematic.data.object, preview, false);
+
+                // Scale circuit image
+                var maxWidth = 150;
+                var widgetWidth = preview.width();
+                var scale = maxWidth/widgetWidth;
+                if(scale < 1){
+                    console.log("scale: " + scale);
+                    preview.css('transform', 'scale(' + scale + ')');
+                    preview.css('transform-origin', 'top left');
+                }
+                image_holder.show();
             };
             reader.readAsText(files[i]);
+
+            
             //$("#input-form")[0].reset();
         }
+
     }
     console.log(fileContents);
 };

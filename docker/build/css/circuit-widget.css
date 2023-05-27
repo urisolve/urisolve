@@ -430,7 +430,7 @@
 
 /* Style for the wires */
 .wire {
-    position:absolute;
+    position: absolute;
     background-color: #2d2d2d;
 }
 .wire.legacy { background-color: darkblue;}
@@ -553,6 +553,7 @@
     font-weight: 100;
     text-align: left;
     padding: 0px;
+    z-index: 1;
 }
 
 .h-label {
@@ -562,6 +563,7 @@
     border: 1px solid black;
     padding: 5px;
     white-space: nowrap;
+    z-index: 2;
 }
 .h-label > span{
     display: block;

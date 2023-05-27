@@ -7,11 +7,11 @@ include("code/common/makeNetlist.js");
  function loadFile(method){
 	// Caso não tenha sido inserida uma Netlist
 	if (!fileContents[1]) {
-		alert("Submit netlist first!!");
+		alert("Submit a schematic first!!");
 		return{
 			first: true,
 			second: 1,
-			third: "No netlist file found"
+			third: "No schematic file found"
 		};
 	}
 
