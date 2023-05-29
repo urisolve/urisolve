@@ -23,12 +23,19 @@ function outHTMLResolutionTabsTSP(order){
     order.forEach(o => {
         source = o[0];
         method = o[1];
-        htmlstr += `<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#resolution-${source.name.value}">`;
-        htmlstr += `<h5>${source.name.value}</h5></a></li>`;
+
+        // Add resolution tab if not already present
+        if($('#results-tabs').find('.resolution-item > a[href="#resolution-'+source.name.value+'"]').length === 0){
+            htmlstr += `<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#resolution-${source.name.value}">`;
+            htmlstr += `<h5>${source.name.value}</h5></a></li>`;
+        }
     });
-    // Add results tab
-    htmlstr += '<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#results-tab">'
-    htmlstr += '<h5 data-translate="_resultsTab"></h5></a></li>';
+
+    // Add results tab if not already present
+    if($('#results-tabs').find('.resolution-item > a[href="#results-tab"]').length === 0){
+        htmlstr += '<li class="nav-item resolution-item"><a class="nav-link" data-bs-toggle="pill" href="#results-tab">'
+        htmlstr += '<h5 data-translate="_resultsTab"></h5></a></li>';
+    }
 
     return htmlstr;
 }
@@ -36,15 +43,20 @@ function outHTMLResolutionTabsTSP(order){
 function outHTMLResolutionTabsContentTSP(order){
     var htmlstr = "";
 
-    // Add results tab content
     order.forEach(o => {
         source = o[0];
         method = o[1];
 
-        htmlstr += `<div id="resolution-${source.name.value}" class="container tab-pane fade in resolution-pages-content"></div>`;
+        // Add resolution tab content if not already present
+        if($('#pages-content').find('#resolution-'+source.name.value).length === 0){
+            htmlstr += `<div id="resolution-${source.name.value}" class="container tab-pane fade in resolution-pages-content"></div>`;
+        }
     });
 
-    htmlstr += '<div id="results-tab" class="container tab-pane fade in resolution-pages-content"></div>';
+    // Add results tab content if not already present
+    if($('#pages-content').find('#results-tab').length === 0){
+        htmlstr += '<div id="results-tab" class="container tab-pane fade in resolution-pages-content"></div>';
+    }
 
     return htmlstr;
 }
@@ -53,9 +65,9 @@ function outHTMLSectionsTSP(){
     var htmlstr = "";
     
     // errors section
-    htmlstr += '<div id="errors"></div>'
+    htmlstr += '<div id="errors-main"></div>'
     // warnings section
-    htmlstr += '<div id="warnings"></div>'
+    htmlstr += '<div id="warnings-main"></div>'
     // circuit image
     htmlstr += '<div id="circuitImage">';
     htmlstr += '<div class="container mt-3">';
@@ -94,7 +106,7 @@ function outHTMLSelectionTSP(){
     htmlstr += '<li data-translate="_interactiveStep3" style="text-indent: 20px;"></li>';
     htmlstr += '<li data-translate="_interactiveStep4" style="text-indent: 20px;"></li></ul>';
     htmlstr += '<p class="m-0" data-translate="_interactiveInfo3" style="text-indent: 10px;"></p></div>';
-    htmlstr += '<ul class="selection-cards"></ul></div></div>';
+    htmlstr += '<ul class="selection-cards d-flex"></ul></div></div>';
     htmlstr += '<div class="container mt-3 text-center">';
     htmlstr += '<button id="calc-btn" class="btn btn-primary"><p class="m-0" data-translate="_btn_calcTSP"></button></div>';
 
@@ -102,6 +114,130 @@ function outHTMLSelectionTSP(){
 }
 
     
+function outHTMLSectionsMCM_TSP(cp) {
+    htmlstr = '';
+
+    // Errors & Warnings section
+    htmlstr += '<div id="errors"></div><div id="warnings"></div>';
+
+    // Add circuit image
+    htmlstr += `<div id="circuitImage">`;
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+    htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
+
+    htmlstr += '<div id= "contResults">';  
+    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
+    
+    // Fundamental variables
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_fundamentalsTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="fundamentalVars"></div><div class="container mt-3">';
+
+    // Circuit information
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
+
+    //Method Equations
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshNumberTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="meshEquations"></div>';
+
+    //Meshes
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="Meshes"></div>';
+
+    // Equation System
+    htmlstr += '<div id="eqSys"></div>';
+
+    // Results Mesh currents
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resMesh"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="resultsCurrentsMesh"></div></div>';
+
+    // Currents data
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
+
+    // Results
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resBranch"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="resultsCurrentsBranch"></div></div>';
+
+    return htmlstr;
+}
+
+function outHTMLSectionsMCR_TSP(cp){
+    let htmlstr = '';
+
+    // Warnings & Errors section
+    htmlstr += '<div id="errors"></div><div id="warnings"></div>';
+
+    // Add circuit image
+    htmlstr += `<div id="circuitImage">`;
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+    htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
+
+    htmlstr += '<div id= "contResults">';  
+    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
+    
+    // Fundamental variables
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_fundamentalsTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="fundamentalVars"></div><div class="container mt-3">';
+
+    // Circuit information
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
+
+    // Currents data
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
+
+    // Nodes information
+    //htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_knlTitle"></h5></div></div>';
+    //htmlstr += '<div class="container mt-3"><div class="row row-tile" id="currentsKNL">';
+
+    // KNL equations
+    htmlstr += '<div id="KNLEquations"></div>';
+
+    //Method Equations
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshNumberTitleMcr"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="meshEquations"></div>';
+
+    //Meshes
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_MeshTitleMCR"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="Meshes"></div>';
+
+    // Equation System
+    
+   htmlstr += '<div id="eqSys"></div>';
+
+    // Results Mesh currents
+    //htmlstr += '<div class="container mt-3">';
+    //htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resMesh"></h5></div></div>';
+    //htmlstr += '<div class="container mt-3" id="resultsCurrentsMesh"></div></div>';
+
+    // Results
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resultsMCR"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="resultsCurrentsBranch"></div></div>';
+    
+    return htmlstr;
+
+}
+
+
+
+
+
+
 
 
 /**
@@ -218,97 +354,5 @@ function populateModal(schematic, modal) {
                 }
             }
         });
-    });
-}
-
-/**
- * This function handles the generation of the resolution order and the calculation of the results
- * @param {Schematic} schematic The main circuit schematic
- * @param {jQuery} modal The modal to be updated
- * @param {Array<Component, string>} order The tuple containing all sources and their respective resolution methods in the order they should be resolved
- */
-function calculateTSP(schematic, modal, order){
-    body = modal.find('.modal-body');
-
-    order.forEach(o => {
-        cp = o[0];
-        method = o[1];
-        generateSection = false;
-
-        if(body.find(`#${cp.name.value}-section-body`).length == 0) {
-            // There are no sections in the modal
-            section = $(`<div class="modal-section resolution-section"></div>`);
-            section.appendTo(body);
-            generateSection = true;
-        }
-        else {
-            // There are sections in the modal
-            section = body.find(`#${cp.name.value}-section-body`).parent();
-            // See if the section is at the same position and has the same method
-            if(section.index() -2 != order.indexOf(o) ||
-                section.find('.subsection-header').eq(1).text() != `Resolução por ${method}`) {
-                // The section is not at the same position
-                // Remove it and add it again at the correct position
-                section.remove();
-                section = $(`<div class="modal-section resolution-section"></div>`);
-                section.insertAfter(body.find('.resolution-section').eq(order.indexOf(o)-1));
-                generateSection = true;
-            }
-        }    
-
-        if(generateSection) {
-            // Colapse button/Section header
-            sectionHeader = $(`<button class="section-header d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#${cp.name.value}-section-body" aria-expanded="false">Contribui&ccedil;&atilde;o de ${cp.name.value}</button>`)
-            // Add colapse icon
-            sectionHeader.append('<i class="fa-solid fa-plus ms-auto float-right"></i>');
-            section.append(sectionHeader);
-            
-            // Section body - circuit image and resolution
-            sectionBody = $(`<div id="${cp.name.value}-section-body" class="section-body"></div>`);
-            sectionBody.append(`<div class="subsection-header">Imagem do subcircuito</div>`);
-            drawingContainer = $(`<div class="drawing-container"></div>`);
-            drawingContainer.appendTo(sectionBody);
-            sectionBody.append(`<div class="subsection-header">Resolu&ccedil;&atilde;o por ${method}</div>`);
-
-            // Section footer - results
-            sectionFooter = $(`<div class="section-footer"></div>`);
-            sectionFooter.append(`<div class="subsection-header">Resultados:</div>`);
-
-            section.append(sectionBody).append(sectionFooter);
-
-            // Update colapse icon
-            sectionBody.on('shown.bs.collapse', function() {
-                $(this).siblings('.section-header').find('i').removeClass('fa-plus').addClass('fa-minus');
-            });
-            
-            sectionBody.on('hidden.bs.collapse', function() {
-                $(this).siblings('.section-header').find('i').removeClass('fa-minus').addClass('fa-plus');
-            });
-
-            subcircuit = makeSubcircuit(schematic, cp.id).data.object;
-
-            redrawSchematic(subcircuit, drawingContainer);
-
-            // Calculate contribution
-            // |PLACEHOLDER| Output the netlist in the place of the resolution for debugging
-            netlist = makeNetlist(subcircuit)
-
-            // Add the netlist to the download button
-            var downloadButton = $('<a id="download" style="display: none; border: 1px solid black; margin: 3px; padding:2px">Click to Download<br></a>');
-
-            downloadButton.click(function(){
-                const blob = new Blob([netlist.data], {type: 'text/plain'});
-                url = URL.createObjectURL(blob);
-                downloadButton.attr('href', url);
-                downloadButton.attr('download', 'netlist.txt');
-            });
-
-            downloadButton.show();
-
-            sectionBody.append(downloadButton).append("<pre style='text-align:left'>" + netlist.data.replace(/\n/g, "<br />") + "</pre>");
-
-            // Colapse the section
-            sectionBody.addClass('collapse');
-        }
     });
 }

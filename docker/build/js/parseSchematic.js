@@ -137,9 +137,6 @@ function parseSchematic(text){
     // Create the schematic object
     const schematic = new Schematic(version, view,grid);
 
-    // Log the schematic object (for debugging)
-    console.log(schematic);
-
     return {
         errorFlag: false,
         errorReasonCodes: [],

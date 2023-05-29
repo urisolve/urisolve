@@ -173,10 +173,11 @@ function handleFileSelect (e) {
 
                 // Scale circuit image
                 var maxWidth = 150;
+                var maxHeight = 150;
                 var widgetWidth = preview.width();
-                var scale = maxWidth/widgetWidth;
+                var widgetHeight = preview.height();
+                var scale = Math.min(maxWidth/widgetWidth, maxHeight/widgetHeight);
                 if(scale < 1){
-                    console.log("scale: " + scale);
                     preview.css('transform', 'scale(' + scale + ')');
                     preview.css('transform-origin', 'top left');
                 }

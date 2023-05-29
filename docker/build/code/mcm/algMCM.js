@@ -1232,8 +1232,10 @@ function Output(jsonFile){
 /**
  * Main Function
  * @param {object} data initila jsonFile data
+ * @param {boolean} showOutput  if true, jsonfile is shown
+ * 								if false, jsonfile is returned
  */
-function loadFileAsTextMCM(data) {
+function loadFileAsTextMCM(data, showOutput = true) {
 
 	let jsonFile = JSON.parse(data);
 	
@@ -1328,6 +1330,6 @@ function loadFileAsTextMCM(data) {
 
 	jsonFile =  saveToJson(malhas_arr, malhas_escolhidas.third, branchCurrentEq, isolatedVPS, jsonFile);
 
-	Output(jsonFile);
-	
+	if(showOutput) {Output(jsonFile);}
+	else {return jsonFile;}
 }

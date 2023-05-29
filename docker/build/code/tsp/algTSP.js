@@ -109,9 +109,6 @@ function makeSubcircuit(schematic, source){
     vectConnections = schematic.connections;
     vectNodes = schematic.nodes;
 
-    // DEBUG
-    console.log(subSchematic);
-
     return {
         errorFlag: false,
         errorReasonCodes: [],
@@ -122,12 +119,262 @@ function makeSubcircuit(schematic, source){
     }
 }
 
+function schematicToJsonFile(schematic) {
+    // Schematic to Netlist
+    netlist = makeNetlist(subcircuit.data.object);
+
+    if(netlist.errorFlag) {
+        alert('Erro ao gerar o netlist.');
+        return;
+    }
+
+    // Netlist to JSON //
+
+    resistors = new Array();
+	coils = new Array();
+	capacitors = new Array();
+	dcVoltPs = new Array();
+	acVoltPs = new Array();
+	dcAmpsPs = new Array();
+	acAmpsPs = new Array();
+	ampsMeters = new Array();
+	voltMeters = new Array();
+	connections = new Array();
+	// Circuit analysis global data
+	circuitAnalData = {
+		frequency:	{value: 0, mult: ''}
+	};
+	nodes = new Array();
+	branches = new Array();
+	currents = new Array();
+	// Circuit analysis counters
+	circuitAnalCnt = {
+		node: 		0,
+		branch: 	0,
+		current:	0
+	};
+	//Manage ampmeters
+	iProbeNodesLoc = new Array();
+	iProbeNodesArr = new Array();
+	iProbeLocVsAmpId = new Array();
+
+    // Validate the netlist
+	var netlistTxt = validateNetlist(netlist.data);
+    // Check for previous ground alteration
+	if(fileContents[2])
+        netlistTxt.first.push(fileContents[2]);
+    cleanData();
+    importData(netlistTxt);
+    manageAmpmeters();
+    findNodes();
+    makeBranches();
+    branchCurrents();
+    agregatePowerSupplies();
+    return {
+        first: false,
+        second: 0,
+        third: buildJson(netlistTxt),
+        fourth: netlistTxt.fourth
+    }
+}
+
+/**
+ * This function calculates the contribuition of each power source to the total power
+ * @param {Schematic} schematic The schematic object of the main circuit
+ * @param {Array<Component, string>} order The resolution order
+ */
+function solveTSP(schematic, order) {
+    tabs = $('#results-tabs');
+    pages = $('#pages-content');
+    subcircuits = new Array();
+  
+    order.forEach(o => {
+      const cp = o[0];
+      const method = o[1];
+      let generateSection = false;
+  
+      const page = $('#resolution-' + cp.name.value);
+      const tab = $('.resolution-item a[href="#resolution-' + cp.name.value + '"]').parent();
+  
+      // Check if the page was already generated
+      if (!tab.hasClass('solved')) {
+        generateSection = true;
+      } else {
+        // If the tab is on the wrong position, move it
+        if (tab.index() -1 !== order.indexOf(o)) {
+            tab.insertAfter($('.resolution-item').eq(order.indexOf(o)));
+        }
+
+        // Check if the method is the same
+        if(page.attr('method') !== method) {
+            generateSection = true;
+        }
+      }
+  
+      if (generateSection) {
+        page.attr('method', method);
+
+        subcircuit = makeSubcircuit(schematic, cp.id);
+
+        if(subcircuit.errorFlag) {
+            alert('Erro ao gerar o subcircuito.');
+            return;
+        }
+
+        subcircuits.push(subcircuit.data.object);
+        jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)]);
+
+        // Initialize variables
+        let warningsText = "";
+        switch (method) {
+            case 'MTN':
+                //page.html(outHTMLTSPResolutionMTN(cp, subcircuit.data.object));
+                break;
+            case 'MCM':
+                // Solve with MCM
+                jsonFile = loadFileAsTextMCM(jsonFile.third, false);
+            
+                // Add sections
+                page.html(outHTMLSectionsMCM_TSP(cp));
+                
+                warningsText = warningOutput(jsonFile.analysisObj.warnings);
+                if(warningsText != 0){
+                    $('#warnings').html(warningsText);
+                    $('#errors').hide();
+                    $('#warnings').show();
+                }
+
+                // Output data Generation
+                $('#buttonShowAll').html(outShowAllBtnMCM());
+
+                //circuit fundamental variables
+                $('#fundamentalVars').html(outCircuitFundamentalsMCM(jsonFile));
+
+                //circuit info MCM
+                $('#circuitInfo').html(outCircuitInfoMCM(jsonFile));
+
+                //circuit equations info
+                $('#meshEquations').html(outEquationCalcMCM(jsonFile));
+
+                // Custom function needed to have multiple pages
+                canvasObjects = outMeshesMCM(jsonFile.branches, jsonFile.analysisObj.chosenMeshes);
+
+                step1 = outStep1MCM(jsonFile.analysisObj.equations);
+                step2 = outStep2MCM(jsonFile.analysisObj.equations);
+                step3 = outStep3MCM(jsonFile.analysisObj.equations);
+                equationSystemOutput = outEquationSystemMCM(jsonFile.analysisObj.equations, step1, step2, step3);
+                $('#eqSys').html(equationSystemOutput);
+                $('#resultsCurrentsMesh').html(outResultsMeshesMCM(jsonFile));
+                $('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
+                $('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
+
+                break;
+            case 'MCR':
+                // Solve with MCR
+                jsonFile = loadFileAsTextMCR(jsonFile.third, false);
+
+                // Add sections
+                page.html(outHTMLSectionsMCR_TSP(cp));
+
+                warningsText = warningOutput(jsonFile.analysisObj.warnings);
+                if(warningsText != 0){
+                    $('#warnings').html(warningsText);
+                    $('#errors').hide();
+                    $('#warnings').show();
+                }
+
+                // Output data Generation
+                $('#buttonShowAll').html(outShowAllBtnMCR());
+
+                //debug version
+                $('#version').html(outVersionMCR(jsonFile));
+
+                //circuit fundamental variables
+                $('#fundamentalVars').html(outCircuitFundamentalsMCR(jsonFile));
+
+                //circuit info MCM
+                $('#circuitInfo').html(outCircuitInfoMCR(jsonFile));
+
+                //circuit equations info
+                $('#meshEquations').html(outEquationCalcMCR(jsonFile));
+                
+
+                //eq nos
+                knlCurrData = outCurrentsKNLMCR(jsonFile.analysisObj.equations.nodeEquationsReal);
+                $('#KNLEquations').html(knlCurrData.first);
+                canvasObjectss = createCanvasCurrentsMCR(knlCurrData.second);
+
+
+                canvasObjects = outMeshesMCR(jsonFile.branches, jsonFile.analysisObj.chosenMeshes, jsonFile.analysisObj.result);
+
+                step1 = outStep1MCR(jsonFile.analysisObj.equations);
+                step2 = outStep2MCR(jsonFile.analysisObj.equations);
+                //let step3 = outStep3MCM(jsonFile.analysisObj.equations);
+                equationSystemOutput = outEquationSystemMCR(jsonFile.analysisObj.equations, step1, step2);
+                $('#eqSys').html(equationSystemOutput);
+                //$('#resultsCurrentsMesh').html(outResultsMeshesMCM(jsonFile));
+                $('#currentsInfo').html(outCurrentsInfoMCR(jsonFile.analysisObj.currents, jsonFile.branches).first);
+                $('#resultsCurrentsBranch').html(outResultsCurrentsMCR(jsonFile));
+
+                break;
+            default:
+                alert('Método de resolução não reconhecido.');
+                break;
+        }
+
+        // Toggle plus minus icon on show hide of collapse element
+        for(let i = 0; i<7; i++){
+            $( "#btn-"+i ).click(function() {
+                $(this).find("i").toggleClass("fas fa-plus fas fa-minus");
+            });
+        }
+
+        $( "#showALL").click(function() {
+            for(let i = 0; i<7; i++){
+                $("#btn-"+i).children('.fa-minus, .fa-plus').toggleClass("fas fa-minus fas fa-plus");
+
+            }
+        });
+
+        // Update the IDs of the elements to be specific to the tab
+        page.find('*').each(function() {
+            var $element = $(this);
+            var currentID = $element.attr('id');
+            if (currentID) {
+              var newID = currentID + "-" + cp.name.value;
+              $element.attr('id', newID);
+            }
+        });
+
+        // Draw subcircuit on first time showing the tab
+        tab.find('a').on('shown.bs.tab', function(e) {
+            drawingContainer = page.find('.circuit-widget');
+            if(drawingContainer.children().length === 0)
+            {
+                drawing = redrawSchematic(subcircuits[order.indexOf(o)], drawingContainer);
+            }
+        });
+
+        // Update Dictionary Language
+        let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+        if(language == "english")
+            set_lang(dictionary.english);
+        else	
+            set_lang(dictionary.portuguese);
+
+        // Add the solved class after solving the page
+        tab.addClass('solved');
+      }
+    });
+  }
+
 function outputTSP(jsonFile, schematic){
     // Get sources and probes
     sourceTypes = ['Vdc', 'Vac', 'Idc', 'Iac'];
     vectSources = vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower);
     vectProbes = vectVProbe.concat(vectIProbe);
-    methods = ['MTN', 'MCR', 'MCM'];
+    //methods = ['MTN', 'MCR', 'MCM'];
+    methods = ['MCR', 'MCM'];
 
     // Add navigation tabs
     $('#results-board').html(outHTMLResolutionNavTSP());
@@ -154,7 +401,6 @@ function outputTSP(jsonFile, schematic){
     // Add circuit drawings
     $('#results-modal').on('shown.bs.modal', function() {
         var mainDrawing = redrawSchematic(schematic, mainCircuit);
-        // Scale drawing by 50%
     });
 
     // Add cards to the selection section
@@ -173,7 +419,7 @@ function outputTSP(jsonFile, schematic){
                             }
                         });
                     } else {
-                        card = $(`<li class="card"></li>`);
+                        card = $(`<li class="card bg-info text-center p-2 mx-1"></li>`);
                         card.append(`<div class="card-title">${cp.name.value}</div>`);
                         card.append(`<select></select>`);
                         methods.forEach(m => card.find('select').append(`<option>${m}</option>`));
@@ -225,18 +471,19 @@ function outputTSP(jsonFile, schematic){
             });
         }
         // Add resolution sections
-        $('.resolution-item').remove();
-        $('.resolution-pages-content').remove();
         $('#results-tabs').append(outHTMLResolutionTabsTSP(resolutionOrder));
         $('#pages-content').append(outHTMLResolutionTabsContentTSP(resolutionOrder));
+        $('#loadpage').fadeIn(1000);
         // Calculate
-        //calculateTSP(schematic, modal, resolutionOrder);
+        solveTSP(schematic, resolutionOrder);
         // Update table
 
+
+        $('#loadpage').fadeOut(1000);
         // Update Dictionary Language
 	    let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
 	    if(language == "english")
-		    set_lang(dictionary.english);
+		    set_lang(dictionary.english);   
 	    else	
 	    	set_lang(dictionary.portuguese);
     });

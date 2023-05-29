@@ -2738,8 +2738,10 @@ function meshEqinMesh(malhas,equacoes){
 /**
  * Main Function
  * @param {object} data initila jsonFile data
+ * @param {boolean} showOutput if true, shows the output
+ * 								if false, returns the output
  */
- function loadFileAsTextMCR(data) {
+ function loadFileAsTextMCR(data, showOutput = true) {
 
 	let jsonFile = JSON.parse(data);
 
@@ -2833,7 +2835,7 @@ function meshEqinMesh(malhas,equacoes){
 
 		
 
-
-	Output2(jsonFile);
+	if(showOutput){Output2(jsonFile);}
+	else{return jsonFile;}
 
 }
