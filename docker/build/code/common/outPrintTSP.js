@@ -116,12 +116,42 @@ function outHTMLSelectionTSP(){
     
 function outHTMLSectionsMCM_TSP(cp) {
     htmlstr = '';
+    // Add navbar
+    htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
+    htmlstr += '<nav id="navbar" class="navbar p-0">';
+    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
+    htmlstr += '<div class="progress my-1 col-11"><div class="progress-bar progress-bar-striped progress-bar-animated rounded mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    htmlstr += '</nav>';
+
+    // Add table of contents
+    htmlstr += '<nav id="tableContents" class="navbar navbar-light bg-light flex-column align-items-stretch px-3 collapse border-top border-secondary">';
+    htmlstr += '<a class="navbar-brand" data-translate="_tableContTitle"></a>';
+    htmlstr += '<nav class="nav nav-pills flex-column">';
+
+    // Nav to circuit image
+    htmlstr += '<a class="nav-link" href="#circuitImage-'+ cp.name.value + '" data-translate="_circuitImage"></a>';
+    // Nav to fundamental variables
+    htmlstr += '<a class="nav-link" href="#fundamentalVars-'+ cp.name.value + '" data-translate="_fundamentalsTitle"></a>';
+    // Nav to circuit information
+    htmlstr += '<a class="nav-link" href="#circuitInfo-'+ cp.name.value + '" data-translate="_infoTitle"></a>';
+    // Nav to method equations
+    htmlstr += '<a class="nav-link" href="#meshEquations-'+ cp.name.value + '" data-translate="_MeshNumberTitle"></a>';
+    // Nav to meshes
+    htmlstr += '<a class="nav-link" href="#Meshes-'+ cp.name.value + '" data-translate="_MeshTitle"></a>';
+    // Nav to results mesh currents
+    htmlstr += '<a class="nav-link" href="#resultsCurrentsMesh-'+ cp.name.value + '" data-translate="_resMesh"></a>';
+    // Nav to currents data
+    htmlstr += '<a class="nav-link" href="#currentsInfo-'+ cp.name.value + '" data-translate="_currents"></a>';
+    // Nav to results
+    htmlstr += '<a class="nav-link" href="#resultsCurrentsBranch-'+ cp.name.value + '" data-translate="_resBranch"></a></nav></nav>';
+
+    htmlstr += '</div>';
 
     // Errors & Warnings section
     htmlstr += '<div id="errors"></div><div id="warnings"></div>';
 
     // Add circuit image
-    htmlstr += `<div id="circuitImage">`;
+    htmlstr += `<div id="circuitImage" class="mb-3">`;
     htmlstr += '<div class="container mt-3">';
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
     htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
@@ -172,6 +202,37 @@ function outHTMLSectionsMCM_TSP(cp) {
 function outHTMLSectionsMCR_TSP(cp){
     let htmlstr = '';
 
+    // Add navbar
+    htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
+    htmlstr += '<nav id="navbar" class="navbar p-0">';
+    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
+    htmlstr += '<div class="progress my-1 col-11"><div class="progress-bar progress-bar-striped progress-bar-animated rounded mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    htmlstr += '</nav>';
+
+    // Add table of contents
+    htmlstr += '<nav id="tableContents" class="navbar navbar-light bg-light flex-column align-items-stretch px-3 collapse border-top border-secondary">';
+    htmlstr += '<a class="navbar-brand" data-translate="_tableContTitle"></a>';
+    htmlstr += '<nav class="nav nav-pills flex-column">';
+
+    // Nav to circuit image
+    htmlstr += '<a class="nav-link" href="#circuitImage-'+ cp.name.value + '" data-translate="_circuitImage"></a>';
+    // Nav to fundamental variables
+    htmlstr += '<a class="nav-link" href="#fundamentalVars-'+ cp.name.value + '" data-translate="_fundamentalsTitle"></a>';
+    // Nav to circuit information
+    htmlstr += '<a class="nav-link" href="#circuitInfo-'+ cp.name.value + '" data-translate="_infoTitle"></a>';
+    // Nav to currents data
+    htmlstr += '<a class="nav-link" href="#currentsInfo-'+ cp.name.value + '" data-translate="_currents"></a>';
+    // Nav to KNL equations
+    htmlstr += '<a class="nav-link" href="#KNLEquations-'+ cp.name.value + '" data-translate="_knlTitle"></a>';
+    // Nav to method equations
+    htmlstr += '<a class="nav-link" href="#meshEquations-'+ cp.name.value + '" data-translate="_MeshNumberTitleMcr"></a>';
+    // Nav to meshes
+    htmlstr += '<a class="nav-link" href="#Meshes-'+ cp.name.value + '" data-translate="_MeshTitleMCR"></a>';
+    // Nav to results
+    htmlstr += '<a class="nav-link" href="#resultsCurrentsBranch-'+ cp.name.value + '" data-translate="_resultsMCR"></a></nav></nav>';
+
+    htmlstr += '</div>';
+
     // Warnings & Errors section
     htmlstr += '<div id="errors"></div><div id="warnings"></div>';
 
@@ -216,8 +277,7 @@ function outHTMLSectionsMCR_TSP(cp){
     htmlstr += '<div class="container mt-3" id="Meshes"></div>';
 
     // Equation System
-    
-   htmlstr += '<div id="eqSys"></div>';
+    htmlstr += '<div id="eqSys"></div>';
 
     // Results Mesh currents
     //htmlstr += '<div class="container mt-3">';
@@ -239,12 +299,7 @@ function outHTMLSectionsMCR_TSP(cp){
 
 
 
-
-/**
- * This function populates it with the results of the analysis.
- * @param {Schematic} schematic The schematic to be analyzed
- * @param {jQuery} modal The container where to be populated
- */
+/*
 function populateModal(schematic, modal) {
 
     // Add toast stack
@@ -278,27 +333,9 @@ function populateModal(schematic, modal) {
 
     table.append(tableHeader).append(tableBody);
 
-    // Add progress bar
-    progress = $('<div class="progress my-2"></div>');
-    progress.append('<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>');
-
-    // Update progress bar on each step
-    progress.on('updateProgress', function (e, data) {
-        var progress = $(this).find('.progress-bar');
-        progress.css('width', data.progress + '%');
-        progress.attr('aria-valuenow', data.progress);
-        
-        if (data.progress == 100) {
-            progress.removeClass('progress-bar-animated').removeClass('progress-bar-striped').addClass('bg-success');
-        }
-    });
-
-    // Put the progress at 0%
-    progress.trigger('updateProgress', {progress: 0});
 
 
-    // Add calculate button
-    calcBtn.click(function() {
+
 
             if (selectionCards.find('.card').length != vectSources.length) {
                 // Show toast
@@ -328,31 +365,6 @@ function populateModal(schematic, modal) {
 
 
 
-    // Add scroll listener to modal
-    modal.scroll(() => {
-        var scrollBot = $(window).scrollTop() + modal.outerHeight();
-
-        $('.resolution-section').each(function() {
-            if($(this).find('.show').length) {
-                footer = $(this).find($('.section-footer')).eq(0);
-                var divTop = footer.offset().top;
-                var divBottom = divTop + footer.height();
-
-                if (divTop <= scrollBot && scrollBot < divBottom) {
-                    // Get this source's cells on the results table
-                    source = vectSources.find(s => s.name.value == $(this).find('.section-header').text().match(/de (.*)/)[1]);
-                    tableBody.find('tr').each(function() {
-                        cells = $(this).find('td');
-                        // Populate with the source's name as a placeholder
-                        cells.eq(vectSources.indexOf(source)).text(source.name.value);
-                    });
-
-                    $(this).addClass('solved');
-
-                    // Update the progress bar
-                    progress.trigger('updateProgress', {progress: ($(this).siblings('.solved').length + 1) / vectSources.length *100});
-                }
-            }
-        });
-    });
+    
 }
+*/

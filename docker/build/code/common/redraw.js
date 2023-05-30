@@ -4,9 +4,11 @@
  * @param {jQuery} container The div where the schematic will be drawn
  * @param {boolean} interactive If true, the schematic will be drawn as an interactive widget
  *                              If false, the schematic will be drawn as a static image
+ * @param {boolean} mutable If true, the schematic will be drawn with the ability to be edited
+ *                          If false, the schematic will be drawn without the ability to be edited
  * @returns {Object} An object containing the error flag and the error reason codes
  */
-function redrawSchematic(schematic, container, interactive = true){
+function redrawSchematic(schematic, container, interactive = true, mutable = true){
     // Clear the drawing area
     container.empty();
     // Change the scale to the stylesheet
@@ -471,68 +473,75 @@ function redrawSchematic(schematic, container, interactive = true){
                 });
 
                 // Build the menu content
-                content = $(`<div class="menu-content"></div>`)
+                content = $(`<div class="menu-content pt-3"></div>`)
                 // Populate the menu content and add the OK button event handler
                 switch(cp.type){
                     case 'R':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">R = </div>');
-                        line1.append(`<input type="number" min="0" min="0" class="input1 col-3" title="Ohmic resistance in Ohms" placeholder="${cp.value.value}">`);
-
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TOhm">T&#8486;</option>`));
-                        select.append($(`<option value="GOhm">G&#8486;</option>`));
-                        select.append($(`<option value="MOhm">M&#8486;</option>`));
-                        select.append($(`<option value="kOhm">k&#8486;</option>`));
-                        select.append($(`<option value="Ohm">&#8486;</option>`));
-                        select.append($(`<option value="mOhm">m&#8486;</option>`));
-                        select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
-                        select.append($(`<option value="nOhm">n&#8486;</option>`));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        
-                        line1.append(select);
-                        select.val(cp.value.unit);
+                        line1.append('<div class="col-4 d-flex text-start">R = </div>');
+                        if(mutable) {
+                            line1.append(`<input type="number" min="0" min="0" class="input1 col-3 bg-light border border-secondary" title="Ohmic resistance in Ohms" placeholder="${cp.value.value}">`);
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TOhm">T&#8486;</option>`));
+                            select.append($(`<option value="GOhm">G&#8486;</option>`));
+                            select.append($(`<option value="MOhm">M&#8486;</option>`));
+                            select.append($(`<option value="kOhm">k&#8486;</option>`));
+                            select.append($(`<option value="Ohm">&#8486;</option>`));
+                            select.append($(`<option value="mOhm">m&#8486;</option>`));
+                            select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
+                            select.append($(`<option value="nOhm">n&#8486;</option>`));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
 
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">Temp = </div>');
-                        line2.append(`<input type="number" min="0" min="0" class="input3 col-6" title="Simulation temperature in degree Celsius" placeholder="${cp.properties.temperature.value}">`);
+                        line2.append('<div class="col-4 d-flex text-start">Temp = </div>');
+                        if(mutable)
+                            line2.append(`<input type="number" min="0" min="0" class="input3 col-6 bg-light border border-secondary" title="Simulation temperature in degree Celsius" placeholder="${cp.properties.temperature.value}">`);
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.properties.temperature.visible == '1');
                         line2.append(box2);
                         
                         
                         line3 = $(`<div class="input-line-3 col-12"></div>`);
-                        line3.append('<div class="col-4 text-start">Tc1 = </div>');
-                        line3.append(`<input type="number" min="0" min="0" class="input4 col-6" title="First order temperature coefficient" placeholder="${cp.properties.tc1.value}">`);
+                        line3.append('<div class="col-4 d-flex text-start">Tc1 = </div>');
+                        if(mutable)
+                            line3.append(`<input type="number" min="0" min="0" class="input4 col-6 bg-light border border-secondary" title="First order temperature coefficient" placeholder="${cp.properties.tc1.value}">`);
                         box3 = $(`<input type="checkbox" class="box3 col-1 ms-auto">`);
                         box3.prop('checked', cp.properties.tc1.visible == '1');
                         line3.append(box3);
                         
                         line4 = $(`<div class="input-line-4 col-12"></div>`);
-                        line4.append('<div class="col-4 text-start">Tc2 = </div>');
-                        line4.append(`<input type="number" min="0" class="input5 col-6" title="Second order temperature coefficient" placeholder="${cp.properties.tc2.value}">`);
+                        line4.append('<div class="col-4 d-flex text-start">Tc2 = </div>');
+                        if(mutable)
+                            line4.append(`<input type="number" min="0" class="input5 col-6 bg-light border border-secondary" title="Second order temperature coefficient" placeholder="${cp.properties.tc2.value}">`);
                         box4 = $(`<input type="checkbox" class="box4 col-1 ms-auto">`);
                         box4.prop('checked', cp.properties.tc2.visible == '1');
                         line4.append(box4);
                         
                         line5 = $(`<div class="input-line-5 col-12"></div>`);
-                        line5.append('<div class="col-4 text-start">Tnom = </div>');
-                        line5.append(`<input type="number" min="0" class="input6 col-6" title="Temperature at which parameters were extracted" placeholder="${cp.properties.tnom.value}">`);
+                        line5.append('<div class="col-4 d-flex text-start">Tnom = </div>');
+                        if(mutable)
+                            line5.append(`<input type="number" min="0" class="input6 col-6 bg-light border border-secondary" title="Temperature at which parameters were extracted" placeholder="${cp.properties.tnom.value}">`);
                         box5 = $(`<input type="checkbox" class="box5 col-1 ms-auto">`);
                         box5.prop('checked', cp.properties.tnom.visible == '1');
                         line5.append(box5);
                         
                         line6 = $(`<div class="input-line-6 col-12"></div>`);
-                        line6.append('<div class="col-4 text-start">Symbol = </div>');
-                        select = $(`<select class="input7 col-6">`);
-                        select.append($(`<option value="US">US</option>`));
-                        select.append($(`<option value="european">european</option>`));
-                        line6.append(select);
-                        select.val(cp.symbol.reference);
+                        line6.append('<div class="col-4 d-flex text-start">Symbol = </div>');
+                        if(mutable){
+                            select = $(`<select class="input7 col-6">`);
+                            select.append($(`<option value="US">US</option>`));
+                            select.append($(`<option value="european">european</option>`));
+                            line6.append(select);
+                            select.val(cp.symbol.reference); 
+                        }
                         box6 = $(`<input type="checkbox" class="box6 col-1 ms-auto">`);
                         box6.prop('checked', cp.symbol.visible == '1');
                         line6.append(box6);
@@ -540,20 +549,22 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2).append(line3).append(line4).append(line5).append(line6).tooltip();
 
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())   
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())
-                                cp.properties.temperature.value = drawing.find($('.input3')).val();
-                            if(drawing.find($('.input4')).val())
-                                cp.properties.tc1.value = drawing.find($('.input4')).val();
-                            if(drawing.find($('.input5')).val())
-                                cp.properties.tc2.value = drawing.find($('.input5')).val();
-                            if(drawing.find($('.input6')).val())
-                                cp.properties.tnom.value = drawing.find($('.input6')).val();
-                            if(drawing.find($('.input7')).val())
-                                cp.symbol.reference = drawing.find($('.input7')).val();
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())   
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())
+                                    cp.properties.temperature.value = drawing.find($('.input3')).val();
+                                if(drawing.find($('.input4')).val())
+                                    cp.properties.tc1.value = drawing.find($('.input4')).val();
+                                if(drawing.find($('.input5')).val())
+                                    cp.properties.tc2.value = drawing.find($('.input5')).val();
+                                if(drawing.find($('.input6')).val())
+                                    cp.properties.tnom.value = drawing.find($('.input6')).val();
+                                if(drawing.find($('.input7')).val())
+                                    cp.symbol.reference = drawing.find($('.input7')).val();
+                            }
 
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
@@ -574,52 +585,62 @@ function redrawSchematic(schematic, container, interactive = true){
                                 cp.symbol.visible = '1';
                             else cp.symbol.visible = '0';
                             
-                            if(cp.symbol.reference == 'US')
-                                drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('european').addClass('US');
-                            else drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('US').addClass('european');
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            
+                            if(mutable){
+                                if(cp.symbol.reference == 'US')
+                                    drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('european').addClass('US');
+                                else 
+                                    drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('US').addClass('european');
+
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'C':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">C = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Capacitance in Farad" placeholder="${cp.value.value}">`);
+                        line1.append('<div class="col-4 d-flex text-start">C = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Capacitance in Farad" placeholder="${cp.value.value}">`);
 
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TF">TF</option>`));
-                        select.append($(`<option value="GF">GF</option>`));
-                        select.append($(`<option value="MF">MF</option>`));
-                        select.append($(`<option value="kF">kF</option>`));
-                        select.append($(`<option value="F">F</option>`));
-                        select.append($(`<option value="mF">mF</option>`));
-                        select.append($(`<option value="uF">&#181;F</option>`));
-                        select.append($(`<option value="nF">nF</option>`));
-                        select.append($(`<option value="pF">pF</option>`));                    
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TF">TF</option>`));
+                            select.append($(`<option value="GF">GF</option>`));
+                            select.append($(`<option value="MF">MF</option>`));
+                            select.append($(`<option value="kF">kF</option>`));
+                            select.append($(`<option value="F">F</option>`));
+                            select.append($(`<option value="mF">mF</option>`));
+                            select.append($(`<option value="uF">&#181;F</option>`));
+                            select.append($(`<option value="nF">nF</option>`));
+                            select.append($(`<option value="pF">pF</option>`));                    
+                            
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
                         
-                        line1.append(select);
-                        select.val(cp.value.unit);
-
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">V = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-6" title="Initial voltage for transient simulation" placeholder="${cp.properties.initialValue.value}">`);
+                        line2.append('<div class="col-4 d-flex text-start">V = </div>');
+                        if(mutable)
+                            line2.append(`<input type="number" min="0" class="input3 col-6 bg-light border border-secondary" title="Initial voltage for transient simulation" placeholder="${cp.properties.initialValue.value}">`);
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.properties.initialValue.visible == '1');
                         line2.append(box2);
 
                         line3 = $(`<div class="input-line-3 col-12"></div>`);
-                        line3.append('<div class="col-4 text-start">Symbol = </div>');
-                        select = $(`<select class="input4 col-6" placeholder="${cp.symbol.reference}">`);
-                        select.append($(`<option value="neutral">neutral</option>`));
-                        select.append($(`<option value="polar">polar</option>`));
-                        line3.append(select);
-                        select.val(cp.symbol.reference);
+                        line3.append('<div class="col-4 d-flex text-start">Symbol = </div>');
+                        if(mutable){
+                            select = $(`<select class="input4 col-6" placeholder="${cp.symbol.reference}">`);
+                            select.append($(`<option value="neutral">neutral</option>`));
+                            select.append($(`<option value="polar">polar</option>`));
+                            line3.append(select);
+                            select.val(cp.symbol.reference);
+                        }
                         box3 = $(`<input type="checkbox" class="box3 col-1 ms-auto">`);
                         box3.prop('checked', cp.symbol.visible == '1');
                         line3.append(box3);
@@ -627,15 +648,16 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2).append(line3);
 
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())
-                                cp.properties.initialValue.value = drawing.find($('.input3')).val();
-                            if(drawing.find($('.input4')).val())
-                                cp.symbol.reference = drawing.find($('.input4')).val();
-
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())
+                                    cp.properties.initialValue.value = drawing.find($('.input3')).val();
+                                if(drawing.find($('.input4')).val())
+                                    cp.symbol.reference = drawing.find($('.input4')).val();
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -646,40 +668,48 @@ function redrawSchematic(schematic, container, interactive = true){
                                 cp.symbol.visible = '1';
                             else cp.symbol.visible = '0';
                             
-                            if(cp.symbol.reference == 'neutral')
-                                drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('polar').addClass('neutral');
-                            else drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('neutral').addClass('polar');
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+
+                            if(mutable){
+                                if(cp.symbol.reference == 'neutral')
+                                    drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('polar').addClass('neutral');
+                                else 
+                                    drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('neutral').addClass('polar');
+
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'L':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">L = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Inductance in Henry" placeholder="${cp.value.value}">`);
+                        line1.append('<div class="col-4 d-flex text-start">L = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Inductance in Henry" placeholder="${cp.value.value}">`);
                         
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TH">TH</option>`));
-                        select.append($(`<option value="GH">GH</option>`));
-                        select.append($(`<option value="MH">MH</option>`));
-                        select.append($(`<option value="kH">kH</option>`));
-                        select.append($(`<option value="H">H</option>`));
-                        select.append($(`<option value="mH">mH</option>`));
-                        select.append($(`<option value="uH">&#181;H</option>`));
-                        select.append($(`<option value="nH">nH</option>`));
-                        select.append($(`<option value="pH">pH</option>`));
-                        line1.append(select);
-                        select.val(cp.value.unit);
-
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TH">TH</option>`));
+                            select.append($(`<option value="GH">GH</option>`));
+                            select.append($(`<option value="MH">MH</option>`));
+                            select.append($(`<option value="kH">kH</option>`));
+                            select.append($(`<option value="H">H</option>`));
+                            select.append($(`<option value="mH">mH</option>`));
+                            select.append($(`<option value="uH">&#181;H</option>`));
+                            select.append($(`<option value="nH">nH</option>`));
+                            select.append($(`<option value="pH">pH</option>`));
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
+                        
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">I = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-6" title="Initial current for transient simulation" placeholder="${cp.properties.initialValue.value}">`);
+                        line2.append('<div class="col-4 d-flex text-start">I = </div>');
+                        if(mutable)
+                            line2.append(`<input type="number" min="0" class="input3 col-6 bg-light border border-secondary" title="Initial current for transient simulation" placeholder="${cp.properties.initialValue.value}">`);
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.properties.initialValue.visible == '1');
                         line2.append(box2);
@@ -687,13 +717,14 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2);
 
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())
-                                cp.properties.initialValue.value = drawing.find($('.input3')).val();
-                            
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())
+                                    cp.properties.initialValue.value = drawing.find($('.input3')).val();
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -703,48 +734,54 @@ function redrawSchematic(schematic, container, interactive = true){
                             
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
-                            });
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
+                        });
                         break;
                     case 'Vdc':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">U = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Voltage in Volts" placeholder="${cp.value.value}">`);
+                        line1.append('<div class="col-4 d-flex text-start">U = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Voltage in Volts" placeholder="${cp.value.value}">`);
                         
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TV">TV</option>`));
-                        select.append($(`<option value="GV">GV</option>`));
-                        select.append($(`<option value="MV">MV</option>`));
-                        select.append($(`<option value="kV">kV</option>`));
-                        select.append($(`<option value="V">V</option>`));
-                        select.append($(`<option value="mV">mV</option>`));
-                        select.append($(`<option value="uV">&#181;V</option>`));
-                        select.append($(`<option value="nV">nV</option>`));
-                        select.append($(`<option value="pV">pV</option>`));
-                        line1.append(select);
-                        select.val(cp.value.unit);
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TV">TV</option>`));
+                            select.append($(`<option value="GV">GV</option>`));
+                            select.append($(`<option value="MV">MV</option>`));
+                            select.append($(`<option value="kV">kV</option>`));
+                            select.append($(`<option value="V">V</option>`));
+                            select.append($(`<option value="mV">mV</option>`));
+                            select.append($(`<option value="uV">&#181;V</option>`));
+                            select.append($(`<option value="nV">nV</option>`));
+                            select.append($(`<option value="pV">pV</option>`));
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
 
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">Ri = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-3" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
+                        line2.append('<div class="col-4 d-flex text-start">Ri = </div>');
+                        if(mutable){
+                            line2.append(`<input type="number" min="0" class="input3 col-3 bg-light border border-secondary" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
                         
-                        select = $(`<select class="input4 col-3">`);
-                        select.append($(`<option value="TOhm">T&#8486;</option>`));
-                        select.append($(`<option value="GOhm">G&#8486;</option>`));
-                        select.append($(`<option value="MOhm">M&#8486;</option>`));
-                        select.append($(`<option value="kOhm">k&#8486;</option>`));
-                        select.append($(`<option value="Ohm">&#8486;</option>`));
-                        select.append($(`<option value="mOhm">m&#8486;</option>`));
-                        select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
-                        select.append($(`<option value="nOhm">n&#8486;</option>`));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        line2.append(select);
-                        select.val(cp.properties.impedance.unit);
+                            select = $(`<select class="input4 col-3">`);
+                            select.append($(`<option value="TOhm">T&#8486;</option>`));
+                            select.append($(`<option value="GOhm">G&#8486;</option>`));
+                            select.append($(`<option value="MOhm">M&#8486;</option>`));
+                            select.append($(`<option value="kOhm">k&#8486;</option>`));
+                            select.append($(`<option value="Ohm">&#8486;</option>`));
+                            select.append($(`<option value="mOhm">m&#8486;</option>`));
+                            select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
+                            select.append($(`<option value="nOhm">n&#8486;</option>`));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            line2.append(select);
+                            select.val(cp.properties.impedance.unit);
+                        }
 
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.properties.impedance.visible == '1');
@@ -753,6 +790,7 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2);
 
                         okButton.click(function(){
+                            if(mutable){
                             if(drawing.find($('.input1')).val())
                                 cp.value.value = drawing.find($('.input1')).val();
                             if(drawing.find($('.input2')).val())
@@ -761,7 +799,7 @@ function redrawSchematic(schematic, container, interactive = true){
                                 cp.properties.impedance.value = drawing.find($('.input3')).val();
                             if(drawing.find($('.input4')).val())
                                 cp.properties.impedance.unit = drawing.find($('.input4')).val();
-                            
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -771,49 +809,53 @@ function redrawSchematic(schematic, container, interactive = true){
 
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'Idc':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">I = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Current in Ampere" placeholder="${cp.value.value}">`);
-                    
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TA">TA</option>`));
-                        select.append($(`<option value="GA">GA</option>`));
-                        select.append($(`<option value="MA">MA</option>`));
-                        select.append($(`<option value="kA">kA</option>`));
-                        select.append($(`<option value="A">A</option>`));
-                        select.append($(`<option value="mA">mA</option>`));
-                        select.append($(`<option value="uA">&#181;A</option>`));
-                        select.append($(`<option value="nA">nA</option>`));
-                        select.append($(`<option value="pA">pA</option>`));
-                        line1.append(select);
-                        select.val(cp.value.unit);
-
+                        line1.append('<div class="col-4 d-flex text-start">I = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Current in Ampere" placeholder="${cp.value.value}">`);
+                        
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TA">TA</option>`));
+                            select.append($(`<option value="GA">GA</option>`));
+                            select.append($(`<option value="MA">MA</option>`));
+                            select.append($(`<option value="kA">kA</option>`));
+                            select.append($(`<option value="A">A</option>`));
+                            select.append($(`<option value="mA">mA</option>`));
+                            select.append($(`<option value="uA">&#181;A</option>`));
+                            select.append($(`<option value="nA">nA</option>`));
+                            select.append($(`<option value="pA">pA</option>`));
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">Ri = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-3" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
-                        
-                        select = $(`<select class="input4 col-3">`);
-                        select.append($(`<option value="TOhm">T&#8486;</option>`));
-                        select.append($(`<option value="GOhm">G&#8486;</option>`));
-                        select.append($(`<option value="MOhm">M&#8486;</option>`));
-                        select.append($(`<option value="kOhm">k&#8486;</option>`));
-                        select.append($(`<option value="Ohm">&#8486;</option>`));
-                        select.append($(`<option value="mOhm">m&#8486;</option>`));
-                        select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
-                        select.append($(`<option value="nOhm">n&#8486;</option>`));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        line2.append(select);
-                        select.val(cp.properties.impedance.unit);
-
+                        line2.append('<div class="col-4 d-flex text-start">Ri = </div>');
+                        if(mutable){
+                            line2.append(`<input type="number" min="0" class="input3 col-3 bg-light border border-secondary" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
+                            
+                            select = $(`<select class="input4 col-3">`);
+                            select.append($(`<option value="TOhm">T&#8486;</option>`));
+                            select.append($(`<option value="GOhm">G&#8486;</option>`));
+                            select.append($(`<option value="MOhm">M&#8486;</option>`));
+                            select.append($(`<option value="kOhm">k&#8486;</option>`));
+                            select.append($(`<option value="Ohm">&#8486;</option>`));
+                            select.append($(`<option value="mOhm">m&#8486;</option>`));
+                            select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
+                            select.append($(`<option value="nOhm">n&#8486;</option>`));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            line2.append(select);
+                            select.val(cp.properties.impedance.unit);
+                        }
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.properties.impedance.visible == '1');
                         line2.append(box2);
@@ -821,15 +863,16 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2);
 
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())  
-                                cp.properties.impedance.value = drawing.find($('.input3')).val();
-                            if(drawing.find($('.input4')).val())  
-                                cp.properties.impedance.unit = drawing.find($('.input4')).val();
-
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())  
+                                    cp.properties.impedance.value = drawing.find($('.input3')).val();
+                                if(drawing.find($('.input4')).val())  
+                                    cp.properties.impedance.unit = drawing.find($('.input4')).val();
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -839,84 +882,92 @@ function redrawSchematic(schematic, container, interactive = true){
 
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'Vac':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">U = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Peak voltage in Volts" placeholder="${cp.value.value}">`);
-                        
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TV">TV</option>`));
-                        select.append($(`<option value="GV">GV</option>`));
-                        select.append($(`<option value="MV">MV</option>`));
-                        select.append($(`<option value="kV">kV</option>`));
-                        select.append($(`<option value="V">V</option>`));
-                        select.append($(`<option value="mV">mV</option>`));
-                        select.append($(`<option value="uV">&#181;V</option>`));
-                        select.append($(`<option value="nV">nV</option>`));
-                        select.append($(`<option value="pV">pV</option>`));
-                        line1.append(select);
-                        select.val(cp.value.unit);
-
+                        line1.append('<div class="col-4 d-flex text-start">U = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Peak voltage in Volts" placeholder="${cp.value.value}">`);
+                            
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TV">TV</option>`));
+                            select.append($(`<option value="GV">GV</option>`));
+                            select.append($(`<option value="MV">MV</option>`));
+                            select.append($(`<option value="kV">kV</option>`));
+                            select.append($(`<option value="V">V</option>`));
+                            select.append($(`<option value="mV">mV</option>`));
+                            select.append($(`<option value="uV">&#181;V</option>`));
+                            select.append($(`<option value="nV">nV</option>`));
+                            select.append($(`<option value="pV">pV</option>`));
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">f = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-3" title="Frequency in Hertz" placeholder="${cp.frequency.value}">`);
-                        
-                        select = $(`<select class="input4 col-3">`);
-                        select.append($(`<option value="THz">THz</option>`));
-                        select.append($(`<option value="GHz">GHz</option>`));
-                        select.append($(`<option value="MHz">MHz</option>`));
-                        select.append($(`<option value="kHz">kHz</option>`));
-                        select.append($(`<option value="Hz">Hz</option>`));
-                        select.append($(`<option value="mHz">mHz</option>`));
-                        select.append($(`<option value="uHz">&#181;Hz</option>`));
-                        select.append($(`<option value="nHz">nHz</option>`));
-                        select.append($(`<option value="pHz">pHz</option>`));
-                        line2.append(select);
-                        select.val(cp.frequency.unit);
+                        line2.append('<div class="col-4 d-flex text-start">f = </div>');
+                        if(mutable){
+                            line2.append(`<input type="number" min="0" class="input3 col-3 bg-light border border-secondary" title="Frequency in Hertz" placeholder="${cp.frequency.value}">`);
+                            
+                            select = $(`<select class="input4 col-3">`);
+                            select.append($(`<option value="THz">THz</option>`));
+                            select.append($(`<option value="GHz">GHz</option>`));
+                            select.append($(`<option value="MHz">MHz</option>`));
+                            select.append($(`<option value="kHz">kHz</option>`));
+                            select.append($(`<option value="Hz">Hz</option>`));
+                            select.append($(`<option value="mHz">mHz</option>`));
+                            select.append($(`<option value="uHz">&#181;Hz</option>`));
+                            select.append($(`<option value="nHz">nHz</option>`));
+                            select.append($(`<option value="pHz">pHz</option>`));
+                            line2.append(select);
+                            select.val(cp.frequency.unit);
+                        }
                         
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.frequency.visible == '1');
                         line2.append(box2);
 
                         line3 = $(`<div class="input-line-3 col-12"></div>`);
-                        line3.append('<div class="col-4 text-start">Phase = </div>');
-                        line3.append(`<input type="number" min="0" class="input5 col-6" title="Initial phase in degrees" placeholder="${cp.phase.value}">`);
+                        line3.append('<div class="col-4 d-flex text-start">Phase = </div>');
+                        if(mutable)
+                            line3.append(`<input type="number" min="0" class="input5 col-6 bg-light border border-secondary" title="Initial phase in degrees" placeholder="${cp.phase.value}">`);
                         box3 = $(`<input type="checkbox" class="box3 col-1 ms-auto">`);
                         box3.prop('checked', cp.phase.visible == '1');
                         line3.append(box3);
 
                         line4 = $(`<div class="input-line-4 col-12"></div>`);
-                        line4.append('<div class="col-4 text-start">Theta = </div>');
-                        line4.append(`<input type="number" min="0" class="input6 col-6" title="Damping factor" placeholder="${cp.properties.damping.value}">`);
+                        line4.append('<div class="col-4 d-flex text-start">Theta = </div>');
+                        if(mutable)
+                            line4.append(`<input type="number" min="0" class="input6 col-6 bg-light border border-secondary" title="Damping factor" placeholder="${cp.properties.damping.value}">`);
                         box4 = $(`<input type="checkbox" class="box4 col-1 ms-auto">`);
                         box4.prop('checked', cp.properties.damping.visible == '1');
                         line4.append(box4);
 
                         line5 = $(`<div class="input-line-5 col-12"></div>`);
-                        line5.append('<div class="col-4 text-start">Ri = </div>');
-                        line5.append(`<input type="number" min="0" class="input7 col-3" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
-                        
-                        select = $(`<select class="input8 col-3">`);
-                        select.append($(`<option value="TOhm">T&#8486;</option>`));
-                        select.append($(`<option value="GOhm">G&#8486;</option>`));
-                        select.append($(`<option value="MOhm">M&#8486;</option>`));
-                        select.append($(`<option value="kOhm">k&#8486;</option>`));
-                        select.append($(`<option value="Ohm">&#8486;</option>`));
-                        select.append($(`<option value="mOhm">m&#8486;</option>`));
-                        select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
-                        select.append($(`<option value="nOhm">n&#8486;</option>`));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        line5.append(select);
-                        select.val(cp.properties.impedance.unit);
-
+                        line5.append('<div class="col-4 d-flex text-start">Ri = </div>');
+                        if(mutable){
+                            line5.append(`<input type="number" min="0" class="input7 col-3 bg-light border border-secondary" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
+                            
+                            select = $(`<select class="input8 col-3">`);
+                            select.append($(`<option value="TOhm">T&#8486;</option>`));
+                            select.append($(`<option value="GOhm">G&#8486;</option>`));
+                            select.append($(`<option value="MOhm">M&#8486;</option>`));
+                            select.append($(`<option value="kOhm">k&#8486;</option>`));
+                            select.append($(`<option value="Ohm">&#8486;</option>`));
+                            select.append($(`<option value="mOhm">m&#8486;</option>`));
+                            select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
+                            select.append($(`<option value="nOhm">n&#8486;</option>`));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            line5.append(select);
+                            select.val(cp.properties.impedance.unit);
+                        }
                         box5 = $(`<input type="checkbox" class="box5 col-1 ms-auto">`);
                         box5.prop('checked', cp.properties.impedance.visible == '1');
                         line5.append(box5);
@@ -924,23 +975,24 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2).append(line3).append(line4).append(line5);
                     
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())
-                                cp.frequency.value = drawing.find($('.input3')).val();
-                            if(drawing.find($('.input4')).val())
-                                cp.frequency.unit = drawing.find($('.input4')).val();
-                            if(drawing.find($('.input5')).val())
-                                cp.phase.value = drawing.find($('.input5')).val();
-                            if(drawing.find($('.input6')).val())
-                                cp.properties.damping.value = drawing.find($('.input6')).val();
-                            if(drawing.find($('.input7')).val())
-                                cp.properties.impedance.value = drawing.find($('.input7')).val();
-                            if(drawing.find($('.input8')).val())
-                                cp.properties.impedance.unit = drawing.find($('.input8')).val();
-
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())
+                                    cp.frequency.value = drawing.find($('.input3')).val();
+                                if(drawing.find($('.input4')).val())
+                                    cp.frequency.unit = drawing.find($('.input4')).val();
+                                if(drawing.find($('.input5')).val())
+                                    cp.phase.value = drawing.find($('.input5')).val();
+                                if(drawing.find($('.input6')).val())
+                                    cp.properties.damping.value = drawing.find($('.input6')).val();
+                                if(drawing.find($('.input7')).val())
+                                    cp.properties.impedance.value = drawing.find($('.input7')).val();
+                                if(drawing.find($('.input8')).val())
+                                    cp.properties.impedance.unit = drawing.find($('.input8')).val();
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -959,83 +1011,92 @@ function redrawSchematic(schematic, container, interactive = true){
                             
                             drawLabel(drawing.find(drawing.find($('.label-'+cp.id))), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'Iac':
                         line1 = $(`<div class="input-line-1 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">I = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Peak current in Ampere" placeholder="${cp.value.value}">`);
-                        
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($(`<option value="TA">TA</option>`));
-                        select.append($(`<option value="GA">GA</option>`));
-                        select.append($(`<option value="MA">MA</option>`));
-                        select.append($(`<option value="kA">kA</option>`));
-                        select.append($(`<option value="A">A</option>`));
-                        select.append($(`<option value="mA">mA</option>`));
-                        select.append($(`<option value="uA">&#181;A</option>`));
-                        select.append($(`<option value="nA">nA</option>`));
-                        select.append($(`<option value="pA">pA</option>`));
-                        line1.append(select);
-                        select.val(cp.value.unit);
+                        line1.append('<div class="col-4 d-flex text-start">I = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Peak current in Ampere" placeholder="${cp.value.value}">`);
+                            
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($(`<option value="TA">TA</option>`));
+                            select.append($(`<option value="GA">GA</option>`));
+                            select.append($(`<option value="MA">MA</option>`));
+                            select.append($(`<option value="kA">kA</option>`));
+                            select.append($(`<option value="A">A</option>`));
+                            select.append($(`<option value="mA">mA</option>`));
+                            select.append($(`<option value="uA">&#181;A</option>`));
+                            select.append($(`<option value="nA">nA</option>`));
+                            select.append($(`<option value="pA">pA</option>`));
+                            line1.append(select);
+                            select.val(cp.value.unit);
+                        }
 
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.value.visible == '1');
                         line1.append(box1);
 
                         line2 = $(`<div class="input-line-2 col-12"></div>`);
-                        line2.append('<div class="col-4 text-start">f = </div>');
-                        line2.append(`<input type="number" min="0" class="input3 col-3" title="Frequency in Hertz" placeholder="${cp.frequency.value}">`);
-                        
-                        select = $(`<select class="input4 col-3">`);
-                        select.append($('<option value="THz">THz</option>'));
-                        select.append($('<option value="GHz">GHz</option>'));
-                        select.append($('<option value="MHz">MHz</option>'));
-                        select.append($('<option value="kHz">kHz</option>'));
-                        select.append($('<option value="Hz">Hz</option>'));
-                        select.append($('<option value="mHz">mHz</option>'));
-                        select.append($('<option value="uHz">&#181;Hz</option>'));
-                        select.append($('<option value="nHz">nHz</option>'));
-                        select.append($('<option value="pHz">pHz</option>'));
-                        line2.append(select);
-                        select.val(cp.frequency.unit);
-
+                        line2.append('<div class="col-4 d-flex text-start">f = </div>');
+                        if(mutable){
+                            line2.append(`<input type="number" min="0" class="input3 col-3 bg-light border border-secondary" title="Frequency in Hertz" placeholder="${cp.frequency.value}">`);
+                            
+                            select = $(`<select class="input4 col-3">`);
+                            select.append($('<option value="THz">THz</option>'));
+                            select.append($('<option value="GHz">GHz</option>'));
+                            select.append($('<option value="MHz">MHz</option>'));
+                            select.append($('<option value="kHz">kHz</option>'));
+                            select.append($('<option value="Hz">Hz</option>'));
+                            select.append($('<option value="mHz">mHz</option>'));
+                            select.append($('<option value="uHz">&#181;Hz</option>'));
+                            select.append($('<option value="nHz">nHz</option>'));
+                            select.append($('<option value="pHz">pHz</option>'));
+                            line2.append(select);
+                            select.val(cp.frequency.unit);
+                        }
                         box2 = $(`<input type="checkbox" class="box2 col-1 ms-auto">`);
                         box2.prop('checked', cp.frequency.visible == '1');
                         line2.append(box2);
 
                         line3 = $(`<div class="input-line-3 col-12"></div>`);
-                        line3.append('<div class="col-4 text-start">Phase = </div>');
-                        line3.append(`<input type="number" min="0" class="input5 col-6" title="Initial phase in degrees" placeholder="${cp.phase.value}">`);
+                        line3.append('<div class="col-4 d-flex text-start">Phase = </div>');
+                        if(mutable)
+                            line3.append(`<input type="number" min="0" class="input5 col-6 bg-light border border-secondary" title="Initial phase in degrees" placeholder="${cp.phase.value}">`);
                         box3 = $(`<input type="checkbox" class="box3 col-1 ms-auto">`);
                         box3.prop('checked', cp.phase.visible == '1');
                         line3.append(box3);
 
                         line4 = $(`<div class="input-line-4 col-12"></div>`);
-                        line4.append('<div class="col-4 text-start">Theta = </div>');
-                        line4.append(`<input type="number" min="0" class="input6 col-6" title="Damping factor" placeholder="${cp.properties.damping.value}">`);
+                        line4.append('<div class="col-4 d-flex text-start">Theta = </div>');
+                        if(mutable)
+                            line4.append(`<input type="number" min="0" class="input6 col-6 bg-light border border-secondary" title="Damping factor" placeholder="${cp.properties.damping.value}">`);
                         box4 = $(`<input type="checkbox" class="box4 col-1 ms-auto">`);
                         box4.prop('checked', cp.properties.damping.visible == '1');
                         line4.append(box4);
 
                         line5 = $(`<div class="input-line-5 col-12"></div>`);
-                        line5.append('<div class="col-4 text-start">Ri = </div>');
-                        line5.append(`<input type="number" min="0" class="input7 col-3" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
-                    
-                        select = $(`<select class="input8 col-3">`);
-                        select.append($(`<option value="TOhm">T&#8486;</option>`));
-                        select.append($(`<option value="GOhm">G&#8486;</option>`));
-                        select.append($(`<option value="MOhm">M&#8486;</option>`));
-                        select.append($(`<option value="kOhm">k&#8486;</option>`));
-                        select.append($(`<option value="Ohm">&#8486;</option>`));
-                        select.append($(`<option value="mOhm">m&#8486;</option>`));
-                        select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
-                        select.append($(`<option value="nOhm">n&#8486;</option>`));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        line5.append(select);
-                        select.val(cp.properties.impedance.unit);
+                        line5.append('<div class="col-4 d-flex text-start">Ri = </div>');
+                        if(mutable){
+                            line5.append(`<input type="number" min="0" class="input7 col-3 bg-light border border-secondary" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
+                        
+                            select = $(`<select class="input8 col-3">`);
+                            select.append($(`<option value="TOhm">T&#8486;</option>`));
+                            select.append($(`<option value="GOhm">G&#8486;</option>`));
+                            select.append($(`<option value="MOhm">M&#8486;</option>`));
+                            select.append($(`<option value="kOhm">k&#8486;</option>`));
+                            select.append($(`<option value="Ohm">&#8486;</option>`));
+                            select.append($(`<option value="mOhm">m&#8486;</option>`));
+                            select.append($(`<option value="uOhm">&#181;&#8486;</option>`));
+                            select.append($(`<option value="nOhm">n&#8486;</option>`));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            line5.append(select);
+                            select.val(cp.properties.impedance.unit);
+                        }
 
                         box5 = $(`<input type="checkbox" class="box5 col-1 ms-auto">`);
                         box5.prop('checked', cp.properties.impedance.visible == '1');
@@ -1044,23 +1105,24 @@ function redrawSchematic(schematic, container, interactive = true){
                         content.append(line1).append(line2).append(line3).append(line4).append(line5);
                     
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.value.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.value.unit = drawing.find($('.input2')).val();
-                            if(drawing.find($('.input3')).val())
-                                cp.frequency.value = drawing.find($('.input3')).val();
-                            if(drawing.find($('.input4')).val())
-                                cp.frequency.unit = drawing.find($('.input4')).val();
-                            if(drawing.find($('.input5')).val())
-                                cp.phase.value = drawing.find($('.input5')).val();
-                            if(drawing.find($('.input6')).val())
-                                cp.properties.damping.value = drawing.find($('.input6')).val();
-                            if(drawing.find($('.input7')).val())
-                                cp.properties.impedance.value = drawing.find($('.input7')).val();
-                            if(drawing.find($('.input8')).val())
-                                cp.properties.impedance.unit = drawing.find($('.input8')).val();
-
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.value.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.value.unit = drawing.find($('.input2')).val();
+                                if(drawing.find($('.input3')).val())
+                                    cp.frequency.value = drawing.find($('.input3')).val();
+                                if(drawing.find($('.input4')).val())
+                                    cp.frequency.unit = drawing.find($('.input4')).val();
+                                if(drawing.find($('.input5')).val())
+                                    cp.phase.value = drawing.find($('.input5')).val();
+                                if(drawing.find($('.input6')).val())
+                                    cp.properties.damping.value = drawing.find($('.input6')).val();
+                                if(drawing.find($('.input7')).val())
+                                    cp.properties.impedance.value = drawing.find($('.input7')).val();
+                                if(drawing.find($('.input8')).val())
+                                    cp.properties.impedance.unit = drawing.find($('.input8')).val();
+                            }
                             if(drawing.find(drawing.find($('.box1'))).is(':checked'))
                                 cp.value.visible = '1';
                             else cp.value.visible = '0';
@@ -1079,28 +1141,32 @@ function redrawSchematic(schematic, container, interactive = true){
 
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                     case 'VProbe':
                     case 'IProbe':
                         line1 = $(`<div class="input-line-2 col-12"></div>`);
-                        line1.append('<div class="col-4 text-start">Ri = </div>');
-                        line1.append(`<input type="number" min="0" class="input1 col-3" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
-                        
-                        select = $(`<select class="input2 col-3">`);
-                        select.append($('<option value="TOhm">T&#8486;</option>'));
-                        select.append($('<option value="GOhm">G&#8486;</option>'));
-                        select.append($('<option value="MOhm">M&#8486;</option>'));
-                        select.append($('<option value="kOhm">k&#8486;</option>'));
-                        select.append($('<option value="Ohm">&#8486;</option>'));
-                        select.append($('<option value="mOhm">m&#8486;</option>'));
-                        select.append($('<option value="uOhm">&#181;&#8486;</option>'));
-                        select.append($('<option value="nOhm">n&#8486;</option>'));
-                        select.append($(`<option value="pOhm">p&#8486;</option>`));
-                        line1.append(select);
-                        select.val(cp.properties.impedance.unit);
+                        line1.append('<div class="col-4 d-flex text-start">Ri = </div>');
+                        if(mutable){
+                            line1.append(`<input type="number" min="0" class="input1 col-3 bg-light border border-secondary" title="Internal Resistance" placeholder="${cp.properties.impedance.value}">`);
+                            
+                            select = $(`<select class="input2 col-3">`);
+                            select.append($('<option value="TOhm">T&#8486;</option>'));
+                            select.append($('<option value="GOhm">G&#8486;</option>'));
+                            select.append($('<option value="MOhm">M&#8486;</option>'));
+                            select.append($('<option value="kOhm">k&#8486;</option>'));
+                            select.append($('<option value="Ohm">&#8486;</option>'));
+                            select.append($('<option value="mOhm">m&#8486;</option>'));
+                            select.append($('<option value="uOhm">&#181;&#8486;</option>'));
+                            select.append($('<option value="nOhm">n&#8486;</option>'));
+                            select.append($(`<option value="pOhm">p&#8486;</option>`));
+                            line1.append(select);
+                            select.val(cp.properties.impedance.unit);
+                        }
 
                         box1 = $(`<input type="checkbox" class="box1 col-1 ms-auto">`);
                         box1.prop('checked', cp.properties.impedance.visible == '1');
@@ -1108,19 +1174,22 @@ function redrawSchematic(schematic, container, interactive = true){
 
                         content.append(line1);
                         okButton.click(function(){
-                            if(drawing.find($('.input1')).val())
-                                cp.properties.impedance.value = drawing.find($('.input1')).val();
-                            if(drawing.find($('.input2')).val())
-                                cp.properties.impedance.unit = drawing.find($('.input2')).val();
-
+                            if(mutable){
+                                if(drawing.find($('.input1')).val())
+                                    cp.properties.impedance.value = drawing.find($('.input1')).val();
+                                if(drawing.find($('.input2')).val())
+                                    cp.properties.impedance.unit = drawing.find($('.input2')).val();
+                            }
                             if(drawing.find($('.box1')).is(':checked'))
                                 cp.properties.impedance.visible = '1';
                             else cp.properties.impedance.visible = '0';
                                 
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
-                            try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                            catch(e){console.log(e);}
+                            if(mutable){
+                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
+                                catch(e){console.log(e);}
+                            }
                             });
                         break;
                 }

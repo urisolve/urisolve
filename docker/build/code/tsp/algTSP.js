@@ -336,22 +336,47 @@ function solveTSP(schematic, order) {
             }
         });
 
-        // Update the IDs of the elements to be specific to the tab
+        // Update the IDs and targets of the elements to be specific to the tab
+        // This is needed to avoid conflicts with other tabs
         page.find('*').each(function() {
             var $element = $(this);
             var currentID = $element.attr('id');
+            var currentTarget = $element.attr('data-bs-target');
             if (currentID) {
               var newID = currentID + "-" + cp.name.value;
               $element.attr('id', newID);
             }
+            if (currentTarget && currentTarget != '.multi-collapse') {
+                var newTarget = currentTarget + "-" + cp.name.value;
+                $element.attr('data-bs-target', newTarget);
+            }
         });
+
+        // Ajust table of contents offset
+        page.find('#tableContents-'+ cp.name.value+ ' a').each(function() {
+            if ($(this).attr('href')) {
+                $(this).click(function() {
+                    $('.modal').animate({
+                        scrollTop: $($(this).attr('href')).position().top - 55,
+                    }, 500);
+                });
+            }
+        });
+
+        // Change progress bar
+        var progress = page.find('.progress-bar');
+        percent = (order.indexOf(o) + 1) * 100 / order.length;
+        progress.css('width', percent + '%');
+        progress.attr('aria-valuenow', percent);
+        if(percent == 100)
+            progress.removeClass('progress-bar-animated').addClass('bg-success');
 
         // Draw subcircuit on first time showing the tab
         tab.find('a').on('shown.bs.tab', function(e) {
             drawingContainer = page.find('.circuit-widget');
             if(drawingContainer.children().length === 0)
             {
-                drawing = redrawSchematic(subcircuits[order.indexOf(o)], drawingContainer);
+                drawing = redrawSchematic(subcircuits[order.indexOf(o)], drawingContainer, true, false);
             }
         });
 
@@ -375,6 +400,7 @@ function outputTSP(jsonFile, schematic){
     vectProbes = vectVProbe.concat(vectIProbe);
     //methods = ['MTN', 'MCR', 'MCM'];
     methods = ['MCR', 'MCM'];
+    //methods = ['MCM'];
 
     // Add navigation tabs
     $('#results-board').html(outHTMLResolutionNavTSP());

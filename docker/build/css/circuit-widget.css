@@ -635,8 +635,9 @@
 
 .menu-content > div {
     display: flex;
+    justify-content: center;
     align-items: center;
-    height: auto;
+    height: 30px;
     padding: 3px;
 }
 
