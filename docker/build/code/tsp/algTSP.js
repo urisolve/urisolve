@@ -119,9 +119,9 @@ function makeSubcircuit(schematic, source){
     }
 }
 
-function schematicToJsonFile(schematic) {
+function schematicToJsonFile(circuit) {
     // Schematic to Netlist
-    netlist = makeNetlist(subcircuit.data.object);
+    netlist = makeNetlist(circuit);
 
     if(netlist.errorFlag) {
         alert('Erro ao gerar o netlist.');
@@ -184,9 +184,9 @@ function schematicToJsonFile(schematic) {
  * @param {Array<Component, string>} order The resolution order
  */
 function solveTSP(schematic, order) {
-    tabs = $('#results-tabs');
-    pages = $('#pages-content');
-    subcircuits = new Array();
+    let tabs = $('#results-tabs');
+    let pages = $('#pages-content');
+    let subcircuits = new Array(length = order.length);
   
     order.forEach(o => {
       const cp = o[0];
@@ -214,15 +214,15 @@ function solveTSP(schematic, order) {
       if (generateSection) {
         page.attr('method', method);
 
-        subcircuit = makeSubcircuit(schematic, cp.id);
+        let subcircuit = makeSubcircuit(schematic, cp.id);
 
         if(subcircuit.errorFlag) {
             alert('Erro ao gerar o subcircuito.');
             return;
         }
 
-        subcircuits.push(subcircuit.data.object);
-        jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)]);
+        subcircuits[order.indexOf(o)] = ({schematic: subcircuit.data.object, name: cp.name.value, method: method});
+        let jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)].schematic);
 
         // Initialize variables
         let warningsText = "";
@@ -357,8 +357,9 @@ function solveTSP(schematic, order) {
             if ($(this).attr('href')) {
                 $(this).click(function() {
                     $('.modal').animate({
-                        scrollTop: $($(this).attr('href')).position().top - 55,
+                        scrollTop: $($(this).attr('href')).position().top - 100 - $(this).parent().height(),
                     }, 500);
+                    page.find('#tableContents-'+ cp.name.value).removeClass('show');
                 });
             }
         });
@@ -372,11 +373,12 @@ function solveTSP(schematic, order) {
             progress.removeClass('progress-bar-animated').addClass('bg-success');
 
         // Draw subcircuit on first time showing the tab
-        tab.find('a').on('shown.bs.tab', function(e) {
+        tab.find('a').on('shown.bs.tab', function(e, order, o) {
             drawingContainer = page.find('.circuit-widget');
-            if(drawingContainer.children().length === 0)
-            {
-                drawing = redrawSchematic(subcircuits[order.indexOf(o)], drawingContainer, true, false);
+            if (drawingContainer.children().length === 0) {
+                // Get component
+                let componentName = $(this).find('h5').text();
+                let drawing = redrawSchematic(subcircuits.find(s => s.name == componentName).schematic, drawingContainer, true, false);
             }
         });
 
