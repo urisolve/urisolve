@@ -189,15 +189,29 @@ function solveTSP(schematic, order) {
     subcircuits = new Array();
   
     order.forEach(o => {
+        const cp = o[0];
+        const method = o[1];
+
+        subcircuit = makeSubcircuit(schematic, cp.id);
+
+        if(subcircuit.errorFlag) {
+            alert('Erro ao gerar o subcircuito.');
+            return;
+        }
+    
+        subcircuits.push({subcircuit: subcircuit.data.object, cp: cp.name.value});
+    });
+
+    order.forEach(o => {
       const cp = o[0];
       const method = o[1];
       let generateSection = false;
   
-      const page = $('#resolution-' + cp.name.value);
-      const tab = $('.resolution-item a[href="#resolution-' + cp.name.value + '"]').parent();
-  
-      // Check if the page was already generated
-      if (!tab.hasClass('solved')) {
+    const page = $('#resolution-' + cp.name.value);
+    const tab = $('.resolution-item a[href="#resolution-' + cp.name.value + '"]').parent();
+
+    // Check if the page was already generated
+    if (!tab.hasClass('solved')) {
         generateSection = true;
       } else {
         // If the tab is on the wrong position, move it
@@ -214,18 +228,9 @@ function solveTSP(schematic, order) {
       if (generateSection) {
         page.attr('method', method);
 
-        subcircuit = makeSubcircuit(schematic, cp.id);
-
-        if(subcircuit.errorFlag) {
-            alert('Erro ao gerar o subcircuito.');
-            return;
-        }
-
-        subcircuits.push(subcircuit.data.object);
-        jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)]);
+        jsonFile = schematicToJsonFile(subcircuits.find(s => s.cp == cp.name.value).subcircuit);
 
         // Initialize variables
-        let warningsText = "";
         switch (method) {
             case 'MTN':
                 //page.html(outHTMLTSPResolutionMTN(cp, subcircuit.data.object));
@@ -357,26 +362,19 @@ function solveTSP(schematic, order) {
             if ($(this).attr('href')) {
                 $(this).click(function() {
                     $('.modal').animate({
-                        scrollTop: $($(this).attr('href')).position().top - 55,
+                        scrollTop: $($(this).attr('href')).position().top - 100 - $(this).parent().height(),
                     }, 500);
+                    page.find('#tableContents-'+ cp.name.value).removeClass('show');
                 });
             }
         });
-
-        // Change progress bar
-        var progress = page.find('.progress-bar');
-        percent = (order.indexOf(o) + 1) * 100 / order.length;
-        progress.css('width', percent + '%');
-        progress.attr('aria-valuenow', percent);
-        if(percent == 100)
-            progress.removeClass('progress-bar-animated').addClass('bg-success');
 
         // Draw subcircuit on first time showing the tab
         tab.find('a').on('shown.bs.tab', function(e) {
             drawingContainer = page.find('.circuit-widget');
             if(drawingContainer.children().length === 0)
             {
-                drawing = redrawSchematic(subcircuits[order.indexOf(o)], drawingContainer, true, false);
+                drawing = redrawSchematic(subcircuits.find(s => s.cp === cp.name.value).subcircuit, drawingContainer, true, false);
             }
         });
 
@@ -390,6 +388,16 @@ function solveTSP(schematic, order) {
         // Add the solved class after solving the page
         tab.addClass('solved');
       }
+
+        // Change progress bar
+        var progress = page.find('.progress-bar');
+        percent = (order.indexOf(o) + 1) * 100 / order.length;
+        progress.css('width', percent + '%');
+        progress.attr('aria-valuenow', percent);
+        if(percent == 100)
+            progress.removeClass('progress-bar-animated').addClass('bg-success');
+        else
+            progress.addClass('progress-bar-animated').removeClass('bg-success');
     });
   }
 
