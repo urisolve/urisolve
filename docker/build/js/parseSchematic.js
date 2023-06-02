@@ -13,17 +13,42 @@ function parseSchematic(text){
     const wiresPattern = /<Wires>([\s\S]*?)<\/Wires>/;
     //const diagramsPattern = /<Diagrams>([\s\S]*?)<\/Diagrams>/;
     //const paintingsPattern = /<Paintings>([\s\S]*?)<\/Paintings>/;
+    
+    let tempReg;
 
     // Get the version number
     const version = text.match(versionPattern)[1];
+    if(!version)
+        version = '0.0.0';
     // Get the properties section
-    const propertiesString = text.match(propertiesPattern)[1];
+    tempReg = text.match(propertiesPattern);
+    if(!tempReg)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['1'],
+            errorData: {missingData: ['Properties']},
+        }
+    const propertiesString = tempReg[1];
     // Get the symbol section
     //const symbol = text.match(symbolPattern)[1];
     // Get the components section
-    const components = text.match(componentsPattern)[1];
+    tempReg = text.match(componentsPattern);
+    if(!tempReg)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['1'],
+            errorData: {missingData: ['Components']},
+        }
+    const components = tempReg[1];
     // Get the wires section
-    const wires = text.match(wiresPattern)[1];
+    tempReg = text.match(wiresPattern);
+    if(!tempReg)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['1'],
+            errorData: {missingData: ['Wires']},
+        }
+    const wires = tempReg[1];
     // Get the diagrams section
     //const diagrams = text.match(diagramsPattern)[1];
     // Get the paintings section
@@ -34,12 +59,52 @@ function parseSchematic(text){
     
     //Get the view propertie object
     const viewMatch = propertiesString.match(viewPattern);
+    if(!viewMatch)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['1'],
+            errorData: {missingData: ['View']},
+        }
     const viewValues = viewMatch[1].split(',');
+    if(viewValues.length < 7) {
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['2'],
+            errorData: [{invalidData: ['View'], error: 'has missing values'}],
+        }
+    }
+    else if(viewValues.length > 7){
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['2'],
+            errorData: [{invalidData: ['View'], error: 'has too many values'}],
+        }
+    }
     const view = new View(...viewValues);
 
     //Get the grid propertie object
     const gridMatch = propertiesString.match(gridPattern);
+    if(!gridMatch)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['1'],
+            errorData: {missingData: ['Grid']},
+        }
     const gridValues = gridMatch[1].split(',');
+    if(gridValues.length < 3) {
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['2'],
+            errorData: {invalidData: ['Grid'], error: 'has missing values'},
+        }
+    }
+    else if(gridValues.length > 3){
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['2'],
+            errorData: {invalidData: ['Grid'], error: 'has too many values'},
+        }
+    }
     const grid = new Grid(...gridValues);
 
     // Regex pattern for each component
@@ -47,11 +112,16 @@ function parseSchematic(text){
 
     // Get all the component strings
     const componentsArray = components.match(componentPattern);
+    if(!componentsArray)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['3'],
+        }
 
     componentIndex=1;
-
+    let errorFlag = false;
+    let errorData = [];
     // Parse each component
-    if(componentsArray !== null)
     componentsArray.forEach(component => {
         // Remove the < and > from the component
         const componentString = component.substring(1, component.length - 1);
@@ -65,33 +135,113 @@ function parseSchematic(text){
         // Create a new component object depending on type
         switch(cpProperties[0]){
             case 'R':
+                if(cpProperties.length < 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new Resistor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'C':
+                if(cpProperties.length < 16){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 16){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new Capacitor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'L':
+                if(cpProperties.length < 14){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 14){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new Inductor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Vdc':
+                if(cpProperties.length < 15){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 15){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new DcVoltPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Idc':
+                if(cpProperties.length < 15){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 15){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new DcCurrPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Vac':
+                if(cpProperties.length < 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new AcVoltPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Iac':
+                if(cpProperties.length < 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 22){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new AcCurrPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'GND':
+                if(cpProperties.length < 9){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ground '], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 9){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Ground '], error: 'has too many values'});
+                }
                 cp = new GND("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'VProbe':
+                if(cpProperties.length < 12){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 12){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new VProbe("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'IProbe':
+                if(cpProperties.length < 12){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has missing values'});
+                }
+                else if(cpProperties.length > 12){
+                    errorFlag = true;
+                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has too many values'});
+                }
                 cp = new IProbe("cp" + componentIndex, cpProperties, ports);
                 break;
             default:
@@ -100,37 +250,47 @@ function parseSchematic(text){
         };   
         componentIndex++;
     });
-    else
-        return {
-            errorFlag: true,
-            errorReasonCodes: ['No components found (temp)'],
-        }   
 
     // Regex pattern for each wire
     const wirePattern = /<(.*?)>/g;
 
     // Get all the wire strings
     const wireArray = wires.match(wirePattern);
+    if(!wireArray)
+        return {
+            errorFlag: true,
+            errorReasonCodes: ['4'],
+        }
 
     wireIndex=1;
 
     // Parse each wire
-    if(wireArray !== null)
     wireArray.forEach(wire => {
         // Remove the < and > from the wire
         const wireString = wire.substring(1, wire.length - 1);
         // Split the wire into an array of properties (removing the quotes)
         const wireProperties = wireString.replace(/"/g,'').split(' ');
+        if(wireProperties.length < 9) {
+            errorFlag = true;
+            errorData.push({invalidData: ['Wire '+ wireIndex], error: 'has missing values'});
+        }
+        else if(wireProperties.length > 9){
+            errorFlag = true;
+            errorData.push({invalidData: ['Wire '+ wireIndex], error: 'has too many values'});
+        }
         // Create a new wire object
         const w = new Wire("s" + wireIndex, wireProperties);
 
         wireIndex++;
     });
-    else
+
+    if(errorFlag){
         return {
             errorFlag: true,
-            errorReasonCodes: ['No wires found (temp)'],
+            errorReasonCodes: ['2'],
+            errorData: errorData,
         }
+    }
     
     treatSchematic();
 
@@ -841,4 +1001,38 @@ function cropWindow(schematic){
     schematic.properties.view.y2 = maxY + 30 + schematic.properties.grid.y*2;
 
     return schematic;
+}
+
+function parseSchematic_handleError (err) {
+    let codes = err.errorReasonCodes;
+    let data = err.errorData;
+    
+    let errorstr = '';
+
+    codes.forEach(e => {
+        switch(e){
+            case '1':
+                errorstr += '\tMissing data: ';
+                data.missingData.forEach(err =>{
+                    errorstr += err + ', ';
+                });
+                break;
+            case '2':
+                errorstr += '\tInvalid elements: ';
+                data.forEach(err =>{
+                    errorstr += err.invalidData + ' ' + err.error + ', ';
+                });
+                break;
+            case '3':
+                errorstr += '\tCircuit has no components';
+                break;
+            case '4':
+                errorstr += '\tCircuit has no wires';
+                break;
+            default:
+                errorstr += 'Error ' + e + ':' + data + '\n';
+                break;
+        }
+    });
+    return errorstr;
 }

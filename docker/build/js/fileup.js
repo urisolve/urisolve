@@ -157,12 +157,9 @@ function handleFileSelect (e) {
 
                 // Check for errors
                 if(schematic.errorFlag){
-                    alert("Error parsing schematic file!!");
-                    return{
-                        first: true,
-                        second: 1,
-                        third: schematic.errorReasonCodes
-                    };
+                    alert("Invalid schematic file: \n" + parseSchematic_handleError(schematic));
+                    cleanFileHtmlOutput();
+                    return;
                 }
                 cropWindow(schematic.data.object);
                 preview = $('<div id="circuit-preview"></div>');
@@ -170,6 +167,12 @@ function handleFileSelect (e) {
 
                 // Add circuit image to the page
                 var circuitImage = redrawSchematic(schematic.data.object, preview, false);
+
+                if(circuitImage.errorFlag){
+                    alert("Error generating circuit image: \n" + redrawSchematic_handleError(circuitImage));
+                    cleanFileHtmlOutput();
+                    return;
+                }
 
                 // Scale circuit image
                 var maxWidth = 150;
