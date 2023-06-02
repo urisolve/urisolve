@@ -294,7 +294,61 @@ function outHTMLSectionsMCR_TSP(cp){
 }
 
 
+function outToast (message) {
+    toastStack = $('#toast-stack');
+    if(toastStack.length === 0){
+        var toastStack = $('<div id="toast-stack" class="toast-container position-fixed" style="bottom: 5vh; right: 5vw; min-width: 20vw;"></div>');
+        toastStack.appendTo('#results-modal');
+    }
 
+    var toast = $('<div class="toast w-100" role="alert" aria-live="assertive" aria-atomic="true"></div>');
+
+    // Add toast header
+    if(message.title){
+        toastHeader = $('<div class="toast-header"></div>');
+
+        // Add toast icon
+        if(message.type === 'error'){
+            toastHeader.append('<i class="fas fa-exclamation-triangle mr-2"></i>');
+        }
+        else if(message.type === 'warning'){
+            toastHeader.append('<i class="fas fa-exclamation-circle mr-2"></i>');
+        }
+        else if(message.type === 'success'){
+            toastHeader.append('<i class="fas fa-check-circle mr-2"></i>');
+        }
+        else if(message.type === 'info'){
+            toastHeader.append('<i class="fas fa-info-circle mr-2"></i>');
+        }
+
+        // Add toast title
+        if(message.title){
+            toastHeader.append('<strong class="mr-auto">'+ message.title +'</strong>');
+        }
+
+        // Add toast close button
+        toastHeader.append('<button type="button" class="close ml-auto" data-bs-dismiss="toast">&times;</button>');
+        toast.append(toastHeader);
+    }
+
+    // Add toast body
+    if(message.body){
+        toastBody = $('<div class="toast-body">'+ message.body +'</div>');
+        toast.append(toastBody);
+    }
+
+    toast.appendTo(toastStack);    
+  
+    // Check if maximum number of toasts is reached
+    if (toastStack.find('.toast').length >= 5) {
+        // Remove the oldest toast from the DOM and the activeToasts array
+        var oldestToast = toastStack.find('.toast:first');
+        oldestToast.remove();
+    }
+
+    var bsToast = new bootstrap.Toast(toast[0]);
+    bsToast.show();
+}
 
 
 
@@ -332,39 +386,4 @@ function populateModal(schematic, modal) {
     });
 
     table.append(tableHeader).append(tableBody);
-
-
-
-
-
-            if (selectionCards.find('.card').length != vectSources.length) {
-                // Show toast
-                var toast = $('<div class="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>');
-                var toastContent = $('<div class="d-flex"></div>');
-                var toastBody = $('<div class="toast-body">Por favor, selecione todas as fontes.</div>');
-                var toastClose = $('<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>');
-                
-                toastContent.append(toastBody).append(toastClose).appendTo(toast);
-                toastStack.append(toast);
-              
-                // Check if maximum number of toasts is reached
-                if (toastStack.find('.toast').length >= 5) {
-                    // Remove the oldest toast from the DOM and the activeToasts array
-                    var oldestToast = toastStack.find('.toast:first');
-                    oldestToast.remove();
-                }
-
-                var bsToast = new bootstrap.Toast(toast[0]);
-                bsToast.show();
-              
-                return;
-            }  
-
-
-    });
-
-
-
-    
-}
 */

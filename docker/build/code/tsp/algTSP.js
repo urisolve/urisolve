@@ -485,7 +485,7 @@ function outputTSP(jsonFile, schematic){
             resolutionOrder = vectSources.map(s => [s, methods[0]]);
         } else {
             if ($('.selection-cards').find('.card').length != vectSources.length){
-                alert("Please select all sources");
+                outToast({type: 'error', title: 'Error', body: 'You must select all power sources.'});
                 return;
             }
             // Interactive mode
@@ -528,6 +528,7 @@ function outputTSP(jsonFile, schematic){
 function loadFileAsTextTSP(data, schematic){
     jsonFile = JSON.parse(data);
     console.log(jsonFile);
-
     outputTSP(jsonFile, schematic);
+    outToast({type: 'success', title: 'Success', body: 'Schematic is valid.'});
+
 }
