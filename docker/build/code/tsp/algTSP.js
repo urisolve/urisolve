@@ -119,6 +119,11 @@ function makeSubcircuit(schematic, source){
     }
 }
 
+/**
+ * This function converts the schematic object to a netlist and then to a JSON file
+ * @param {Schematic} circuit The circuit to be converted to JSON
+ * @returns {Object} The JSON file or the error data
+ */
 function schematicToJsonFile(circuit) {
     // Schematic to Netlist
     netlist = makeNetlist(circuit);
@@ -181,11 +186,10 @@ function schematicToJsonFile(circuit) {
 /**
  * This function calculates the contribuition of each power source to the total power
  * @param {Schematic} schematic The schematic object of the main circuit
+ * @param {Object} mainJsonFile The JSON file of the main circuit
  * @param {Array<Component, string>} order The resolution order
  */
-function solveTSP(schematic, order) {
-    let tabs = $('#results-tabs');
-    let pages = $('#pages-content');
+function solveTSP(schematic, mainJsonFile, order) {
     let subcircuits = new Array(length = order.length);
   
     order.forEach(o => {
@@ -203,6 +207,16 @@ function solveTSP(schematic, order) {
         // If the tab is on the wrong position, move it
         if (tab.index() -1 !== order.indexOf(o)) {
             tab.insertAfter($('.resolution-item').eq(order.indexOf(o)));
+
+            // Change progress bar
+            var progress = page.find('.progress-bar');
+            percent = (order.indexOf(o) + 1) * 100 / order.length;
+            progress.css('width', percent + '%');
+            progress.attr('aria-valuenow', percent);
+            if(percent == 100)
+                progress.removeClass('progress-bar-animated').addClass('bg-success');
+            else
+                progress.removeClass('bg-success').addClass('progress-bar-animated');
         }
 
         // Check if the method is the same
@@ -268,6 +282,8 @@ function solveTSP(schematic, order) {
                 $('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
                 $('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
 
+                // Push the solved JSON to the array
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCM'};
                 break;
             case 'MCR':
                 // Solve with MCR
@@ -316,6 +332,8 @@ function solveTSP(schematic, order) {
                 $('#currentsInfo').html(outCurrentsInfoMCR(jsonFile.analysisObj.currents, jsonFile.branches).first);
                 $('#resultsCurrentsBranch').html(outResultsCurrentsMCR(jsonFile));
 
+                // Push the solved JSON to the array
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCR'};
                 break;
             default:
                 alert('Método de resolução não reconhecido.');
@@ -371,6 +389,8 @@ function solveTSP(schematic, order) {
         progress.attr('aria-valuenow', percent);
         if(percent == 100)
             progress.removeClass('progress-bar-animated').addClass('bg-success');
+        else
+            progress.removeClass('bg-success').addClass('progress-bar-animated');
 
         // Draw subcircuit on first time showing the tab
         tab.find('a').on('shown.bs.tab', function(e, order, o) {
@@ -379,6 +399,10 @@ function solveTSP(schematic, order) {
                 // Get component
                 let componentName = $(this).find('h5').text();
                 let drawing = redrawSchematic(subcircuits.find(s => s.name == componentName).schematic, drawingContainer, true, false);
+                if(drawing.errorFlag){
+                    alert('Error on circuit drawing:\n' + redrawSchematic_handleError(drawing));
+                    return;
+                }
             }
         });
 
@@ -393,8 +417,198 @@ function solveTSP(schematic, order) {
         tab.addClass('solved');
       }
     });
+
+    console.log(solvedJSON);
+    contributions = {};
+    for (json in solvedJSON){
+        // Get current values
+        contributions[json] = {};
+        const regex = /^(\w+)\s*=\s*(-?[\d.,]+)~(\w+)$/;
+
+        switch(solvedJSON[json].method) {
+            case 'MCR':
+                solvedJSON[json].file.analysisObj.result.cuurentResult.forEach(curr => {
+                    const match = curr.match(regex);
+                    if (match) {
+                        const obj = {
+                        value: parseFloat(match[2].replace(',', '.')),
+                        unit: match[3],
+                        };
+                        contributions[json][match[1]] = obj;
+
+                        // Find component in the branch
+                        solvedJSON[json].file.branches.forEach(branch => {
+                            if(branch.currentData.ref === match[1]){
+                                components = branch.components.map(cp => cp.ref);
+                                contributions[json][match[1]].components = components;
+                                contributions[json][match[1]].start = branch.startNode;
+                                contributions[json][match[1]].end = branch.endNode;
+                            }
+                        });
+                    }
+                });
+
+            break;
+            case 'MCM':
+                solvedJSON[json].file.analysisObj.currents.forEach(curr => {
+                    const obj = {
+                        value: curr.valueRe,
+                        start: curr.noP,
+                        end: curr.noN,
+                    }
+                    
+                    // Get the appropriate unit
+                    let totalAbs = Math.abs(curr.valueRe);
+                    if (totalAbs >= 1000000){
+                        obj.unit = 'MA';
+                        obj.value /= 1000000;
+                    }
+                    else if (totalAbs >= 1000){
+                        obj.unit = 'kA';
+                        obj.value /= 1000;
+                    }
+                    else if (totalAbs >= 1){
+                        obj.unit = 'A';
+                    }
+                    else if (totalAbs >= 0.001){
+                        obj.unit = 'mA';
+                        obj.value *= 1000;
+                    }
+                    else if (totalAbs >= 0.000001){
+                        obj.unit = 'uA';
+                        obj.value *= 1000000;
+                    }
+
+                    // Round total to 2 decimal places
+                    obj.value = Math.round(obj.value * 100) / 100;
+
+                    contributions[json][curr.ref] = obj;
+
+                    // Find component in the branch
+                    solvedJSON[json].file.branches.forEach(branch => {
+                        if(branch.currentData.ref === curr.ref){
+                            components = branch.components.map(cp => cp.ref);
+                            contributions[json][curr.ref].components = components;
+                        }
+                    });
+                });
+            break;
+        }
+    }
+    mainJsonFile.analysisObj.contributions = contributions;
+
+    // Match contributions to the currents
+    mainJsonFile.branches.forEach(branch => {
+        branch.components = branch.acAmpPwSupplies.concat(branch.acVoltPwSupplies, branch.capacitors, branch.coils, branch.dcAmpPwSupplies
+, branch.dcVoltPwSupplies, branch.resistors);
+        components = branch.components.map(cp => cp.ref);
+        curr = branch.currentData.ref;
+        currentObj = mainJsonFile.analysisObj.currents.find(c => c.ref === curr);
+
+        currentObj.contributions = {};
+        
+        // Find the current in the contributions
+        for (json in contributions){
+            for (curr in mainJsonFile.analysisObj.contributions[json]){
+                c = mainJsonFile.analysisObj.contributions[json][curr];
+
+                let sortedComponents = components.slice().sort();
+                let sortedCComponents = c.components.slice().sort().map(cp => {if(cp.startsWith("Ri\\_")){return cp.substring(4);} return cp;}); 
+                if (sortedComponents.some(value => sortedCComponents.includes(value))){
+                    currentObj.contributions[json] = c;
+                }
+            };
+        }
+    });
+
+    // Calculate total values
+    mainJsonFile.analysisObj.results = [];
+    mainJsonFile.analysisObj.currents.forEach(curr => {
+        let total = 0;
+        let equation = curr.ref + ' = ';
+        let first = true;
+        for (json in curr.contributions){
+            contribution = curr.contributions[json];
+            if(contribution.value !== 0){
+                switch(contribution.unit){
+                    case 'MA':
+                        unitMultiplier = 1000000;
+                        break;
+                    case 'kA':
+                        unitMultiplier = 1000;
+                        break;
+                    case 'A':
+                        unitMultiplier = 1;
+                        break;
+                    case 'mA':
+                        unitMultiplier = 0.001;
+                        break;
+                    case 'uA':
+                        unitMultiplier = 0.000001;
+                        break;
+                    default:
+                        unitMultiplier = 1;
+                        break;
+                }
+                let value = contribution.value * unitMultiplier;
+                if (curr.noP == contribution.start || curr.noN == contribution.end){
+                    total += value;
+                    if (value < 0 && !first)
+                        equation += ' (' + contribution.value + contribution.unit + ') + ';
+                    else
+                        equation += contribution.value + contribution.unit + ' + ';
+                    first = false;
+                }
+                else if (curr.noP == contribution.end || curr.noN == contribution.start){
+                    total -= value;
+                    if (value < 0 && !first)
+                        equation += ' (' + contribution.value*-1 + contribution.unit + ') + ';
+                    else
+                        equation += contribution.value*-1 + contribution.unit + ' + ';
+                    first = false;
+                }
+            }
+        }
+
+        // Get the appropriate unit
+        let unit = '';
+        let totalAbs = Math.abs(total);
+        if (totalAbs >= 1){
+            unit = 'A';
+        }
+        else if (totalAbs >= 0.001){
+            unit = 'mA';
+            total *= 1000;
+        }
+        else if (totalAbs >= 0.000001){
+            unit = 'uA';
+            total *= 1000000;
+        }
+        else{
+            unit = 'A';
+        }
+        // Round total to 2 decimal places
+        total = Math.round(total * 100) / 100;
+        mainJsonFile.analysisObj.results.push({ref: curr.ref, value: total, unit: unit, equation: equation.slice(0, -3)});
+    });
+
+    console.log(mainJsonFile);
+
+    return {
+        errorFlag: false,
+        errorReasonCodes: [],
+        data: { solvedJSON: mainJsonFile}
+    }
   }
 
+/**
+ * Outputs information to the modal
+ * @param {object} jsonFile 
+ * @param {Schematic} schematic 
+ * 
+ * @description Error codes:
+ * @description 1 - There's less than 2 power sources in the schematic
+ */
 function outputTSP(jsonFile, schematic){
     // Get sources and probes
     sourceTypes = ['Vdc', 'Vac', 'Idc', 'Iac'];
@@ -403,6 +617,13 @@ function outputTSP(jsonFile, schematic){
     //methods = ['MTN', 'MCR', 'MCM'];
     methods = ['MCR', 'MCM'];
     //methods = ['MCM'];
+
+    if(vectSources.length < 2){
+        return{
+            errorFlag: true,
+            errorReasonCodes: [1],
+        }
+    }
 
     // Add navigation tabs
     $('#results-board').html(outHTMLResolutionNavTSP());
@@ -429,6 +650,10 @@ function outputTSP(jsonFile, schematic){
     // Add circuit drawings
     $('#results-modal').on('shown.bs.modal', function() {
         var mainDrawing = redrawSchematic(schematic, mainCircuit);
+        if(mainDrawing.errorFlag){
+            alert('Error on circuit drawing:\n' + redrawSchematic_handleError(mainDrawing));
+            return;
+        }
     });
 
     // Add cards to the selection section
@@ -498,14 +723,31 @@ function outputTSP(jsonFile, schematic){
                 resolutionOrder.push([source, method]);
             });
         }
+
+        $('#loadpage').fadeIn(1000);
+
         // Add resolution sections
         $('#results-tabs').append(outHTMLResolutionTabsTSP(resolutionOrder));
         $('#pages-content').append(outHTMLResolutionTabsContentTSP(resolutionOrder));
-        $('#loadpage').fadeIn(1000);
-        // Calculate
-        solveTSP(schematic, resolutionOrder);
-        // Update table
 
+        // Calculate
+        let solved = solveTSP(schematic, jsonFile, resolutionOrder);
+        if(solved.errorFlag) {
+            alert('Erro ao resolver o circuito.');
+            return;
+        }
+        
+        // Add results section
+        $('#results-tab').html(outHTMLResultsSectionsTSP());
+
+        // Populate table
+        $('#results-table').html(outHTMLResultsTableTSP(solved.data.solvedJSON));
+
+        // Populate info section
+        $('#currentsInfo-results').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
+
+        // Populate results section
+        $('#resolution-results').html(outHTMLResultsTSP(jsonFile));
 
         $('#loadpage').fadeOut(1000);
         // Update Dictionary Language
@@ -523,12 +765,52 @@ function outputTSP(jsonFile, schematic){
 		set_lang(dictionary.english);
 	else	
 		set_lang(dictionary.portuguese);
+
+    return {
+        errorFlag: false,
+        errorReasonCodes: []
+    }
 }
 
+/**
+ * Main function of the TSP module
+ * @param {object} data Initial jsonFile data
+ * @param {Schematic} schematic Schematic object of the main circuit
+ */
 function loadFileAsTextTSP(data, schematic){
     jsonFile = JSON.parse(data);
     console.log(jsonFile);
-    outputTSP(jsonFile, schematic);
+    solvedJSON = {};
+    output = outputTSP(jsonFile, schematic);
+    if(output.errorFlag){
+        throw output;
+    }
     outToast({type: 'success', title: 'Success', body: 'Schematic is valid.'});
 
+}
+
+/**
+ * This function handles the errors of the TSP module and returns a string with the error message
+ * @param {object} err Error data
+ * @returns 
+ */
+function TSP_handleError(err){
+    console.log(err);
+    codes = err.errorReasonCodes;
+    data = err.errorData;
+
+    errorstr = "";
+    if(Array.isArray(codes))
+        codes.forEach(code => {
+            switch(code){
+                case 1:
+                    errorstr += 'There must be at least 2 power sources.';
+                    break;
+                default:
+                    errorstr += 'Unknown error.';
+                    break;
+            }
+        });
+
+    return errorstr;
 }

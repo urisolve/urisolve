@@ -1,3 +1,7 @@
+/**
+ * This function creates the HTML code for the navigation tabs and the tab content
+ * @returns {String} HTML code
+ */
 function outHTMLResolutionNavTSP(){
     var htmlstr = "";
 
@@ -16,6 +20,11 @@ function outHTMLResolutionNavTSP(){
     return htmlstr;
 }
 
+/**
+ * This function generates the HTML for the resolution tabs
+ * @param {Array<Component, String>} order The order of the resolution tabs and the method used
+ * @returns {string} HTML code
+ */
 function outHTMLResolutionTabsTSP(order){
     var htmlstr = "";
 
@@ -40,6 +49,11 @@ function outHTMLResolutionTabsTSP(order){
     return htmlstr;
 }
 
+/**
+ * This function generates the HTML for the resolution tabs content
+ * @param {Array<Component, String>} order The order of the resolution tabs and the method used
+ * @returns {String} HTML code
+ */
 function outHTMLResolutionTabsContentTSP(order){
     var htmlstr = "";
 
@@ -61,6 +75,10 @@ function outHTMLResolutionTabsContentTSP(order){
     return htmlstr;
 }
 
+/**
+ * This function generates the HTML for section of the main tab
+ * @returns {String} HTML code
+ */
 function outHTMLSectionsTSP(){
     var htmlstr = "";
     
@@ -82,6 +100,10 @@ function outHTMLSectionsTSP(){
     return htmlstr;
 }
 
+/**
+ * This function generates the HTML to populate the selection section of the main tab
+ * @returns {String} HTML code
+ */
 function outHTMLSelectionTSP(){
     var htmlstr = "";
 
@@ -113,7 +135,11 @@ function outHTMLSelectionTSP(){
     return htmlstr;
 }
 
-    
+/**
+ * This function generates the HTML for the section of tab resolution using the MCM method
+ * @param {Component} cp 
+ * @returns {String} HTML code
+ */    
 function outHTMLSectionsMCM_TSP(cp) {
     htmlstr = '';
     // Add navbar
@@ -199,6 +225,11 @@ function outHTMLSectionsMCM_TSP(cp) {
     return htmlstr;
 }
 
+/**
+ * This function generates the HTML for the section of tab resolution using the MCR method
+ * @param {Component} cp 
+ * @returns {String} HTML code
+ */
 function outHTMLSectionsMCR_TSP(cp){
     let htmlstr = '';
 
@@ -294,6 +325,133 @@ function outHTMLSectionsMCR_TSP(cp){
 }
 
 
+function outHTMLResultsSectionsTSP(){
+    var htmlstr = "";
+
+    // Add table section
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_ResultsTable"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="results-table"></div>';
+
+    // Add current info section
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="currentsInfo-results"></div>';
+
+    // Add resolution section
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resolutionTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="resolution-results"></div>';
+
+    return htmlstr;
+}
+
+function outHTMLResultsTableTSP(jsonFile) {
+    var htmlstr = "";
+
+    // Add table
+    htmlstr += '<table class="table table-bordered table-sm text-center">';
+    // Add table header
+    htmlstr += '<thead class="table-dark"><tr><th scope="col" colspan="2" data-translate="_ResultsTableCell1"></th>';
+
+    for (let json in jsonFile.analysisObj.contributions) {
+        htmlstr += '<th scope="col">' + json + '</th>';
+    };
+
+    htmlstr += '</tr></thead><tbody>';
+
+
+    // Add table body
+    jsonFile.analysisObj.currents.forEach(current => {
+        htmlstr += '<tr><th class="align-middle" scope="row" rowspan="2">' + current.ref + '</th>';
+        htmlstr += '<th scope="row" data-translate="_ResultsTableCell2"></th>';
+        for (let json in jsonFile.analysisObj.contributions) {
+            contribution = current.contributions[json];
+            if(contribution !== undefined) {
+                htmlstr += '<td><span>' + contribution.start + '</span>';
+                htmlstr += '<i class="fas fa-arrow-right mr-2 ml-2"></i>';
+                htmlstr += '<span>' + contribution.end + '</span></td>';
+            } else {
+                htmlstr += '<td>-</td>';
+            }
+        };
+        htmlstr += '</tr><tr><th scope="row" data-translate="_ResultsTableCell3"></th>';
+        for (let json in jsonFile.analysisObj.contributions) {
+            contribution = current.contributions[json];
+            if(contribution === undefined) contribution = {value: '0', unit: 'A'};
+            htmlstr += '<td>' + contribution.value + ' '+ contribution.unit + '</td>';
+        };
+        htmlstr += '</tr>';
+    });
+
+    htmlstr += '</tbody></table>';
+
+
+    return htmlstr;
+}
+
+function outHTMLResultsTSP(jsonFile) {
+    results = jsonFile.analysisObj.results;
+
+    var htmlstr = "";
+
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
+
+    if(results.length > 0){
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<results.length; k++){
+            str += results[k].equation;
+            if(k<results.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        str += ' \\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<results.length; k++){
+            if(results[k].complex){
+                // Not yet implemented
+            }
+            else {
+                str += results[k].ref + '=' + results[k].value + '\\;' + results[k].unit;
+            }
+
+            if(k<results.length-1)
+                str += ' \\\\[0.7em] ';
+    }
+
+        str += '\\end{cases}';
+
+        // Render System to TeX
+        str = katex.renderToString(str, {throwOnError: false});
+    /*
+        // Add Notes
+        htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+        htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+        htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+        htmlstr += '<div class="ml-1"><strong><p data-translate="_currResNotes1MCM"></p></strong></div>';
+        htmlstr += '</div></div></div>'
+    */
+        // Add equations in a scroll menu
+        htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
+    }
+    // Close Currents Card
+    htmlstr += '</div></div></div>';
+
+    // Close results panel
+    htmlstr += '</div></div>';
+
+    return htmlstr;
+}
+
+/**
+ * This function generates a BS5 toast
+ * @param {Object} message The object containing the message, title and type of the toast
+ */
 function outToast (message) {
     toastStack = $('#toast-stack');
     if(toastStack.length === 0){
@@ -349,41 +507,3 @@ function outToast (message) {
     var bsToast = new bootstrap.Toast(toast[0]);
     bsToast.show();
 }
-
-
-
-
-/*
-function populateModal(schematic, modal) {
-
-    // Add toast stack
-    var toastStack = $('<div class="toast-container top-0 start-50 translate-middle-x"></div>');
-
-
-    // Section #1 - Sticky composed of main circuit drawing and contributions table
-
-    ctHeader = $('<div class="section-header">Tabela de resultados</div>');
-    table = $('<table class="contributions-table"></table>');
-
-    // Build results table
-    tableHeader = $('<thead><tr></tr></thead>');
-    tableHeader.find('tr').append('<th colspan="2">Grandeza \\ Fonte</th>');
-
-    // Add source columns
-    vectSources.map(cp => tableHeader.find('tr').append(`<th>${cp.name.value}</th>`));
-
-    tableBody = $('<tbody></tbody>');   
-    // Add probe rows
-    vectProbes.forEach(p => {
-        row1 = $('<tr></tr>');
-        row2 = $('<tr></tr>');
-        row1.append(`<th rowspan='2'>${p.name.value}</th>`);
-        row1.append(`<th>Sentido</th>`);
-        row2.append(`<th>Valor</th>`);
-        vectSources.map(cp => row1.append(`<td></td>`));
-        vectSources.map(cp => row2.append(`<td></td>`));
-        tableBody.append(row1).append(row2);
-    });
-
-    table.append(tableHeader).append(tableBody);
-*/

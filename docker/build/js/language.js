@@ -230,6 +230,11 @@ $(function () {
             "_interactiveStep3": '3. Select the resolution method for each individual circuit from the respective dropdown menu.',
             "_interactiveStep4": '4. When you are satisfied with the selected order and methods, press the "Calculate" button to obtain the results.',
             "_btn_calcTSP": "Calculate",
+            "_ResultsTable": "Contributions table",
+            "_ResultsTableCell1": "Parameter \\ Source",
+            "_ResultsTableCell2": "Direction",
+            "_ResultsTableCell3": "Value",
+            "_resolutionTitle": "Superposition summation",
         },
 
         // Language Switch - PT-PT
@@ -463,6 +468,11 @@ $(function () {
             "_interactiveStep3": '3. Selecione o método de resolução de cada circuito parcelar individualmente através do respectivo menu suspenso.',
             "_interactiveStep4": '4. Quando estiver satisfeito com a ordem e os métodos selecionados, pressione o botão "Calcular" para obter os resultados.',
             "_btn_calcTSP": "Calcular",
+            "_ResultsTable": "Tabela de Contribuições",
+            "_ResultsTableCell1": "Parâmetro \\ Fonte",
+            "_ResultsTableCell2": "Sentido",
+            "_ResultsTableCell3": "Valor",
+            "_resolutionTitle": "Soma das contribuições",
         }
     };
 

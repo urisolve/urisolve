@@ -9,6 +9,36 @@
  * @returns {Object} An object containing the error flag and the error reason codes
  */
 function redrawSchematic(schematic, container, interactive = true, mutable = true){
+    if(!(schematic instanceof Schematic)){
+        return {
+            errorFlag: true,
+            errorReasonCodes: [1]
+        };
+    }
+
+    if(!(container instanceof jQuery) || container.length === 0){
+        return {
+            errorFlag: true,
+            errorReasonCodes: [2]
+        };
+    }
+
+    if(typeof interactive !== 'boolean'){
+        return {
+            errorFlag: true,
+            errorReasonCodes: [3],
+            errorData: "interactive"
+        };
+    }
+
+    if(typeof mutable !== 'boolean'){
+        return {
+            errorFlag: true,
+            errorReasonCodes: [3],
+            errorData: "mutable"
+        };
+    }
+
     // Clear the drawing area
     container.empty();
     // Change the scale to the stylesheet
@@ -1247,7 +1277,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
         else {
             return {
                 errorFlag: true,
-                errorReasonCodes: ['WIRE_NOT_HORIZONTAL_OR_VERTICAL(temp)']
+                errorReasonCodes: [5],
+                errorData: {wire: wire.id}
             }
         }
 
@@ -1416,6 +1447,11 @@ function drawLabel(label, cp){
     snapToDrawing(label, label.parent().parent());
 }
 
+/**
+ * This function snaps the element to the edge of the drawing if it is outside
+ * @param {Jquery} element The element to be snapped
+ * @param {Jquery} drawing The drawing div
+ */
 function snapToDrawing(element, drawing){
     //Snap the element to the edge of the drawing if it is outside
     var elementOffset = element.offset();
@@ -1490,4 +1526,42 @@ function drawWireLine(wire, x2, y2, xLeft, yTop, scale, drawing){
 
         if($('.style-switch input').is(':checked'))
             line.addClass('legacy');
+}
+
+/**
+ * This function handles the errors returned by the redrawSchematic function
+ * @param {Object} err The error object returned by the function
+ * @returns {string} The error message to be displayed
+ */
+function redrawSchematic_handleError(err){
+    let codes = err.errorReasonCodes;
+    let data = err.errorData;
+
+    let errorstr = '';
+
+    codes.forEach(e => {
+        switch(e){
+            case 1:
+                errorstr += '\tSchematic passed is not a valid schematic object.\n';
+                break;
+            case 2:
+                errorstr += '\tContainer passed is not a valid HTML element.\n';
+                break;
+            case 3:
+                errorstr += '\tValue of ' + data + ' must be a boolean value.\n';
+                break;
+            case 4:
+                errorstr += '\tDrawing onto non-rendered container. Please be sure to call function only when container is rendered.\n';
+                break;
+            case 5:
+                errorstr += '\tWire: ' + data.wire + ' is neither horizontal nor vertical.\n';
+                break;
+            default:
+                errorstr += 'Unknown error.\n';
+                break;
+        }
+
+    });
+
+    return errorstr;
 }

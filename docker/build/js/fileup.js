@@ -152,6 +152,24 @@ function handleFileSelect (e) {
             reader.onload = function(e) {
                 //alert(e.target.result);
                 fileContents[1] = e.target.result;
+
+                //Reset schematic arrays
+                vectComponents = [];
+                vectResistor = [];
+                vectCapacitor = [];
+                vectInductor = [];
+                vectDcVoltPower = [];
+                vectAcVoltPower = [];
+                vectDcCurrPower = [];
+                vectAcCurrPower = [];
+                vectGND = [];
+                vectVProbe = [];
+                vectIProbe = [];
+                vectWires = [];
+                vectConnections = [];
+                vectNodes = [];
+                vectPorts = [];
+
                 //Parse the schematic file
                 var schematic = parseSchematic(e.target.result);
 
@@ -167,6 +185,10 @@ function handleFileSelect (e) {
 
                 // Add circuit image to the page
                 var circuitImage = redrawSchematic(schematic.data.object, preview, false);
+                if(circuitImage.errorFlag){
+                    alert('Error on circuit drawing:\n' + redrawSchematic_handleError(circuitImage));
+                    return;
+                }
 
                 if(circuitImage.errorFlag){
                     alert("Error generating circuit image: \n" + redrawSchematic_handleError(circuitImage));

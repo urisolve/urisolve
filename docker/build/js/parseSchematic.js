@@ -1003,6 +1003,11 @@ function cropWindow(schematic){
     return schematic;
 }
 
+/**
+ * This function generates the error string for the parseSchematic function
+ * @param {Object} err The error object returned by the parseSchematic function
+ * @returns {String} The error string
+ */
 function parseSchematic_handleError (err) {
     let codes = err.errorReasonCodes;
     let data = err.errorData;

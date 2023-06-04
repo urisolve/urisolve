@@ -37,6 +37,13 @@ include("code/common/makeNetlist.js");
 
 	// Check for errors
 	if(schematic.errorFlag){
+		alert("Invalid schematic file: \n" + parseSchematic_handleError(schematic));
+		cleanFileHtmlOutput();
+		return;
+	}
+
+	// Check for errors
+	if(schematic.errorFlag){
 		alert("Error parsing schematic file!!");
 		return{
 			first: true,
@@ -2263,7 +2270,7 @@ function analyseCircuit(analysismet) {
 						}
 						successFlag = true;
 					} catch (error) {
-						console.log("Error in TSP: " + error);
+						console.log("Error in TSP: " + TSP_handleError(error));
 						successFlag = false;
 					}
 					if (successFlag) {
