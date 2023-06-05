@@ -451,37 +451,95 @@ function solveTSP(schematic, mainJsonFile, order) {
             break;
             case 'MCM':
                 solvedJSON[json].file.analysisObj.currents.forEach(curr => {
-                    const obj = {
-                        value: curr.valueRe,
-                        start: curr.noP,
-                        end: curr.noN,
+                    let obj = {};
+                    if(!curr.complex){
+                        value = curr.magnitude;
+                        if(curr.angle == 180)
+                            value *= -1;  
+                        
+                        obj = {
+                            complex: curr.complex,
+                            start: curr.noP,
+                            end: curr.noN,
+                            value: value,
+                        };
+                    }
+                    else {
+                        magnitude =  curr.magnitude;
+                        angle =  curr.angle;
+                        valueRe = curr.valueRe;
+                        valueIm =  curr.valueIm;
+
+                        obj = {
+                            complex: curr.complex,
+                            start: curr.noP,
+                            end: curr.noN,
+                            magnitude: magnitude,
+                            angle: angle,
+                            valueRe: valueRe,
+                            valueIm: valueIm,
+                        };
+                    }
+
+                    if (!obj.complex){
+                        // Get the appropriate unit
+                        let valueAbs = Math.abs(curr.valueRe);
+                        if (valueAbs >= 1000000){
+                            obj.unit = 'MA';
+                            obj.value /= 1000000;
+                        }
+                        else if (valueAbs >= 1000){
+                            obj.unit = 'kA';
+                            obj.value /= 1000;
+                        }
+                        else if (valueAbs >= 1){
+                            obj.unit = 'A';
+                        }
+                        else if (valueAbs >= 0.001){
+                            obj.unit = 'mA';
+                            obj.value *= 1000;
+                        }
+                        else if (valueAbs >= 0.000001){
+                            obj.unit = 'uA';
+                            obj.value *= 1000000;
+                        }
+
+                        // Round total to 2 decimal places
+                        obj.value = Math.round(obj.value * 100) / 100;
+                    }
+                    else {
+                        // Get the appropriate unit for the magnitude
+                        let valueAbs = Math.abs(curr.magnitude);
+                        if (valueAbs >= 1000000){
+                            obj.unit = 'MA';
+                            obj.magnitude /= 1000000;
+                        }
+                        else if (valueAbs >= 1000){
+                            obj.unit = 'kA';
+                            obj.magnitude /= 1000;
+                        }
+                        else if (valueAbs >= 1){
+                            obj.unit = 'A';
+                        }
+                        else if (valueAbs >= 0.001){
+                            obj.unit = 'mA';
+                            obj.magnitude *= 1000;
+                        }
+                        else if (valueAbs >= 0.000001){
+                            obj.unit = 'uA';
+                            obj.magnitude *= 1000000;
+                        }
+
+                        // Round total to 2 decimal places magnitude
+                        obj.magnitude = Math.round(obj.magnitude * 100) / 100;
+                        // Round total to 2 decimal places angle
+                        obj.angle = Math.round(obj.angle * 100) / 100;
+                        // Round total to 2 decimal places valueRe
+                        obj.valueRe = Math.round(obj.valueRe * 100) / 100;
+                        // Round total to 2 decimal places valueIm
+                        obj.valueIm = Math.round(obj.valueIm * 100) / 100;
                     }
                     
-                    // Get the appropriate unit
-                    let totalAbs = Math.abs(curr.valueRe);
-                    if (totalAbs >= 1000000){
-                        obj.unit = 'MA';
-                        obj.value /= 1000000;
-                    }
-                    else if (totalAbs >= 1000){
-                        obj.unit = 'kA';
-                        obj.value /= 1000;
-                    }
-                    else if (totalAbs >= 1){
-                        obj.unit = 'A';
-                    }
-                    else if (totalAbs >= 0.001){
-                        obj.unit = 'mA';
-                        obj.value *= 1000;
-                    }
-                    else if (totalAbs >= 0.000001){
-                        obj.unit = 'uA';
-                        obj.value *= 1000000;
-                    }
-
-                    // Round total to 2 decimal places
-                    obj.value = Math.round(obj.value * 100) / 100;
-
                     contributions[json][curr.ref] = obj;
 
                     // Find component in the branch
@@ -524,7 +582,8 @@ function solveTSP(schematic, mainJsonFile, order) {
     // Calculate total values
     mainJsonFile.analysisObj.results = [];
     mainJsonFile.analysisObj.currents.forEach(curr => {
-        let total = 0;
+        let totalre = 0;
+        let totalim = 0;
         let equation = curr.ref + ' = ';
         let first = true;
         for (json in curr.contributions){
@@ -550,46 +609,121 @@ function solveTSP(schematic, mainJsonFile, order) {
                         unitMultiplier = 1;
                         break;
                 }
-                let value = contribution.value * unitMultiplier;
-                if (curr.noP == contribution.start || curr.noN == contribution.end){
-                    total += value;
-                    if (value < 0 && !first)
-                        equation += ' (' + contribution.value + contribution.unit + ') + ';
-                    else
-                        equation += contribution.value + contribution.unit + ' + ';
-                    first = false;
-                }
-                else if (curr.noP == contribution.end || curr.noN == contribution.start){
-                    total -= value;
-                    if (value < 0 && !first)
-                        equation += ' (' + contribution.value*-1 + contribution.unit + ') + ';
-                    else
-                        equation += contribution.value*-1 + contribution.unit + ' + ';
-                    first = false;
+
+                if(!contribution.complex){
+                    let value = contribution.value * unitMultiplier;
+                    if (curr.noP == contribution.start || curr.noN == contribution.end){
+                        totalre += value;
+                        if (value < 0 && !first)
+                            equation += ' (' + contribution.value + contribution.unit + ') + ';
+                        else
+                            equation += contribution.value + contribution.unit + ' + ';
+                        first = false;
+                    }
+                    else if (curr.noP == contribution.end || curr.noN == contribution.start){
+                        totalre -= value;
+                        if (value < 0 && !first)
+                            equation += ' (' + contribution.value*-1 + contribution.unit + ') + ';
+                        else
+                            equation += contribution.value*-1 + contribution.unit + ' + ';
+                        first = false;
+                    }
+                } else {
+                    let valuere = contribution.valueRe * unitMultiplier;
+                    let valueim = contribution.valueIm * unitMultiplier;
+                    if (curr.noP == contribution.start || curr.noN == contribution.end){
+                        totalre += valuere;
+                        totalim += valueim;
+                        equation += contribution.magnitude + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ' + ';
+                        first = false;
+                    }
+                    else if (curr.noP == contribution.end || curr.noN == contribution.start){
+                        totalre -= valuere;
+                        totalim -= valueim;
+                        if(!first)
+                            equation += ' (' + contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ') + ';
+                        else
+                            equation += contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ' + ';
+                        first = false;
+                    }
                 }
             }
         }
-
         // Get the appropriate unit
         let unit = '';
-        let totalAbs = Math.abs(total);
-        if (totalAbs >= 1){
+        let totalAbs = Math.abs(totalre);
+        if (totalAbs >= 1000000){
+            unit = 'MA';
+            totalre /= 1000000;
+            if(totalim)
+                totalim /= 1000000;      
+        }
+        else if (totalAbs >= 1000){
+            unit = 'kA';
+            totalre /= 1000;
+            if(totalim)
+                totalim /= 1000;
+        }
+        else if (totalAbs >= 1){
             unit = 'A';
         }
         else if (totalAbs >= 0.001){
             unit = 'mA';
-            total *= 1000;
+            totalre *= 1000;
+            if(totalim)
+                totalim *= 1000;
         }
         else if (totalAbs >= 0.000001){
             unit = 'uA';
-            total *= 1000000;
+            totalre *= 1000000;
+            if(totalim)
+                totalim *= 1000000;
         }
         else{
             unit = 'A';
         }
         // Round total to 2 decimal places
-        total = Math.round(total * 100) / 100;
-        mainJsonFile.analysisObj.results.push({ref: curr.ref, value: total, unit: unit, equation: equation.slice(0, -3)});
+        if(totalim){
+            // Calculate magnitude and angle
+            totalmag = Math.sqrt(totalre**2 + totalim**2);
+            totalang = Math.atan(totalim/totalre) * 180 / Math.PI;
+
+            // Get the appropriate unit for the magnitude
+            let totalAbs = Math.abs(totalmag);
+            if (totalAbs >= 1000000){
+                unit = 'MA';
+                totalmag /= 1000000;
+            }
+            else if (totalAbs >= 1000){
+                unit = 'kA';
+                totalmag /= 1000;
+            }
+            else if (totalAbs >= 1){
+                unit = 'A';
+            }
+            else if (totalAbs >= 0.001){
+                unit = 'mA';
+                totalmag *= 1000;
+            }
+            else if (totalAbs >= 0.000001){
+                unit = 'uA';
+                totalmag *= 1000000;
+            }
+            else{
+                unit = 'A';
+            }
+            
+            totalre = Math.round(totalre * 100) / 100;
+            totalim = Math.round(totalim * 100) / 100;
+            totalang = Math.round(totalang * 100) / 100;
+            totalmag = Math.round(totalmag * 100) / 100;
+            console.log(' = ', totalre, totalim, totalmag, totalang);
+            mainJsonFile.analysisObj.results.push({ref: curr.ref, complex: true, value: {valuere: totalre, valueim: totalim, magnitude: totalmag, angle: totalang}, unit: unit, equation: equation.slice(0, -3)});
+        }
+        else {
+            totalre = Math.round(totalre * 100) / 100;
+            mainJsonFile.analysisObj.results.push({ref: curr.ref, complex: false, value: totalre, unit: unit, equation: equation.slice(0, -3)});
+        }
     });
 
     console.log(mainJsonFile);
@@ -615,7 +749,7 @@ function outputTSP(jsonFile, schematic){
     vectSources = vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower);
     vectProbes = vectVProbe.concat(vectIProbe);
     //methods = ['MTN', 'MCR', 'MCM'];
-    methods = ['MCR', 'MCM'];
+    methods = ['MCM', 'MCR'];
     //methods = ['MCM'];
 
     if(vectSources.length < 2){

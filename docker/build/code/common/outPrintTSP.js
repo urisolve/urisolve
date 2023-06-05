@@ -379,6 +379,10 @@ function outHTMLResultsTableTSP(jsonFile) {
         for (let json in jsonFile.analysisObj.contributions) {
             contribution = current.contributions[json];
             if(contribution === undefined) contribution = {value: '0', unit: 'A'};
+            else if(contribution.complex){
+                htmlstr += '<td>' + contribution.magnitude + '&angle;' + contribution.angle + '&deg;' + contribution.unit + '</td>';
+                continue;
+            }
             htmlstr += '<td>' + contribution.value + ' '+ contribution.unit + '</td>';
         };
         htmlstr += '</tr>';
@@ -414,7 +418,7 @@ function outHTMLResultsTSP(jsonFile) {
 
         for(let k = 0; k<results.length; k++){
             if(results[k].complex){
-                // Not yet implemented
+                str += results[k].ref + '=' + results[k].value.magnitude + '\\angle' + results[k].value.angle + '^{\\circ}' + results[k].unit;
             }
             else {
                 str += results[k].ref + '=' + results[k].value + '\\;' + results[k].unit;
