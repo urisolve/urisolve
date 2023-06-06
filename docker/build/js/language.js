@@ -470,7 +470,7 @@ $(function () {
             "_btn_calcTSP": "Calcular",
             "_ResultsTable": "Tabela de Contribuições",
             "_ResultsTableCell1": "Parâmetro \\ Fonte",
-            "_ResultsTableCell2": "Sentido",
+            "_ResultsTableCell2": "Direção",
             "_ResultsTableCell3": "Valor",
             "_resolutionTitle": "Soma das contribuições",
         }

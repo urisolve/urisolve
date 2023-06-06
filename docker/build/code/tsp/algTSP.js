@@ -423,29 +423,59 @@ function solveTSP(schematic, mainJsonFile, order) {
     for (json in solvedJSON){
         // Get current values
         contributions[json] = {};
-        const regex = /^(\w+)\s*=\s*(-?[\d.,]+)~(\w+)$/;
-
+        
         switch(solvedJSON[json].method) {
             case 'MCR':
+                ref = '';
                 solvedJSON[json].file.analysisObj.result.cuurentResult.forEach(curr => {
-                    const match = curr.match(regex);
-                    if (match) {
-                        const obj = {
-                        value: parseFloat(match[2].replace(',', '.')),
-                        unit: match[3],
-                        };
-                        contributions[json][match[1]] = obj;
-
-                        // Find component in the branch
-                        solvedJSON[json].file.branches.forEach(branch => {
-                            if(branch.currentData.ref === match[1]){
-                                components = branch.components.map(cp => cp.ref);
-                                contributions[json][match[1]].components = components;
-                                contributions[json][match[1]].start = branch.startNode;
-                                contributions[json][match[1]].end = branch.endNode;
-                            }
-                        });
+                    if(solvedJSON[json].file.analysisObj.circuitFreq.value == '0'){
+                        const regex = /^(\w+)\s*=\s*(-?[\d.,]+)~(\w+)$/;
+                        const match = curr.match(regex);
+                        if (match){
+                            const obj = {
+                                value: parseFloat(match[2].replace(',', '.')),
+                                unit: match[3],
+                                };
+                                contributions[json][match[1]] = obj;
+                        }
+                        ref = match[1];
                     }
+                    else {
+                        const regex = /^([A-Za-z0-9]+)\s*=\s*([\d.,-]+)\\angle\{(.+?)\}\s*([A-Za-z]+)/;
+                        const match = curr.match(regex);
+                        if (match){
+                            const obj = {
+                                complex: true,
+                                magnitude: parseFloat(match[2].replace(',', '.')),
+                                angle: parseFloat(match[3].replace(',', '.').replace('^{\\circ}', '')),
+                                unit: match[4],
+                            };
+                            obj.valueRe = obj.magnitude * Math.cos(obj.angle * Math.PI / 180);
+                            obj.valueIm = obj.magnitude * Math.sin(obj.angle * Math.PI / 180);
+
+                            // Round total to 3 decimal places magnitude
+                            obj.magnitude = Math.round(obj.magnitude * 1000) / 1000;
+                            // Round total to 3 decimal places angle
+                            obj.angle = Math.round(obj.angle * 1000) / 1000;
+                            // Round total to 3 decimal places valueRe
+                            obj.valueRe = Math.round(obj.valueRe * 1000) / 1000;
+                            // Round total to 3 decimal places valueIm
+                            obj.valueIm = Math.round(obj.valueIm * 1000) / 1000;
+
+                            contributions[json][match[1]] = obj;
+                        }
+                        ref = match[1];
+                    }
+
+                    // Find component in the branch
+                    solvedJSON[json].file.branches.forEach(branch => {
+                        if(branch.currentData.ref === ref){
+                            components = branch.components.map(cp => cp.ref);
+                            contributions[json][ref].components = components;
+                            contributions[json][ref].start = branch.currentData.noP;
+                            contributions[json][ref].end = branch.currentData.noN;
+                        }
+                    });
                 });
 
             break;
@@ -463,25 +493,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                             end: curr.noN,
                             value: value,
                         };
-                    }
-                    else {
-                        magnitude =  curr.magnitude;
-                        angle =  curr.angle;
-                        valueRe = curr.valueRe;
-                        valueIm =  curr.valueIm;
 
-                        obj = {
-                            complex: curr.complex,
-                            start: curr.noP,
-                            end: curr.noN,
-                            magnitude: magnitude,
-                            angle: angle,
-                            valueRe: valueRe,
-                            valueIm: valueIm,
-                        };
-                    }
-
-                    if (!obj.complex){
                         // Get the appropriate unit
                         let valueAbs = Math.abs(curr.valueRe);
                         if (valueAbs >= 1000000){
@@ -503,20 +515,43 @@ function solveTSP(schematic, mainJsonFile, order) {
                             obj.unit = 'uA';
                             obj.value *= 1000000;
                         }
+                        else {
+                            obj.unit = 'A';
+                            obj.value = 0;
+                        }
 
-                        // Round total to 2 decimal places
-                        obj.value = Math.round(obj.value * 100) / 100;
+                        // Round total to 3 decimal places
+                        obj.value = Math.round(obj.value * 1000) / 1000;
                     }
                     else {
+                        magnitude =  curr.magnitude;
+                        angle =  curr.angle;
+                        valueRe = curr.valueRe;
+                        valueIm =  curr.valueIm;
+
+                        obj = {
+                            complex: curr.complex,
+                            start: curr.noP,
+                            end: curr.noN,
+                            magnitude: magnitude,
+                            angle: angle,
+                            valueRe: valueRe,
+                            valueIm: valueIm,
+                        };
+
                         // Get the appropriate unit for the magnitude
                         let valueAbs = Math.abs(curr.magnitude);
                         if (valueAbs >= 1000000){
                             obj.unit = 'MA';
                             obj.magnitude /= 1000000;
+                            obj.valueRe /= 1000000;
+                            obj.valueIm /= 1000000;
                         }
                         else if (valueAbs >= 1000){
                             obj.unit = 'kA';
                             obj.magnitude /= 1000;
+                            obj.valueRe /= 1000;
+                            obj.valueIm /= 1000;
                         }
                         else if (valueAbs >= 1){
                             obj.unit = 'A';
@@ -524,22 +559,36 @@ function solveTSP(schematic, mainJsonFile, order) {
                         else if (valueAbs >= 0.001){
                             obj.unit = 'mA';
                             obj.magnitude *= 1000;
+                            obj.valueRe *= 1000;
+                            obj.valueIm *= 1000;
                         }
                         else if (valueAbs >= 0.000001){
                             obj.unit = 'uA';
                             obj.magnitude *= 1000000;
+                            obj.valueRe *= 1000000;
+                            obj.valueIm *= 1000000;
+                        }
+                        else {
+                            obj.unit = 'A';
+                            obj.magnitude = 0;
+                            obj.valueRe = 0;
+                            obj.valueIm = 0;
                         }
 
-                        // Round total to 2 decimal places magnitude
-                        obj.magnitude = Math.round(obj.magnitude * 100) / 100;
-                        // Round total to 2 decimal places angle
-                        obj.angle = Math.round(obj.angle * 100) / 100;
-                        // Round total to 2 decimal places valueRe
-                        obj.valueRe = Math.round(obj.valueRe * 100) / 100;
-                        // Round total to 2 decimal places valueIm
-                        obj.valueIm = Math.round(obj.valueIm * 100) / 100;
+                        
+
+                        // Round total to 3 decimal places magnitude
+                        obj.magnitude = Math.round(obj.magnitude * 1000) / 1000;
+                        // Round total to 3 decimal places angle
+                        obj.angle = Math.round(obj.angle * 1000) / 1000;
+                        // Round total to 3 decimal places valueRe
+                        obj.valueRe = Math.round(obj.valueRe * 1000) / 1000;
+                        // Round total to 3 decimal places valueIm
+                        obj.valueIm = Math.round(obj.valueIm * 1000) / 1000;
+
+                        console.log(obj.valueRe + ' ' + obj.valueIm + 'j' + ' ' + obj.unit);
                     }
-                    
+
                     contributions[json][curr.ref] = obj;
 
                     // Find component in the branch
@@ -649,40 +698,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                 }
             }
         }
-        // Get the appropriate unit
-        let unit = '';
-        let totalAbs = Math.abs(totalre);
-        if (totalAbs >= 1000000){
-            unit = 'MA';
-            totalre /= 1000000;
-            if(totalim)
-                totalim /= 1000000;      
-        }
-        else if (totalAbs >= 1000){
-            unit = 'kA';
-            totalre /= 1000;
-            if(totalim)
-                totalim /= 1000;
-        }
-        else if (totalAbs >= 1){
-            unit = 'A';
-        }
-        else if (totalAbs >= 0.001){
-            unit = 'mA';
-            totalre *= 1000;
-            if(totalim)
-                totalim *= 1000;
-        }
-        else if (totalAbs >= 0.000001){
-            unit = 'uA';
-            totalre *= 1000000;
-            if(totalim)
-                totalim *= 1000000;
-        }
-        else{
-            unit = 'A';
-        }
-        // Round total to 2 decimal places
+
         if(totalim){
             // Calculate magnitude and angle
             totalmag = Math.sqrt(totalre**2 + totalim**2);
@@ -711,17 +727,17 @@ function solveTSP(schematic, mainJsonFile, order) {
             }
             else{
                 unit = 'A';
+                totalmag = 0;
             }
             
-            totalre = Math.round(totalre * 100) / 100;
-            totalim = Math.round(totalim * 100) / 100;
-            totalang = Math.round(totalang * 100) / 100;
-            totalmag = Math.round(totalmag * 100) / 100;
-            console.log(' = ', totalre, totalim, totalmag, totalang);
+            totalre = Math.round(totalre * 1000) / 1000;
+            totalim = Math.round(totalim * 1000) / 1000;
+            totalang = Math.round(totalang * 1000) / 1000;
+            totalmag = Math.round(totalmag * 1000) / 1000;
             mainJsonFile.analysisObj.results.push({ref: curr.ref, complex: true, value: {valuere: totalre, valueim: totalim, magnitude: totalmag, angle: totalang}, unit: unit, equation: equation.slice(0, -3)});
         }
         else {
-            totalre = Math.round(totalre * 100) / 100;
+            totalre = Math.round(totalre * 1000) / 1000;
             mainJsonFile.analysisObj.results.push({ref: curr.ref, complex: false, value: totalre, unit: unit, equation: equation.slice(0, -3)});
         }
     });
@@ -749,7 +765,7 @@ function outputTSP(jsonFile, schematic){
     vectSources = vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower);
     vectProbes = vectVProbe.concat(vectIProbe);
     //methods = ['MTN', 'MCR', 'MCM'];
-    methods = ['MCM', 'MCR'];
+    methods = ['MCR', 'MCM'];
     //methods = ['MCM'];
 
     if(vectSources.length < 2){
@@ -929,7 +945,6 @@ function loadFileAsTextTSP(data, schematic){
  * @returns 
  */
 function TSP_handleError(err){
-    console.log(err);
     codes = err.errorReasonCodes;
     data = err.errorData;
 
