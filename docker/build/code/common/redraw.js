@@ -624,8 +624,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                                 else 
                                     drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('US').addClass('european');
 
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -707,8 +707,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                                 else 
                                     drawing.find($('.'+cp.id+' > .cp-symbol')).removeClass('neutral').addClass('polar');
 
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -765,8 +765,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                         });
                         break;
@@ -840,8 +840,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -913,8 +913,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -1042,8 +1042,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find(drawing.find($('.label-'+cp.id))), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -1172,8 +1172,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -1217,8 +1217,8 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
                             drawLabel(drawing.find($('.label-'+cp.id)), cp);
                             drawing.find($('.menu')).remove();
                             if(mutable){
-                                try{updateOutput({data: {tree: JSON.stringify(schematic)}}, makeNetlist(schematic));}
-                                catch(e){console.log(e);}
+                                // Change handler
+                                cleanResolution();
                             }
                             });
                         break;
@@ -1291,7 +1291,7 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
         });
 
         // Draw the wire labels
-        if(wire.label.text){
+        if(wire.label.text && wire.label.text == connection.id){
             label = $(`<div class="label-${wire.id} wire-label">${wire.label.text}</div>`);
             label.appendTo(w).position({
                 my: 'left top',
@@ -1564,4 +1564,9 @@ function redrawSchematic_handleError(err){
     });
 
     return errorstr;
+}
+
+function cleanResolution(){
+    $('#results-tabs > .resolution-item').remove();
+    
 }

@@ -821,10 +821,12 @@ function removeUnconnected(e){
                 }
                 else if(e.end.connectedWires[0]){
                     connection = vectConnections.find(c => c.wires.some(w => w.id === e.end.connectedWires[0].wire));
-                    wire = connection.wires.find(w => w.id == e.end.connectedWires[0].wire);
-                    connection.wires = connection.wires.filter(w => w.id !== wire.id);
-                    wire[e.end.connectedWires[0].point].connectedWires = wire[e.end.connectedWires[0].point].connectedWires.filter(c => c.wire !== e.id);
-                    removeUnconnected(wire);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == e.end.connectedWires[0].wire);
+                        connection.wires = connection.wires.filter(w => w.id !== wire.id);
+                        wire[e.end.connectedWires[0].point].connectedWires = wire[e.end.connectedWires[0].point].connectedWires.filter(c => c.wire !== e.id);
+                        removeUnconnected(wire);
+                    }
                 }
             }
             else{
@@ -834,8 +836,10 @@ function removeUnconnected(e){
                 });
                 e.end.connectedWires.forEach(c => {
                     connection = vectConnections.find(con => con.wires.some(w => w.id === c.wire));
-                    wire = connection.wires.find(w => w.id == c.wire);
-                    wire[c.point].connectedWires = wire[c.point].connectedWires.filter(cp => cp.wire !== e.id);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == c.wire);
+                        wire[c.point].connectedWires = wire[c.point].connectedWires.filter(cp => cp.wire !== e.id);
+                    }
                 });
                 if(e.end.connectedPorts.length + e.end.connectedWires.length == 2){
                 vectNodes = vectNodes.filter(n => !n.connection.some(conn => conn.wire == e.id));
@@ -862,10 +866,12 @@ function removeUnconnected(e){
                 }
                 else if(e.begin.connectedWires[0]){
                     connection = vectConnections.find(c => c.wires.some(w => w.id === e.begin.connectedWires[0].wire));
-                    wire = connection.wires.find(w => w.id == e.begin.connectedWires[0].wire);
-                    connection.wires = connection.wires.filter(w => w.id !== wire.id);
-                    wire[e.begin.connectedWires[0].point].connectedWires = wire[e.begin.connectedWires[0].point].connectedWires.filter(c => c.wire !== e.id);
-                    removeUnconnected(wire);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == e.begin.connectedWires[0].wire);
+                        connection.wires = connection.wires.filter(w => w.id !== wire.id);
+                        wire[e.begin.connectedWires[0].point].connectedWires = wire[e.begin.connectedWires[0].point].connectedWires.filter(c => c.wire !== e.id);
+                        removeUnconnected(wire);
+                    }
                 }
             }
             else{
@@ -875,8 +881,10 @@ function removeUnconnected(e){
                 });
                 e.begin.connectedWires.forEach(c => {
                     connection = vectConnections.find(con => con.wires.some(w => w.id === c.wire));
-                    wire = connection.wires.find(w => w.id == c.wire);
-                    wire[c.point].connectedWires = wire[c.point].connectedWires.filter(cp => cp.wire !== e.id);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == c.wire);
+                        wire[c.point].connectedWires = wire[c.point].connectedWires.filter(cp => cp.wire !== e.id);
+                    }
                 });
                 if(e.begin.connectedPorts.length + e.begin.connectedWires.length == 2){
                 vectNodes = vectNodes.filter(n => !n.connection.some(conn => conn.wire == e.id));
@@ -885,8 +893,7 @@ function removeUnconnected(e){
         }
     }
     else if(e instanceof Component){
-        // If the component was removed because it was not connected at port 0
-        if(e.port[0].connections.length == 0){
+        if(e.port[1].connections.length != 0){
             //Check if there's more than one connection on the other one, if not remove that connection as well
             if(e.port[1].connections.length < 2 && e.port[1].connections[0]){
                 if(e.port[1].connections[0].hasOwnProperty('component')){
@@ -898,11 +905,13 @@ function removeUnconnected(e){
                 }
                 else if(e.port[1].connections[0].hasOwnProperty('wire') && e.port[1].connections[0].hasOwnProperty('point')){
                     connection = vectConnections.find(c => c.wires.some(w => w.id === e.port[1].connections[0].wire));
-                    wire = connection.wires.find(w => w.id == e.port[1].connections[0].wire);
-                    connection.wires = connection.wires.filter(w => w.id !== wire.id);
-                    point = [wire.begin, wire.end].find(p => p.connectedPorts.some(c => c.component == e.id));
-                    point.connectedPorts = point.connectedPorts.filter(c => c.component !== e.id);
-                    removeUnconnected(wire);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == e.port[1].connections[0].wire);
+                        connection.wires = connection.wires.filter(w => w.id !== wire.id);
+                        point = [wire.begin, wire.end].find(p => p.connectedPorts.some(c => c.component == e.id));
+                        point.connectedPorts = point.connectedPorts.filter(c => c.component !== e.id);
+                        removeUnconnected(wire);
+                    }
                 }
             }
             else{
@@ -913,8 +922,10 @@ function removeUnconnected(e){
                     }
                     else{
                         connection = vectConnections.find(con => con.wires.some(w => w.id === c.wire));
-                        wire = connection.wires.find(w => w.id == c.wire);
-                        wire[c.point].connectedPorts = wire[c.point].connectedPorts.filter(cp => cp.component !== e.id);
+                        if(connection){
+                            wire = connection.wires.find(w => w.id == c.wire);
+                            wire[c.point].connectedPorts = wire[c.point].connectedPorts.filter(cp => cp.component !== e.id);
+                        }
                     }
                 });
                 if(e.port[1].connections.length == 2){
@@ -922,8 +933,7 @@ function removeUnconnected(e){
                 }
             }
         }
-        // If the component was removed because it was not connected at port 1
-        else if(e.port[1].connections.length == 0){
+        else if(e.port[0].connections.length != 0){
             //Check if there's more than one connection on the other one, if not remove that connection as well
             if(e.port[0].connections.length < 2){
                 if(e.port[0].connections[0].hasOwnProperty('component') && e.port[0].connections[0].hasOwnProperty('port')){
@@ -935,11 +945,13 @@ function removeUnconnected(e){
                 }
                 else if(e.port[0].connections[0].hasOwnProperty('wire') && e.port[0].connections[0].hasOwnProperty('point')){
                     connection = vectConnections.find(c => c.wires.some(w => w.id === e.port[0].connections[0].wire));
-                    wire = connection.wires.find(w => w.id == e.port[0].connections[0].wire);
-                    connection.wires = connection.wires.filter(w => w.id !== wire.id);
-                    point = [wire.begin, wire.end].find(p => p.connectedPorts.some(c => c.component == e.id));
-                    point.connectedPorts = point.connectedPorts.filter(c => c.component !== e.id);
-                    removeUnconnected(wire);
+                    if(connection){
+                        wire = connection.wires.find(w => w.id == e.port[0].connections[0].wire);
+                        connection.wires = connection.wires.filter(w => w.id !== wire.id);
+                        point = [wire.begin, wire.end].find(p => p.connectedPorts.some(c => c.component == e.id));
+                        point.connectedPorts = point.connectedPorts.filter(c => c.component !== e.id);
+                        removeUnconnected(wire);
+                    }
                 }
             }
             else{

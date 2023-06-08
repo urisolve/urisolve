@@ -96,7 +96,6 @@ function makeSubcircuit(schematic, source){
             p.net = "";
         });
     });
-
     treatSchematic();
 
     // Create new schematic
@@ -738,6 +737,33 @@ function solveTSP(schematic, mainJsonFile, order) {
         }
         else {
             totalre = Math.round(totalre * 1000) / 1000;
+
+            // Get the appropriate unit
+            let totalAbs = Math.abs(totalre);
+            if (totalAbs >= 1000000){
+                unit = 'MA';
+                totalre /= 1000000;
+            }
+            else if (totalAbs >= 1000){
+                unit = 'kA';
+                totalre /= 1000;
+            }
+            else if (totalAbs >= 1){
+                unit = 'A';
+            }
+            else if (totalAbs >= 0.001){
+                unit = 'mA';
+                totalre *= 1000;
+            }
+            else if (totalAbs >= 0.000001){
+                unit = 'uA';
+                totalre *= 1000000;
+            }
+            else{
+                unit = 'A';
+                totalre = 0;
+            }
+
             mainJsonFile.analysisObj.results.push({ref: curr.ref, complex: false, value: totalre, unit: unit, equation: equation.slice(0, -3)});
         }
     });
