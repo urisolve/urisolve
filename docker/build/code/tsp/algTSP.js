@@ -453,7 +453,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                             obj.valueIm = obj.magnitude * Math.sin(obj.angle * Math.PI / 180);
 
                             // Round total to 3 decimal places magnitude
-                            obj.magnitude = Math.round(obj.magnitude * 1000) / 1000;
+                            obj.magnitude = Math.round(obj.magnitude * 100) / 100;
                             // Round total to 3 decimal places angle
                             obj.angle = Math.round(obj.angle * 1000) / 1000;
                             // Round total to 3 decimal places valueRe
@@ -577,7 +577,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                         
 
                         // Round total to 3 decimal places magnitude
-                        obj.magnitude = Math.round(obj.magnitude * 1000) / 1000;
+                        obj.magnitude = Math.round(obj.magnitude * 100) / 100;
                         // Round total to 3 decimal places angle
                         obj.angle = Math.round(obj.angle * 1000) / 1000;
                         // Round total to 3 decimal places valueRe
@@ -701,8 +701,7 @@ function solveTSP(schematic, mainJsonFile, order) {
         if(totalim){
             // Calculate magnitude and angle
             totalmag = Math.sqrt(totalre**2 + totalim**2);
-            totalang = Math.atan(totalim/totalre) * 180 / Math.PI;
-
+            totalang = Math.atan2(totalim,totalre) * 180 / Math.PI;
             // Get the appropriate unit for the magnitude
             let totalAbs = Math.abs(totalmag);
             if (totalAbs >= 1000000){

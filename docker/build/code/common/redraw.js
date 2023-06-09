@@ -1566,6 +1566,9 @@ function redrawSchematic_handleError(err){
     return errorstr;
 }
 
+/**
+ * This function handles the change in circuit values (for now, it only exists to handle reseting TSP resolution)
+ */
 function cleanResolution(){
     $('#results-tabs > .resolution-item').remove();
     
