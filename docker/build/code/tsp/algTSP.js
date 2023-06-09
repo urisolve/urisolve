@@ -196,8 +196,9 @@ function solveTSP(schematic, mainJsonFile, order) {
       const method = o[1];
       let generateSection = false;
   
+      const tabs = $('.resolution-item');
       const page = $('#resolution-' + cp.name.value);
-      const tab = $('.resolution-item a[href="#resolution-' + cp.name.value + '"]').parent();
+      const tab = tabs.find($('a[href="#resolution-' + cp.name.value + '"]')).parent();
   
       // Check if the page was already generated
       if (!tab.hasClass('solved')) {
@@ -207,15 +208,9 @@ function solveTSP(schematic, mainJsonFile, order) {
         if (tab.index() -1 !== order.indexOf(o)) {
             tab.insertAfter($('.resolution-item').eq(order.indexOf(o)));
 
-            // Change progress bar
-            var progress = page.find('.progress-bar');
-            percent = (order.indexOf(o) + 1) * 100 / order.length;
-            progress.css('width', percent + '%');
-            progress.attr('aria-valuenow', percent);
-            if(percent == 100)
-                progress.removeClass('progress-bar-animated').addClass('bg-success');
-            else
-                progress.removeClass('bg-success').addClass('progress-bar-animated');
+            // Reset the scroll event listener
+            modal = $('#results-modal');
+            modal.off('scroll');
         }
 
         // Check if the method is the same
@@ -248,7 +243,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                 jsonFile = loadFileAsTextMCM(jsonFile.third, false);
             
                 // Add sections
-                page.html(outHTMLSectionsMCM_TSP(cp));
+                page.html(outHTMLSectionsMCM_TSP(cp, order.length));
                 
                 warningsText = warningOutput(jsonFile.analysisObj.warnings);
                 if(warningsText != 0){
@@ -289,7 +284,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                 jsonFile = loadFileAsTextMCR(jsonFile.third, false);
 
                 // Add sections
-                page.html(outHTMLSectionsMCR_TSP(cp));
+                page.html(outHTMLSectionsMCR_TSP(cp, order.length));
 
                 warningsText = warningOutput(jsonFile.analysisObj.warnings);
                 if(warningsText != 0){
@@ -381,18 +376,10 @@ function solveTSP(schematic, mainJsonFile, order) {
             }
         });
 
-        // Change progress bar
-        var progress = page.find('.progress-bar');
-        percent = (order.indexOf(o) + 1) * 100 / order.length;
-        progress.css('width', percent + '%');
-        progress.attr('aria-valuenow', percent);
-        if(percent == 100)
-            progress.removeClass('progress-bar-animated').addClass('bg-success');
-        else
-            progress.removeClass('bg-success').addClass('progress-bar-animated');
-
         // Draw subcircuit on first time showing the tab
-        tab.find('a').on('shown.bs.tab', function(e, order, o) {
+        tab.find('a').on('shown.bs.tab', function(e) {
+            tabIndex = $(e.target).parent().index() - 1;
+            
             drawingContainer = page.find('.circuit-widget');
             if (drawingContainer.children().length === 0) {
                 // Get component
@@ -402,6 +389,45 @@ function solveTSP(schematic, mainJsonFile, order) {
                     alert('Error on circuit drawing:\n' + redrawSchematic_handleError(drawing));
                     return;
                 }
+            }
+
+            // Change progress bar
+            var progressBars = page.find('.progress-bar');
+            for(let i = 0; i<tabs.length; i++){
+                let progress = progressBars.eq(i);
+                if(tabIndex == i) {
+                    modal = $('#results-modal');
+                    var winScroll = modal.scrollTop();
+                    var height = modal[0].scrollHeight - modal.outerHeight();
+                    var percent = (winScroll / height) * 100;
+
+                    // Update progress bar on scroll
+                    modal.scroll(function() {
+                        var winScroll = modal.scrollTop();
+                        var height = modal[0].scrollHeight - modal.outerHeight();
+                        var percent = (winScroll / height) * 100;
+                        progress.css('width', percent + '%');
+                        progress.attr('aria-valuenow', percent);
+
+                        if(percent == 100)
+                            progress.removeClass('progress-bar-animated').addClass('bg-success');
+                        else
+                            progress.removeClass('bg-success').addClass('progress-bar-animated');
+                    });
+                }
+                else if(tabIndex > i){
+                    percent = 100;
+                }
+                else if(tabIndex < i){
+                    percent = 0;
+                }
+                    
+                progress.css('width', percent + '%');
+                progress.attr('aria-valuenow', percent);
+                if(percent == 100)
+                    progress.removeClass('progress-bar-animated').addClass('bg-success');
+                else
+                    progress.removeClass('bg-success').addClass('progress-bar-animated');
             }
         });
 

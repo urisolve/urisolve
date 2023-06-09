@@ -7,7 +7,7 @@ function outHTMLResolutionNavTSP(){
 
     // Add nav tabs
     htmlstr += '<div class="container mt-3 sticky-top" style="background-color: #fff;">'
-    htmlstr += '<ul id="results-tabs" class="nav nav-pills nav-justified border border-secondary rounded">';
+    htmlstr += '<ul id="results-tabs" class="nav nav-pills nav-justified border border-secondary rounded-top">';
     htmlstr += '<li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#main-tab">'
     htmlstr += '<h5 data-translate="_mainTab"></h5></a></li>';
     htmlstr += '</ul></div>';
@@ -137,17 +137,21 @@ function outHTMLSelectionTSP(){
 
 /**
  * This function generates the HTML for the section of tab resolution using the MCM method
- * @param {Component} cp 
+ * @param {Component} cp The component to be analyzed
+ * @param {Number} length The total number of tabs
  * @returns {String} HTML code
  */    
-function outHTMLSectionsMCM_TSP(cp) {
+function outHTMLSectionsMCM_TSP(cp, length) {
     htmlstr = '';
     // Add navbar
     htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
     htmlstr += '<nav id="navbar" class="navbar p-0">';
     htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
-    htmlstr += '<div class="progress my-1 col-11"><div class="progress-bar progress-bar-striped progress-bar-animated rounded mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
-    htmlstr += '</nav>';
+    htmlstr += '<div class="progress-container d-flex align-items-center my-1 col-11">';
+    for(let i = 0; i < length; i++){
+        htmlstr += '<div class="progress my-auto mx-1" style="width: '+ 100/length + '%"><div class="progress-bar rounded-pill mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    }
+    htmlstr += '</div></nav>';
 
     // Add table of contents
     htmlstr += '<nav id="tableContents" class="navbar navbar-light bg-light flex-column align-items-stretch px-3 collapse border-top border-secondary">';
@@ -227,18 +231,22 @@ function outHTMLSectionsMCM_TSP(cp) {
 
 /**
  * This function generates the HTML for the section of tab resolution using the MCR method
- * @param {Component} cp 
+ * @param {Component} cp The component to be analyzed
+ * @param {Number} length The total number of tabs
  * @returns {String} HTML code
  */
-function outHTMLSectionsMCR_TSP(cp){
+function outHTMLSectionsMCR_TSP(cp, length){
     let htmlstr = '';
 
     // Add navbar
     htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
     htmlstr += '<nav id="navbar" class="navbar p-0">';
     htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
-    htmlstr += '<div class="progress my-1 col-11"><div class="progress-bar progress-bar-striped progress-bar-animated rounded mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
-    htmlstr += '</nav>';
+    htmlstr += '<div class="progress-container d-flex align-items-center my-1 col-11">';
+    for(let i = 0; i < length; i++){
+        htmlstr += '<div class="progress my-auto mx-1" style="width: '+ 100/length + '%"><div class="progress-bar rounded-pill mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    }
+    htmlstr += '</div></nav>';
 
     // Add table of contents
     htmlstr += '<nav id="tableContents" class="navbar navbar-light bg-light flex-column align-items-stretch px-3 collapse border-top border-secondary">';
