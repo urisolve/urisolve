@@ -1,3 +1,6 @@
+include('code/common/outPrintMCM.js');
+include('code/common/outPrintMCR.js');
+
 /**
  * This function creates the HTML code for the navigation tabs and the tab content
  * @returns {String} HTML code
@@ -458,6 +461,664 @@ function outHTMLResultsTSP(jsonFile) {
     htmlstr += '</div></div>';
 
     return htmlstr;
+}
+
+function buildTeXOvTSP(file, subfiles) {
+    console.log('Building tex', file);
+    // Get circuit information
+    let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let F = file.analysisObj.circuitFreq;
+    let currentsResults = file.analysisObj.results;
+    let currents = file.analysisObj.currents;
+	let totalCurrents = currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
+    let subcircuits = file.analysisObj.contributions;
+
+
+    let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+    if(lang == 'english') lang = dictionary.english;
+    else if(lang == 'português') lang = dictionary.portuguese;
+
+    // Add cover page
+	let TeX = getTexFileHeaderTSPOv(lang);
+
+    // Add main circuit image
+    TeX += "\\section{" + lang._circuitImage + "}";
+    //TeX += "\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";"
+    //TeX += "\\inlineimages{circuit.png}{\\circuit}}}";
+    //TeX += "\r\n\\caption{" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+
+    // TeX Fundamental Vars
+	TeX += "\\section{" + lang._fundamentalsTitle + "}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{" + lang._fundamentals_R + " {[}R{]}}&&\\textbf{" + lang._fundamentals_N + " {[}N{]}}&&\\textbf{" + lang._fundamentals_C + " {[}C{]}}&&\\textbf{" + lang._fundamentals_T + " {[}T{]}} \\\\\r\n";
+	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{" + lang._infoTitle + "}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{" + lang._info_T + " {[}AC\/DC{]}} && \\textbf{" + lang._info_F + " {[}A{]}} && \\textbf{" + lang._info_A + " {[}I{]}} \\\\\r\n";
+	if(F.value == 0){
+			TeX += "DC";
+			aux = "&&N~/~A\\;";
+	}
+	else{
+		TeX += "AC";
+		aux = "&&F="+F.value+"\\;"+F.mult;
+	}
+
+	TeX += aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak\r\n\r\n";
+
+
+    // Add Subcircuit info
+    TeX += "\\section{" + lang._calcContrib + "}\r\n\r\n";
+
+    for (let contribution in subcircuits) {
+        TeX += "\\subsection{" + lang._source + ' ' + contribution + "}\r\n\r\n";
+        TeX += "\\subsubsection{" + lang._circuitImage + "}\r\n\r\n";
+        
+        //mesh current results
+        TeX += "\\subsubsection{" + lang._branchIden + "}\n\r\n\r\\paragraph{" + lang._currents + "}\\phantom{}\n\r\n\r";
+        TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+        TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            TeX += curr + " & " + current.start + " & " + current.end + " & " + current.components.join(', ') + " \\\\ \r\n";
+        }
+
+        TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+        //mesh current results
+        TeX += "\r\n\r\n\\paragraph{" + lang._resBranch + "}\\phantom{}\r\n\r\n";
+
+        // Create system
+        str = '\\large \\begin{cases}';
+        i = 0;
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            if(current.complex){
+                if(current.angle == 0){
+                    str += '\\underline{' + curr + '}=' + current.magnitude + ' ' + current.unit;
+                }
+                else{
+                    str += '\\underline{' + curr + '}=' + current.magnitude + '\\angle ' + current.angle + '^{\\circ}\\; ' + current.unit;
+                    }
+                }
+            else{
+                str += curr + '=' + current.value + '\\; ' + current.unit;
+            }
+    
+            if(i<Object.keys(subcircuits[contribution]).length-1)
+                str += ' \\\\[0.7em] ';
+
+            i++;
+        }
+    
+            str += '\\end{cases}';
+    
+            // Render System to TeX
+            TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n\\pagebreak\r\n\r\n";
+    }
+
+    
+    // Add Contributions table
+    TeX += "\\section{" + lang._ResultsTable + "}\r\n\r\n";
+
+    TeX += "\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{|c|c|";
+    for (let k in subcircuits) {
+        TeX += "c|";
+    }
+    TeX += "}\r\n\\hline\r\n";
+    // Table header
+    TeX += "\\multicolumn{2}{|l|}{\\textbf{" + lang._ResultsTableCell1.replace('\\', '\\textbackslash') + "}}";
+
+    for (let contribution in subcircuits) {
+        TeX += " & \\textbf{" + contribution + "}";
+
+    }
+    TeX += '\\\\\\hline\r\n';
+
+    // Table body
+    for (let i = 0; i < currents.length; i++) {
+        TeX += "\\multirow{2}{*}{" + currents[i].ref + "} & " + lang._ResultsTableCell2;
+        
+        for(let contribution in subcircuits){
+            let current = currents[i].contributions[contribution];
+            if (current)
+                TeX += " & " + current.start + " $\\rightarrow$ " + current.end;
+            else
+                TeX += " & -";
+        }
+
+        TeX += "\\\\\\cline{2-"+ (Object.keys(subcircuits).length + 2) + "}\r\n";
+
+        TeX += "& " + lang._ResultsTableCell3;
+
+        for(let contribution in subcircuits){
+            let current = currents[i].contributions[contribution];
+            if (!current){
+                TeX += " & 0 A";
+            }
+            else{
+                if(current.complex){
+                    TeX += " & $" + current.magnitude + '\\angle' + current.angle + '^{\\circ} ' + current.unit + "$";
+                }
+                else{
+                    TeX += " & " + current.value + ' ' + current.unit;
+                }
+            }
+        }
+
+        TeX += "\\\\\\hline\r\n";
+    }
+
+    TeX += "\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak\r\n\r\n";
+
+
+    // Add Currents results
+    TeX += "\\section{" + lang._branchIden + "}\n\r\n\r\\subsection{" + lang._currents + "}\n\r\n\r";
+    TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+    TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+    currents.forEach(current => {
+        branch = file.branches.find(branch => branch.currentId == current.id);
+        components = branch.components.map(component => component.ref);
+
+        TeX += current.ref + " & " + current.noP + " & " + current.noN + " & " + components.join(', ') + " \\\\ \r\n";
+    });
+
+    TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+
+    //results
+    TeX += "\r\n\r\n\\subsection{" + lang._resBranch + "}\r\n\r\n";
+
+    // Create system
+    if(currentsResults.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currentsResults.length; k++){
+            str += currentsResults[k].equation;
+            if(k<currentsResults.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += '\\\\\\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currentsResults.length; k++){
+            if(currentsResults[k].complex){
+                if(currentsResults[k].value.angle == 0){
+                    str += '\\underline{' + currentsResults[k].ref + '}=' + currentsResults[k].value.magnitude + ' ' + currentsResults[k].unit;
+                }
+                else{
+                    str += '\\underline{' + currentsResults[k].ref + '}=' + currentsResults[k].value.magnitude + '\\angle ' + currentsResults[k].value.angle + '^{\\circ}\\; ' + currentsResults[k].unit;
+                }
+            }
+            else{
+                str += currentsResults[k].ref + '=' + currentsResults[k].value + '\\; ' + currentsResults[k].unit;
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        // Render System to TeX
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n\\pagebreak\r\n\r\n";
+    }
+
+    // Add appendix
+    TeX += "\\section{" + lang._appendices + "}\r\n\r\n";
+    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
+    let k = 0;
+    const patternMesh = /\.png}\{\\mesh([a-zA-Z])/g;
+    const patternNode = /\.png}\{\\node([a-zA-Z])/g;
+    for (let subfile in subfiles) {
+        jsonFile = subfiles[subfile].file;
+        canvasObjects = subfiles[subfile].canvas;
+        canvasObjectss = subfiles[subfile].canvasCurr;
+        TeX += "\\section{" + lang._tableContTitle + ' ' + subfile + "}\r\n\r\n";
+
+        switch(subfiles[subfile].method){
+            case 'MCR':
+                TeXOv = buildTeXOv2(jsonFile, canvasObjects, canvasObjectss, false);
+                TeXOv = TeXOv.replaceAll('\\subsubsection', '\\paragraph').replaceAll('\\subsection', '\\subsubsection').replaceAll('\\section', '\\subsection');
+                
+                TeXOv = TeXOv.replaceAll(patternMesh, (match, letter) => {
+                    const suffix = substitutions[k];
+                    return `.png}{\\mesh${letter}${suffix}`;
+                });
+                TeXOv = TeXOv.replaceAll(patternNode, (match, letter) => {
+                    const suffix = substitutions[k];
+                    return `.png}{\\node${letter}${suffix}`;
+                });
+
+                TeX += TeXOv;
+                break;
+            case 'MCM':
+                TeXOv = buildTeXOv(jsonFile, canvasObjects, false);
+                TeXOv = TeXOv.replaceAll('\\subsubsection', '\\paragraph').replaceAll('\\subsection', '\\subsubsection').replaceAll('\\section', '\\subsection');
+
+                TeXOv = TeXOv.replaceAll(patternMesh, (match, letter) => {
+                    const suffix = substitutions[k];
+                    return `.png}{\\mesh${letter}${suffix}`;
+                });
+                TeX += TeXOv;
+
+                break;
+            case 'MTN':
+
+             break;
+        }
+
+        k++;
+        TeX += "\r\n\r\n\\pagebreak\r\n\r\n";
+    }
+
+    TeX += "\\end{document}\r\n";
+    return TeX;
+}
+
+function getTexFileHeaderTSPOv(lang){
+    let texHeader = '';
+    texHeader += '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\n\r';
+    texHeader += '\\include{images}\r\n';
+    texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\usepackage{multirow}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._TSPmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\r\n\\textsc{' + lang._TSPmethod + '} \\\\\r\n\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
+    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 06/2023}}}  \\\\\\multicolumn{2}{c}{Guilherme Zenha - 1201398@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n' + lang._TSPabstract + '\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
+    return texHeader;
+}
+
+function buildImTeXTSP(imagesTSP, files){
+    let imageTex = '';
+
+    let sampleimg = base64imgselect("logo");
+    imageTex += '\\newcommand{\\logo}{' + sampleimg.replace('data:image/png;base64,', '') + '}\r\n';
+
+    const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
+
+    // Add circuit image
+    var html = $('#circuitImage > .circuit-widget > .drawing');
+    //var imgTex = circuitToSvg(html);
+    //imageTex += imgTex;
+
+    // Add subcircuit images
+    let k = 0;
+
+    for (let file in files) {
+        let images = files[file].canvas;
+        let imagesNodes = files[file].canvasCurr;
+        switch(files[file].method){
+            case 'MCR':
+            let subscnt = 0;
+            for(let i = 0; i < images.length; i++){
+                var svg = document.getElementById("mesh#Mesh" + String(i+1) + '-' +file);
+                var img = new Image;
+                svg.toDataURL("image/png", {
+                    callback: function(data) {
+                        img.setAttribute("src", data);
+                        imageTex += '\\newcommand{\\mesh' + substitutions[i] + substitutions[k] + '}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
+                        subscnt=subscnt+1;
+                    }
+                });
+            }
+
+            for(let i = 0; i < imagesNodes.length; i++){
+            
+                imagesNodes[i].dataURL=imagesNodes[i].dataURL.replace('data:image/png;base64,', '')
+                imageTex += '\\newcommand{\\node' + substitutions[i] + substitutions[k] + '}{' + imagesNodes[i].dataURL + '}\r\n';
+
+            }
+
+                break;
+            case 'MCM':
+                for(let i = 0; i < images.length; i++){
+                    var svg = document.getElementById("mesh#Mesh" + String(i+1) + '-' +file);
+                    var img = new Image;
+                    svg.toDataURL("image/png", {
+                        callback: function(data) {
+                            img.setAttribute("src", data);
+                            imageTex += '\\newcommand{\\mesh' + substitutions[i] + substitutions[k] +'}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
+                        }
+                    });
+                }
+                break;
+            case 'MTN':
+
+                break;
+        }
+        k++;
+    }
+    
+    return imageTex;
+}
+
+function buildTeXRichTSP(file) {
+    console.log('Building tex', file);
+    // Get circuit information
+    let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+	let F = file.analysisObj.circuitFreq;
+    let currentsResults = file.analysisObj.results;
+    let currents = file.analysisObj.currents;
+	let totalCurrents = currents.length;
+	let Amps = file.probes.ammeters.length;
+	let E = R - (N - 1) - C;
+    let subcircuits = file.analysisObj.contributions;
+
+
+    let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+    if(lang == 'english') lang = dictionary.english;
+    else if(lang == 'português') lang = dictionary.portuguese;
+
+    // Add cover page
+	let TeX = getTexFileHeaderTSPRich(lang);
+
+    // Add main circuit image
+    TeX += "\\section{" + lang._circuitImage + "}";
+    //TeX += "\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";"
+    //TeX += "\\inlineimages{circuit.png}{\\circuit}}}";
+    //TeX += "\r\n\\caption{" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+
+    // TeX Fundamental Vars
+	TeX += "\\section{" + lang._fundamentalsTitle + "}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{" + lang._fundamentals_R + " {[}R{]}}&&\\textbf{" + lang._fundamentals_N + " {[}N{]}}&&\\textbf{" + lang._fundamentals_C + " {[}C{]}}&&\\textbf{" + lang._fundamentals_T + " {[}T{]}} \\\\\r\n";
+	TeX += "R="+R+"&&N="+N+"&&C="+C+"&&T="+T+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+	// TeX Circuit Information
+	TeX += "\\section{" + lang._infoTitle + "}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{" + lang._info_T + " {[}AC\/DC{]}} && \\textbf{" + lang._info_F + " {[}A{]}} && \\textbf{" + lang._info_A + " {[}I{]}} \\\\\r\n";
+	if(F.value == 0){
+			TeX += "DC";
+			aux = "&&N~/~A\\;";
+	}
+	else{
+		TeX += "AC";
+		aux = "&&F="+F.value+"\\;"+F.mult;
+	}
+
+	TeX += aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n";
+
+
+    // Add Subcircuit info
+    TeX += "\\section{" + lang._calcContrib + "}\r\n\r\n";
+
+    for (let contribution in subcircuits) {
+        TeX += "\\subsection{" + lang._source + ' ' + contribution + "}\r\n\r\n";
+        TeX += "\\subsubsection{" + lang._circuitImage + "}\r\n\r\n";
+        
+        //mesh current results
+        TeX += "\\subsubsection{" + lang._branchIden + "}\n\r\n\r\\paragraph{" + lang._currents + "}\\phantom{}\n\r\n\r";
+        TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+        TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            TeX += curr + " & " + current.start + " & " + current.end + " & " + current.components.join(', ') + " \\\\ \r\n";
+        }
+
+        TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+        //mesh current results
+        TeX += "\r\n\r\n\\paragraph{" + lang._resBranch + "}\\phantom{}\r\n\r\n";
+
+        // Create system
+        str = '\\large \\begin{cases}';
+        i = 0;
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            if(current.complex){
+                if(current.angle == 0){
+                    str += '\\underline{' + curr + '}=' + current.magnitude + ' ' + current.unit;
+                }
+                else{
+                    str += '\\underline{' + curr + '}=' + current.magnitude + '\\angle ' + current.angle + '^{\\circ}\\; ' + current.unit;
+                    }
+                }
+            else{
+                str += curr + '=' + current.value + '\\; ' + current.unit;
+            }
+    
+            if(i<Object.keys(subcircuits[contribution]).length-1)
+                str += ' \\\\[0.7em] ';
+
+            i++;
+        }
+    
+            str += '\\end{cases}';
+    
+            // Render System to TeX
+            TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+    }
+
+    
+    // Add Contributions table
+    TeX += "\\section{" + lang._ResultsTable + "}\r\n\r\n";
+
+    TeX += "\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{|c|c|";
+    for (let k in subcircuits) {
+        TeX += "c|";
+    }
+    TeX += "}\r\n\\hline\r\n";
+    // Table header
+    TeX += "\\multicolumn{2}{|l|}{\\textbf{" + lang._ResultsTableCell1.replace('\\', '\\textbackslash') + "}}";
+
+    for (let contribution in subcircuits) {
+        TeX += " & \\textbf{" + contribution + "}";
+
+    }
+    TeX += '\\\\\\hline\r\n';
+
+    // Table body
+    for (let i = 0; i < currents.length; i++) {
+        TeX += "\\multirow{2}{*}{" + currents[i].ref + "} & " + lang._ResultsTableCell2;
+        
+        for(let contribution in subcircuits){
+            let current = currents[i].contributions[contribution];
+            if (current)
+                TeX += " & " + current.start + " $\\rightarrow$ " + current.end;
+            else
+                TeX += " & -";
+        }
+
+        TeX += "\\\\\\cline{2-"+ (Object.keys(subcircuits).length + 2) + "}\r\n";
+
+        TeX += "& " + lang._ResultsTableCell3;
+
+        for(let contribution in subcircuits){
+            let current = currents[i].contributions[contribution];
+            if (!current){
+                TeX += " & 0 A";
+            }
+            else{
+                if(current.complex){
+                    TeX += " & $" + current.magnitude + '\\angle' + current.angle + '^{\\circ} ' + current.unit + "$";
+                }
+                else{
+                    TeX += " & " + current.value + ' ' + current.unit;
+                }
+            }
+        }
+
+        TeX += "\\\\\\hline\r\n";
+    }
+
+    TeX += "\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+
+    // Add Currents results
+    TeX += "\\section{" + lang._branchIden + "}\n\r\n\r\\subsection{" + lang._currents + "}\n\r\n\r";
+    TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+    TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+    currents.forEach(current => {
+        branch = file.branches.find(branch => branch.currentId == current.id);
+        components = branch.components.map(component => component.ref);
+
+        TeX += current.ref + " & " + current.noP + " & " + current.noN + " & " + components.join(', ') + " \\\\ \r\n";
+    });
+
+    TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+
+    //results
+    TeX += "\r\n\r\n\\subsection{" + lang._resBranch + "}\r\n\r\n";
+
+    // Create system
+    if(currentsResults.length > 0){
+        // Create Equations
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k<currentsResults.length; k++){
+            str += currentsResults[k].equation;
+            if(k<currentsResults.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        str += '\\\\\\Leftrightarrow';
+
+        str += '\\large \\begin{cases}';
+
+        for(let k = 0; k<currentsResults.length; k++){
+            if(currentsResults[k].complex){
+                if(currentsResults[k].value.angle == 0){
+                    str += '\\underline{' + currentsResults[k].ref + '}=' + currentsResults[k].value.magnitude + ' ' + currentsResults[k].unit;
+                }
+                else{
+                    str += '\\underline{' + currentsResults[k].ref + '}=' + currentsResults[k].value.magnitude + '\\angle ' + currentsResults[k].value.angle + '^{\\circ}\\; ' + currentsResults[k].unit;
+                }
+            }
+            else{
+                str += currentsResults[k].ref + '=' + currentsResults[k].value + '\\; ' + currentsResults[k].unit;
+            }
+
+            if(k<currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+
+        str += '\\end{cases}';
+
+        // Render System to TeX
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n";
+    }
+
+    TeX += "\\end{document}\r\n";
+    return TeX;
+}
+
+function getTexFileHeaderTSPRich(lang){
+    let texHeader = '';
+    texHeader += '\\documentclass[a4paper]{article}\r\n';
+    texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\usepackage{multirow}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._TSPmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\includegraphics[height=1cm, keepaspectratio]{logo}} URIsolve APP \\\\\r\n\\newline\r\n\\textsc{' + lang._TSPmethod + '} \\\\\r\n\\\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
+    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 06/2023}}}  \\\\\\multicolumn{2}{c}{Guilherme Zenha - 1201398@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n' + lang._TSPabstract + '\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
+    return texHeader;
+}
+
+async function circuitToSvg(circuit){
+    // Get component symbols
+    let rUsDivs = circuit.find('.R.US');
+    let rEUDivs = circuit.find('.R.european');
+    let cNeutralDivs = circuit.find('.C.neutral');
+    let cPolarDivs = circuit.find('.C.polar');
+    let lDivs = circuit.find('.L');
+    let vacDivs = circuit.find('.Vac');
+    let vdcDivs = circuit.find('.Vdc');
+    let iacDivs = circuit.find('.Iac');
+    let idcDivs = circuit.find('.Idc');
+    let vprobeDivs = circuit.find('.VProbe');
+    let iprobeDivs = circuit.find('.IProbe');
+    let gndDivs = circuit.find('.gnd');
+    let vertDivs = circuit.find('.connect-vertical');
+    let horDivs = circuit.find('.connect-horizontal');
+    let components = rUsDivs.add(rEUDivs).add(cNeutralDivs).add(cPolarDivs).add(lDivs).add(vacDivs).add(vdcDivs).add(iacDivs).add(idcDivs).add(vprobeDivs).add(iprobeDivs).add(gndDivs).add(vertDivs).add(horDivs);
+    
+    images = [];
+
+    // Get component images
+    components.each(function(){
+        var backgroundImage = $(this).css('background-image');
+        var backgroundImageURL = backgroundImage.replace('url(','').replace(')','').replace(/\"/gi, "");
+        var backgroundSize = $(this).css('background-size');
+        var x = $(this).offset().left - $(this).parent().parent().offset().left;
+        var y = $(this).offset().top - $(this).parent().parent().offset().top;        
+        var width = $(this).css('width');
+        var height = $(this).css('height');
+
+        if($(this).hasClass('rotated-0')){
+            rotation = 0;
+        }
+        else if($(this).hasClass('rotated-90')){
+            rotation = 90;
+        }
+        else if($(this).hasClass('rotated-180')){
+            rotation = 180;
+        }
+        else if($(this).hasClass('rotated-270')){
+            rotation = 270;
+        }
+
+        var image = {
+            backgroundImage: backgroundImageURL,
+            backgroundSize: backgroundSize,
+            rotation: rotation,
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        };
+
+        images.push(image);
+    });
+
+    preloadedImages = [];
+
+    // Preload images
+    images.forEach(function(image){
+        var img = new Image();
+        img.src = image.backgroundImage;
+        preloadedImages.push(img);
+    });
+
+    return new Promise((resolve, reject) => {
+        try {
+          html2canvas(circuit[0]).then(canvas => {
+            var context = canvas.getContext('2d');
+    
+            for (let i = 0; i < preloadedImages.length; i++) {
+              var image = preloadedImages[i];
+              var x = images[i].x;
+              var y = images[i].y;
+              var width = images[i].width;
+              var height = images[i].height;
+              var rotation = images[i].rotation;
+    
+              context.drawImage(image, x, y, width, height);
+            }
+    
+            var img = new Image();
+            img.src = canvas.toDataURL('image/png');
+    
+            img.onload = () => {
+              const imageTex = '\\newcommand{\\circuit}{' + canvas.toDataURL('image/png').replace('data:image/png;base64,', '') + '}\r\n';
+              resolve(imageTex);
+            };
+          });
+        } catch (error) {
+          reject(new Error('An error occurred during image capture: ' + error));
+        }
+    });
 }
 
 /**

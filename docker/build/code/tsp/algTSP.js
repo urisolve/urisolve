@@ -277,7 +277,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                 $('#resultsCurrentsBranch').html(outResultsCurrentsMCM(jsonFile));
 
                 // Push the solved JSON to the array
-                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCM'};
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCM', canvas: canvasObjects};
                 break;
             case 'MCR':
                 // Solve with MCR
@@ -327,7 +327,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                 $('#resultsCurrentsBranch').html(outResultsCurrentsMCR(jsonFile));
 
                 // Push the solved JSON to the array
-                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCR'};
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCR', canvas: canvasObjects, canvasCurr: canvasObjectss};
                 break;
             default:
                 alert('Método de resolução não reconhecido.');
@@ -611,7 +611,6 @@ function solveTSP(schematic, mainJsonFile, order) {
                         // Round total to 3 decimal places valueIm
                         obj.valueIm = Math.round(obj.valueIm * 1000) / 1000;
 
-                        console.log(obj.valueRe + ' ' + obj.valueIm + 'j' + ' ' + obj.unit);
                     }
 
                     contributions[json][curr.ref] = obj;
@@ -689,17 +688,17 @@ function solveTSP(schematic, mainJsonFile, order) {
                     if (curr.noP == contribution.start || curr.noN == contribution.end){
                         totalre += value;
                         if (value < 0 && !first)
-                            equation += ' (' + contribution.value + contribution.unit + ') + ';
+                            equation += ' (' + contribution.value + ' ' + contribution.unit + ') + ';
                         else
-                            equation += contribution.value + contribution.unit + ' + ';
+                            equation += contribution.value + ' ' + contribution.unit + ' + ';
                         first = false;
                     }
                     else if (curr.noP == contribution.end || curr.noN == contribution.start){
                         totalre -= value;
                         if (value < 0 && !first)
-                            equation += ' (' + contribution.value*-1 + contribution.unit + ') + ';
+                            equation += ' (' + contribution.value*-1 + ' ' + contribution.unit + ') + ';
                         else
-                            equation += contribution.value*-1 + contribution.unit + ' + ';
+                            equation += contribution.value*-1 + ' ' + contribution.unit + ' + ';
                         first = false;
                     }
                 } else {
@@ -708,16 +707,16 @@ function solveTSP(schematic, mainJsonFile, order) {
                     if (curr.noP == contribution.start || curr.noN == contribution.end){
                         totalre += valuere;
                         totalim += valueim;
-                        equation += contribution.magnitude + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ' + ';
+                        equation += contribution.magnitude + '\\angle' + contribution.angle + '^{\\circ}' + ' ' + contribution.unit + ' + ';
                         first = false;
                     }
                     else if (curr.noP == contribution.end || curr.noN == contribution.start){
                         totalre -= valuere;
                         totalim -= valueim;
                         if(!first)
-                            equation += ' (' + contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ') + ';
+                            equation += ' (' + contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + ' ' + contribution.unit + ') + ';
                         else
-                            equation += contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + contribution.unit + ' + ';
+                            equation += contribution.magnitude*-1 + '\\angle' + contribution.angle + '^{\\circ}' + ' ' + contribution.unit + ' + ';
                         first = false;
                     }
                 }
@@ -798,7 +797,8 @@ function solveTSP(schematic, mainJsonFile, order) {
     return {
         errorFlag: false,
         errorReasonCodes: [],
-        data: { solvedJSON: mainJsonFile}
+        data: { solvedJSON: mainJsonFile,
+                subcircuits: solvedJSON,}
     }
   }
 
@@ -950,7 +950,111 @@ function outputTSP(jsonFile, schematic){
         // Populate results section
         $('#resolution-results').html(outHTMLResultsTSP(jsonFile));
 
+
+        // Export JSON file
+        $("#json").off().on('click', function() {
+            const filename = 'urisolve_results_TSP.json';
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonFile)));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        });
+
+        // Export TeX File
+        $("#tex").off().on('click', function() {
+            const filename = 'urisolve_results_TSP.tex';
+            const imagesFilename = 'urisolve_images_TSP.tex';
+                    
+            //Get User info
+            let studName = document.getElementById('output-name').value;
+            let studLastname = document.getElementById('output-lastname').value;
+            let studNumber = document.getElementById('output-number').value
+
+            // Get Simulation Time
+            let hourstr = new Date().getHours();
+            let minstr = new Date().getMinutes();
+            if(hourstr.toString().length < 2)
+                hourstr = "0" + hourstr;
+            if(minstr.toString().length < 2)
+                minstr = "0" + minstr;
+            hourstr = hourstr + ":" + minstr;
+
+            let TeX = buildTeXOvTSP(jsonFile, solved.data.subcircuits);
+            let ImagesTeX = buildImTeXTSP(undefined, solved.data.subcircuits);
+
+            //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
+            if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+                let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+                string += " at " + hourstr + "\r\n";
+                TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
+            }
+
+            // Create download link for TeX file
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(TeX));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            // Create download link for Images TeX file
+            let element2 = document.createElement('a');
+            element2.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(ImagesTeX));
+            element2.setAttribute('download', imagesFilename);
+            element2.style.display = 'none';
+
+            // Download files
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            document.body.appendChild(element2);
+            element2.click();
+            document.body.removeChild(element2);
+        });
+
+        // Open in overleaf
+        $("#overleaf").off().on('click', function() {
+            let TeX = buildTeXOvTSP(jsonFile, solved.data.subcircuits);
+            let ImagesTeX = buildImTeXTSP(undefined, solved.data.subcircuits);
+            //Get User info
+            let studName = document.getElementById('output-name').value;
+            let studLastname = document.getElementById('output-lastname').value;
+            let studNumber = document.getElementById('output-number').value
+            // Get Simulation Time
+            let hourstr = new Date().getHours();
+            let minstr = new Date().getMinutes();
+            if(hourstr.toString().length < 2)
+                hourstr = "0" + hourstr;
+            if(minstr.toString().length < 2)
+                minstr = "0" + minstr;
+            hourstr = hourstr + ":" + minstr;
+            //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
+            if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
+                let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+                string += " at " + hourstr + "\r\n";
+                TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
+            }
+            TeX = TeX.replaceAll("[latin1]", "");
+            document.getElementById('main').value = encodeURIComponent(TeX);
+            document.getElementById('images').value = encodeURIComponent(ImagesTeX);
+            document.getElementById('overleaf').submit();
+        });
+
+        // Export PDF File
+        $("#print").off().on('click', function() {
+            // Not implemented yet
+        });
+
+        // On modal close remove all exports
+        $('#results-modal').on('hidden.bs.modal', function() {
+            $("#json").off();
+            $("#tex").off();
+            $("#overleaf").off();
+            $("#print").off();
+        });
+
         $('#loadpage').fadeOut(1000);
+
         // Update Dictionary Language
 	    let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
 	    if(language == "english")

@@ -1051,7 +1051,7 @@ function getTexFileHeaderMCMOv(lang){
  * @param {array} meshImages image information
  * @returns {string} TeX string
  */
-function buildTeXOv(file, meshImages){
+function buildTeXOv(file, meshImages, begin = true){
 
 	let R = file.branches.length;
 	let N = countNodesByType(file.nodes, 0);
@@ -1070,16 +1070,17 @@ function buildTeXOv(file, meshImages){
     let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
     if(lang == 'english') lang = dictionary.english;
     else if(lang == 'português') lang = dictionary.portuguese;
+    let TeX = '';
+    if(begin){
+        // Tex Variable
+        let TeX = getTexFileHeaderMCMOv(lang);
 
-	// Tex Variable
-	let TeX = getTexFileHeaderMCMOv(lang);
-
-	if(fileContents[0]){
-		TeX += "\\section{" + lang._circuitImage + "}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";
-		TeX += "\\inlineimages{circuit.png}{\\circuit}}}\r\n\\caption{";
-		TeX += "" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
-	}
-
+        if(fileContents[0]){
+            TeX += "\\section{" + lang._circuitImage + "}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";
+            TeX += "\\inlineimages{circuit.png}{\\circuit}}}\r\n\\caption{";
+            TeX += "" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+        }
+    }
 	// TeX Fundamental Vars
 	TeX += "\\section{" + lang._fundamentalsTitle + "}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
 	TeX += "\\textbf{" + lang._fundamentals_R + " {[}R{]}}&&\\textbf{" + lang._fundamentals_N + " {[}N{]}}&&\\textbf{" + lang._fundamentals_C + " {[}C{]}}&&\\textbf{" + lang._fundamentals_T + " {[}T{]}} \\\\\r\n";
@@ -1326,8 +1327,9 @@ function buildTeXOv(file, meshImages){
         TeX += "\\begin{footnotesize}\r\n\\textbf{\\textit{Note: }} ";
         TeX += lang._currResNotes1MCM.slice(6) + "\r\n\\end{footnotesize}\r\n\r\n";
 	}
-
-	TeX += "\\end{document}\r\n";
+    if(begin){
+        TeX += "\\end{document}\r\n";
+    }
 	return TeX;
 }
 
