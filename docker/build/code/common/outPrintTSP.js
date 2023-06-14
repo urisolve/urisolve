@@ -149,7 +149,7 @@ function outHTMLSectionsMCM_TSP(cp, length) {
     // Add navbar
     htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
     htmlstr += '<nav id="navbar" class="navbar p-0">';
-    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
+    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-bars"></i></a></div>';
     htmlstr += '<div class="progress-container d-flex align-items-center my-1 col-11">';
     for(let i = 0; i < length; i++){
         htmlstr += '<div class="progress my-auto mx-1" style="width: '+ 100/length + '%"><div class="progress-bar rounded-pill mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
@@ -244,7 +244,7 @@ function outHTMLSectionsMCR_TSP(cp, length){
     // Add navbar
     htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
     htmlstr += '<nav id="navbar" class="navbar p-0">';
-    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-indent"></i></a></div>';
+    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-bars"></i></a></div>';
     htmlstr += '<div class="progress-container d-flex align-items-center my-1 col-11">';
     for(let i = 0; i < length; i++){
         htmlstr += '<div class="progress my-auto mx-1" style="width: '+ 100/length + '%"><div class="progress-bar rounded-pill mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
@@ -283,6 +283,15 @@ function outHTMLSectionsMCR_TSP(cp, length){
     htmlstr += '<div class="container mt-3">';
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
     htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
+
+    // Add subcircuit note
+    htmlstr += '<div id="subcircuit-note" class="my-2">';
+    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+    htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+    htmlstr += '<div class="ml-1"><strong><p data-translate="_tspNotes1"></p></strong></div>';
+    htmlstr += '</div></div></div></div>';
+    
 
     htmlstr += '<div id= "contResults">';  
     htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
@@ -410,6 +419,17 @@ function outHTMLResultsTSP(jsonFile) {
 
     var htmlstr = "";
 
+    // Add note
+    htmlstr += '<div id="resolution-note" class="my-2">';
+    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+    htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+    if(!results.map(r => r.complex).includes(true))
+        htmlstr += '<div class="ml-1"><strong><p data-translate="_tspNotesSum"></p></strong></div>';
+    else
+        htmlstr += '<div class="ml-1"><strong><p data-translate="_tspNotesSumComplex"></p></strong></div>';
+    htmlstr += '</div></div></div></div>';
+
     htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
     htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
 
@@ -486,7 +506,7 @@ function buildTeXOvTSP(file, subfiles) {
 	let TeX = getTexFileHeaderTSPOv(lang);
 
     // Add main circuit image
-    TeX += "\\section{" + lang._circuitImage + "}";
+    //TeX += "\\section{" + lang._circuitImage + "}";
     //TeX += "\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";"
     //TeX += "\\inlineimages{circuit.png}{\\circuit}}}";
     //TeX += "\r\n\\caption{" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
@@ -672,7 +692,15 @@ function buildTeXOvTSP(file, subfiles) {
         str += '\\end{cases}';
 
         // Render System to TeX
-        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n\\pagebreak\r\n\r\n";
+        TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
+        
+        if(currentsResults.map(r => r.complex).includes(true)){
+            TeX += '\\begin{footnotesize}\\textbf{\\textit{Note: }} ' + lang._tspNotesSumComplex + '\\end{footnotesize}';
+        }
+        else{
+            TeX += '\\begin{footnotesize}\\textbf{\\textit{Note: }} ' + lang._tspNotesSum + '\\end{footnotesize}';
+        }
+        TeX += "\\pagebreak\r\n\r\n";
     }
 
     // Add appendix

@@ -475,12 +475,12 @@ function redrawSchematic(schematic, container, interactive = true, mutable = tru
             hlabel.hide();
 
             // Add hammer.js touch events to the component so that it can trigger double tap on mobile
-            //var myElement = container.find('.'+cp.id)[0];
-            //var hammer = new Hammer(myElement);
+            var myElement = container.find('.'+cp.id)[0];
+            var hammer = new Hammer(myElement);
 
             // Build the properties menu on double click
-            //hammer.on("doubletap", function(event) {
-            drawing.find($('.'+cp.id)).dblclick(function(){
+            hammer.on("doubletap", function(event) {
+            //drawing.find($('.'+cp.id)).dblclick(function(){
                 drawing = container.find('.drawing');
                 drawing.find(drawing.find($('.menu'))).remove();
                 // Build the menu elements

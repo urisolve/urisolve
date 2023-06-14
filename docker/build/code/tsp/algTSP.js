@@ -10,6 +10,7 @@ include('code/common/redraw.js'); // To add circuit drawings to the modal sectio
  */
 function makeSubcircuit(schematic, source){
     index = 0;
+    changes = [];
     // Remove voltage power sources
     vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower).forEach(cp => {
         if(cp.id !== source)
@@ -48,6 +49,8 @@ function makeSubcircuit(schematic, source){
                     0,                                  //SymbolVisible
                 ];
 
+                changes.push({source: cp.name.value, changeCode: '1'});
+
                 ports = getPorts(caracteristics);
 
                 new Resistor(id, caracteristics, ports);
@@ -69,10 +72,15 @@ function makeSubcircuit(schematic, source){
                     "",                                 //node_set
                 ];
 
+                changes.push({source: cp.name.value, changeCode: '2'});
+
                 new Wire(id, caracteristics);
             }
+            else {
             // If the impedance is 0, and it's a current source, switch for an open circuit
             // It has already been removed
+                changes.push({source: cp.name.value, changeCode: '3'});
+            }
         }
     });
     // Reset all connections and nodes
@@ -113,7 +121,8 @@ function makeSubcircuit(schematic, source){
         errorReasonCodes: [],
         data: {
             tree: JSON.stringify(subSchematic),
-            object: subSchematic
+            object: subSchematic,
+            changes: changes,
         }
     }
 }
@@ -333,6 +342,30 @@ function solveTSP(schematic, mainJsonFile, order) {
                 alert('Método de resolução não reconhecido.');
                 break;
         }
+
+        // Add notes to the modal
+        let note = '<div class="d-flex d-flex-row"><p>';
+        subcircuit.data.changes.forEach(change => {
+            note += '<i class="fas fa-chevron-right"></i>';
+            note += '<strong> ' + change.source + '</strong>';
+            switch(change.changeCode){
+                case '1':
+                    note +='<span data-translate="_tspNotesRi"></span><br>';
+                    break;
+                case '2':
+                    note += '<span data-translate="_tspNotesIdeal"></span>';
+                    note += '<span data-translate="_tspNotesCC"></span><br>';
+                    break;
+                case '3':
+                    note += '<span data-translate="_tspNotesIdeal"></span>';
+                    note += '<span data-translate="_tspNotesCA"></span><br>';
+                    break;
+            }
+        });
+        note += '</p></div>';
+        note = $(note);
+        noteContainer = $('#subcircuit-note .container-fluid').find('.ml-1')[1];
+        note.appendTo(noteContainer);
 
         // Toggle plus minus icon on show hide of collapse element
         for(let i = 0; i<7; i++){
@@ -881,8 +914,21 @@ function outputTSP(jsonFile, schematic){
                     }
                     $(this).toggleClass('order-selected');
                     $(this).toggleClass('order-selectable');
+                    selected = $('.order-selected').length;
+                    $('#source-counter > div').text(selected+' / ' +vectSources.length);
                 });
             });
+
+            // Add source counter
+            selected = $('.order-selected').length;
+            $('#circuitImage').append('<div id="source-counter" class="mx-auto mt-2 p-1 border border-dark col-2 text-center"><span data-translate="_numsources"></span><div>'+selected+' / ' +vectSources.length+'</div></div>');
+
+            // Update Dictionary Language
+            let language = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+            if(language == "english")
+                set_lang(dictionary.english);
+            else	
+                set_lang(dictionary.portuguese);
         } else {
             // Passive mode
             vectSources.forEach(cp => {
@@ -891,6 +937,9 @@ function outputTSP(jsonFile, schematic){
                 cpDiv.removeClass('order-selected');
                 cpDiv.off('click');
             });
+
+            // Remove source counter
+            $('#source-counter').remove();
         }
     });
 
@@ -903,6 +952,7 @@ function outputTSP(jsonFile, schematic){
         handle: '.card-title',
         cancelable: true,
     });
+    $("#selection").disableSelection();
 
     // Handle calc button
     $('#calc-btn').click(function() {

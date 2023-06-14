@@ -1073,7 +1073,7 @@ function buildTeXOv(file, meshImages, begin = true){
     let TeX = '';
     if(begin){
         // Tex Variable
-        let TeX = getTexFileHeaderMCMOv(lang);
+        TeX = getTexFileHeaderMCMOv(lang);
 
         if(fileContents[0]){
             TeX += "\\section{" + lang._circuitImage + "}\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";
