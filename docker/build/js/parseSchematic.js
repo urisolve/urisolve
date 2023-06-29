@@ -137,110 +137,146 @@ function parseSchematic(text){
             case 'R':
                 if(cpProperties.length < 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Resistor '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new Resistor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'C':
                 if(cpProperties.length < 16){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 16){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Capacitor '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new Capacitor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'L':
                 if(cpProperties.length < 14){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 14){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Inductor '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new Inductor("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Vdc':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[11] && !cpProperties[12] && !cpProperties[13] && !cpProperties[14]){
+                    cpProperties[12] = '0';
+                    cpProperties[13] = 'Ohm';
+                    cpProperties[14] = '0';
+                }
                 if(cpProperties.length < 15){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 15){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Dc Voltage Source '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new DcVoltPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Idc':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[11] && !cpProperties[12] && !cpProperties[13] && !cpProperties[14]){
+                    cpProperties[12] = '0';
+                    cpProperties[13] = 'Ohm';
+                    cpProperties[14] = '0';
+                }
                 if(cpProperties.length < 15){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 15){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Dc Current Source '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new DcCurrPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Vac':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[18] && !cpProperties[19] && !cpProperties[20] && !cpProperties[21]){
+                    cpProperties[19] = '0';
+                    cpProperties[20] = 'Ohm';
+                    cpProperties[21] = '0';
+                }
                 if(cpProperties.length < 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Ac Voltage Source '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new AcVoltPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'Iac':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[18] && !cpProperties[19] && !cpProperties[20] && !cpProperties[21]){
+                    cpProperties[19] = '0';
+                    cpProperties[20] = 'Ohm';
+                    cpProperties[21] = '0';
+                }
                 if(cpProperties.length < 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 22){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Ac Current Source '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new AcCurrPower("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'GND':
                 if(cpProperties.length < 9){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ground '], error: 'has missing values'});
+                    errorData.push({invalidData: ['Ground '], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 9){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Ground '], error: 'has too many values'});
+                    errorData.push({invalidData: ['Ground '], error: 'has too many values\n'});
                 }
                 cp = new GND("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'VProbe':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[8] && !cpProperties[9] && !cpProperties[10] && !cpProperties[11]){
+                    cpProperties[9] = '0';
+                    cpProperties[10] = 'Ohm';
+                    cpProperties[11] = '0';
+                }
                 if(cpProperties.length < 12){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 12){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Voltage Probe '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new VProbe("cp" + componentIndex, cpProperties, ports);
                 break;
             case 'IProbe':
+                // If the component is missing an internal resistance (original qucs behaviour)
+                if(cpProperties[8] && !cpProperties[9] && !cpProperties[10] && !cpProperties[11]){
+                    cpProperties[9] = '0';
+                    cpProperties[10] = 'Ohm';
+                    cpProperties[11] = '0';
+                }
                 if(cpProperties.length < 12){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has missing values'});
+                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has missing values\n'});
                 }
                 else if(cpProperties.length > 12){
                     errorFlag = true;
-                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has too many values'});
+                    errorData.push({invalidData: ['Current Probe '+ cpProperties[1]], error: 'has too many values\n'});
                 }
                 cp = new IProbe("cp" + componentIndex, cpProperties, ports);
                 break;
@@ -1035,9 +1071,8 @@ function parseSchematic_handleError (err) {
                 });
                 break;
             case '2':
-                errorstr += '\tInvalid elements: ';
                 data.forEach(err =>{
-                    errorstr += err.invalidData + ' ' + err.error + ', ';
+                    errorstr += err.invalidData + ' ' + err.error;
                 });
                 break;
             case '3':

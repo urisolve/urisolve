@@ -183,6 +183,9 @@ function handleFileSelect (e) {
                 preview = $('<div id="circuit-preview"></div>');
                 image_holder.css('max-height', '150px').css('max-width', '150px').append(preview);
 
+                // Turn off the grid
+                schematic.data.object.properties.grid.active = false;
+
                 // Add circuit image to the page
                 var circuitImage = redrawSchematic(schematic.data.object, preview, false);
                 if(circuitImage.errorFlag){
