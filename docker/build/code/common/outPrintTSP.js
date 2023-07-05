@@ -556,7 +556,7 @@ function buildTeXOvTSP(file, subfiles) {
         TeX += "\r\n\r\n\\paragraph{" + lang._resBranch + "}\\phantom{}\r\n\r\n";
 
         // Create system
-        str = '\\large \\begin{cases}';
+        let str = '\\large \\begin{cases}';
         i = 0;
         for (let curr in subcircuits[contribution]){
             let current = subcircuits[contribution][curr];
@@ -645,8 +645,8 @@ function buildTeXOvTSP(file, subfiles) {
     TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
 
     currents.forEach(current => {
-        branch = file.branches.find(branch => branch.currentId == current.id);
-        components = branch.components.map(component => component.ref);
+        let branch = file.branches.find(branch => branch.currentId == current.id);
+        let components = branch.components.map(component => component.ref);
 
         TeX += current.ref + " & " + current.noP + " & " + current.noN + " & " + components.join(', ') + " \\\\ \r\n";
     });

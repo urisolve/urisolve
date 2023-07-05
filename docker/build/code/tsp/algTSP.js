@@ -187,7 +187,6 @@ function schematicToJsonFile(circuit) {
         first: false,
         second: 0,
         third: buildJson(netlistTxt),
-        fourth: netlistTxt.fourth
     }
 }
 
@@ -240,6 +239,7 @@ function solveTSP(schematic, mainJsonFile, order) {
 
         subcircuits[order.indexOf(o)] = ({schematic: subcircuit.data.object, name: cp.name.value, method: method});
         let jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)].schematic);
+        console.log(jsonFile);
 
         // Initialize variables
         let warningsText = "";
@@ -877,6 +877,8 @@ function outputTSP(jsonFile, schematic){
 
     // Turn the viz. on
 	$("#contResults").show();
+    // Disable output buttons until the circuit is solved
+    $('#buttons-div .btn-secondary').addClass('disabled');
 	$("#loadpage").fadeOut(1000);
     $("#results").show();
 	$('#results-modal').modal('show');
@@ -1093,7 +1095,11 @@ function outputTSP(jsonFile, schematic){
         // Export PDF File
         $("#print").off().on('click', function() {
             // Not implemented yet
+            //buildPrintPDF(jsonFile, canvasObjects);
         });
+
+        // Enable output buttons
+        $('#buttons-div .btn-secondary').removeClass('disabled');
 
         // On modal close remove all exports
         $('#results-modal').on('hidden.bs.modal', function() {
