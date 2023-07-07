@@ -9,22 +9,22 @@ include('code/common/redraw.js'); // To add circuit drawings to the modal sectio
  * @returns {Object} The sub-schematic object or the error data
  */
 function makeSubcircuit(schematic, source){
-    index = 0;
-    changes = [];
+    let index = 0;
+    let changes = [];
     // Remove voltage power sources
     vectDcVoltPower.concat(vectAcVoltPower, vectDcCurrPower, vectAcCurrPower).forEach(cp => {
         if(cp.id !== source)
         {
             // Remove the component from the vector
-            vectComponents = vectComponents.filter(c => c.id != cp.id);
+                vectComponents = vectComponents.filter(c => c.id != cp.id);
 
             // If the component has impedance, switch for the internal resistance
             if(cp.properties.impedance.value !== '0')
             {
-                id = 'Ri'+index;
+                let id = 'Ri'+index;
                 index++;
 
-                caracteristics = [                      //Caracteristics:
+                let caracteristics = [                      //Caracteristics:
                     'R',                                //Type
                     'Ri_'+cp.name.value,                //NameValue
                     '1',                                //Active
@@ -51,16 +51,16 @@ function makeSubcircuit(schematic, source){
 
                 changes.push({source: cp.name.value, changeCode: '1'});
 
-                ports = getPorts(caracteristics);
+                let ports = getPorts(caracteristics);
 
                 new Resistor(id, caracteristics, ports);
             }
             // If the impedance is 0, and it's a voltage source, switch for a short circuit
             else if (['Vac', 'Vdc'].includes(cp.type))
             {
-                id = 'CC'+index;
+                let id = 'CC'+index;
                 index++;
-                caracteristics = [                      //Caracteristics:
+                let caracteristics = [                      //Caracteristics:
                     cp.port[0].position.x,              //BeginPositionX
                     cp.port[0].position.y,              //BeginPositionY
                     cp.port[1].position.x,              //EndPositionX
@@ -107,7 +107,7 @@ function makeSubcircuit(schematic, source){
     treatSchematic();
 
     // Create new schematic
-    var subSchematic = new Schematic(schematic.qucs_version, schematic.properties.view, schematic.properties.grid);
+    let subSchematic = new Schematic(schematic.qucs_version, schematic.properties.view, schematic.properties.grid);
     
     cropWindow(subSchematic);
 
@@ -201,7 +201,7 @@ function solveTSP(schematic, mainJsonFile, order) {
   
     order.forEach(o => {
       const cp = o[0];
-      const method = o[1];
+      let method = o[1];
       let generateSection = false;
   
       const tabs = $('.resolution-item');
@@ -239,7 +239,15 @@ function solveTSP(schematic, mainJsonFile, order) {
 
         subcircuits[order.indexOf(o)] = ({schematic: subcircuit.data.object, name: cp.name.value, method: method});
         let jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)].schematic);
-        console.log(jsonFile);
+        let parsedJson = JSON.parse(jsonFile.third);
+
+        if(parsedJson.analysisObj.warnings.length > 0){
+            if(parsedJson.analysisObj.warnings.some(w => w.errorCode === 15)){
+                method = 'LKM'; 
+                parsedJson.analysisObj.currents = JSON.parse(JSON.stringify(mainJsonFile.analysisObj.currents));
+                parsedJson.branches = JSON.parse(JSON.stringify(mainJsonFile.branches));
+            }
+        }
 
         // Initialize variables
         let warningsText = "";
@@ -323,7 +331,6 @@ function solveTSP(schematic, mainJsonFile, order) {
                 $('#KNLEquations').html(knlCurrData.first);
                 canvasObjectss = createCanvasCurrentsMCR(knlCurrData.second);
 
-
                 canvasObjects = outMeshesMCR(jsonFile.branches, jsonFile.analysisObj.chosenMeshes, jsonFile.analysisObj.result);
 
                 step1 = outStep1MCR(jsonFile.analysisObj.equations);
@@ -337,6 +344,44 @@ function solveTSP(schematic, mainJsonFile, order) {
 
                 // Push the solved JSON to the array
                 solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCR', canvas: canvasObjects, canvasCurr: canvasObjectss};
+                break;
+            case 'LKM':
+                // Solve with LKM
+                jsonFile = loadFileAsTextLKM(parsedJson, subcircuit.data.object);
+
+                // Add sections
+                page.html(outHTMLSectionsLKM_TSP(cp, order.length));
+
+                warningsText = warningOutput(jsonFile.analysisObj.warnings);
+                    if(warningsText != 0){
+                        $('#warnings').html(warningsText);
+                        $('#errors').hide();
+                        $('#warnings').show();
+                    }
+
+                // Output data Generation
+                $('#buttonShowAll').html(outShowAllBtnMCR());
+
+                // Circuit info 
+                $('#circuitInfo').html(outCircuitInfoMCM(jsonFile));
+
+                // Current info
+                
+                // Equations
+                step1 = '';
+                step2 = '';
+                if (cp.type == 'Vac' || cp.type == 'Vdc') {
+                    step1 = outStep1LKM_TSP(jsonFile.analysisObj.equations);
+                    step2 = outStep2LKM_TSP(jsonFile.analysisObj.equations);
+                }
+                equationSystemOutput = outEquationSystemLKM_TSP(jsonFile.analysisObj, step1, step2);
+                $('#eqSys').html(equationSystemOutput);
+
+                // Results
+                $('#resultsCurrentsBranch').html(outHTMLResultsLKM(jsonFile));
+
+                // Push the solved JSON to the array
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'LKM'};
                 break;
             default:
                 alert('Método de resolução não reconhecido.');
@@ -657,6 +702,53 @@ function solveTSP(schematic, mainJsonFile, order) {
                     });
                 });
             break;
+            case 'LKM':
+                solvedJSON[json].file.analysisObj.currents.forEach(curr => {
+                    let obj = {};
+
+                    if(!curr.complex){
+                        obj = {
+                            complex: curr.complex,
+                            start: curr.noP,
+                            end: curr.noN,
+                            value: curr.value,
+                            components: curr.components,
+                        };
+                    
+                        // Get the appropriate unit
+                        let valueAbs = Math.abs(curr.valueRe);
+                        if (valueAbs >= 1000000){
+                            obj.unit = 'MA';
+                            obj.value /= 1000000;
+                        }
+                        else if (valueAbs >= 1000){
+                            obj.unit = 'kA';
+                            obj.value /= 1000;
+                        }
+                        else if (valueAbs >= 1){
+                            obj.unit = 'A';
+                        }
+                        else if (valueAbs >= 0.001){
+                            obj.unit = 'mA';
+                            obj.value *= 1000;
+                        }
+                        else if (valueAbs >= 0.000001){
+                            obj.unit = 'uA';
+                            obj.value *= 1000000;
+                        }
+                        else {
+                            obj.unit = 'A';
+                            obj.value = 0;
+                        }
+
+                        // Round total to 3 decimal places
+                        obj.value = Math.round(obj.value * 1000) / 1000;
+                    }
+
+                    contributions[json][curr.ref] = obj;
+                });
+            break;
+
         }
     }
     mainJsonFile.analysisObj.contributions = contributions;
@@ -668,8 +760,9 @@ function solveTSP(schematic, mainJsonFile, order) {
         components = branch.components.map(cp => cp.ref);
         curr = branch.currentData.ref;
         currentObj = mainJsonFile.analysisObj.currents.find(c => c.ref === curr);
-
         currentObj.contributions = {};
+        console.log('Branch current:' + curr);
+        console.log(currentObj);
         
         // Find the current in the contributions
         for (json in contributions){
@@ -1139,6 +1232,7 @@ function outputTSP(jsonFile, schematic){
  * @param {Schematic} schematic Schematic object of the main circuit
  */
 function loadFileAsTextTSP(data, schematic){
+    console.log(schematic);
     jsonFile = JSON.parse(data);
     console.log(jsonFile);
     solvedJSON = {};
@@ -1173,4 +1267,390 @@ function TSP_handleError(err){
         });
 
     return errorstr;
+}
+
+function loadFileAsTextLKM(jsonfile, schematic){
+    let branches = Object.values(jsonfile.branches);
+    let currents = Object.values(jsonfile.analysisObj.currents);
+    let currentRefs = [];
+    let originalNodes = [];
+    currents.forEach(curr => {
+        currentRefs.push(curr.ref);
+        if(!originalNodes.includes(curr.noN))
+            originalNodes.push(curr.noN);
+        if(!originalNodes.includes(curr.noP))
+            originalNodes.push(curr.noP);
+    });
+    connections = JSON.parse(JSON.stringify(schematic.connections));
+
+    // Find source
+    let source = schematic.components.find(cp => cp.type == 'Vdc' || cp.type == 'Vac' || cp.type == 'Idc' || cp.type == 'Iac');
+    // Find source port 1
+    let connection = connections.find(c => c.ports.find(p => p.port == 1 && p.component == source.id));
+    // Find end of pseudo-branch
+    let port1 = connection.ports.find(p => p.port == 1 && p.component == source.id);
+    let port2 = connection.ports.find(p => p.component != source.id);
+
+    let pbranch = [source.name.value];
+    let curr = undefined;
+    // Follow the pseudo-branch until it reaches the end
+    while (!originalNodes.includes(connection.id)){
+        connection = connections.find(c => c.ports.find(p => p.component == port2.component && p.port != port2.port));
+        if(connection){
+            port1 = connection.ports.find(p => p.component == port2.component && p.port != port2.port);
+            port2 = connection.ports.find(p => p.component != port2.component);
+            component = schematic.components.find(cp => cp.id == port1.component);
+            component2 = schematic.components.find(cp => cp.id == port2.component);
+            if(component2.type == "GND"){
+                port2 = connection.ports.find(p => p.component != port2.component && p.component != component.id);
+            }
+            if (component.type == 'IProbe'){
+                if(currentRefs.includes(component.name.value)){
+                    curr = currents.find(c => c.ref == component.name.value);
+                    if(port1.port == 1){
+                        curr.equation = component.name.value + " = I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "+"
+                    } else {
+                        curr.equation = component.name.value + " = -I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "-"
+                    }
+                }
+            }
+            else{
+                pbranch.push(component.name.value);
+            }
+        }
+    }
+    let end = connection.id;
+    
+    // Follow to the other end of the pseudo-branch
+    connection = connections.find(c => c.ports.find(p => p.component == source.id && p.port == 0));
+    port1 = connection.ports.find(p => p.component == source.id && p.port == 0);
+    port2 = connection.ports.find(p => p.component != source.id);
+    while (!originalNodes.includes(connection.id)){
+        connection = connections.find(c => c.ports.find(p => p.component == port2.component && p.port != port2.port));
+        if(connection){
+            port1 = connection.ports.find(p => p.component == port2.component && p.port != port2.port);
+            port2 = connection.ports.find(p => p.component != port2.component);
+            component = schematic.components.find(cp => cp.id == port1.component);
+            component2 = schematic.components.find(cp => cp.id == port2.component);
+            if(component2.type == "GND"){
+                port2 = connection.ports.find(p => p.component != port2.component && p.component != component.id);
+            }
+            if (component.type == 'IProbe'){
+                if(currentRefs.includes(component.name.value)){
+                    curr = currents.find(c => c.ref == component.name.value);
+                    if(port1.port == 0){
+                        curr.equation = component.name.value + " = I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "+"
+                    } else {
+                        curr.equation = component.name.value + " = -I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "-"
+                    }
+                }
+            }
+            else{
+                pbranch.unshift(component.name.value);
+            }
+        }
+    }
+    let start = connection.id;
+
+    if(curr != undefined){
+        curr.components = pbranch;
+    }
+    else{
+        // Find matching branch
+        branches.forEach(branch => {
+            let components = branch.acAmpPwSupplies.concat(branch.acVoltPwSupplies, branch.capacitors, branch.coils, branch.dcAmpPwSupplies
+                , branch.dcVoltPwSupplies, branch.resistors);
+            components = components.map(cp => cp.ref);
+            if (components.some(value => pbranch.includes(value))){
+                curr = branch.currentData.ref;
+                curr = currents.find(c => c.ref == curr);
+                if(curr.noP == start || curr.noN == end){
+                    curr.equation = curr.ref + " = I";
+                    curr.direction = "+"
+                }
+                else{
+                    curr.equation = curr.ref + " = -I";
+                    curr.direction = "-"
+                }
+                curr.valueRe = 0;
+                curr.valueIm = 0;
+                curr.magnitude = 0;
+                curr.angle = 0;
+                curr.unit = "A";
+                curr.complex = false;
+                curr.components = pbranch;
+            }
+        });
+    }
+    curr = undefined;
+
+
+    // Find other pseudo-branche
+    startpoint = connections.find(c => c.id == end);
+    port1 = startpoint.ports.find(p => !pbranch.includes(p.component));
+    component = schematic.components.find(cp => cp.id == port1.component);
+    pbranch = [];
+    connection = {};
+    while(connection.id != start){
+        connection = connections.find(c => c.ports.find(p => p.component == port1.component && p.port != port1.port));
+        if(connection){
+            port2 = connection.ports.find(p => p.component != port1.component);
+            component2 = schematic.components.find(cp => cp.id == port2.component);
+            if(component2.type == "GND"){
+                port2 = connection.ports.find(p => p.component != port2.component && p.component != component.id);
+            }
+            if (component.type == 'IProbe'){
+                if(currentRefs.includes(component.name.value)){
+                    curr = currents.find(c => c.ref == component.name.value);
+                    if(port1.port == 1){
+                        curr.equation = component.name.value + " = I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "+"
+                    } else {
+                        curr.equation = component.name.value + " = -I";
+                        curr.valueRe = 0;
+                        curr.valueIm = 0;
+                        curr.magnitude = 0;
+                        curr.angle = 0;
+                        curr.unit = "A";
+                        curr.complex = false;
+                        curr.direction = "-"
+                    }
+                }
+            }
+            else{
+                pbranch.push(component.name.value);
+            }
+            connections = connections.filter(c => c != connection);
+        }
+        else
+            connection = {};
+    }
+    if(curr != undefined){
+        curr.components = pbranch;
+    }
+    else{
+        // Find matching branch
+        branches.forEach(branch => {
+            let components = branch.acAmpPwSupplies.concat(branch.acVoltPwSupplies, branch.capacitors, branch.coils, branch.dcAmpPwSupplies
+                , branch.dcVoltPwSupplies, branch.resistors);
+            components = components.map(cp => cp.ref);
+            if (components.some(value => pbranch.includes(value))){
+                curr = branch.currentData.ref;
+                curr = currents.find(c => c.ref == curr);
+                if(curr.noP == startpoint.id || curr.noN == start){
+                    curr.equation = curr.ref + " = I";
+                    curr.direction = "+"
+                }
+                else{
+                    curr.equation = curr.ref + " = -I";
+                    curr.direction = "-"
+                }
+                curr.valueRe = 0;
+                curr.valueIm = 0;
+                curr.magnitude = 0;
+                curr.angle = 0;
+                curr.unit = "A";
+                curr.complex = false;
+                curr.components = pbranch;
+            }
+        });
+    }
+
+    currents = currents.filter(c => c.equation!=undefined);
+
+    let equations = {
+        EqI: [],
+        EqIresult: [],
+        Req: [],
+        Leq: [],
+        Ceq: [],
+        Xleq: [],
+        Xceq: [],
+        Zeq: [],
+    }
+    // Calculate I
+    switch(source.type){
+        case 'Idc':
+            // I = Source value
+            valueRe = source.value.value;
+            valueIm = 0;
+            magnitude = source.value.value;
+            angle = 0;
+            unit = source.value.unit;
+            complex = false;
+
+            // Add current to jsonfile
+            equations.EqIresult = ['I = ' + source.name.value];
+
+            currents.forEach(curr => {
+                if(curr.direction == "+"){
+                    curr.valueRe = valueRe;
+                    curr.valueIm = valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle;
+                    curr.value = magnitude;
+                    curr.unit = unit;
+                    curr.complex = false;
+                } else {
+                    curr.valueRe = -valueRe;
+                    curr.valueIm = -valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle +180;
+                    curr.value = magnitude*-1;
+                    curr.unit = unit;
+                    curr.complex = false;
+                }
+            });
+            break;
+        case 'Iac':
+            // I = Source value    
+
+            break;
+        case 'Vdc':
+            // Calculate impedance Zeq = Req
+            impedance = 0;
+            resistors = schematic.components.filter(cp => cp.type == 'R');
+            equations.Req[0] = 'Req = ';
+            resistors.forEach(resistor => {
+                switch (resistor.value.unit){
+                    case 'MOhm':
+                        multiplier = 1000000;
+                        break;
+                    case 'kOhm':
+                        multiplier = 1000;
+                        break;
+                    case 'Ohm':
+                        multiplier = 1;
+                        break;
+                    case 'mOhm':
+                        multiplier = 0.001;
+                        break;
+                    case 'uOhm':
+                        multiplier = 0.000001;
+                        break;
+                    default:
+                        multiplier = 1;
+                        break;
+                }
+                impedance += resistor.value.value*multiplier;
+
+                equations.Req[0] += resistor.name.value;
+                if(resistor != resistors[resistors.length-1])
+                    equations.Req[0] += ' + ';
+                else
+                    equations.Req[0] += ' = ' + impedance + '\\:Ohm';
+            });
+            equations.Zeq = ['Zeq = Req = ' + impedance + '\\:Ohm'];
+            // I = V/Z
+            valueRe = source.value.value/impedance;
+            valueIm = 0;
+            magnitude = source.value.value/impedance;
+            angle = 0;
+            unit = 'A';
+
+            // Set the appropriate unit
+            let valueAbs = Math.abs(magnitude);
+            if (valueAbs >= 1000000){
+                unit = 'MA';
+                magnitude /= 1000000;
+            }
+            else if (valueAbs >= 1000){
+                unit = 'kA';
+                magnitude /= 1000;
+            }
+            else if (valueAbs >= 1){
+                unit = 'A';
+            }
+            else if (valueAbs >= 0.001){
+                unit = 'mA';
+                magnitude *= 1000;
+            }
+            else if (valueAbs >= 0.000001){
+                unit = 'uA';
+                magnitude *= 1000000;
+            }
+            else{
+                unit = 'A';
+                magnitude = 0;
+            }
+
+            // Round total to 3 decimal places
+            valueRe = Math.round(valueRe * 1000) / 1000;
+            valueIm = Math.round(valueIm * 1000) / 1000;
+            magnitude = Math.round(magnitude * 1000) / 1000;
+            angle = Math.round(angle * 1000) / 1000;
+
+            // Add current to jsonfile
+            equations.EqIresult = ['I = \\frac{' + source.name.value + '}{Zeq}' + ' = ' + magnitude + '\\:' + unit];
+            equations.EqI = ['I = \\frac{' + source.name.value + '}{Zeq}' + ' = \\frac{' + source.value.value + '}{' + impedance + '} = ' + magnitude + '\\:' + unit];
+
+            currents.forEach(curr => {
+                if(curr.direction == "+"){
+                    curr.valueRe = valueRe;
+                    curr.valueIm = valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle;
+                    curr.value = magnitude;
+                    curr.unit = unit;
+                    curr.complex = false;
+                } else {
+                    curr.valueRe = -valueRe;
+                    curr.valueIm = -valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle +180;
+                    curr.value = magnitude*-1;
+                    curr.unit = unit;
+                    curr.complex = false;
+                }
+            });
+            break;
+        case 'Vac':
+            // Calculate impedance
+            req = 0;
+            zeq = 0;
+            break;
+    }
+    // Add currents to jsonfile
+    currents.forEach(curr => {
+        delete curr.direction;
+    });
+    jsonfile.analysisObj.currents = currents;
+    
+    // Add equations to jsonfile
+    jsonfile.analysisObj.equations = equations;
+    return jsonfile;
 }

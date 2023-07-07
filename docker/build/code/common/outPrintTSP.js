@@ -344,6 +344,242 @@ function outHTMLSectionsMCR_TSP(cp, length){
 
 }
 
+function outHTMLSectionsLKM_TSP(cp, length){
+    let htmlstr = '';
+
+    // Add navbar
+    htmlstr += '<div class="p-0 sticky-top text-start bg-light border border-top-0 border-secondary rounded-bottom" style="top:50px;">'
+    htmlstr += '<nav id="navbar" class="navbar p-0">';
+    htmlstr += '<div class="col-1 p-0 text-center"><a class="btn btn-primary m-1" data-bs-toggle="collapse" href="#tableContents-'+ cp.name.value +'" role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fas fa-bars"></i></a></div>';
+    htmlstr += '<div class="progress-container d-flex align-items-center my-1 col-11">';
+    for(let i = 0; i < length; i++){
+        htmlstr += '<div class="progress my-auto mx-1" style="width: '+ 100/length + '%"><div class="progress-bar rounded-pill mx-0" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>';
+    }
+    htmlstr += '</div></nav>';
+
+    // Add table of contents
+    htmlstr += '<nav id="tableContents" class="navbar navbar-light bg-light flex-column align-items-stretch px-3 collapse border-top border-secondary">';
+    htmlstr += '<a class="navbar-brand" data-translate="_tableContTitle"></a>';
+    htmlstr += '<nav class="nav nav-pills flex-column">';
+
+    // Nav to circuit image
+    htmlstr += '<a class="nav-link" href="#circuitImage-'+ cp.name.value + '" data-translate="_circuitImage"></a>';
+
+    htmlstr += '</div>';
+
+    // Warnings & Errors section
+    htmlstr += '<div id="errors"></div><div id="warnings"></div>';
+
+    // Add circuit image
+    htmlstr += `<div id="circuitImage">`;
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
+    htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
+
+    // Add subcircuit note
+    htmlstr += '<div id="subcircuit-note" class="my-2">';
+    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+    htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+    htmlstr += '<div class="ml-1"><strong><p data-translate="_tspNotes1"></p></strong></div>';
+    htmlstr += '</div></div></div></div>';
+
+    htmlstr += '<div id= "contResults">';  
+    htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
+
+    // Circuit information
+    htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
+
+    // Equation System
+    htmlstr += '<div id="eqSys"></div>';
+
+    // Results
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_resultsMCR"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="resultsCurrentsBranch"></div></div>';
+
+    return htmlstr;
+}
+
+function outStep1LKM_TSP(equations){
+    let htmlstr = '';
+
+    // Generate the collapse panel
+    htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step1Panel">';
+    // Generate equation system
+    let str = '\\large \\begin{cases}';
+
+    eqs = equations.Req.concat(equations.Leq, equations.Xleq, equations.Ceq, equations.Xceq, equations.Zeq);
+    eqs.forEach(eq => {
+        str += eq;
+        if(eqs.indexOf(eq) < eqs.length-1)
+            str += ' \\\\[0.7em] ';
+    });
+    str += '\\end{cases}';
+
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Place the equations inside a scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+
+    return htmlstr;
+}
+
+function outStep2LKM_TSP(equations){
+    let htmlstr = '';
+
+    // Generate the collapse panel
+    htmlstr += '<div class="collapse multi-collapse col-xs-12" id="step2Panel">';
+    // Generate equation system
+    let str = '\\large \\begin{cases}';
+
+    eqs = equations.EqI;
+    eqs.forEach(eq => {
+        str += eq;
+        if(eqs.indexOf(eq) < eqs.length-1)
+            str += ' \\\\[0.7em] ';
+    });
+    str += '\\end{cases}';
+
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Place the equations inside a scroll menu
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+
+    return htmlstr;
+}
+
+function outEquationSystemLKM_TSP(analysisObj, step1 = '', step2 = ''){
+    let htmlstr = '';
+
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_eqSystemTitle"></h5></div></div>';
+    htmlstr += '<div class="container mt-3"><div class="row" id="equationSystem">';
+
+    // Add card
+    htmlstr += '<div class="col-sm-12"><div class="card bg-light mb-3">';
+    // Create Show Steps Collapse Button
+    let btnstr ='<button class="btn btn-primary btn-md lead ml-3 mt-2 mb-1" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEquations"';
+    btnstr += ' aria-expanded="false" data-translate="_snStepsBtn"></button>';
+    // Add card body
+    htmlstr += '<div class="card-body text-secondary mt-2 mb-2">';
+    let str = '';
+    // Add equation system
+    if(step1 !== ''){
+        str = '\\large \\begin{cases}';
+        str += analysisObj.equations.EqIresult;
+        str += '\\\\[0.7em]';
+        str += analysisObj.equations.Zeq;
+        str += '\\end{cases}';
+    }
+    else{
+        str = '\\begin{cases} \\large ';
+        str += analysisObj.equations.EqIresult;
+        str += '\\end{cases}';
+    }
+    
+    // Render it to LaTeX
+    str = katex.renderToString(str, {throwOnError: false});
+    // Generate equation system
+    htmlstr += '<div class="row">';
+    htmlstr += '<div class="scrollmenu mt-2 mb-2"><span>'+ str + '</span></div></div>';
+    
+    if(step1 !== ''){
+        // Add steps button
+        htmlstr += '<div class="row mb-2"><div class="card-text text-center">' + btnstr +'</div></div>';
+        
+        // Add steps
+        let plusIcon = '<i class="fas fa-plus"></i>';
+
+        // Create collapse panel
+        htmlstr += '<div class="collapse multi-collapse" id="collapseEquations">';
+        
+        // STEP #1 - Calculate Zeq
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-1" data-bs-toggle="collapse" data-bs-target="#step1Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 1:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep1LKM"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += step1 +'</div>';
+
+        // STEP #2 - Calculate I
+        btnstr  = '<button class="btn collapsed border bg-warning btn-warning btn-sm float-right mt-1 mb-1 mr-1" ';
+        btnstr += 'id="btn-2" data-bs-toggle="collapse" data-bs-target="#step2Panel';
+        btnstr += '" aria-expanded="false"><span class="lead" data-translate="_ShowHowBtn"></span>'+ plusIcon + '</button>';
+        // Add card
+        htmlstr += '<div class="card card-header border-0 mb-2 bg-light">';
+        htmlstr += '<div class="row bg-success rounded">';
+        // Add step text
+        htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 2:';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep2LKM"></small></h5></div>';
+        // Add button
+        htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
+        // Add Step results
+        htmlstr += step2 +'</div>';
+
+        // Close collapse panel
+        htmlstr += '</div>';
+
+        // Close card and card-body divs
+        htmlstr += '</div></div></div></div>';
+    }
+    
+
+    return htmlstr;
+}
+
+function outHTMLResultsLKM(jsonFile){
+    let currents = jsonFile.analysisObj.currents;
+
+    let htmlstr = '';
+
+    htmlstr += '<div class="col-sm-12 col-lg-6-40 print-block"><div class="card bg-light mb-3">';
+    htmlstr += '<div class="card-body text-secondary mt-1 mb-1 print-block">';
+
+    if(currents.length > 0){
+        str = '\\large \\begin{cases}';
+        for(let k = 0; k< currents.length; k++){
+            str += currents[k].equation;
+            if(k < currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}  \\Leftrightarrow \\large \\begin{cases}';
+
+        for(let k = 0; k< currents.length; k++){
+            if(currents[k].complex){
+
+            }
+            else{
+              str += currents[k].ref + ' = ' + currents[k].value + ' ' + currents[k].unit;  
+            }
+
+            if(k < currents.length-1)
+                str += ' \\\\[0.7em] ';
+        }
+        str += '\\end{cases}';
+
+        // Render it to LaTeX
+        str = katex.renderToString(str, {throwOnError: false});
+        // Add equations in a scroll menu
+        htmlstr += '<div class="scrollmenu mt-2 mb-3"><span>'+ str + '</span></div>';
+    }
+    
+    // Close Currents card
+    htmlstr += '</div></div></div>';
+
+    // Close results panel
+    htmlstr += '</div></div>';
+
+    return htmlstr;
+}
 
 function outHTMLResultsSectionsTSP(){
     var htmlstr = "";

@@ -104,6 +104,7 @@ $(function () {
             "_warning12-2": "List of removed voltmeters: ",
             "_warning14-1": "Could not find an available Ground node. The node",
             "_warning14-2": "was selected as Ground.",
+            "_warning15-1": "This circuit can be solved using the selected method, but it is simpler to apply Kirchhoff's Loop Rule.",
             "_warning16-0": "The following voltage sources were grouped together:",
             "_warning16-1": "Sources ",
             "_warning16-2": "were grouped into the equivalent source ",
@@ -246,6 +247,8 @@ $(function () {
             "_calcContrib": "Calculation of the contributions of each source",
             "_source": "Source",
             "_appendices": "Annexes",
+            "_eqStep1LKM": "Equivalent impedance calculation",
+            "_eqStep2LKM": "Current Calculation",
             
         },
 
@@ -352,6 +355,7 @@ $(function () {
             "_warning12-2": "Lista de voltímetros removidos: ",
             "_warning14-1": "Não foi encontrado um Ground no circuito. Foi escolhido o nó",
             "_warning14-2": "como Ground.",
+            "_warning15-1": "Este circuito pode ser resolvido pelo método selecionado. Mas é mais simples aplicar a Lei de Kirchhoff das Malhas.",
             "_warning16-0": "As seguintes fontes de tensão foram automaticamente agrupadas:",
             "_warning16-1": "As fontes ",
             "_warning16-2": "foram agrupadas numa fonte equivalente ",
@@ -498,6 +502,8 @@ $(function () {
             "_calcContrib": "Cálculo das contribuições de cada fonte",
             "_source": "Fonte",
             "_appendices": "Anexos",   
+            "_eqStep1LKM": "Cálculo da impedância equivalente",
+            "_eqStep2LKM": "Cálculo da corrente",
         }
     };
 

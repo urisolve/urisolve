@@ -427,6 +427,12 @@ function warningOutput(errList){
                 warnString += '</div></div>';
                 break;
 
+            /* Warning Error Code 15 */
+            /* That it was solved with ohm's law */
+            case 15:
+                warnString += header;
+                warnString += '<span data-translate="_warning15-1"></span></div>';
+                break;
             /* Warning Error Code 8 */
             case 16:
                 warnString += header;
