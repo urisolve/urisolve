@@ -348,7 +348,6 @@ function solveTSP(schematic, mainJsonFile, order) {
             case 'LKM':
                 // Solve with LKM
                 jsonFile = loadFileAsTextLKM(parsedJson, subcircuit.data.object);
-
                 // Add sections
                 page.html(outHTMLSectionsLKM_TSP(cp, order.length));
 
@@ -1391,19 +1390,21 @@ function loadFileAsTextLKM(jsonfile, schematic){
                 curr.unit = "A";
                 curr.complex = false;
                 curr.components = pbranch;
+                branch.components = pbranch;
             }
         });
     }
     curr = undefined;
-
-
-    // Find other pseudo-branche
+    // Find other pseudo-branch
     startpoint = connections.find(c => c.id == end);
-    port1 = startpoint.ports.find(p => !pbranch.includes(p.component));
+    pbranchIds = pbranch.map(cp => schematic.components.find(c => c.name.value == cp).id);
+    port1 = startpoint.ports.find(p => !pbranchIds.includes(p.component));
     component = schematic.components.find(cp => cp.id == port1.component);
     pbranch = [];
     connection = {};
-    while(connection.id != start){
+    temp = 0;
+    while(connection.id != start && temp < 20){
+        temp++;
         connection = connections.find(c => c.ports.find(p => p.component == port1.component && p.port != port1.port));
         if(connection){
             port2 = connection.ports.find(p => p.component != port1.component);
@@ -1438,7 +1439,6 @@ function loadFileAsTextLKM(jsonfile, schematic){
             else{
                 pbranch.push(component.name.value);
             }
-            connections = connections.filter(c => c != connection);
         }
         else
             connection = {};
@@ -1470,11 +1470,11 @@ function loadFileAsTextLKM(jsonfile, schematic){
                 curr.unit = "A";
                 curr.complex = false;
                 curr.components = pbranch;
+                branch.components = pbranch;
             }
         });
     }
     currents = currents.filter(c => c.equation!=undefined);
-
 
     // Calculate current I
     let equations = {
@@ -1764,7 +1764,42 @@ function loadFileAsTextLKM(jsonfile, schematic){
                         equations.Ceq[0] += ' + ';
                     else {
                         ceq = 1/ceq;
-                        equations.Ceq[0] += ') = ' + ceq + '\\:F';
+
+                        // Set the appropriate unit
+                        let ceqAbs = Math.abs(ceq);
+                        multiplier = 1;
+                        if (ceqAbs >= 1000000){
+                            unit = 'MF';
+                            multiplier /= 1000000;
+                        }
+                        else if (ceqAbs >= 1000){
+                            unit = 'kF';
+                            multiplier /= 1000;
+                        }
+                        else if (ceqAbs >= 1){
+                            unit = 'F';
+                        }
+                        else if (ceqAbs >= 0.001){
+                            unit = 'mF';
+                            multiplier *= 1000;
+                        }
+                        else if (ceqAbs >= 0.000001){
+                            unit = 'uF';
+                            multiplier *= 1000000;
+                        }
+                        else if (ceqAbs >= 0.000000001){
+                            unit = 'nF';
+                            multiplier *= 1000000000;
+                        }
+                        else if (ceqAbs >= 0.000000000001){
+                            unit = 'pF';
+                            multiplier *= 1000000000000;
+                        }
+                        else{
+                            unit = 'F';
+                        }
+
+                        equations.Ceq[0] += ') = ' + ceq*multiplier + '\\:' + unit;
                     }
                 });
                 xc = 1/(w*ceq);
@@ -1835,7 +1870,41 @@ function loadFileAsTextLKM(jsonfile, schematic){
                     if(coil != coils[coils.length-1])
                         equations.Leq[0] += ' + ';
                     else{
-                        equations.Leq[0] += ' = ' + leq + '\\:H';
+                        // Set the appropriate unit
+                        let leqAbs = Math.abs(leq);
+                        multiplier = 1;
+                        if (leqAbs >= 1000000){
+                            unit = 'MH';
+                            multiplier /= 1000000;
+                        }
+                        else if (leqAbs >= 1000){
+                            unit = 'kH';
+                            multiplier /= 1000;
+                        }
+                        else if (leqAbs >= 1){
+                            unit = 'H';
+                        }
+                        else if (leqAbs >= 0.001){
+                            unit = 'mH';
+                            multiplier *= 1000;
+                        }
+                        else if (leqAbs >= 0.000001){
+                            unit = 'uH';
+                            multiplier *= 1000000;
+                        }
+                        else if (leqAbs >= 0.000000001){
+                            unit = 'nH';
+                            multiplier *= 1000000000;
+                        }
+                        else if (leqAbs >= 0.000000000001){
+                            unit = 'pH';
+                            multiplier *= 1000000000000;
+                        }
+                        else{
+                            unit = 'H';
+                        }
+                        
+                        equations.Leq[0] += ' = ' + leq*multiplier + '\\:'+ unit;
                     }
                 });
                 xl = w*leq;
@@ -1900,14 +1969,17 @@ function loadFileAsTextLKM(jsonfile, schematic){
             zeq = Math.round(zeq * 1000) / 1000;
 
             equations.Zeq = ['Z_{eq} = \\sqrt{R_{eq}^2 + (X_{L} - X_{C})^2} = ' + zeq*multiplier + '\\:' + unit];
+            if (req != 0)
             thetaZ = Math.atan2((xl - xc),req)*180/Math.PI;
+            else
+            thetaZ = 90;
             // Round total to 3 decimal places
             thetaZ = Math.round(thetaZ * 1000) / 1000;
             equations.thetaZ = ['\\theta_{Z} = \\arctan{\\frac{X_{L} - X_{C}}{R_{eq}}} = ' + thetaZ + '\\:rad'];
 
             // I = V/Z
             magnitude = source.value.value/zeq;
-            angle = Math.atan2(xl - xc,req)*180/Math.PI;
+            angle = thetaZ;
             if(xl - xc < 0)
                 angle *= -1;
             valueRe = magnitude*Math.cos(angle*Math.PI/180);

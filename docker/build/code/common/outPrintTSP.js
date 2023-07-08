@@ -787,7 +787,7 @@ function buildTeXOvTSP(file, subfiles) {
 
     for (let contribution in subcircuits) {
         TeX += "\\subsection{" + lang._source + ' ' + contribution + "}\r\n\r\n";
-        TeX += "\\subsubsection{" + lang._circuitImage + "}\r\n\r\n";
+        //TeX += "\\subsubsection{" + lang._circuitImage + "}\r\n\r\n";
         
         //mesh current results
         TeX += "\\subsubsection{" + lang._branchIden + "}\n\r\n\r\\paragraph{" + lang._currents + "}\\phantom{}\n\r\n\r";
@@ -944,10 +944,10 @@ function buildTeXOvTSP(file, subfiles) {
         TeX += "\\begin{gather*}\r\n" + str + "\r\n\\end{gather*}\r\n\r\n";
         
         if(currentsResults.map(r => r.complex).includes(true)){
-            TeX += '\\begin{footnotesize}\\textbf{\\textit{Note: }} ' + lang._tspNotesSumComplex + '\\end{footnotesize}';
+            TeX += '\\begin{footnotesize} ' + lang._tspNotesSumComplex + '\\end{footnotesize}';
         }
         else{
-            TeX += '\\begin{footnotesize}\\textbf{\\textit{Note: }} ' + lang._tspNotesSum + '\\end{footnotesize}';
+            TeX += '\\begin{footnotesize} ' + lang._tspNotesSum + '\\end{footnotesize}';
         }
         TeX += "\\pagebreak\r\n\r\n";
     }
@@ -994,6 +994,11 @@ function buildTeXOvTSP(file, subfiles) {
             case 'MTN':
 
              break;
+            case 'LKM':
+                TeXOv = buildTeXOvLKM(jsonFile, canvasObjects, canvasObjectss);
+
+                TeX += TeXOv;
+                break;
         }
 
         k++;
@@ -1009,7 +1014,7 @@ function getTexFileHeaderTSPOv(lang){
     texHeader += '\\documentclass[a4paper]{article}\r\n\\newcommand{\\inlineimages}[2]{\r\n\\newwrite\\tempfile\r\n\\immediate\\openout\\tempfile=#1.base64\r\n\\immediate\\write\\tempfile{#2}\r\n\\immediate\\closeout\\tempfile\r\n\\immediate\\write18{base64 -d #1.base64 > #1}\r\n\\includegraphics{#1}\r\n}\n\r';
     texHeader += '\\include{images}\r\n';
     texHeader += '\\usepackage{graphicx}\r\n\\usepackage[latin1]{inputenc}\r\n\\usepackage{amsmath}\r\n\\usepackage{fancyhdr}\r\n\\usepackage{multirow}\r\n\\pagestyle{fancy}\r\n\\lhead{\\textsc{URIsolve App}}\r\n\\rhead{\\textsc{' + lang._TSPmethod + '}}\r\n\\cfoot{www.isep.ipp.pt}\r\n\\lfoot{DEE - ISEP}\r\n\\rfoot {\\thepage}\r\n\\renewcommand{\\headrulewidth}{0.4pt}\r\n\\renewcommand{\\footrulewidth}{0.4pt}\r\n\r\n\\title{\r\n\\raisebox{-.2\\height}{\\scalebox{.30}{\\inlineimages{logo.png}{\\logo}}} URIsolve APP \\\\\r\n\r\n\\textsc{' + lang._TSPmethod + '} \\\\\r\n\\\r\n' + lang._step_by_step + ' \\\\\r\n\\vspace*{1\\baselineskip}\r\n}\r\n\r\n';
-    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 06/2023}}}  \\\\\\multicolumn{2}{c}{Guilherme Zenha - 1201398@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
+    texHeader += '\\author{\\begin{tabular}[t]{c@{\\extracolsep{8em}}c}&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._project_coor + '}}}  \\\\&\\\\André Rocha         & Mário Alves         \\\\anr@isep.ipp.pt     & mjf@isep.ipp.pt     \\\\&\\\\Lino Sousa          & Francisco Pereira   \\\\sss@isep.ipp.pt     & fdp@isep.ipp.pt     \\\\&\\\\&\\\\\\multicolumn{2}{c}{\\textbf{\\emph{' + lang._devel + '}}}  \\\\\\multicolumn{2}{c}{\\small{\\textbf{v1.0.0 - 07/2023}}}  \\\\\\multicolumn{2}{c}{Guilherme Zenha - 1201398@isep.ipp.pt}  \\\\\\end{tabular}}\r\n\r\n\\date{}\r\n\r\n';
     texHeader += '\\begin{document}\r\n\r\n\\maketitle\r\n\\thispagestyle{empty}\r\n\r\n\\vspace{\\fill}\r\n\\begin{abstract}\r\n\\centering\r\n' + lang._TSPabstract + '\r\n\\end{abstract}\r\n\\vspace{\\fill}\r\n\r\n\\begin{center}\r\n\\today\r\n\\end{center}\r\n\r\n\\clearpage\r\n\\pagenumbering{arabic}\r\n\r\n\\newpage\r\n\r\n';
     return texHeader;
 }
@@ -1076,6 +1081,120 @@ function buildImTeXTSP(imagesTSP, files){
     }
     
     return imageTex;
+}
+
+function buildTeXOvLKM(file, canvasObjects, canvasObjectss) {
+    let currents = file.analysisObj.currents;
+    let branches = file.branches;
+    let F = file.analysisObj.circuitFreq;
+    let Amps = file.probes.ammeters.length;
+    let totalCurrents = currents.length;
+    let equations = file.analysisObj.equations;
+    
+
+    let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+    if(lang == 'english') lang = dictionary.english;
+    else if(lang == 'português') lang = dictionary.portuguese;
+
+    let TeX = "";
+
+    // TeX Circuit Information
+	TeX += "\\subsection{" + lang._infoTitle + "}\r\n\r\n\\begin{table}[h!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
+	TeX += "\\textbf{" + lang._info_T + " {[}AC\/DC{]}} && \\textbf{" + lang._info_F + " {[}A{]}} && \\textbf{" + lang._info_A + " {[}I{]}} \\\\\r\n";
+	if(F.value == 0){
+			TeX += "DC";
+			aux = "&&N~/~A\\;";
+	}
+	else{
+		TeX += "AC";
+		aux = "&&F="+F.value+"\\;"+F.mult;
+	}
+
+    TeX += aux;
+
+	TeX += " & & "+Amps+"\/"+totalCurrents+"\r\n\\end{tabular}\r\n\\end{table}\r\n\r\n";
+
+    // Add Currents results
+    TeX += "\\subsection{" + lang._branchIden + "}\n\r\n\r\\subsubsection{" + lang._currents + "}\n\r\n\r";
+    TeX += "\\begin{table}[ht]\r\n\\caption{" + lang._currentsTableCap + "}\r\n\\centering\r\n\\begin{tabular}{cccc}\r\n";
+    TeX += "\\textbf{Reference} & \\textbf{Start Node} & \\textbf{End Node} & \\textbf{Components} \\\\ \\hline\r\n";
+
+    currents.forEach(current => {
+        let branch = file.branches.find(branch => branch.currentId == current.id);
+        components = branch.components.map(component => component);
+
+        TeX += current.ref + " & " + current.noP + " & " + current.noN + " & " + components.join(', ') + " \\\\ \r\n";
+    });
+
+    TeX += "\\end{tabular}\r\n\\end{table}\r\n\r\n\\pagebreak\r\n\r\n";
+
+    // Equation system
+    TeX += "\\subsection{" + lang._resBranch + "}\r\n\r\n";
+
+    let str = '\\large \\begin{cases}';
+    str += equations.EqIresult;
+    if(equations.Zeq.length > 0){
+        str += '\\\\[0.7em]';
+        str += equations.Zeq;
+    }
+    str += '\\end{cases}';
+
+    TeX += lang._snEquat + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+    if (equations.Zeq.length > 0){
+        TeX += lang._Steps + ":\r\n\r\n";
+        // Step 1
+        str = '\\large \\begin{cases}';
+        eqs = equations.Req.concat(equations.Leq,equations.Ceq , equations.Xleq, equations.Xceq, equations.Zeq, equations.thetaZ);
+        eqs.forEach(eq => {
+            str += eq;
+            if(eqs.indexOf(eq) < eqs.length-1)
+                str += '\\\\[0.7em]';
+        });
+        str += '\\end{cases}';
+
+        TeX += '\\textbf{Step 1:}' +  lang._eqStep1LKM + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+        // Step 2
+        str = '\\large \\begin{cases}';
+        eqs = equations.EqI.concat(equations.thetaI);
+        eqs.forEach(eq => {
+            str += eq;
+            if(eqs.indexOf(eq) < eqs.length-1)
+                str += '\\\\[0.7em]';
+        });
+        str += '\\end{cases}';
+
+        TeX += '\\textbf{Step 2:}' + lang._eqStep2LKM + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+    }
+    TeX += '\r\n\\pagebreak\r\n\r\n';
+
+    // Results
+    TeX += '\\subsection{' + lang._resultsMCR + '}\r\n\r\n';
+    str = '\\large \\begin{cases}';
+    // Create system
+    for(let k = 0; k< currents.length; k++){
+        str += currents[k].equation;
+        if(k < currents.length-1)
+            str += ' \\\\[0.7em] ';
+    }
+    str += '\\end{cases}  \\Leftrightarrow \\large \\begin{cases}';
+
+    for(let k = 0; k< currents.length; k++){
+        if(currents[k].complex){
+            str += currents[k].ref + ' = ' + currents[k].magnitude + '\\angle' + currents[k].angle + '^{\\circ}' + currents[k].unit;
+        }
+        else{
+          str += currents[k].ref + ' = ' + currents[k].value + ' ' + currents[k].unit;  
+        }
+
+        if(k < currents.length-1)
+            str += ' \\\\[0.7em] ';
+    }
+    str += '\\end{cases}';
+
+    TeX += "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+
+    return TeX;
 }
 
 function buildTeXRichTSP(file) {
