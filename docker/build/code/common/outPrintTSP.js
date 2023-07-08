@@ -364,6 +364,14 @@ function outHTMLSectionsLKM_TSP(cp, length){
 
     // Nav to circuit image
     htmlstr += '<a class="nav-link" href="#circuitImage-'+ cp.name.value + '" data-translate="_circuitImage"></a>';
+    // Nav to circuit information
+    htmlstr += '<a class="nav-link" href="#circuitInfo-'+ cp.name.value + '" data-translate="_infoTitle"></a>';
+    // Nav to currents data
+    htmlstr += '<a class="nav-link" href="#currentsInfo-'+ cp.name.value + '" data-translate="_currents"></a>';
+    // Nav to equation system
+    htmlstr += '<a class="nav-link" href="#eqSys-'+ cp.name.value + '" data-translate="_eqSystemTitle"></a>';
+    // Nav to results
+    htmlstr += '<a class="nav-link" href="#resultsCurrentsBranch-'+ cp.name.value + '" data-translate="_resultsMCR"></a></nav></nav>';
 
     htmlstr += '</div>';
 
@@ -391,6 +399,11 @@ function outHTMLSectionsLKM_TSP(cp, length){
     htmlstr += '<div class="container mt-3"><div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_infoTitle"></h5></div></div>';
     htmlstr += '<div class="container mt-3" id="circuitInfo"></div>';
 
+    // Currents data
+    htmlstr += '<div class="container mt-3">';
+    htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_currents"></h5></div></div>';
+    htmlstr += '<div class="container mt-3" id="currentsInfo"></div>';
+
     // Equation System
     htmlstr += '<div id="eqSys"></div>';
 
@@ -410,7 +423,7 @@ function outStep1LKM_TSP(equations){
     // Generate equation system
     let str = '\\large \\begin{cases}';
 
-    eqs = equations.Req.concat(equations.Leq, equations.Xleq, equations.Ceq, equations.Xceq, equations.Zeq);
+    eqs = equations.Req.concat(equations.Leq,equations.Ceq , equations.Xleq, equations.Xceq, equations.Zeq, equations.thetaZ);
     eqs.forEach(eq => {
         str += eq;
         if(eqs.indexOf(eq) < eqs.length-1)
@@ -434,7 +447,7 @@ function outStep2LKM_TSP(equations){
     // Generate equation system
     let str = '\\large \\begin{cases}';
 
-    eqs = equations.EqI;
+    eqs = equations.EqI.concat(equations.thetaI);
     eqs.forEach(eq => {
         str += eq;
         if(eqs.indexOf(eq) < eqs.length-1)
@@ -555,7 +568,7 @@ function outHTMLResultsLKM(jsonFile){
 
         for(let k = 0; k< currents.length; k++){
             if(currents[k].complex){
-
+                str += currents[k].ref + ' = ' + currents[k].magnitude + '\\angle' + currents[k].angle + '^{\\circ}' + currents[k].unit;
             }
             else{
               str += currents[k].ref + ' = ' + currents[k].value + ' ' + currents[k].unit;  

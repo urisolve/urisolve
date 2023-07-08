@@ -366,7 +366,8 @@ function solveTSP(schematic, mainJsonFile, order) {
                 $('#circuitInfo').html(outCircuitInfoMCM(jsonFile));
 
                 // Current info
-                
+                $('#currentsInfo').html(outCurrentsInfo(jsonFile.analysisObj.currents, jsonFile.branches).first);
+
                 // Equations
                 step1 = '';
                 step2 = '';
@@ -598,7 +599,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                         };
 
                         // Get the appropriate unit
-                        let valueAbs = Math.abs(curr.valueRe);
+                        valueAbs = Math.abs(curr.valueRe);
                         if (valueAbs >= 1000000){
                             obj.unit = 'MA';
                             obj.value /= 1000000;
@@ -643,7 +644,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                         };
 
                         // Get the appropriate unit for the magnitude
-                        let valueAbs = Math.abs(curr.magnitude);
+                        valueAbs = Math.abs(curr.magnitude);
                         if (valueAbs >= 1000000){
                             obj.unit = 'MA';
                             obj.magnitude /= 1000000;
@@ -713,36 +714,21 @@ function solveTSP(schematic, mainJsonFile, order) {
                             end: curr.noN,
                             value: curr.value,
                             components: curr.components,
+                            unit: curr.unit,
                         };
-                    
-                        // Get the appropriate unit
-                        let valueAbs = Math.abs(curr.valueRe);
-                        if (valueAbs >= 1000000){
-                            obj.unit = 'MA';
-                            obj.value /= 1000000;
-                        }
-                        else if (valueAbs >= 1000){
-                            obj.unit = 'kA';
-                            obj.value /= 1000;
-                        }
-                        else if (valueAbs >= 1){
-                            obj.unit = 'A';
-                        }
-                        else if (valueAbs >= 0.001){
-                            obj.unit = 'mA';
-                            obj.value *= 1000;
-                        }
-                        else if (valueAbs >= 0.000001){
-                            obj.unit = 'uA';
-                            obj.value *= 1000000;
-                        }
-                        else {
-                            obj.unit = 'A';
-                            obj.value = 0;
-                        }
-
-                        // Round total to 3 decimal places
-                        obj.value = Math.round(obj.value * 1000) / 1000;
+                    }
+                    else {
+                        obj = {
+                            complex: curr.complex,
+                            start: curr.noP,
+                            end: curr.noN,
+                            magnitude: curr.magnitude,
+                            angle: curr.angle,
+                            valueRe: curr.valueRe,
+                            valueIm: curr.valueIm,
+                            components: curr.components,
+                            unit: curr.unit,
+                        };
                     }
 
                     contributions[json][curr.ref] = obj;
@@ -761,8 +747,6 @@ function solveTSP(schematic, mainJsonFile, order) {
         curr = branch.currentData.ref;
         currentObj = mainJsonFile.analysisObj.currents.find(c => c.ref === curr);
         currentObj.contributions = {};
-        console.log('Branch current:' + curr);
-        console.log(currentObj);
         
         // Find the current in the contributions
         for (json in contributions){
@@ -1489,9 +1473,10 @@ function loadFileAsTextLKM(jsonfile, schematic){
             }
         });
     }
-
     currents = currents.filter(c => c.equation!=undefined);
 
+
+    // Calculate current I
     let equations = {
         EqI: [],
         EqIresult: [],
@@ -1501,8 +1486,9 @@ function loadFileAsTextLKM(jsonfile, schematic){
         Xleq: [],
         Xceq: [],
         Zeq: [],
+        thetaZ: [],
+        thetaI: [],
     }
-    // Calculate I
     switch(source.type){
         case 'Idc':
             // I = Source value
@@ -1537,14 +1523,43 @@ function loadFileAsTextLKM(jsonfile, schematic){
             });
             break;
         case 'Iac':
-            // I = Source value    
+            // I = Source value 
+            magnitude = source.value.value;
+            angle = source.phase.value;
+            unit = source.value.unit;
+            complex = true;
+            valuere = magnitude*Math.cos(angle*Math.PI/180);
+            valueim = magnitude*Math.sin(angle*Math.PI/180);
+            
+            // Add current to jsonfile
+            equations.EqIresult = ['I = ' + source.name.value];
+
+            currents.forEach(curr => {
+                if(curr.direction == "+"){
+                    curr.valueRe = valuere;
+                    curr.valueIm = valueim;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle;
+                    curr.value = magnitude;
+                    curr.unit = unit;
+                    curr.complex = true;
+                } else {
+                    curr.valueRe = -valueRe;
+                    curr.valueIm = -valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle +180;
+                    curr.value = magnitude*-1;
+                    curr.unit = unit;
+                    curr.complex = true;
+                }
+            });
 
             break;
         case 'Vdc':
             // Calculate impedance Zeq = Req
             impedance = 0;
             resistors = schematic.components.filter(cp => cp.type == 'R');
-            equations.Req[0] = 'Req = ';
+            equations.Req[0] = 'R_{eq} = ';
             resistors.forEach(resistor => {
                 switch (resistor.value.unit){
                     case 'MOhm':
@@ -1574,7 +1589,7 @@ function loadFileAsTextLKM(jsonfile, schematic){
                 else
                     equations.Req[0] += ' = ' + impedance + '\\:Ohm';
             });
-            equations.Zeq = ['Zeq = Req = ' + impedance + '\\:Ohm'];
+            equations.Zeq = ['Z_{eq} = R_{eq} = ' + impedance + '\\:Ohm'];
             // I = V/Z
             valueRe = source.value.value/impedance;
             valueIm = 0;
@@ -1583,7 +1598,7 @@ function loadFileAsTextLKM(jsonfile, schematic){
             unit = 'A';
 
             // Set the appropriate unit
-            let valueAbs = Math.abs(magnitude);
+            valueAbs = Math.abs(magnitude);
             if (valueAbs >= 1000000){
                 unit = 'MA';
                 magnitude /= 1000000;
@@ -1640,8 +1655,329 @@ function loadFileAsTextLKM(jsonfile, schematic){
             break;
         case 'Vac':
             // Calculate impedance
-            req = 0;
-            zeq = 0;
+            let req = 0;
+            let leq = 0;
+            let ceq = 0;
+            let xl = 0;
+            let xc = 0;
+            
+            switch (source.frequency.unit){
+                case 'GHz':
+                    multiplier = 1000000000;
+                    break;
+                case 'MHz':
+                    multiplier = 1000000;
+                    break;
+                case 'kHz':
+                    multiplier = 1000;
+                    break;
+                case 'Hz':
+                    multiplier = 1;
+                    break;
+                case 'mHz':
+                    multiplier = 0.001;
+                    break;
+                case 'uHz':
+                    multiplier = 0.000001;
+                    break;
+                case 'nHz':
+                    multiplier = 0.000000001;
+                    break;
+                default:
+                    multiplier = 1;
+                    break;
+            }
+            let w = 2*Math.PI*source.frequency.value*multiplier;
+
+            resistors = schematic.components.filter(cp => cp.type == 'R');
+            if(resistors.length > 0){
+                equations.Req[0] = 'R_{eq} = ';
+                resistors.forEach(resistor => {
+                    switch (resistor.value.unit){
+                        case 'MOhm':
+                            multiplier = 1000000;
+                            break;
+                        case 'kOhm':
+                            multiplier = 1000;
+                            break;
+                        case 'Ohm':
+                            multiplier = 1;
+                            break;
+                        case 'mOhm':
+                            multiplier = 0.001;
+                            break;
+                        case 'uOhm':
+                            multiplier = 0.000001;
+                            break;
+                        default:
+                            multiplier = 1;
+                            break;
+                    }
+                    req += resistor.value.value*multiplier;
+
+                    equations.Req[0] += resistor.name.value;
+                    if(resistor != resistors[resistors.length-1])
+                        equations.Req[0] += ' + ';
+                    else{
+                        // Round total to 3 decimal places
+                        req = Math.round(req * 1000) / 1000;
+                        equations.Req[0] += ' = ' + req + '\\:Ohm';
+                    }
+                });
+            }
+
+            capacitors = schematic.components.filter(cp => cp.type == 'C');
+            if(capacitors.length > 0){
+                equations.Ceq[0] = 'C_{eq} = 1/(';
+                capacitors.forEach(capacitor => {
+                    switch (capacitor.value.unit){
+                        case 'MF':
+                            multiplier = 1000000;
+                            break;
+                        case 'kF':
+                            multiplier = 1000;
+                            break;
+                        case 'F':
+                            multiplier = 1;
+                            break;
+                        case 'mF':
+                            multiplier = 0.001;
+                            break;
+                        case 'uF':
+                            multiplier = 0.000001;
+                            break;
+                        case 'nF':
+                            multiplier = 0.000000001;
+                            break;
+                        case 'pF':
+                            multiplier = 0.000000000001;
+                            break;
+                        default:
+                            multiplier = 1;
+                            break;
+                    }
+
+                    ceq += 1/(capacitor.value.value*multiplier);
+            
+                    equations.Ceq[0] += '\\frac{1}{' + capacitor.name.value + '}';
+                    if(capacitor != capacitors[capacitors.length-1])
+                        equations.Ceq[0] += ' + ';
+                    else {
+                        ceq = 1/ceq;
+                        equations.Ceq[0] += ') = ' + ceq + '\\:F';
+                    }
+                });
+                xc = 1/(w*ceq);
+                // Set the appropriate unit
+                let xcAbs = Math.abs(xc);
+                multiplier = 1;
+                if (xcAbs >= 1000000){
+                    unit = 'MOhm';
+                    multiplier /= 1000000;
+                }
+                else if (xcAbs >= 1000){
+                    unit = 'kOhm';
+                    multiplier /= 1000;
+                }
+                else if (xcAbs >= 1){
+                    unit = 'Ohm';
+                }
+                else if (xcAbs >= 0.001){
+                    unit = 'mOhm';
+                    multiplier *= 1000;
+                }
+                else if (xcAbs >= 0.000001){
+                    unit = 'uOhm';
+                    multiplier *= 1000000;
+                }
+                else{
+                    unit = 'Ohm';
+                }
+
+                // Round total to 3 decimal places
+                xc = Math.round(xc * 1000) / 1000;
+
+                equations.Xceq = ['X_{C} = \\frac{1}{\\omega C_{eq}} = ' + xc*multiplier + '\\:' + unit];
+            }
+            coils = schematic.components.filter(cp => cp.type == 'L');
+            if(coils.length > 0){
+                equations.Leq[0] = 'L_{eq} = ';
+                coils.forEach(coil => {
+                    switch (coil.value.unit){
+                        case 'MH':
+                            multiplier = 1000000;
+                            break;
+                        case 'kH':
+                            multiplier = 1000;
+                            break;
+                        case 'H':
+                            multiplier = 1;
+                            break;
+                        case 'mH':
+                            multiplier = 0.001;
+                            break;
+                        case 'uH':
+                            multiplier = 0.000001;
+                            break;
+                        case 'nH':
+                            multiplier = 0.000000001;
+                            break;
+                        case 'pH':
+                            multiplier = 0.000000000001;
+                            break;
+                        default:
+                            multiplier = 1;
+                            break;
+                    }
+                    leq += coil.value.value*multiplier;
+
+                    equations.Leq[0] += coil.name.value;
+                    if(coil != coils[coils.length-1])
+                        equations.Leq[0] += ' + ';
+                    else{
+                        equations.Leq[0] += ' = ' + leq + '\\:H';
+                    }
+                });
+                xl = w*leq;
+                // Set the appropriate unit
+                let xlAbs = Math.abs(xl);
+                multiplier = 1;
+                if (xlAbs >= 1000000){
+                    unit = 'MOhm';
+                    multiplier /= 1000000;
+                }
+                else if (xlAbs >= 1000){
+                    unit = 'kOhm';
+                    multiplier /= 1000;
+                }
+                else if (xlAbs >= 1){
+                    unit = 'Ohm';
+                }
+                else if (xlAbs >= 0.001){
+                    unit = 'mOhm';
+                    multiplier *= 1000;
+                }
+                else if (xlAbs >= 0.000001){
+                    unit = 'uOhm';
+                    multiplier *= 1000000;
+                }
+                else{
+                    unit = 'Ohm';
+                }
+
+                // Round total to 3 decimal places
+                xl = Math.round(xl * 1000) / 1000;
+                equations.Xleq = ['X_{L} = \\omega L_{eq} = ' + xl*multiplier + '\\:'+ unit];
+            }
+            zeq = Math.sqrt(Math.pow(req, 2) + Math.pow(xl - xc, 2));
+            // Set the appropriate unit
+            let zeqAbs = Math.abs(zeq);
+            multiplier = 1;
+            if (zeqAbs >= 1000000){
+                unit = 'MOhm';
+                multiplier /= 1000000;
+            }
+            else if (zeqAbs >= 1000){
+                unit = 'kOhm';
+                multiplier /= 1000;
+            }
+            else if (zeqAbs >= 1){
+                unit = 'Ohm';
+            }
+            else if (zeqAbs >= 0.001){
+                unit = 'mOhm';
+                multiplier *= 1000;
+            }
+            else if (zeqAbs >= 0.000001){
+                unit = 'uOhm';
+                multiplier *= 1000000;
+            }
+            else{
+                unit = 'Ohm';
+            }
+
+            // Round total to 3 decimal places
+            zeq = Math.round(zeq * 1000) / 1000;
+
+            equations.Zeq = ['Z_{eq} = \\sqrt{R_{eq}^2 + (X_{L} - X_{C})^2} = ' + zeq*multiplier + '\\:' + unit];
+            thetaZ = Math.atan2((xl - xc),req)*180/Math.PI;
+            // Round total to 3 decimal places
+            thetaZ = Math.round(thetaZ * 1000) / 1000;
+            equations.thetaZ = ['\\theta_{Z} = \\arctan{\\frac{X_{L} - X_{C}}{R_{eq}}} = ' + thetaZ + '\\:rad'];
+
+            // I = V/Z
+            magnitude = source.value.value/zeq;
+            angle = Math.atan2(xl - xc,req)*180/Math.PI;
+            if(xl - xc < 0)
+                angle *= -1;
+            valueRe = magnitude*Math.cos(angle*Math.PI/180);
+            valueIm = magnitude*Math.sin(angle*Math.PI/180);
+
+            // Set the appropriate unit
+            valueAbs = Math.abs(magnitude);
+            if(valueAbs >= 1000000){
+                unit = 'MA';
+                magnitude /= 1000000;
+                valueRe /= 1000000;
+                valueIm /= 1000000;
+            } else if (valueAbs >= 1000){
+                unit = 'kA';
+                magnitude /= 1000;
+                valueRe /= 1000;
+                valueIm /= 1000;
+            } else if (valueAbs >= 1){
+                unit = 'A';
+            } else if (valueAbs >= 0.001){
+                unit = 'mA';
+                magnitude *= 1000;
+                valueRe *= 1000;
+                valueIm *= 1000;
+            } else if (valueAbs >= 0.000001){
+                unit = 'uA';
+                magnitude *= 1000000;
+                valueRe *= 1000000;
+                valueIm *= 1000000;
+            } else{
+                unit = 'A';
+                magnitude = 0;
+                valueRe = 0;
+                valueIm = 0;
+            }
+
+            // Set the appropriate unit
+            let reAbs = Math.abs(valueRe);
+
+            // Round total to 3 decimal places
+            valueRe = Math.round(valueRe * 1000) / 1000;
+            valueIm = Math.round(valueIm * 1000) / 1000;
+            magnitude = Math.round(magnitude * 1000) / 1000;
+            angle = Math.round(angle * 1000) / 1000;
+
+            // Add current to jsonfile
+            equations.EqI = ['I = \\frac{' + source.name.value + '}{Z_{eq}}' + ' = \\frac{' + source.value.value + '}{' + zeq + '} = ' + magnitude + '\\:' + unit];
+            equations.EqIresult = ['I = \\frac{' + source.name.value + '}{Z_{eq}}' + ' = ' + magnitude + '\\angle' + angle + '^{\\circ}\\:' + unit];
+            equations.thetaI = ['\\theta_{I} = \\arctan{\\frac{X_{L} - X_{C}}{R_{eq}}} = ' + angle + '^{\\circ}'];
+
+            currents.forEach(curr => {
+                if(curr.direction == "+"){
+                    curr.valueRe = valueRe;
+                    curr.valueIm = valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle;
+                    curr.value = magnitude;
+                    curr.unit = unit;
+                    curr.complex = true;
+                } else {
+                    curr.valueRe = -valueRe;
+                    curr.valueIm = -valueIm;
+                    curr.magnitude = magnitude;
+                    curr.angle = angle +180;
+                    curr.value = magnitude*-1;
+                    curr.unit = unit;
+                    curr.complex = true;
+                }
+            });
+
             break;
     }
     // Add currents to jsonfile
