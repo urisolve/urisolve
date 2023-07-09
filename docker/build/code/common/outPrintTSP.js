@@ -1423,7 +1423,7 @@ function getTexFileHeaderTSPRich(lang){
     return texHeader;
 }
 
-function buildPrintPDF_TSP(file, meshImages){
+function buildPrintPDF_TSP(file){
     window.jsPDF = window.jspdf.jsPDF;
 
     const marginSides = 0.2;

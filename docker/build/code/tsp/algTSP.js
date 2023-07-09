@@ -1171,7 +1171,7 @@ function outputTSP(jsonFile, schematic){
         // Export PDF File
         $("#print").off().on('click', function() {
             // Not implemented yet
-            buildPrintPDF_TSP(jsonFile, canvasObjects);
+            buildPrintPDF_TSP(jsonFile);
         });
 
         // Enable output buttons
