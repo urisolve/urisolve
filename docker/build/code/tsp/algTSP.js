@@ -243,7 +243,7 @@ function solveTSP(schematic, mainJsonFile, order) {
 
         if(parsedJson.analysisObj.warnings.length > 0){
             if(parsedJson.analysisObj.warnings.some(w => w.errorCode === 15)){
-                method = 'LKM'; 
+                method = 'RLC'; 
                 parsedJson.analysisObj.currents = JSON.parse(JSON.stringify(mainJsonFile.analysisObj.currents));
                 parsedJson.branches = JSON.parse(JSON.stringify(mainJsonFile.branches));
             }
@@ -345,11 +345,11 @@ function solveTSP(schematic, mainJsonFile, order) {
                 // Push the solved JSON to the array
                 solvedJSON[cp.name.value] = {file: jsonFile, method: 'MCR', canvas: canvasObjects, canvasCurr: canvasObjectss};
                 break;
-            case 'LKM':
-                // Solve with LKM
-                jsonFile = loadFileAsTextLKM(parsedJson, subcircuit.data.object);
+            case 'RLC':
+                // Solve with RLC
+                jsonFile = loadFileAsTextRLC(parsedJson, subcircuit.data.object);
                 // Add sections
-                page.html(outHTMLSectionsLKM_TSP(cp, order.length));
+                page.html(outHTMLSectionsRLC_TSP(cp, order.length));
 
                 warningsText = warningOutput(jsonFile.analysisObj.warnings);
                     if(warningsText != 0){
@@ -371,17 +371,17 @@ function solveTSP(schematic, mainJsonFile, order) {
                 step1 = '';
                 step2 = '';
                 if (cp.type == 'Vac' || cp.type == 'Vdc') {
-                    step1 = outStep1LKM_TSP(jsonFile.analysisObj.equations);
-                    step2 = outStep2LKM_TSP(jsonFile.analysisObj.equations);
+                    step1 = outStep1RLC_TSP(jsonFile.analysisObj.equations);
+                    step2 = outStep2RLC_TSP(jsonFile.analysisObj.equations);
                 }
-                equationSystemOutput = outEquationSystemLKM_TSP(jsonFile.analysisObj, step1, step2);
+                equationSystemOutput = outEquationSystemRLC_TSP(jsonFile.analysisObj, step1, step2);
                 $('#eqSys').html(equationSystemOutput);
 
                 // Results
-                $('#resultsCurrentsBranch').html(outHTMLResultsLKM(jsonFile));
+                $('#resultsCurrentsBranch').html(outHTMLResultsRLC(jsonFile));
 
                 // Push the solved JSON to the array
-                solvedJSON[cp.name.value] = {file: jsonFile, method: 'LKM'};
+                solvedJSON[cp.name.value] = {file: jsonFile, method: 'RLC'};
                 break;
             default:
                 alert('Método de resolução não reconhecido.');
@@ -702,7 +702,7 @@ function solveTSP(schematic, mainJsonFile, order) {
                     });
                 });
             break;
-            case 'LKM':
+            case 'RLC':
                 solvedJSON[json].file.analysisObj.currents.forEach(curr => {
                     let obj = {};
 
@@ -1171,7 +1171,7 @@ function outputTSP(jsonFile, schematic){
         // Export PDF File
         $("#print").off().on('click', function() {
             // Not implemented yet
-            //buildPrintPDF(jsonFile, canvasObjects);
+            buildPrintPDF_TSP(jsonFile, canvasObjects);
         });
 
         // Enable output buttons
@@ -1252,7 +1252,7 @@ function TSP_handleError(err){
     return errorstr;
 }
 
-function loadFileAsTextLKM(jsonfile, schematic){
+function loadFileAsTextRLC(jsonfile, schematic){
     let branches = Object.values(jsonfile.branches);
     let currents = Object.values(jsonfile.analysisObj.currents);
     let currentRefs = [];

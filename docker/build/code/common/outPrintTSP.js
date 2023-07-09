@@ -344,7 +344,7 @@ function outHTMLSectionsMCR_TSP(cp, length){
 
 }
 
-function outHTMLSectionsLKM_TSP(cp, length){
+function outHTMLSectionsRLC_TSP(cp, length){
     let htmlstr = '';
 
     // Add navbar
@@ -415,7 +415,7 @@ function outHTMLSectionsLKM_TSP(cp, length){
     return htmlstr;
 }
 
-function outStep1LKM_TSP(equations){
+function outStep1RLC_TSP(equations){
     let htmlstr = '';
 
     // Generate the collapse panel
@@ -439,7 +439,7 @@ function outStep1LKM_TSP(equations){
     return htmlstr;
 }
 
-function outStep2LKM_TSP(equations){
+function outStep2RLC_TSP(equations){
     let htmlstr = '';
 
     // Generate the collapse panel
@@ -463,7 +463,7 @@ function outStep2LKM_TSP(equations){
     return htmlstr;
 }
 
-function outEquationSystemLKM_TSP(analysisObj, step1 = '', step2 = ''){
+function outEquationSystemRLC_TSP(analysisObj, step1 = '', step2 = ''){
     let htmlstr = '';
 
     htmlstr += '<div class="container mt-3">';
@@ -517,7 +517,7 @@ function outEquationSystemLKM_TSP(analysisObj, step1 = '', step2 = ''){
         htmlstr += '<div class="row bg-success rounded">';
         // Add step text
         htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 1:';
-        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep1LKM"></small></h5></div>';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep1RLC"></small></h5></div>';
         // Add button
         htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
         // Add Step results
@@ -532,7 +532,7 @@ function outEquationSystemLKM_TSP(analysisObj, step1 = '', step2 = ''){
         htmlstr += '<div class="row bg-success rounded">';
         // Add step text
         htmlstr += '<div class="col-xs-9 d-flex align-items-center col-md"><h5 class="ml-2 text-light"><span data-translate="_step"></span> 2:';
-        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep2LKM"></small></h5></div>';
+        htmlstr += '&nbsp;&nbsp;<small class="text-light lead" data-translate="_eqStep2RLC"></small></h5></div>';
         // Add button
         htmlstr += '<div class="col-xs-3 ml-auto">'+btnstr+'</div></div>';
         // Add Step results
@@ -549,7 +549,7 @@ function outEquationSystemLKM_TSP(analysisObj, step1 = '', step2 = ''){
     return htmlstr;
 }
 
-function outHTMLResultsLKM(jsonFile){
+function outHTMLResultsRLC(jsonFile){
     let currents = jsonFile.analysisObj.currents;
 
     let htmlstr = '';
@@ -739,6 +739,7 @@ function buildTeXOvTSP(file, subfiles) {
 	let N = countNodesByType(file.nodes, 0);
 	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
 	let F = file.analysisObj.circuitFreq;
+    let T = file.components.acVoltPs.length + file.components.dcVoltPs.length;
     let currentsResults = file.analysisObj.results;
     let currents = file.analysisObj.currents;
 	let totalCurrents = currents.length;
@@ -994,8 +995,8 @@ function buildTeXOvTSP(file, subfiles) {
             case 'MTN':
 
              break;
-            case 'LKM':
-                TeXOv = buildTeXOvLKM(jsonFile, canvasObjects, canvasObjectss);
+            case 'RLC':
+                TeXOv = buildTeXOvRLC(jsonFile, canvasObjects, canvasObjectss);
 
                 TeX += TeXOv;
                 break;
@@ -1083,7 +1084,7 @@ function buildImTeXTSP(imagesTSP, files){
     return imageTex;
 }
 
-function buildTeXOvLKM(file, canvasObjects, canvasObjectss) {
+function buildTeXOvRLC(file, canvasObjects, canvasObjectss) {
     let currents = file.analysisObj.currents;
     let branches = file.branches;
     let F = file.analysisObj.circuitFreq;
@@ -1152,7 +1153,7 @@ function buildTeXOvLKM(file, canvasObjects, canvasObjectss) {
         });
         str += '\\end{cases}';
 
-        TeX += '\\textbf{Step 1:}' +  lang._eqStep1LKM + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+        TeX += '\\textbf{Step 1:}' +  lang._eqStep1RLC + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
 
         // Step 2
         str = '\\large \\begin{cases}';
@@ -1164,7 +1165,7 @@ function buildTeXOvLKM(file, canvasObjects, canvasObjectss) {
         });
         str += '\\end{cases}';
 
-        TeX += '\\textbf{Step 2:}' + lang._eqStep2LKM + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
+        TeX += '\\textbf{Step 2:}' + lang._eqStep2RLC + "\r\n\\begin{gather*}\r\n"+str+"\r\n\\end{gather*}\r\n\\par\r\n\r\n\\paragraph{} ";
     }
     TeX += '\r\n\\pagebreak\r\n\r\n';
 
@@ -1422,6 +1423,434 @@ function getTexFileHeaderTSPRich(lang){
     return texHeader;
 }
 
+function buildPrintPDF_TSP(file, meshImages){
+    window.jsPDF = window.jspdf.jsPDF;
+
+    const marginSides = 0.2;
+    const marginBottom = 0.1;
+    const marginTop = 0.1;
+
+    //letter size
+    titleSize = 18;
+    subtitleSize = 16;
+    subsubtitleSize = 14;
+    bigInfoSize = 12;
+    smallInfoSize = 10;
+    tinyInfoSize = 8;
+
+    let lang = document.getElementById("lang-sel-txt").innerText.toLowerCase();
+    if(lang == 'english') lang = dictionary.english;
+    else if(lang == 'português') lang = dictionary.portuguese;
+
+    //init file
+    let doc = new jsPDF({unit:'pt', format:'a4'});
+    doc.setFont("../../vendor/jsPDF-master/docs/fonts/cmunbsr/SourceSerifPro-Light-normal", "regular");
+    doc.page = 1;
+    const height = doc.internal.pageSize.height;
+
+    // Add cover page
+    doc = addCoverPage_TSP(doc, lang);
+    doc.addPage();
+    doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+    line = height*marginTop;
+
+    // Add Fundamental Vars
+    line = printFundVars_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang);
+    // Add Circuit Information
+    line = printCircInfo_TSP(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+    doc.addPage();
+    doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+    line = height*marginTop;
+    // Add Subcircuit info
+    line = printContributions_TSP(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+    // Add Contributions table
+    line = printContributionsTable_TSP(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+    doc.addPage();
+    doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+    line = height*marginTop;
+    // Add Currents results
+    line = printCurrResults_TSP(doc, file, line+=10, marginSides, marginTop, marginBottom, lang);
+
+    // Output PDF
+    doc.autoPrint();
+	doc.output("dataurlnewwindow", {filename: "output.pdf"});
+}
+
+function addCoverPage_TSP(doc, lang){
+    let line = 170;
+    const width = doc.internal.pageSize.width;
+
+    doc.setFontSize(20);
+    let sampleimg = base64imgselect("logo");
+    doc.addImage(sampleimg, "JPG", width/2-70, line-20, 67/3.5, 82/3.5);
+	doc.text('URIsolve APP', width/2+10, line-1, null, null, 'center');
+    doc.text(lang._TSPmethod, width/2, line+=20, null, null, 'center');
+
+    doc.setFontSize(16);
+    doc.text(lang._step_by_step, width/2, line+=16, null, null, 'center');
+
+    doc.setFontSize(13);
+    doc.text(lang._project_coor, width/2, line+=50, null, null, 'center');
+
+
+    doc.setFontSize(12);
+    doc.text('André Rocha', width/3, line+=40, null, null, 'center');
+    doc.text('Mário Alves', 2*width/3, line, null, null, 'center');
+    doc.text('anr@isep.ipp.pt', width/3, line+=10, null, null, 'center');
+    doc.text('mjf@isep.ipp.pt', 2*width/3, line, null, null, 'center');
+
+    doc.text('Lino Sousa', width/3, line+=30, null, null, 'center');
+    doc.text('Francisco Pereira', 2*width/3, line, null, null, 'center');
+    doc.text('sss@isep.ipp.pt', width/3, line+=10, null, null, 'center');
+    doc.text('fdp@isep.ipp.pt', 2*width/3, line, null, null, 'center');
+
+    doc.setFontSize(13);
+    doc.text(lang._devel, width/2, line+=40, null, null, 'center');
+
+    doc.setFontSize(12);
+    doc.text('v1.0.0 - 07/2023', width/2, line+=30, null, null, 'center');
+    doc.text('Guilherme Zenha - 1201398@isep.ipp.pt', width/2, line+=15, null, null, 'center');
+    
+
+    doc.setFontSize(10);
+    doc.text('Abstract', width/2, line+=100, null, null, 'center');
+
+    doc.setFontSize(8);
+    doc.text(lang._TSPabstract.slice(0, 64), width/2, line+=10, null, null, 'center');
+    doc.text(lang._TSPabstract.slice(64), width/2, line+=10, null, null, 'center');
+
+
+    doc.setFontSize(10);
+    const d = new Date(); 
+    doc.text(d.getDate()+" / "+d.getMonth()+" / "+d.getFullYear(), width/2, line+=150, null, null, 'center');
+
+    return doc;
+}
+
+function printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang){
+    width = doc.internal.pageSize.width;
+    height = doc.internal.pageSize.height;
+
+    ms = width*marginSides;
+    mb = height-marginBottom*height;
+    mt = marginTop*height;
+
+    doc.setFontSize(10);
+    doc.text('DEE - ISEP', ms, mb, null, null, 'left');
+    doc.text('URIsolve APP', ms, mt, null, null, 'left');
+    doc.text(lang._page + doc.page, width-ms, mb, null, null, 'right');
+    doc.text(lang._TSPmethod, width-ms, mt, null, null, 'right');
+    doc.setFontSize(8);
+    doc.text('www.isep.ipp.pt', width/2, mb, null, null, 'center');
+
+    doc.line(ms, mb-10, width-ms, mb-10);
+    doc.line(ms, mt+4, width-ms, mt+4);
+
+    doc.page++;
+
+    return doc;
+}
+
+function printFundVars_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+        
+    let R = file.branches.length;
+	let N = countNodesByType(file.nodes, 0);
+	let C = file.components.acAmpsPs.length + file.components.dcAmpsPs.length;
+    let T = file.components.acVoltPs.length + file.components.dcVoltPs.length;
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+20+20 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+    
+
+    doc.setFontSize(subtitleSize);
+    doc.text('1.  ' + lang._fundamentalsTitle, marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(smallInfoSize);
+    doc.text(lang._fundamentals_R + '   |', innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
+    doc.text(lang._fundamentals_N + '   |', 2.4*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text(lang._fundamentals_C + '   |', 4.2*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text(lang._fundamentals_T, 7.1*innerWidth/9 + width * marginSides, line, null, null, 'center');
+
+    doc.setFontSize(smallInfoSize);
+    doc.text('R = ' + R.toString(), innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
+    doc.text('N = ' + N.toString(), 2.4*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('C = ' + C.toString(), 4.2*innerWidth/9 + width * marginSides, line, null, null, 'center');
+    doc.text('T = ' + T.toString(), 7.1*innerWidth/9 + width * marginSides, line, null, null, 'center');
+
+    return line;
+}
+
+function printCircInfo_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+    
+    let freq = file.analysisObj.circuitFreq;
+	let totalCurrents = file.analysisObj.currents.length;
+	let ammeters = file.probes.ammeters.length;
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+20+20 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('2.  ' + lang._infoTitle, marginSides*width, line+=25, null, null, 'left');
+
+    doc.setFontSize(smallInfoSize);
+    doc.text(lang._info_T + ' [AC/DC]', innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
+    doc.text(lang._info_F, 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+    doc.text(lang._info_A, 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+
+    let aux;
+    let aux1;
+    if(freq.value == 0){
+        aux = 'DC';
+        aux1 = 'N / A';
+    }
+    else{
+        aux = 'AC';
+        aux1 = 'F = ' + freq.value + ' ' + freq.mult;
+    }
+    doc.setFontSize(smallInfoSize);
+    doc.text(aux, innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
+    doc.text(aux1, 2.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+    doc.text(ammeters + '/' + totalCurrents, 3.5*innerWidth/4 + width * marginSides, line, null, null, 'center');
+
+    return line;
+}
+
+function printContributions_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+
+    let subcircuits = file.analysisObj.contributions;
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+20+20 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('3.  ' + lang._calcContrib, marginSides*width, line+=25, null, null, 'left');
+
+    let i = 0;
+    for (let contribution in subcircuits) {
+        i++;
+        doc.setFontSize(subsubtitleSize);
+        doc.text('3.' + (i) + '  ' + lang._source + ' ' + contribution, marginSides*width, line+=20, null, null, 'left');
+
+        doc.setFontSize(smallInfoSize);
+        doc.text('3.' + (i) + '.1  ' + lang._branchIden, marginSides*width, line+=20, null, null, 'left');
+        doc.text(lang._currents, marginSides*width, line+=20, null, null, 'left');
+        
+        if(lang == dictionary.portuguese){
+            var table = 'Tabela '+i+' - ';
+        }
+        else{
+            var table = 'Table '+i+' - ';
+        }
+    
+        doc.setFontSize(smallInfoSize);
+        doc.text(table + lang._currentsTableCap, width/2, line+=20, null, null, 'center');
+    
+        doc.text('Reference', innerWidth/5 + width * marginSides, line+=10, null, null, 'center');
+        doc.text('Start Node', 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text('End Node', 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text('Components', 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    
+        line+=2;
+
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            
+            doc.text(curr, innerWidth/5 + width * marginSides, line+=12, null, null, 'center');
+            doc.text(current.start, 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+            doc.text(current.end, 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+            doc.text(current.components.join(', '), 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        }
+
+        doc.text(lang._resBranch, marginSides*width, line+=20, null, null, 'left');
+
+        line+=5;
+        doc.setLineWidth(1);
+        doc.line(1.3*width/4-0.1*width, line+5, 1.3*width/4-0.1*width, line+Object.keys(subcircuits[contribution]).length*14);
+
+        for (let curr in subcircuits[contribution]){
+            let current = subcircuits[contribution][curr];
+            let str = '';
+            if(current.complex){
+                if(current.angle == 0){
+                    str += '\\underline{' + curr + '}~=~' + current.magnitude + '~' + current.unit;
+                }
+                else{
+                    str += '\\underline{' + curr + '}~=~' + current.magnitude + '\\angle ' + current.angle + '^{\\circ}\\' + '~' + current.unit;
+                    }
+                }
+            else{
+                str += curr + '~=~' + current.value + '~' + current.unit;
+            }
+            printEquation(doc, str, 1.3*width/4-0.1*width, line+=14, 'left');  
+        }
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+    return line;
+}
+
+function printContributionsTable_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+    
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+20+20 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('4.  ' + lang._ResultsTable, marginSides*width, line+=25, null, null, 'left');
+
+    let colnum = 2+Object.keys(file.analysisObj.contributions).length;
+    let colwidth = innerWidth/colnum;
+    let rownum = 1+2*file.analysisObj.currents.length;
+
+    doc.setFontSize(smallInfoSize);
+    // Add table header
+    line+=10;   
+    doc.text(lang._ResultsTableCell1, colwidth + width * marginSides, line+=10, null, null, 'center');
+    for (let json in jsonFile.analysisObj.contributions) {
+        doc.text(json, (2+Object.keys(jsonFile.analysisObj.contributions).indexOf(json))*colwidth + width * marginSides, line, null, null, 'center');
+    }
+    line+=2;
+    // Add table body
+    jsonFile.analysisObj.currents.forEach(current => {
+
+        doc.text(current.ref, 0.75*colwidth + width * marginSides, line+24, null, null, 'center');
+        doc.text(lang._ResultsTableCell2, 1.25*colwidth + width * marginSides, line+=12, null, null, 'center');
+        for (let json in jsonFile.analysisObj.contributions) {
+            contribution = current.contributions[json];
+            if(contribution !== undefined) {
+                doc.text(contribution.start + ' => ' + contribution.end, (2+Object.keys(jsonFile.analysisObj.contributions).indexOf(json))*colwidth + width * marginSides, line, null, null, 'center');
+            } else {
+                doc.text('-', (2+Object.keys(jsonFile.analysisObj.contributions).indexOf(json))*colwidth + width * marginSides, line, null, null, 'center');
+            }
+        }
+        line+=12;
+        doc.text(lang._ResultsTableCell3, 1.25*colwidth + width * marginSides, line+=12, null, null, 'center');
+        for (let json in jsonFile.analysisObj.contributions) {
+            contribution = current.contributions[json];
+            if(contribution === undefined) contribution = {value: '0', unit: 'A'};
+            else if(contribution.complex){
+                doc.text(contribution.magnitude + '<' + contribution.angle + 'º ' + contribution.unit, (2+Object.keys(jsonFile.analysisObj.contributions).indexOf(json))*colwidth + width * marginSides, line, null, null, 'center');
+                continue;
+            }
+            doc.text(contribution.value + ' '+ contribution.unit, (2+Object.keys(jsonFile.analysisObj.contributions).indexOf(json))*colwidth + width * marginSides, line, null, null, 'center');
+        }
+        line+=12;
+
+    });
+
+   return line;
+}
+
+function printCurrResults_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+
+    let currents = file.analysisObj.currents;
+    let subcircuits = file.analysisObj.contributions;
+    let results = jsonFile.analysisObj.results;
+
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+    let innerWidth = width - 2 * width * marginSides;
+
+    if(line+25+20+20 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    }
+
+    doc.setFontSize(subtitleSize);
+    doc.text('5.  ' + lang._branchIden, marginSides*width, line+=25, null, null, 'left');
+    doc.setFontSize(subsubtitleSize);
+    doc.text('5.1  ' + lang._currents, marginSides*width, line+=20, null, null, 'left');
+    
+    let tablen = Object.keys(subcircuits).length + 1;
+    if(lang == dictionary.portuguese){
+        var table = 'Tabela '+tablen+' - ';
+    }
+    else{
+        var table = 'Table '+tablen+' - ';
+    }
+
+    doc.setFontSize(smallInfoSize);
+    doc.text(table + lang._currentsTableCap, width/2, line+=20, null, null, 'center');
+
+    doc.text('Reference', innerWidth/5 + width * marginSides, line+=10, null, null, 'center');
+    doc.text('Start Node', 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    doc.text('End Node', 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    doc.text('Components', 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+
+    line+=2;
+
+    for (let curr in currents){
+        let current = currents[curr];
+        let branch = file.branches.find(branch => branch.currentId == current.id);
+        let components = branch.components.map(component => component.ref);
+
+        doc.text(current.ref, innerWidth/5 + width * marginSides, line+=12, null, null, 'center');
+        doc.text(current.noP, 2*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text(current.noN, 3*innerWidth/5 + width * marginSides, line, null, null, 'center');
+        doc.text(components.join(', '), 4*innerWidth/5 + width * marginSides, line, null, null, 'center');
+    }
+
+    doc.setFontSize(subsubtitleSize);
+    doc.text('5.2  ' + lang._resBranch, marginSides*width, line+=20, null, null, 'left');
+
+    line+=5;
+    doc.setLineWidth(1);
+    doc.line(1.3*width/4-0.1*width, line+5, 1.3*width/4-0.1*width, line+results.length*14);
+    doc.line(1.3*width/4-0.1*width, line+results.length*14+14, 1.3*width/4-0.1*width, line+results.length*14*2+14);
+
+    for (let k = 0; k<results.length; k++){
+        printEquation(doc, results[k].equation, 1.3*width/4-0.1*width, line+=14, 'left');
+    }
+    line+=12;
+    for (let k = 0; k<results.length; k++){
+        let str = '';
+        if(results[k].complex){
+            if(results[k].value.angle == 0){
+                str += '\\underline{' + results[k].ref + '}~=~' + results[k].value.magnitude + '~' + results[k].unit;
+            }
+            else{
+                str += '\\underline{' + results[k].ref + '}~=~' + results[k].value.magnitude + '\\angle ' + results[k].value.angle + '^{\\circ}\\;' + '~' + results[k].unit;
+            }
+        }
+        else{
+            str += results[k].ref + '~=~' + results[k].value + '~' + results[k].unit;
+        }
+        printEquation(doc, str, 1.3*width/4-0.1*width, line+=14, 'left');
+    }
+
+    return line;
+}
+
+// FUNCTION DOES NOT WORK !!!
 async function circuitToSvg(circuit){
     // Get component symbols
     let rUsDivs = circuit.find('.R.US');

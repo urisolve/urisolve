@@ -247,8 +247,8 @@ $(function () {
             "_calcContrib": "Calculation of the contributions of each source",
             "_source": "Source",
             "_appendices": "Annexes",
-            "_eqStep1LKM": "Equivalent impedance calculation",
-            "_eqStep2LKM": "Current Calculation",
+            "_eqStep1RLC": "Equivalent impedance calculation",
+            "_eqStep2RLC": "Current Calculation",
             
         },
 
@@ -502,8 +502,8 @@ $(function () {
             "_calcContrib": "Cálculo das contribuições de cada fonte",
             "_source": "Fonte",
             "_appendices": "Anexos",   
-            "_eqStep1LKM": "Cálculo da impedância equivalente",
-            "_eqStep2LKM": "Cálculo da corrente",
+            "_eqStep1RLC": "Cálculo da impedância equivalente",
+            "_eqStep2RLC": "Cálculo da corrente",
         }
     };
 
