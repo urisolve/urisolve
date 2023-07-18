@@ -7,7 +7,7 @@ function makeNetlist(schematic){
     netlist = `# Qucs ${schematic.qucs_version}\n`;
 
     // Add the component definitions
-    schematic.components.forEach(cp => {
+    schematic.components.concat(vectSims).forEach(cp => {
         // Skip ground
         if(cp.type == 'GND'){
             return;
@@ -80,11 +80,37 @@ function makeNetlist(schematic){
                                      +`R="${cp.properties.impedance.value} ${cp.properties.impedance.unit}" `
                                      +`Temp = "26.85" Tc1 = "0.0" Tc2 = "0.0" Tnom = "26.85"`;
                 break;
+            case '.DC':
+                componentEntry += `Temp="${cp.properties.temperature.value}" `
+                                    +`reltol="${cp.properties.reltol.value}" `
+                                    +`abstol="${cp.properties.abstol.value} ${cp.properties.abstol.unit}" `
+                                    +`vntol="${cp.properties.vntol.value} ${cp.properties.vntol.unit}" `
+                                    +`saveOPs="${cp.properties.saveOps.value}" `
+                                    +`MaxIter="${cp.properties.maxIter.value}" `
+                                    +`saveAll="${cp.properties.saveAll.value}" `
+                                    +`convHelper="${cp.properties.convHelper.value}" `
+                                    +`Solver="${cp.properties.solver.value}"`;
+                break;
+            case '.AC':
+                componentEntry += `Type="${cp.properties.type.value}" `;
+                switch(cp.properties.type.value){
+                    case 'const':
+                    case 'list':
+                        componentEntry += `Values="${cp.properties.points.value}" `
+                                        + `Noise="${cp.properties.noise.value}" `;
+                    break;
+                    case 'lin':
+                    case 'log':
+                        componentEntry += `Start="${cp.properties.start.value} ${cp.properties.start.unit}" `
+                                        + `Stop="${cp.properties.stop.value} ${cp.properties.stop.unit}" `
+                                        + `Points="${cp.properties.points.value}" `
+                                        + `Noise="${cp.properties.noise.value}" `;
+                    break; 
+                }
             }
         // Add the component to the netlist
         netlist += componentEntry + '\n';
     });
-
     return {
         errorFlag: false,
         errorReasonCodes: [],

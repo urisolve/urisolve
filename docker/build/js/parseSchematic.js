@@ -280,6 +280,12 @@ function parseSchematic(text){
                 }
                 cp = new IProbe("cp" + componentIndex, cpProperties, ports);
                 break;
+            case '.DC':
+                cp = new DCSim(cpProperties);
+                break;
+            case '.AC':
+                cp = new ACSim(cpProperties);
+                break;
             default:
                 console.log("cp" + componentIndex + ':' +component + " not found");
                 break;

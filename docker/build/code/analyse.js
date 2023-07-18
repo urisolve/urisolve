@@ -31,6 +31,7 @@ include("code/common/makeNetlist.js");
     vectConnections = [];
     vectNodes = [];
     vectPorts = [];
+	vectSims = [];
 
 	//Parse the schematic file
 	var schematic = parseSchematic(fileContents[1]);
@@ -2270,7 +2271,7 @@ function analyseCircuit(analysismet) {
 						}
 						successFlag = true;
 					} catch (error) {
-						console.log("Error in TSP: " + TSP_handleError(error));
+						console.log("Error in TSP: " + error);
 						successFlag = false;
 					}
 					if (successFlag) {

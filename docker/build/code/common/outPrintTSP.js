@@ -189,6 +189,14 @@ function outHTMLSectionsMCM_TSP(cp, length) {
     htmlstr += '<div class="row bg-dark rounded text-light p-2"><h5 class="ml-3" data-translate="_circuitImage"></h5></div></div>';
     htmlstr += '<div class="circuit-widget container mt-3 text-center p-0"></div></div>';
 
+    // Add subcircuit note
+    htmlstr += '<div id="subcircuit-note" class="my-2">';
+    htmlstr += '<div class="card p-1" style="background-color: #ffffcc; border-left: 6px solid #ffeb3b;">';
+    htmlstr += '<div class="container-fluid"><div class="d-flex flex-row">';
+    htmlstr += '<div class="ml-1 mt-1"><i class="fas fa-sticky-note"></i></div>';
+    htmlstr += '<div class="ml-1"><strong><p data-translate="_tspNotes1"></p></strong></div>';
+    htmlstr += '</div></div></div></div>';
+
     htmlstr += '<div id= "contResults">';  
     htmlstr += '<div class="row"><div class="container"><div id="buttonShowAll"></div></div></div>';
     

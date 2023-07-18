@@ -1928,6 +1928,59 @@ class IProbe extends Component {
         }
 }
 
+class DCSim {
+    constructor(caracteristics){
+        this.type = caracteristics[0];
+        this.name = {value: caracteristics[1], position: {x: caracteristics[5], y: caracteristics[6]}};
+        this.active = caracteristics[2];
+        this.position = {x: caracteristics[3], y: caracteristics[4], angle: caracteristics[8], mirrorx: caracteristics[7]};
+        this.properties = {temperature: {value: caracteristics[9], visible: caracteristics[10]},
+                           reltol: {value: caracteristics[11], visible: caracteristics[12]},
+                           abstol: {value: caracteristics[13], unit: caracteristics[14], visible: caracteristics[15]},
+                           vntol: {value: caracteristics[16], unit: caracteristics[17], visible: caracteristics[18]},
+                           saveOps: {value: caracteristics[19], visible: caracteristics[20]},
+                           maxIter: {value: caracteristics[21], visible: caracteristics[22]},
+                           saveAll: {value: caracteristics[23], visible: caracteristics[24]},
+                           convHelper: {value: caracteristics[25], visible: caracteristics[26]},
+                           solver: {value: caracteristics[27], visible: caracteristics[28]}
+        };
+        vectSims.push(this);
+    }
+}
+
+
+class ACSim {
+    constructor(caracteristics) {
+        console.log(caracteristics);
+        this.type = caracteristics[0];
+        this.name = {value: caracteristics[1], position: {x: caracteristics[5], y: caracteristics[6]}};
+        this.active = caracteristics[2];
+        this.position = {x: caracteristics[3], y: caracteristics[4], angle: caracteristics[8], mirrorx: caracteristics[7]};
+
+        this.properties = {type: {value: caracteristics[9], visible: caracteristics[10]},
+                           start: {value: caracteristics[11], unit: caracteristics[12] ,visible: caracteristics[13]},
+                           stop: {value: caracteristics[14], unit: caracteristics[15], visible: caracteristics[16]}};
+        //Get the list of frequencies [x Hz; y Hz; z Hz]
+        if(caracteristics[9] == 'list' || caracteristics[9]  == 'const'){
+            let i=0;
+            let freqList = caracteristics[17] + ' ' + caracteristics[18];
+            while(!caracteristics[18+i].endsWith(']')){
+                freqList += ' ';
+                i+=2;
+                freqList += caracteristics[17+i] + ' ' + caracteristics[18+i];
+            }
+            this.properties.points = {value: freqList, visible: caracteristics[19+i]};
+            this.properties.noise = {value: caracteristics[20+i], visible: caracteristics[21+i]};
+        }
+        else{
+            this.properties.points = {value: caracteristics[17], visible: caracteristics[18]};
+            this.properties.noise = {value: caracteristics[19], visible: caracteristics[20]};
+        }
+        
+        vectSims.push(this);
+    }
+}
+
 class Connection {
     /**
      * Creates the connection object and adds it to the connections array

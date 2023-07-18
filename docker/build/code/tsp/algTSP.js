@@ -257,7 +257,15 @@ function solveTSP(schematic, mainJsonFile, order) {
                 break;
             case 'MCM':
                 // Solve with MCM
-                jsonFile = loadFileAsTextMCM(jsonFile.third, false);
+                try{
+                    jsonFile = loadFileAsTextMCM(jsonFile.third, false);
+                }
+                catch(err){
+                    return {
+                        errorFlag: true,
+                        errorData: err,
+                    }
+                }
             
                 // Add sections
                 page.html(outHTMLSectionsMCM_TSP(cp, order.length));
@@ -298,7 +306,15 @@ function solveTSP(schematic, mainJsonFile, order) {
                 break;
             case 'MCR':
                 // Solve with MCR
-                jsonFile = loadFileAsTextMCR(jsonFile.third, false);
+                try{
+                    jsonFile = loadFileAsTextMCR(jsonFile.third, false);
+                }
+                catch(err){
+                    return {
+                        errorFlag: true,
+                        errorData: err,
+                    }
+                }
 
                 // Add sections
                 page.html(outHTMLSectionsMCR_TSP(cp, order.length));
@@ -1061,9 +1077,13 @@ function outputTSP(jsonFile, schematic){
 
         // Calculate
         let solved = solveTSP(schematic, jsonFile, resolutionOrder);
-        if(solved.errorFlag) {
+        if(Object.keys(solved.data.subcircuits).length != vectSources.length) {
+            cleanModalResults();
+            $('#loadpage').fadeOut(1000);
             alert('Erro ao resolver o circuito.');
-            return;
+            return {
+                errorFlag: true,
+            };
         }
         
         // Add results section
@@ -1115,7 +1135,7 @@ function outputTSP(jsonFile, schematic){
 
             //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
             if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
-                let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+                let string = "\\vspace{0.5cm}{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
                 string += " at " + hourstr + "\r\n";
                 TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
             }
@@ -1158,7 +1178,7 @@ function outputTSP(jsonFile, schematic){
             hourstr = hourstr + ":" + minstr;
             //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
             if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
-                let string = "\\vspace{0.5cm}\\centering{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
+                let string = "\\vspace{0.5cm}{ \r\n Simulation performed by: \\textbf{ "+studName+" "+studLastname+" ("+studNumber+")}} "
                 string += " at " + hourstr + "\r\n";
                 TeX = TeX.slice(0,1660) + string + TeX.slice(1661);
             }
