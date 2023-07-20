@@ -690,7 +690,32 @@
                                       }
                                   document.getElementById("resultado").innerHTML = resultado;
                                  }
-                             </script>
+                               </script>
+                             <div id="circuito"></div>
+                               <script src="script.json"></script>
+                               <script>
+                                // Carregando o circuito
+                                function carregarCircuito() {
+                                 const circuitoElement = document.getElementById('resultado');
+                                  if (circuitosjson.resultado === 'triangulo') {
+                                    carregarCircuito(code/cirgen/circuitos/triangulo.json) = resultado;
+                                  } 
+                                   else if (circuitosjson.resultado === 'estrela'){
+                                    carregarCircuito(code/cirgen/circuitos/estrela.JSON) = resultado;
+                                  }
+                                   else if (circuitosjson.resultado === 'estrela'){
+                                    carregarCircuito(code/cirgen/circuitos/estrela.JSON) = resultado;
+                                  }
+                                   else if (circuitosjson.resultado === 'estrela'){
+                                    carregarCircuito(code/cirgen/circuitos/estrela.JSON) = resultado;
+                                  }
+                                   else if (circuitosjson.resultado === 'estrela'){
+                                    carregarCircuito(code/cirgen/circuitos/estrela.JSON) = resultado;
+                                  }
+                                   else if (circuitosjson.resultado === 'estrela'){
+                                    carregarCircuito(code/cirgen/circuitos/estrela.JSON) = resultado;
+                                  }    
+                               </script>
                              <div class="card-footer">
                                 <h1>Caixa para selecionar a quantidade de componentes, nós, ramos, malhas e tipo de circuito</h1>
                              </div> 
@@ -711,19 +736,19 @@
                                            <input type="number" id="informação-Transformador" min="0" style="width:10%; background-color: #d7b01d"><br>  
                                         <input type="checkbox" name="informação" value="Sonda de corrente"> Sonda de corrente
                                            <input type="number" id="informação-Sonda de corrente" min="0" style="width: 10%; background-color: #d7b01d"><br>  
-                                        <input type="checkbox" name="informação" value=" Sonda de tensão">  Sonda de tensão
+                                        <input type="checkbox" name="informação" value="Sonda de tensão">  Sonda de tensão
                                            <input type="number" id="informação-Sonda de tensão" min="0" style="width: 10%; background-color: #d7b01d"><br>  
-                                        <input type="checkbox" name="informação" value=" Fonte de corrente">  Fonte de corrente
+                                        <input type="checkbox" name="informação" value="Fonte de corrente">  Fonte de corrente
                                            <input type="number" id="informação-Fonte de corrente" min="0" style="width: 10%; background-color: #d7b01d"><br>  
                                         <input type="checkbox" name="informação" value="Fonte de tensão"> Fonte de tensão
                                            <input type="number" id="informação-Fonte de tensão" min="0" style="width: 10%; background-color: #d7b01d"><br>  
                                         <input type="checkbox" name="informação" value="Mosfet"> Mosfet
                                            <input type="number" id="informação-Mosfet" min="0" style="width: 10%; background-color: #d7b01d"><br>  
-                                        <input type="checkbox" name="informação" value=" OpAmp">  OpAmp
+                                        <input type="checkbox" name="informação" value="OpAmp">  OpAmp
                                            <input type="number" id="informação-OpAmp" min="0" style="width: 10%;background-color: #d7b01d"><br>  
                                         <input type="checkbox" name="informação" value="Thyristor"> Thyristor
                                            <input type="number" id="informação-Thyristor" min="0" style="width: 10%; background-color: #d7b01d"><br>  
-                                        <input type="checkbox" name="informação" value=" Simulador AC">  Simulador AC
+                                        <input type="checkbox" name="informação" value="Simulador AC">  Simulador AC
                                            <input type="number" id="informação- Simulador AC" min="0" style="width: 10%; background-color: #d7b01d"><br>  
                                         <input type="checkbox" name="informação" value="Simulador DC"> Simulador DC
                                            <input type="number" id="informação-Simulador DC" min="0" style="width: 10%;  background-color: #d7b01d"><br> 
@@ -755,9 +780,14 @@
                                 </div>
                                 <div class="card-footer">
                                     <input type="button" value="Exibir Informação" onclick="exibirInformação()">
-                                       <h3>Quantidade de componentes e circuito selecionados:</h3>
+                                       <h3>Quantidade de componentes e tipo de circuito:</h3>
                                        <div id="resultado" style="width: auto; background-color: #d7b01d"></div> 
                                 </div>
+                                <div class="card-footer">
+                                  <input type="button" value="Carregar Circuito" onclick="carregarCircuito()">
+                                     <h3>Circuito selecionado:</h3>
+                                     <div id="resultado" style="width: auto; background-color: #d7b01d"></div> 
+                              </div>
                              </div>
                            </div>
                            <div class="card-footer">
