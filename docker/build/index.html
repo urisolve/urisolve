@@ -698,22 +698,22 @@
                                 function carregarCircuito() {
                                  const circuitoElement = document.getElementById('resultado');
                                   if (circuitosjson.resultado === 'triangulo') {
-                                    carregarCircuito(build/code/cirgen/circuitos/triangulo.json) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/triangulo.json) = resultado;
                                   } 
                                    else if (circuitosjson.resultado === 'estrela'){
-                                    carregarCircuito(build/code/cirgen/circuitos/estrela.JSON) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/estrela.json) = resultado;
                                   }
                                    else if (circuitosjson.resultado === '1 malha e 1 ramo'){
-                                    carregarCircuito(build/code/cirgen/circuitos/m1_r1.JSON) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/m1_r1.json) = resultado;
                                   }
                                    else if (circuitosjson.resultado === '2 malhas e 3 ramos'){
-                                    carregarCircuito(build/code/cirgen/circuitos/m2_r3.JSON) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/m2_r3.json) = resultado;
                                   }
                                    else if (circuitosjson.resultado === '3 malhas e 6 ramos'){
-                                    carregarCircuito(build/code/cirgen/circuitos/m3_r6.JSON) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/m3_r6.json) = resultado;
                                   }
                                    else if (circuitosjson.resultado === '4 malhas e 9 ramos'){
-                                    carregarCircuito(build/code/cirgen/circuitos/m4_r9.JSON) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/m4_r9.json) = resultado;
                                   }
                                 }    
                                </script>
@@ -787,7 +787,7 @@
                                 <div class="card-footer">
                                   <input type="button" value="Carregar Circuito" onclick="carregarCircuito()">
                                      <h3>Circuito selecionado:</h3>
-                                     <div id="resultado" style="width: auto; background-color: #d7b01d"></div> 
+                                     <div id="resultado" style="width: auto"></div> 
                               </div>
                              </div>
                            </div>
