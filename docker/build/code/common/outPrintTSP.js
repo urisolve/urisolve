@@ -1040,8 +1040,12 @@ async function buildImTeXTSP(files){
     let mainCircuit = $('#circuitImage > .circuit-widget');
     let temp = $('<div></div>');
     mainCircuit.append(temp);
+    // Remove background color
+    mainCircuit.find('.drawing').css('background-color', 'transparent');
     // Create a temporary div to store the circuit image
     canvas = await mainCircuit.CircuitToCanvas(temp)
+    // Restore background color
+    mainCircuit.find('.drawing').css('background-color', '');
 
     data = canvas.toDataURL();
     imageTex += '\\newcommand{\\maincircuit}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
@@ -1438,7 +1442,7 @@ function getTexFileHeaderTSPRich(lang){
     return texHeader;
 }
 
-function buildPrintPDF_TSP(file){
+async function buildPrintPDF_TSP(file){
     window.jsPDF = window.jspdf.jsPDF;
 
     const marginSides = 0.2;
@@ -1469,6 +1473,8 @@ function buildPrintPDF_TSP(file){
     doc = printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang);
     line = height*marginTop;
 
+    // Add main circuit image
+    line = await printCircImage_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang);
     // Add Fundamental Vars
     line = printFundVars_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang);
     // Add Circuit Information
@@ -1542,6 +1548,37 @@ function addCoverPage_TSP(doc, lang){
     return doc;
 }
 
+async function printCircImage_TSP(doc, file, line, marginSides, marginTop, marginBottom, lang){
+    let width = doc.internal.pageSize.width;
+    let height = doc.internal.pageSize.height;
+
+    doc.setFontSize(subtitleSize);
+    doc.text('1.  ' + lang._circuitImage , marginSides*width, line+=35, null, null, 'left');
+
+    // Get circuit image container
+    let mainCircuit = $('#circuitImage > .circuit-widget');
+    let temp = $('<div></div>');
+    mainCircuit.append(temp);
+    // Remove background color
+    mainCircuit.find('.drawing').css('background-color', 'transparent');
+    // Create a temporary div to store the circuit image
+    canvas = await mainCircuit.CircuitToCanvas(temp)
+    // Restore background color
+    mainCircuit.find('.drawing').css('background-color', '');
+
+    if(line+150+30 > height-height*marginBottom-10){
+        doc.addPage();
+        doc = printBuildFoot(doc, marginSides, marginBottom, marginTop, lang);
+        line = height*marginTop;
+    } 
+    doc.addImage(canvas.toDataURL("image/png"), "PNG", marginSides*width, line+=15, width-2*marginSides*width, (width-2*marginSides*width)*canvas.height/canvas.width);
+    line+= (width-2*marginSides*width)*canvas.height/canvas.width;
+
+    temp.remove();
+
+    return line;
+}
+
 function printBuildFoot_TSP(doc, marginSides, marginBottom, marginTop, lang){
     width = doc.internal.pageSize.width;
     height = doc.internal.pageSize.height;
@@ -1585,7 +1622,7 @@ function printFundVars_TSP(doc, file, line, marginSides, marginTop, marginBottom
     
 
     doc.setFontSize(subtitleSize);
-    doc.text('1.  ' + lang._fundamentalsTitle, marginSides*width, line+=25, null, null, 'left');
+    doc.text('2.  ' + lang._fundamentalsTitle, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(smallInfoSize);
     doc.text(lang._fundamentals_R + '   |', innerWidth/9 + width * marginSides, line+=20, null, null, 'center');
@@ -1619,7 +1656,7 @@ function printCircInfo_TSP(doc, file, line, marginSides, marginTop, marginBottom
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('2.  ' + lang._infoTitle, marginSides*width, line+=25, null, null, 'left');
+    doc.text('3.  ' + lang._infoTitle, marginSides*width, line+=25, null, null, 'left');
 
     doc.setFontSize(smallInfoSize);
     doc.text(lang._info_T + ' [AC/DC]', innerWidth/4 + width * marginSides, line+=20, null, null, 'center');
@@ -1659,16 +1696,16 @@ function printContributions_TSP(doc, file, line, marginSides, marginTop, marginB
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('3.  ' + lang._calcContrib, marginSides*width, line+=25, null, null, 'left');
+    doc.text('4.  ' + lang._calcContrib, marginSides*width, line+=25, null, null, 'left');
 
     let i = 0;
     for (let contribution in subcircuits) {
         i++;
         doc.setFontSize(subsubtitleSize);
-        doc.text('3.' + (i) + '  ' + lang._source + ' ' + contribution, marginSides*width, line+=20, null, null, 'left');
+        doc.text('4.' + (i) + '  ' + lang._source + ' ' + contribution, marginSides*width, line+=20, null, null, 'left');
 
         doc.setFontSize(smallInfoSize);
-        doc.text('3.' + (i) + '.1  ' + lang._branchIden, marginSides*width, line+=20, null, null, 'left');
+        doc.text('4.' + (i) + '.1  ' + lang._branchIden, marginSides*width, line+=20, null, null, 'left');
         doc.text(lang._currents, marginSides*width, line+=20, null, null, 'left');
         
         if(lang == dictionary.portuguese){
@@ -1739,7 +1776,7 @@ function printContributionsTable_TSP(doc, file, line, marginSides, marginTop, ma
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('4.  ' + lang._ResultsTable, marginSides*width, line+=25, null, null, 'left');
+    doc.text('5.  ' + lang._ResultsTable, marginSides*width, line+=25, null, null, 'left');
 
     let colnum = 2+Object.keys(file.analysisObj.contributions).length;
     let colwidth = innerWidth/colnum;
@@ -1801,9 +1838,9 @@ function printCurrResults_TSP(doc, file, line, marginSides, marginTop, marginBot
     }
 
     doc.setFontSize(subtitleSize);
-    doc.text('5.  ' + lang._branchIden, marginSides*width, line+=25, null, null, 'left');
+    doc.text('6.  ' + lang._branchIden, marginSides*width, line+=25, null, null, 'left');
     doc.setFontSize(subsubtitleSize);
-    doc.text('5.1  ' + lang._currents, marginSides*width, line+=20, null, null, 'left');
+    doc.text('6.1  ' + lang._currents, marginSides*width, line+=20, null, null, 'left');
     
     let tablen = Object.keys(subcircuits).length + 1;
     if(lang == dictionary.portuguese){
@@ -1835,7 +1872,7 @@ function printCurrResults_TSP(doc, file, line, marginSides, marginTop, marginBot
     }
 
     doc.setFontSize(subsubtitleSize);
-    doc.text('5.2  ' + lang._resBranch, marginSides*width, line+=20, null, null, 'left');
+    doc.text('6.2  ' + lang._resBranch, marginSides*width, line+=20, null, null, 'left');
 
     line+=5;
     doc.setLineWidth(1);

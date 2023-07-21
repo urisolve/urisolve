@@ -1131,7 +1131,7 @@ function outputTSP(jsonFile, schematic){
             hourstr = hourstr + ":" + minstr;
 
             let TeX = buildTeXOvTSP(jsonFile, solved.data.subcircuits);
-            let ImagesTeX = await buildImTeXTSP(undefined, solved.data.subcircuits);
+            let ImagesTeX = await buildImTeXTSP(solved.data.subcircuits);
 
             //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
             if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
@@ -1189,9 +1189,8 @@ function outputTSP(jsonFile, schematic){
         });
 
         // Export PDF File
-        $("#print").off().on('click', function() {
-            // Not implemented yet
-            buildPrintPDF_TSP(jsonFile);
+        $("#print").off().on('click',async function() {
+            await buildPrintPDF_TSP(jsonFile);
         });
 
         // Enable output buttons
