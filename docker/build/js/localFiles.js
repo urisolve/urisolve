@@ -9,7 +9,7 @@ function selectFileFromDB(ID){
 
    // DC Example 1
    DCexample1.push( new File([""], "DCexample1IMG.png"));
-   DCexample1.push( new File([""], "DCexample1NET.txt"));
+   DCexample1.push( new File([""], "DCexample1.sch"));
    DCexample1[0].type = "image/png";
    DCexample1[0].lastModified = 1601573677717;
    DCexample1[0].size = 9221;
@@ -18,7 +18,7 @@ function selectFileFromDB(ID){
    DCexample1[1].size = 801;
    // DC Example 2
    DCexample2.push( new File([""], "DCexample2IMG.png"));
-   DCexample2.push( new File([""], "DCexample2NET.txt"));
+   DCexample2.push( new File([""], "DCexample2.sch"));
    DCexample2[0].type = "image/png";
    DCexample2[0].lastModified = 1601575885103;
    DCexample2[0].size = 11747;
@@ -27,7 +27,7 @@ function selectFileFromDB(ID){
    DCexample2[1].size = 942;
    // DC Example 3
    DCexample3.push( new File([""], "DCexample3IMG.png"));
-   DCexample3.push( new File([""], "DCexample3NET.txt"));
+   DCexample3.push( new File([""], "DCexample3.sch"));
    DCexample3[0].type = "image/png";
    DCexample3[0].lastModified = 1601581395022;
    DCexample3[0].size = 9886;
@@ -36,7 +36,7 @@ function selectFileFromDB(ID){
    DCexample3[1].size = 916;
    // DC Example 4
    DCexample4.push( new File([""], "DCexample4IMG.png"));
-   DCexample4.push( new File([""], "DCexample4NET.txt"));
+   DCexample4.push( new File([""], "DCexample4.sch"));
    DCexample4[0].type = "image/png";
    DCexample4[0].lastModified = 1601931327095;
    DCexample4[0].size = 13204;
@@ -46,6 +46,7 @@ function selectFileFromDB(ID){
 
 
    // Netlists
+   /*
    DCexample1[1].data='R:R5 _net0 C R="50 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"\n'+
    'IProbe:Ir4 B _net1\n'+
    'R:R6 _net1 C R="40 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"\n'+
@@ -118,6 +119,334 @@ function selectFileFromDB(ID){
    'R:R4 gnd _net3 R="30 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"\n'+
    'R:R6 A _net6 R="100 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"\n'+
    'R:R7 C _net7 R="60 Ohm" Temp="26.85" Tc1="0.0" Tc2="0.0" Tnom="26.85"\n';
+   */
+
+   // Schematics
+   DCexample1[1].data = '<Qucs Schematic 0.0.19>\n'+
+   '<Properties>\n'+
+      '<View=0,0,862,800,1,0,0>\n'+
+      '<Grid=10,10,1>\n'+
+      '<DataSet=Exemplo1.dat>\n'+
+      '<DataDisplay=Exemplo1.dpl>\n'+
+      '<OpenDisplay=1>\n'+
+      '<Script=Exemplo1.m>\n'+
+      '<RunScript=0>\n'+
+      '<showFrame=0>\n'+
+      '<FrameText0=Título>\n'+
+      '<FrameText1=Autor:>\n'+
+      '<FrameText2=Data:>\n'+
+      '<FrameText3=Revisão:>\n'+
+   '</Properties>\n'+
+   '<Symbol>\n'+
+   '</Symbol>\n'+
+   '<Components>\n'+
+     '<Vdc V1 1 250 300 18 -16 0 1 "12 V" 1 "0 Ohm" 0>\n'+
+     '<R R5 1 780 460 15 -17 0 3 "50 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<Idc I1 1 620 140 -20 -54 0 2 "0.5 A" 1 "0 Ohm" 0>\n'+
+     '<R R1 1 250 420 15 -18 0 1 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir1 1 250 210 19 3 0 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir2 1 480 290 -55 2 0 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir4 1 580 350 -11 -54 0 0 "0 Ohm" 0>\n'+
+     '<R R3 1 480 400 15 -26 0 1 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir5 1 480 480 36 -9 0 3 "0 Ohm" 0>\n'+
+     '<GND * 1 480 540 0 0 0 0>\n'+
+     '<IProbe Ir6 1 650 520 -10 -55 0 0 "0 Ohm" 0>\n'+
+     '<IProbe Ir3 1 780 280 -54 3 0 1 "0 Ohm" 0>\n'+
+     '<R R2 1 480 210 15 -19 0 1 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R6 1 700 350 -31 14 0 2 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R4 1 780 190 15 -21 0 3 "60 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+   '</Components>\n'+
+   '<Wires>\n'+
+     '<480 430 480 450 "" 0 0 0 "">\n'+
+     '<480 510 480 520 "" 0 0 0 "">\n'+
+     '<780 350 780 430 "" 0 0 0 "">\n'+
+     '<480 140 590 140 "" 0 0 0 "">\n'+
+     '<480 350 480 370 "" 0 0 0 "">\n'+
+     '<480 350 550 350 "" 0 0 0 "">\n'+
+     '<250 330 250 390 "" 0 0 0 "">\n'+
+     '<250 520 480 520 "" 0 0 0 "">\n'+
+     '<250 450 250 520 "" 0 0 0 "">\n'+
+     '<250 140 480 140 "" 0 0 0 "">\n'+
+     '<250 140 250 180 "" 0 0 0 "">\n'+
+     '<250 240 250 270 "" 0 0 0 "">\n'+
+     '<480 320 480 350 "" 0 0 0 "">\n'+
+     '<480 520 480 540 "" 0 0 0 "">\n'+
+     '<780 490 780 520 "" 0 0 0 "">\n'+
+     '<680 520 780 520 "" 0 0 0 "">\n'+
+     '<480 520 620 520 "" 0 0 0 "">\n'+
+     '<780 310 780 350 "" 0 0 0 "">\n'+
+     '<780 220 780 250 "" 0 0 0 "">\n'+
+     '<650 140 780 140 "" 0 0 0 "">\n'+
+     '<780 140 780 160 "" 0 0 0 "">\n'+
+     '<480 140 480 180 "" 0 0 0 "">\n'+
+     '<480 240 480 260 "" 0 0 0 "">\n'+
+     '<610 350 670 350 "" 0 0 0 "">\n'+
+     '<730 350 780 350 "" 0 0 0 "">\n'+
+     '<780 350 780 350 "C" 790 320 0 "">\n'+
+     '<480 140 480 140 "A" 460 110 0 "">\n'+
+     '<480 350 480 350 "B" 450 320 0 "">\n'+
+   '</Wires>\n'+
+   '<Diagrams>\n'+
+   '</Diagrams>\n'+
+   '<Paintings>\n'+
+   '</Paintings>'
+
+   DCexample2[1].data = '<Qucs Schematic 0.0.19>\n'+
+   '<Properties>\n'+
+     '<View=0,-21,944,1010,0.909091,0,0>\n'+
+     '<Grid=10,10,1>\n'+
+     '<DataSet=Exemplo 2.dat>\n'+
+     '<DataDisplay=Exemplo 2.dpl>\n'+
+     '<OpenDisplay=1>\n'+
+     '<Script=Exemplo 2.m>\n'+
+     '<RunScript=0>\n'+
+     '<showFrame=0>\n'+
+     '<FrameText0=Título>\n'+
+     '<FrameText1=Autor:>\n'+
+     '<FrameText2=Data:>\n'+
+     '<FrameText3=Revisão:>\n'+
+   '</Properties>\n'+
+   '<Symbol>\n'+
+   '</Symbol>\n'+
+   '<Components>\n'+
+     '<IProbe Ir3 1 350 470 16 -7 0 1 "0 Ohm" 0>\n'+
+     '<GND * 1 430 590 0 0 0 0>\n'+
+     '<R R1 1 350 370 15 -17 0 1 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir5 1 610 470 36 -8 0 3 "0 Ohm" 0>\n'+
+     '<IProbe Ir6 1 610 150 -54 -9 0 1 "0 Ohm" 0>\n'+
+     '<R R6 1 610 250 14 -19 0 3 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R5 1 610 370 10 -20 0 3 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir4 1 530 300 -9 -55 0 0 "0 Ohm" 0>\n'+
+     '<IProbe Ir7 1 830 180 -56 -9 0 1 "0 Ohm" 0>\n'+
+     '<Vdc V2 1 830 310 -64 -22 0 1 "2 V" 1 "0 Ohm" 0>\n'+
+     '<R R7 1 830 430 -92 -26 0 3 "80 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir1 1 90 370 15 -7 0 1 "0 Ohm" 0>\n'+
+     '<Vdc V1 1 90 480 18 -26 0 1 "12 V" 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir2 1 170 300 -26 16 0 0 "0 Ohm" 0>\n'+
+     '<R R2 1 260 300 -26 14 0 2 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R3 1 180 100 -8 17 0 2 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<Idc I1 1 300 100 -7 18 0 0 "0.1 A" 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir8 1 480 100 -11 17 0 0 "0 Ohm" 0>\n'+
+     '<R R4 1 430 300 -4 12 0 2 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+   '</Components>\n'+
+   '<Wires>\n'+
+     '<350 540 430 540 "" 0 0 0 "">\n'+
+     '<350 500 350 540 "" 0 0 0 "">\n'+
+     '<350 300 350 340 "" 0 0 0 "">\n'+
+     '<350 400 350 440 "" 0 0 0 "">\n'+
+     '<430 540 430 590 "" 0 0 0 "">\n'+
+     '<610 300 610 340 "" 0 0 0 "">\n'+
+     '<430 540 610 540 "" 0 0 0 "">\n'+
+     '<610 500 610 540 "" 0 0 0 "">\n'+
+     '<610 400 610 440 "" 0 0 0 "">\n'+
+     '<610 280 610 300 "" 0 0 0 "">\n'+
+     '<610 100 610 120 "" 0 0 0 "">\n'+
+     '<610 180 610 220 "" 0 0 0 "">\n'+
+     '<560 300 610 300 "" 0 0 0 "">\n'+
+     '<610 100 830 100 "" 0 0 0 "">\n'+
+     '<610 540 830 540 "" 0 0 0 "">\n'+
+     '<830 460 830 540 "" 0 0 0 "">\n'+
+     '<830 340 830 400 "" 0 0 0 "">\n'+
+     '<830 210 830 280 "" 0 0 0 "">\n'+
+     '<830 100 830 150 "" 0 0 0 "">\n'+
+     '<90 540 350 540 "" 0 0 0 "">\n'+
+     '<90 300 90 340 "" 0 0 0 "">\n'+
+     '<90 510 90 540 "" 0 0 0 "">\n'+
+     '<90 400 90 450 "" 0 0 0 "">\n'+
+     '<90 300 140 300 "" 0 0 0 "">\n'+
+     '<200 300 230 300 "" 0 0 0 "">\n'+
+     '<290 300 350 300 "" 0 0 0 "">\n'+
+     '<90 100 90 300 "" 0 0 0 "">\n'+
+     '<90 100 150 100 "" 0 0 0 "">\n'+
+     '<210 100 270 100 "" 0 0 0 "">\n'+
+     '<510 100 610 100 "" 0 0 0 "">\n'+
+     '<330 100 450 100 "" 0 0 0 "">\n'+
+     '<350 300 400 300 "" 0 0 0 "">\n'+
+     '<460 300 500 300 "" 0 0 0 "">\n'+
+     '<350 300 350 300 "B" 330 270 0 "">\n'+
+     '<610 100 610 100 "D" 590 70 0 "">\n'+
+     '<610 300 610 300 "C" 580 270 0 "">\n'+
+     '<90 300 90 300 "A" 60 270 0 "">\n'+
+   '</Wires>\n'+
+   '<Diagrams>\n'+
+   '</Diagrams>\n'+
+   '<Paintings>\n'+
+   '</Paintings>'
+
+   DCexample3[1].data = '<Qucs Schematic 0.0.19>\n'+
+   '<Properties>\n'+
+     '<View=18,47,902,1012,0.971822,0,107>\n'+
+     '<Grid=10,10,1>\n'+
+     '<DataSet=Exemplo 3.dat>\n'+
+     '<DataDisplay=Exemplo 3.dpl>\n'+
+     '<OpenDisplay=1>\n'+
+     '<Script=Exemplo 3.m>\n'+
+     '<RunScript=0>\n'+
+     '<showFrame=0>\n'+
+     '<FrameText0=Título>\n'+
+     '<FrameText1=Autor:>\n'+
+     '<FrameText2=Data:>\n'+
+     '<FrameText3=Revisão:>\n'+
+   '</Properties>\n'+
+   '<Symbol>\n'+
+   '</Symbol>\n'+
+   '<Components>\n'+
+     '<Vdc V2 1 610 140 -22 -54 0 0 "9 V" 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir1 1 100 460 39 -10 0 3 "0 Ohm" 0>\n'+
+     '<IProbe Ir3 1 250 290 -8 17 0 0 "0 Ohm" 0>\n'+
+     '<IProbe Ir2 1 320 460 37 -8 0 3 "0 Ohm" 0>\n'+
+     '<IProbe Ir4 1 250 140 -13 17 0 0 "0 Ohm" 0>\n'+
+     '<R R5 1 390 290 -26 -53 0 2 "80 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir5 1 480 290 -26 16 0 0 "0 Ohm" 0>\n'+
+     '<IProbe Ir6 1 550 460 39 -9 0 3 "0 Ohm" 0>\n'+
+     '<IProbe Ir7 1 610 290 -26 16 0 0 "0 Ohm" 0>\n'+
+     '<IProbe Ir8 1 780 460 35 -13 0 3 "0 Ohm" 0>\n'+
+     '<Vdc V1 1 150 290 -26 -56 0 2 "10 V" 1 "0 Ohm" 0>\n'+
+     '<R R6 1 420 140 -17 16 0 2 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R1 1 100 360 15 -26 0 1 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R2 1 320 360 15 -26 0 1 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R3 1 550 360 15 -26 0 1 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R4 1 780 360 15 -26 0 1 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R7 1 710 290 -26 -53 0 2 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<GND * 1 440 570 0 0 0 0>\n'+
+   '</Components>\n'+
+   '<Wires>\n'+
+     '<100 390 100 430 "" 0 0 0 "">\n'+
+     '<100 290 100 330 "" 0 0 0 "">\n'+
+     '<100 490 100 520 "" 0 0 0 "">\n'+
+     '<100 520 320 520 "" 0 0 0 "">\n'+
+     '<320 520 440 520 "" 0 0 0 "">\n'+
+     '<320 490 320 520 "" 0 0 0 "">\n'+
+     '<280 290 320 290 "" 0 0 0 "">\n'+
+     '<320 290 320 330 "" 0 0 0 "">\n'+
+     '<320 390 320 430 "" 0 0 0 "">\n'+
+     '<320 290 360 290 "" 0 0 0 "">\n'+
+     '<420 290 450 290 "" 0 0 0 "">\n'+
+     '<550 490 550 520 "" 0 0 0 "">\n'+
+     '<550 390 550 430 "" 0 0 0 "">\n'+
+     '<510 290 550 290 "" 0 0 0 "">\n'+
+     '<550 290 550 330 "" 0 0 0 "">\n'+
+     '<550 290 580 290 "" 0 0 0 "">\n'+
+     '<640 290 680 290 "" 0 0 0 "">\n'+
+     '<550 520 780 520 "" 0 0 0 "">\n'+
+     '<780 490 780 520 "" 0 0 0 "">\n'+
+     '<780 390 780 430 "" 0 0 0 "">\n'+
+     '<740 290 780 290 "" 0 0 0 "">\n'+
+     '<780 290 780 330 "" 0 0 0 "">\n'+
+     '<100 140 220 140 "" 0 0 0 "">\n'+
+     '<100 140 100 290 "" 0 0 0 "">\n'+
+     '<180 290 220 290 "" 0 0 0 "">\n'+
+     '<100 290 120 290 "" 0 0 0 "">\n'+
+     '<280 140 390 140 "" 0 0 0 "">\n'+
+     '<450 140 580 140 "" 0 0 0 "">\n'+
+     '<640 140 780 140 "" 0 0 0 "">\n'+
+     '<780 140 780 290 "" 0 0 0 "">\n'+
+     '<440 520 550 520 "" 0 0 0 "">\n'+
+     '<440 520 440 570 "" 0 0 0 "">\n'+
+     '<100 290 100 290 "A" 70 260 0 "">\n'+
+     '<320 290 320 290 "B" 330 250 0 "">\n'+
+     '<550 290 550 290 "C" 560 250 0 "">\n'+
+     '<780 290 780 290 "D" 790 250 0 "">\n'+
+   '</Wires>\n'+
+   '<Diagrams>\n'+
+   '</Diagrams>\n'+
+   '<Paintings>\n'+
+   '</Paintings>'
+   
+   DCexample4[1].data = '<Qucs Schematic 0.0.19>\n'+
+   '<Properties>\n'+
+     '<View=0,-60,932,830,1,0,0>\n'+
+     '<Grid=10,10,1>\n'+
+     '<DataSet=Exemplo 4.dat>\n'+
+     '<DataDisplay=Exemplo 4.dpl>\n'+
+     '<OpenDisplay=1>\n'+
+     '<Script=Exemplo 4.m>\n'+
+     '<RunScript=0>\n'+
+     '<showFrame=0>\n'+
+     '<FrameText0=Título>\n'+
+     '<FrameText1=Autor:>\n'+
+     '<FrameText2=Data:>\n'+
+     '<FrameText3=Revisão:>\n'+
+   '</Properties>\n'+
+   '<Symbol>\n'+
+   '</Symbol>\n'+
+   '<Components>\n'+
+     '<IProbe Ir3 1 160 670 34 -9 0 3 "0 Ohm" 0>\n'+
+     '<Vdc V2 1 160 570 18 -26 0 1 "5 V" 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir5 1 590 330 -10 16 0 0 "0 Ohm" 0>\n'+
+     '<Vdc V3 1 310 110 -20 14 0 2 "12 V" 1 "0 Ohm" 0>\n'+
+     '<Vdc V1 1 420 580 18 -26 0 1 "8 V" 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir1 1 420 480 13 -8 0 1 "0 Ohm" 0>\n'+
+     '<IProbe Ir2 1 580 470 -35 -4 0 3 "0 Ohm" 0>\n'+
+     '<GND * 1 500 770 0 0 0 0>\n'+
+     '<IProbe Ir8 1 500 170 15 -8 0 1 "0 Ohm" 0>\n'+
+     '<R R6 1 500 260 15 -26 0 1 "100 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R3 1 370 330 -26 -53 0 2 "40 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R1 1 580 580 15 -26 0 1 "25 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<R R2 1 160 450 15 -26 0 1 "10 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir7 1 160 190 16 -8 0 1 "0 Ohm" 0>\n'+
+     '<R R7 1 640 110 -27 12 0 2 "60 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir9 1 850 180 -58 -9 0 1 "0 Ohm" 0>\n'+
+     '<R R4 1 850 630 -92 -26 0 3 "30 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir4 1 850 510 -55 -9 0 1 "0 Ohm" 0>\n'+
+     '<Idc I1 1 850 390 -62 -11 0 1 "0.5 A" 1 "0 Ohm" 0>\n'+
+     '<R R5 1 740 330 -30 -49 0 0 "20 Ohm" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>\n'+
+     '<IProbe Ir6 1 260 330 -26 16 0 0 "0 Ohm" 0>\n'+
+   '</Components>\n'+
+   '<Wires>\n'+
+     '<160 730 500 730 "" 0 0 0 "">\n'+
+     '<160 700 160 730 "" 0 0 0 "">\n'+
+     '<160 600 160 640 "" 0 0 0 "">\n'+
+     '<160 480 160 540 "" 0 0 0 "">\n'+
+     '<160 330 160 420 "" 0 0 0 "">\n'+
+     '<400 330 500 330 "" 0 0 0 "">\n'+
+     '<340 110 500 110 "" 0 0 0 "">\n'+
+     '<420 510 420 550 "" 0 0 0 "">\n'+
+     '<580 500 580 550 "" 0 0 0 "">\n'+
+     '<420 610 420 660 "" 0 0 0 "">\n'+
+     '<580 610 580 660 "" 0 0 0 "">\n'+
+     '<580 400 580 440 "" 0 0 0 "">\n'+
+     '<420 400 420 450 "" 0 0 0 "">\n'+
+     '<420 660 500 660 "" 0 0 0 "">\n'+
+     '<500 660 580 660 "" 0 0 0 "">\n'+
+     '<500 660 500 730 "" 0 0 0 "">\n'+
+     '<420 400 500 400 "" 0 0 0 "">\n'+
+     '<500 330 560 330 "" 0 0 0 "">\n'+
+     '<500 400 580 400 "" 0 0 0 "">\n'+
+     '<500 330 500 400 "" 0 0 0 "">\n'+
+     '<500 730 500 770 "" 0 0 0 "">\n'+
+     '<500 290 500 330 "" 0 0 0 "">\n'+
+     '<500 200 500 230 "" 0 0 0 "">\n'+
+     '<500 110 500 140 "" 0 0 0 "">\n'+
+     '<160 110 280 110 "" 0 0 0 "">\n'+
+     '<160 110 160 160 "" 0 0 0 "">\n'+
+     '<160 220 160 330 "" 0 0 0 "">\n'+
+     '<500 110 610 110 "" 0 0 0 "">\n'+
+     '<670 110 850 110 "" 0 0 0 "">\n'+
+     '<850 110 850 150 "" 0 0 0 "">\n'+
+     '<850 210 850 330 "" 0 0 0 "">\n'+
+     '<500 730 850 730 "" 0 0 0 "">\n'+
+     '<850 660 850 730 "" 0 0 0 "">\n'+
+     '<850 540 850 600 "" 0 0 0 "">\n'+
+     '<850 420 850 480 "" 0 0 0 "">\n'+
+     '<850 330 850 360 "" 0 0 0 "">\n'+
+     '<770 330 850 330 "" 0 0 0 "">\n'+
+     '<620 330 710 330 "" 0 0 0 "">\n'+
+     '<290 330 340 330 "" 0 0 0 "">\n'+
+     '<160 330 230 330 "" 0 0 0 "">\n'+
+     '<160 330 160 330 "B" 180 290 0 "">\n'+
+     '<850 330 850 330 "D" 880 300 0 "">\n'+
+     '<500 330 500 330 "A" 470 350 0 "">\n'+
+     '<500 110 500 110 "C" 470 70 0 "">\n'+
+   '</Wires>\n'+
+   '<Diagrams>\n'+
+   '</Diagrams>\n'+
+   '<Paintings>\n'+
+   '</Paintings>'
+   
+   
+
+   
 
    //Images
    DCexample1[0].data ="data:image/png;base64,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";
