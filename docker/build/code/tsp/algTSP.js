@@ -981,7 +981,7 @@ function outputTSP(jsonFile, schematic){
         if(mainDrawing.errorFlag){
             alert('Error on circuit drawing:\n' + redrawSchematic_handleError(mainDrawing));
             return;
-        }
+        } 
     });
 
     // Add cards to the selection section
@@ -1112,7 +1112,7 @@ function outputTSP(jsonFile, schematic){
         });
 
         // Export TeX File
-        $("#tex").off().on('click', function() {
+        $("#tex").off().on('click', async function() {
             const filename = 'urisolve_results_TSP.tex';
             const imagesFilename = 'urisolve_images_TSP.tex';
                     
@@ -1131,7 +1131,7 @@ function outputTSP(jsonFile, schematic){
             hourstr = hourstr + ":" + minstr;
 
             let TeX = buildTeXOvTSP(jsonFile, solved.data.subcircuits);
-            let ImagesTeX = buildImTeXTSP(undefined, solved.data.subcircuits);
+            let ImagesTeX = await buildImTeXTSP(undefined, solved.data.subcircuits);
 
             //Print TeX (Temporary - Index 1432 - texfile cannot be change before it)
             if(studNumber.length>1 && studLastname.length > 1 && studNumber.length>1){
@@ -1161,9 +1161,9 @@ function outputTSP(jsonFile, schematic){
         });
 
         // Open in overleaf
-        $("#overleaf").off().on('click', function() {
+        $("#overleaf").off().on('click', async function() {
             let TeX = buildTeXOvTSP(jsonFile, solved.data.subcircuits);
-            let ImagesTeX = buildImTeXTSP(undefined, solved.data.subcircuits);
+            let ImagesTeX = await buildImTeXTSP(solved.data.subcircuits);
             //Get User info
             let studName = document.getElementById('output-name').value;
             let studLastname = document.getElementById('output-lastname').value;
@@ -1235,6 +1235,8 @@ function outputTSP(jsonFile, schematic){
  * @param {Schematic} schematic Schematic object of the main circuit
  */
 function loadFileAsTextTSP(data, schematic){
+    // Add Circuit to Canvas method to jquery objects
+    addToCanvasMethod();
     console.log(schematic);
     jsonFile = JSON.parse(data);
     console.log(jsonFile);

@@ -764,10 +764,10 @@ function buildTeXOvTSP(file, subfiles) {
 	let TeX = getTexFileHeaderTSPOv(lang);
 
     // Add main circuit image
-    //TeX += "\\section{" + lang._circuitImage + "}";
-    //TeX += "\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";"
-    //TeX += "\\inlineimages{circuit.png}{\\circuit}}}";
-    //TeX += "\r\n\\caption{" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
+    TeX += "\\section{" + lang._circuitImage + "}";
+    TeX += "\r\n\r\n\\begin{figure}[hbt]\r\n\\centering{\\resizebox{12cm}{!}{";
+    TeX += "\\inlineimages{maincircuit.png}{\\maincircuit}}}";
+    TeX += "\r\n\\caption{" + lang._circuitImage + "}\r\n\\label{circuitimage}\r\n\\end{figure}\r\n\r\n";
 
     // TeX Fundamental Vars
 	TeX += "\\section{" + lang._fundamentalsTitle + "}\r\n\r\n\\begin{table}[hbt!]\r\n\\centering\r\n\\begin{tabular}{clclclc}\r\n";
@@ -1028,7 +1028,7 @@ function getTexFileHeaderTSPOv(lang){
     return texHeader;
 }
 
-function buildImTeXTSP(imagesTSP, files){
+async function buildImTeXTSP(files){
     let imageTex = '';
 
     let sampleimg = base64imgselect("logo");
@@ -1036,10 +1036,17 @@ function buildImTeXTSP(imagesTSP, files){
 
     const substitutions = "abcdfghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVYXYZ";
 
-    // Add circuit image
-    var html = $('#circuitImage > .circuit-widget > .drawing');
-    //var imgTex = circuitToSvg(html);
-    //imageTex += imgTex;
+    // Get circuit image container
+    let mainCircuit = $('#circuitImage > .circuit-widget');
+    let temp = $('<div></div>');
+    mainCircuit.append(temp);
+    // Create a temporary div to store the circuit image
+    canvas = await mainCircuit.CircuitToCanvas(temp)
+
+    data = canvas.toDataURL();
+    imageTex += '\\newcommand{\\maincircuit}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
+
+    temp.remove();
 
     // Add subcircuit images
     let k = 0;
@@ -1856,102 +1863,6 @@ function printCurrResults_TSP(doc, file, line, marginSides, marginTop, marginBot
     }
 
     return line;
-}
-
-// FUNCTION DOES NOT WORK !!!
-async function circuitToSvg(circuit){
-    // Get component symbols
-    let rUsDivs = circuit.find('.R.US');
-    let rEUDivs = circuit.find('.R.european');
-    let cNeutralDivs = circuit.find('.C.neutral');
-    let cPolarDivs = circuit.find('.C.polar');
-    let lDivs = circuit.find('.L');
-    let vacDivs = circuit.find('.Vac');
-    let vdcDivs = circuit.find('.Vdc');
-    let iacDivs = circuit.find('.Iac');
-    let idcDivs = circuit.find('.Idc');
-    let vprobeDivs = circuit.find('.VProbe');
-    let iprobeDivs = circuit.find('.IProbe');
-    let gndDivs = circuit.find('.gnd');
-    let vertDivs = circuit.find('.connect-vertical');
-    let horDivs = circuit.find('.connect-horizontal');
-    let components = rUsDivs.add(rEUDivs).add(cNeutralDivs).add(cPolarDivs).add(lDivs).add(vacDivs).add(vdcDivs).add(iacDivs).add(idcDivs).add(vprobeDivs).add(iprobeDivs).add(gndDivs).add(vertDivs).add(horDivs);
-    
-    images = [];
-
-    // Get component images
-    components.each(function(){
-        var backgroundImage = $(this).css('background-image');
-        var backgroundImageURL = backgroundImage.replace('url(','').replace(')','').replace(/\"/gi, "");
-        var backgroundSize = $(this).css('background-size');
-        var x = $(this).offset().left - $(this).parent().parent().offset().left;
-        var y = $(this).offset().top - $(this).parent().parent().offset().top;        
-        var width = $(this).css('width');
-        var height = $(this).css('height');
-
-        if($(this).hasClass('rotated-0')){
-            rotation = 0;
-        }
-        else if($(this).hasClass('rotated-90')){
-            rotation = 90;
-        }
-        else if($(this).hasClass('rotated-180')){
-            rotation = 180;
-        }
-        else if($(this).hasClass('rotated-270')){
-            rotation = 270;
-        }
-
-        var image = {
-            backgroundImage: backgroundImageURL,
-            backgroundSize: backgroundSize,
-            rotation: rotation,
-            x: x,
-            y: y,
-            width: width,
-            height: height
-        };
-
-        images.push(image);
-    });
-
-    preloadedImages = [];
-
-    // Preload images
-    images.forEach(function(image){
-        var img = new Image();
-        img.src = image.backgroundImage;
-        preloadedImages.push(img);
-    });
-
-    return new Promise((resolve, reject) => {
-        try {
-          html2canvas(circuit[0]).then(canvas => {
-            var context = canvas.getContext('2d');
-    
-            for (let i = 0; i < preloadedImages.length; i++) {
-              var image = preloadedImages[i];
-              var x = images[i].x;
-              var y = images[i].y;
-              var width = images[i].width;
-              var height = images[i].height;
-              var rotation = images[i].rotation;
-    
-              context.drawImage(image, x, y, width, height);
-            }
-    
-            var img = new Image();
-            img.src = canvas.toDataURL('image/png');
-    
-            img.onload = () => {
-              const imageTex = '\\newcommand{\\circuit}{' + canvas.toDataURL('image/png').replace('data:image/png;base64,', '') + '}\r\n';
-              resolve(imageTex);
-            };
-          });
-        } catch (error) {
-          reject(new Error('An error occurred during image capture: ' + error));
-        }
-    });
 }
 
 /**

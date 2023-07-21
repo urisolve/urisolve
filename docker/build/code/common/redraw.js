@@ -1573,3 +1573,83 @@ function cleanResolution(){
     $('#results-tabs > .resolution-item').remove();
     
 }
+
+/**
+ * This function adds the toCanvas method to the jQuery objects
+ */
+function addToCanvasMethod(){
+    /**
+     * This method converts the circuit to a canvas element and appends it to the provided jQuery object
+     * @param {JQuery} output The jQuery object to which the canvas will be appended to (it will be emptied first)
+     * @returns {Promise} A promise that resolves to the canvas element
+     */
+    $.fn.CircuitToCanvas = function(output) {
+        return new Promise((resolve) => {
+            drawing = $(this).find('.drawing');
+
+            symbols = drawing.find('.cp-symbol, .connect-horizontal, .connect-vertical, .IProbe, .VProbe, .gnd');
+            symbols.each(function() {
+                $(this)[0].setAttribute('data-html2canvas-ignore','true');
+            });
+            
+            html2canvas(drawing[0], { ignoreElements: true, useCORS: true, allowTaint: true }).then(canvas => {
+                const imagePromises = [];
+                symbols.each(function () {
+                    $(this)[0].removeAttribute('data-html2canvas-ignore');
+                    // Get the background image of the component
+                    let symbolStyle = window.getComputedStyle($(this)[0]);
+                    let symbolBackground = symbolStyle.getPropertyValue('background-image');
+                    let symbolBackgroundURL = symbolBackground.slice(4, -1).replace(/"/g, "");
+                
+                    // Get the position of the component
+                    let symbolPosition = $(this).offset();
+                    let symbolPositionX = symbolPosition.left;
+                    let symbolPositionY = symbolPosition.top;
+                
+                    // Get the size of the component
+                    let symbolWidth = $(this).width();
+                    let symbolHeight = $(this).height();
+                
+                    // Get symbol rotation
+                    let symbolRotation = symbolStyle.getPropertyValue('transform');
+                    let symbolRotationAngle = 0;
+                    if (symbolRotation != 'none') {
+                        let values = symbolRotation.split('(')[1].split(')')[0].split(',');
+                        symbolRotationAngle = Math.atan2(parseFloat(values[1]), parseFloat(values[0]));
+                    }
+                    // Draw the background image on the canvas with rotation
+                    let symbolImage = new Image();
+                    symbolImage.src = symbolBackgroundURL;
+                    const imageLoadPromise = new Promise((imageResolve) => {
+                        symbolImage.onload = function () {
+                            let ctx = canvas.getContext('2d');
+                    
+                            // Save the current context state
+                            ctx.save();
+                    
+                            // Translate the context to the center of the image
+                            ctx.translate(symbolPositionX + symbolWidth / 2, symbolPositionY + symbolHeight / 2);
+                    
+                            // Rotate the context around the center of the image
+                            ctx.rotate(symbolRotationAngle);
+                    
+                            // Draw the image with rotation
+                            ctx.drawImage(symbolImage, -symbolWidth / 2, -symbolHeight / 2, symbolWidth, symbolHeight);
+                    
+                            // Restore the context state (optional)
+                            ctx.restore();
+                            imageResolve();
+                        };
+                    });
+                    imagePromises.push(imageLoadPromise);
+
+                });
+                Promise.all(imagePromises).then(() => {
+                    output.empty();
+                    output.append(canvas);
+                    resolve(canvas);
+                });
+            });
+        })
+    }
+}
