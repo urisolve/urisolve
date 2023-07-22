@@ -1570,8 +1570,10 @@ function redrawSchematic_handleError(err){
  * This function handles the change in circuit values (for now, it only exists to handle reseting TSP resolution)
  */
 function cleanResolution(){
+    // Empty the results tabs
     $('#results-tabs > .resolution-item').remove();
-    
+    // Empty solvedJSON
+    solvedJSON = {};
 }
 
 /**

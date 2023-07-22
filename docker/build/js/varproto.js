@@ -1951,7 +1951,6 @@ class DCSim {
 
 class ACSim {
     constructor(caracteristics) {
-        console.log(caracteristics);
         this.type = caracteristics[0];
         this.name = {value: caracteristics[1], position: {x: caracteristics[5], y: caracteristics[6]}};
         this.active = caracteristics[2];

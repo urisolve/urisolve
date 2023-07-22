@@ -173,6 +173,14 @@ function schematicToJsonFile(circuit) {
 
     // Validate the netlist
 	var netlistTxt = validateNetlist(netlist.data);
+    if(netlistTxt.first.length > 0) {
+		if(foundCriticalErr(netlistTxt.first)){
+            return {
+                errorFlag: true,
+                errorReasonCodes: netlistTxt.first,
+            }
+        }
+    }
     // Check for previous ground alteration
 	if(fileContents[2])
         netlistTxt.first.push(fileContents[2]);
@@ -239,6 +247,12 @@ function solveTSP(schematic, mainJsonFile, order) {
 
         subcircuits[order.indexOf(o)] = ({schematic: subcircuit.data.object, name: cp.name.value, method: method});
         let jsonFile = schematicToJsonFile(subcircuits[order.indexOf(o)].schematic);
+        if(jsonFile.errorFlag) {
+            return {
+                errorFlag: true,
+                errorData: jsonFile.errorReasonCodes,
+            }
+        }
         let parsedJson = JSON.parse(jsonFile.third);
 
         if(parsedJson.analysisObj.warnings.length > 0){
@@ -1077,10 +1091,25 @@ function outputTSP(jsonFile, schematic){
 
         // Calculate
         let solved = solveTSP(schematic, jsonFile, resolutionOrder);
-        if(Object.keys(solved.data.subcircuits).length != vectSources.length) {
+        if(solved.errorFlag){
             cleanModalResults();
             $('#loadpage').fadeOut(1000);
-            alert('Erro ao resolver o circuito.');
+            alert(solved.errorData);
+            return{
+                errorFlag: true,
+            };
+        }
+        if(Object.keys(solved.data.subcircuits).length != vectSources.length) {
+            // Check which subcircuits are missing
+            let missing = [];
+            vectSources.forEach(s => {
+                if(!solved.data.subcircuits[s.name.value])
+                    missing.push(s.name.value);
+            });
+
+            cleanModalResults();
+            $('#loadpage').fadeOut(1000);
+            alert('Erro ao resolver os circuitos: \n' + missing.join(', '));
             return {
                 errorFlag: true,
             };
