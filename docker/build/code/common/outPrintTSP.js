@@ -1038,14 +1038,21 @@ async function buildImTeXTSP(files){
 
     // Get circuit image container
     let mainCircuit = $('#circuitImage > .circuit-widget');
-    let temp = $('<div></div>');
-    mainCircuit.append(temp);
-    // Remove background color
-    mainCircuit.find('.drawing').css('background-color', 'transparent');
+
+    // Get current tab
+    let tab = $('#pages-content > .active');
+
     // Create a temporary div to store the circuit image
-    canvas = await mainCircuit.CircuitToCanvas(temp)
+    let temp = $('<div></div>');
+    temp.append(mainCircuit.clone());
+    tab.prepend(temp);
+    
+    // Remove background color
+    temp.find('.drawing').css('background-color', 'transparent');
+    // Create a temporary div to store the circuit image
+    canvas = await temp.CircuitToCanvas(temp)
     // Restore background color
-    mainCircuit.find('.drawing').css('background-color', '');
+    temp.find('.drawing').css('background-color', '');
 
     data = canvas.toDataURL();
     imageTex += '\\newcommand{\\maincircuit}{' + data.replace('data:image/png;base64,', '') + '}\r\n';
@@ -1557,14 +1564,23 @@ async function printCircImage_TSP(doc, file, line, marginSides, marginTop, margi
 
     // Get circuit image container
     let mainCircuit = $('#circuitImage > .circuit-widget');
-    let temp = $('<div></div>');
-    mainCircuit.append(temp);
-    // Remove background color
-    mainCircuit.find('.drawing').css('background-color', 'transparent');
+
+    // Get current tab
+    let tab = $('#pages-content > .active');
+
     // Create a temporary div to store the circuit image
-    canvas = await mainCircuit.CircuitToCanvas(temp)
+    let temp = $('<div></div>');
+    temp.append(mainCircuit.clone());
+    tab.prepend(temp);
+    
+    // Remove background color
+    temp.find('.drawing').css('background-color', 'transparent');
+    // Create a temporary div to store the circuit image
+    canvas = await temp.CircuitToCanvas(temp)
     // Restore background color
-    mainCircuit.find('.drawing').css('background-color', '');
+    temp.find('.drawing').css('background-color', '');
+
+    temp.remove();
 
     if(line+150+30 > height-height*marginBottom-10){
         doc.addPage();
@@ -1573,8 +1589,6 @@ async function printCircImage_TSP(doc, file, line, marginSides, marginTop, margi
     } 
     doc.addImage(canvas.toDataURL("image/png"), "PNG", marginSides*width, line+=15, width-2*marginSides*width, (width-2*marginSides*width)*canvas.height/canvas.width);
     line+= (width-2*marginSides*width)*canvas.height/canvas.width;
-
-    temp.remove();
 
     return line;
 }
@@ -1825,7 +1839,7 @@ function printCurrResults_TSP(doc, file, line, marginSides, marginTop, marginBot
 
     let currents = file.analysisObj.currents;
     let subcircuits = file.analysisObj.contributions;
-    let results = jsonFile.analysisObj.results;
+    let results = file.analysisObj.results;
 
     let width = doc.internal.pageSize.width;
     let height = doc.internal.pageSize.height;
