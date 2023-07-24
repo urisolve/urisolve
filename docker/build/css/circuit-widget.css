@@ -369,6 +369,7 @@
     background-image: url('../img/circuit-widget-icons/Vac_40px.svg');
     background-size: 100% 100%;
 }
+.Vac.rotated-180, .Vac.rotated-0  { background-image: url('../img/circuit-widget-icons/Vac_40px_horizontal.svg');}
 .Vac.legacy { background-image: url('../img/circuit-widget-icons/Vac_40px_legacy.svg');}
 
 .Vdc {
@@ -381,7 +382,8 @@
     background-image: url('../img/circuit-widget-icons/Iac_40px.svg');
     background-size: 100% 100%;
 }
-.Iac.legacy { background-image: url('../img/circuit-widget-icons/Iac_40px_legacy.svg');}
+.Iac.rotated-180, .Iac.rotated-0  { background-image: url('../img/circuit-widget-icons/Iac_40px_horizontal.svg');}
+.Iac.legacy { background-image: url('../img/circuit-widget-icons/Iac_40px_legacy.svg');}    
 
 .Idc {
     background-image: url('../img/circuit-widget-icons/Idc_40px.svg');
