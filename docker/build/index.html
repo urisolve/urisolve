@@ -774,51 +774,7 @@
                                      <h3>Circuito selecionado:</h3>
                                      <div id="resultado" style="width: auto"></div> 
                               </div>
-
-<body>
-    <h1>Representação do Circuito</h1>
-    <div id="circuito-container"></div>
-
-    <script>
-        const circuitoJSON = {
-            malhas: [
-                ["malha1-componente1", "malha1-componente2", "malha1-componente3"],
-                ["malha2-componente1", "malha2-componente2", "malha2-componente3"]
-            ],
-            ramos: ["ramo1", "ramo2", "ramo3"]
-        };
-
-        function renderizarCircuito() {
-            const circuitoContainer = document.getElementById("circuito-container");
-
-            // Renderizar malhas
-            for (let i = 0; i < circuitoJSON.malhas.length; i++) {
-                const malha = circuitoJSON.malhas[i];
-                for (let j = 0; j < malha.length; j++) {
-                    const componente = document.createElement("div");
-                    componente.className = "componente";
-                    componente.id = malha[j];
-                    componente.textContent = `M${i+1}-C${j+1}`;
-                    circuitoContainer.appendChild(componente);
-                }
-            }
-
-            // Renderizar ramos
-            for (let i = 0; i < circuitoJSON.ramos.length; i++) {
-                const ramo = document.createElement("div");
-                ramo.className = "componente";
-                ramo.id = circuitoJSON.ramos[i];
-                ramo.textContent = `R${i+1}`;
-                circuitoContainer.appendChild(ramo);
-            }
-        }
-
-        renderizarCircuito();
-    </script>
-</body>
-
-
-                             </div>
+                              </div>
                            </div>
                            <div class="card-footer">
                             <small class="text-muted"><span data-translate="_lastUpdated"></span><span> Jun 22 2023.</span></small>
