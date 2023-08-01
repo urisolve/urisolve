@@ -692,13 +692,12 @@
                                  }
                                </script>
                              <div id="circuito"></div>
-                               <script src="script.json"></script>
                                <script>
                                 // Carregando o circuito
                                 function carregarCircuito() {
-                                 const circuitoElement = document.getElementById('resultado');
+                                 const circuitoElement = document.getElementById('circuito');
                                   if (circuitosjson.resultado === 'triangulo') {
-                                    carregarCircuito(docker/build/code/cirgen/circuitos/triangulo.json) = resultado;
+                                    carregarCircuito(docker/build/code/cirgen/circuitos/triangulo.json) = circuito;
                                   } 
                                 }    
                                </script>
@@ -772,7 +771,7 @@
                                 <div class="card-footer">
                                   <input type="button" value="Carregar Circuito" onclick="carregarCircuito()">
                                      <h3>Circuito selecionado:</h3>
-                                     <div id="resultado" style="width: auto"></div> 
+                                     <div id="circuito" style="width: auto"></div> 
                               </div>
                               </div>
                            </div>
