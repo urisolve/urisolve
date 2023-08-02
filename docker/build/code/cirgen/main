@@ -1,32 +1,38 @@
+$(function(){
+    function recolherInformação() {
+         return {
+             circuto: {
+                 AC: $("#isAC")[0].checked,
+                 DC: $("#isDC")[0].checked,
+                 Malhas: $("#isMalhas")[0].checked,
+                 Ramos: $("#isRamos")[0].checked
+                  },
+             componentes: {
+                 Resistência: $("#isResistênca")[0].checked,
+                 Condensador: $("#isCondensador")[0].checked,
+                 Bobine: $("#isBobine")[0].checked,
+                 Massa: $("#isMassa")[0].checked,
+                 Fonte_de_corrente: $("#isFonte de corrente")[0].checked,
+                 Fonte_de_tensão: $("#isFonte de tensão")[0].checked 
+                  }
+                }
+    }
+    function escolherCircuito(){
+        return{
 
-                                function recolherInformação() {
-                                  return {
-                                    circuto: { 
-                                        AC: $("#isAC")[0].checked,
-                                        DC: $("#isDC")[0].checked,
-                                        Malhas: $("#isMalhas")[0].checked,
-                                        Ramos: $("#isRamos")[0].checked
+        }
 
-                                    },
-                                    componentes: {
-                                        Resistência: $("#isResistênca")[0].checked,
-                                        Condensador: $("#isCondensador")[0].checked,
-                                        Bobine: $("#isBobine")[0].checked,
-                                        Massa: $("#isMassa")[0].checked,
-                                        Fonte_de_corrente: $("#isFonte de corrente")[0].checked,
-                                        Fonte_de_tensão: $("#isFonte de tensão")[0].checked 
+    }
+    function preencherCircuito(){
+        return{
+            
+        }
 
-                                    }
-                                  }
-                                }
-                                 
-                            
-                  
-                             
-                          
-                                function carregarCircuito() {
-                                 const circuitoElement = document.getElementById('circuito');
-                                  if (circuitosjson.resultado === 'triangulo') {
-                                    carregarCircuito(docker/build/code/cirgen/circuitos/triangulo.json) = circuito;
-                                  } 
-                                }
+    }                             
+    function mostrarCircuito(){
+        return{
+            
+        }
+
+    } 
+});
