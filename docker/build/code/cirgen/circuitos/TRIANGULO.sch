@@ -2,10 +2,10 @@
 <Properties>
   <View=0,0,800,800,1,0,0>
   <Grid=10,10,1>
-  <DataSet=TRIANGULO.dat>
-  <DataDisplay=TRIANGULO.dpl>
+  <DataSet=TRIANGULO1.dat>
+  <DataDisplay=TRIANGULO1.dpl>
   <OpenDisplay=1>
-  <Script=TRIANGULO.m>
+  <Script=TRIANGULO1.m>
   <RunScript=0>
   <showFrame=0>
   <FrameText0=Título>
@@ -44,6 +44,7 @@
   <530 100 680 100 "" 0 0 0 "">
   <680 100 680 290 "" 0 0 0 "">
   <680 350 680 500 "" 0 0 0 "">
+  <350 100 350 100 "A" 380 70 0 "">
 </Wires>
 <Diagrams>
 </Diagrams>
