@@ -2,10 +2,10 @@
 <Properties>
   <View=0,0,800,800,1,0,0>
   <Grid=10,10,1>
-  <DataSet=ESTRELA.dat>
-  <DataDisplay=ESTRELA.dpl>
+  <DataSet=M2_R3_ESTRELA.dat>
+  <DataDisplay=M2_R3_ESTRELA.dpl>
   <OpenDisplay=1>
-  <Script=ESTRELA.m>
+  <Script=M2_R3_ESTRELA.m>
   <RunScript=0>
   <showFrame=0>
   <FrameText0=Título>
@@ -39,6 +39,7 @@
   <40 400 90 400 "" 0 0 0 "">
   <40 100 40 400 "" 0 0 0 "">
   <40 100 350 100 "" 0 0 0 "">
+  <350 100 350 100 "A" 380 70 0 "">
 </Wires>
 <Diagrams>
 </Diagrams>

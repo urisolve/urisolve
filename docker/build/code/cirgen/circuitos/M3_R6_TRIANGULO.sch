@@ -2,10 +2,10 @@
 <Properties>
   <View=0,0,800,800,1,0,0>
   <Grid=10,10,1>
-  <DataSet=TRIANGULO1.dat>
-  <DataDisplay=TRIANGULO1.dpl>
+  <DataSet=M3_R6_TRIANGULO.dat>
+  <DataDisplay=M3_R6_TRIANGULO.dpl>
   <OpenDisplay=1>
-  <Script=TRIANGULO1.m>
+  <Script=M3_R6_TRIANGULO.m>
   <RunScript=0>
   <showFrame=0>
   <FrameText0=Título>
