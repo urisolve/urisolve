@@ -21,13 +21,13 @@ $(function(){
         return{
             AC: {
                 Malhas: $("#isMalhas")[0].checked,
-                Ramos: $("#Ramos")[0].checked,
-                Nos: $("#Nos")[0].checked           
+                Ramos: $("#isRamos")[0].checked,
+                Nos: $("#isNos")[0].checked           
             },
             DC: {
                 Malhas: $("#isMalhas")[0].checked,
-                Ramos: $("#Ramos")[0].checked,
-                Nos: $("#Nos")[0].checked,
+                Ramos: $("#isRamos")[0].checked,
+                Nos: $("#isNos")[0].checked,
             }
 
         }
@@ -50,6 +50,14 @@ $(function(){
     }                             
     function mostrarCircuito(){
         return{
+            Circuitos: {
+                M1_R1: $("#isM1_R1")[0].checked,
+                M2_R3_ESTRELA: $("#isM2_R3_ESTRELA")[0].checked,
+                M2_R3: $("#isM2_R3")[0].checked,
+                M3_R4: $("#isM3_R4")[0].checked,
+                M3_R6_TRIANGULO: $("#isM3_R6_TRIANGULO")[0].checked,
+                M4_R5: $("#isM4_R5")[0].checked
+            }
             
         }
 

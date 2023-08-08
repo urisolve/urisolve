@@ -1,4 +1,4 @@
-Função que carrega o ficheiro do servidor para o cliente: 
+/*Função que carrega o ficheiro do servidor para o cliente:*/ 
 
 function fetchFileFromServer(relativePath) {
   const absoluteUrl = new URL(relativePath, window.location.origin).href;
@@ -15,7 +15,7 @@ function fetchFileFromServer(relativePath) {
     });
 }
 
-Como utilizar a função no código:
+/*Como utilizar a função no código:*/
 
 fetchFileFromServer(circuitUrl)
     .then(text => {
