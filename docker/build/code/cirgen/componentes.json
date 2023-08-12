@@ -1,0 +1,137 @@
+{
+  "components": [
+    {
+      "id": "cp1",
+      "type": "GND",
+      "position": { "x": 350, "y": 430 },
+      "label": {
+        "name": "",
+        "value": "*",
+        "unit": "undefined",
+        "position": { "x": 0, "y": 0 }
+      },
+      "ports": [
+        {
+          "id": "net2",
+          "type": "hybrid",
+          "position": { "x": 350, "y": 430 }
+        }
+      ]
+    },
+    {
+      "id": "cp5",
+      "type": "DC Voltage Source",
+      "position": { "x": 350, "y": 190 },
+      "label": {
+        "name": "V3",
+        "value": "100",
+        "unit": "V",
+        "position": { "x": 18, "y": -26 }
+      },
+      "ports": [
+        {
+          "id": "_net0",
+          "type": "Vdc",
+          "position": { "x": 350, "y": 220 }
+        },
+        {
+          "id": "A",
+          "type": "Vdc",
+          "position": { "x": 350, "y": 160 }
+        }
+      ]
+    },
+    {
+      "id": "cp2",
+      "type": "Resistor",
+      "position": { "x": 250, "y": 400 },
+      "label": {
+        "name": "R1",
+        "value": "50",
+        "unit": "Ω",
+        "position": { "x": -26, "y": 15 }
+      },
+      "ports": [
+        {
+          "id": "_net2",
+          "type": "R",
+          "position": { "x": 220, "y": 400 }
+        },
+        {
+          "id": "gnd",
+          "type": "hybrid",
+          "position": { "x": 280, "y": 400 }
+        }
+      ]
+    },
+    {
+      "id": "ffe5a9ee-6619-4092-8246-336621497794",
+      "type": "Inductor",
+      "position": { "x": 400, "y": 100 },
+      "label": {
+        "name": "L",
+        "value": "10m",
+        "unit": "H",
+        "position": { "x": 420, "y": 110 }
+      },
+      "ports": [
+        {
+          "id": "8909cf3b-f5cd-4edf-850a-37d1ac6ad9ed",
+          "type": "hybrid",
+          "position": { "x": 0, "y": 0.5 }
+        },
+        {
+          "id": "e7bb96c9-8eae-41c5-a361-7a38836505a8",
+          "type": "hybrid",
+          "position": { "x": 1, "y": 0.5 }
+        }
+      ]
+    },
+    {
+      "id": "ef4bc1f6-e72f-4c4c-b9bb-76ea5d36c13b",
+      "type": "Capacitor",
+      "position": { "x": 510, "y": 200, "angle": 90 },
+      "label": {
+        "name": "C",
+        "value": "1µ",
+        "unit": "F",
+        "position": { "x": 580, "y": 220 }
+      },
+      "ports": [
+        {
+          "id": "dc54f032-592a-4c89-90d6-0727add0908f",
+          "type": "hybrid",
+          "position": { "x": 0, "y": 0.5 }
+        },
+        {
+          "id": "b4c2c42a-24d8-4230-8ee7-f8330926205f",
+          "type": "hybrid",
+          "position": { "x": 1, "y": 0.5 }
+        }
+      ]
+    }
+  ],
+  "nodes": [],
+  "connections": [
+    {
+      "id": "da7214da-14c6-49ab-9ca6-5b2ed8a184d3",
+      "start": "1f7b8784-184b-4733-ae81-53c74b62462c",
+      "end": "8909cf3b-f5cd-4edf-850a-37d1ac6ad9ed"
+    },
+    {
+      "id": "fd313c9d-03f2-437d-8462-331e4efc660a",
+      "start": "e7bb96c9-8eae-41c5-a361-7a38836505a8",
+      "end": "dc54f032-592a-4c89-90d6-0727add0908f"
+    },
+    {
+      "id": "aa09ec37-a2f4-4f9a-a594-710094a61b81",
+      "start": "b4c2c42a-24d8-4230-8ee7-f8330926205f",
+      "end": "c990e78e-2bc5-4afb-92ee-b8a6d1faab0f"
+    },
+    {
+      "id": "7a141173-c7f0-4e4c-9120-2a363dba9f79",
+      "start": "7ed2507f-14fe-45e2-9246-9ee1d36eb442",
+      "end": "ddd6efab-f8f2-4565-8010-1270556f1d00"
+    }
+  ]
+}
