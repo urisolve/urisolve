@@ -675,7 +675,7 @@ function buildEq(malhas){
 							malha.revealedCurrSrc += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
 							malha.revealedEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value + '\\angle' +malhas[componente.meshCurrents[j]-1].currentSource.phase + '^{\\circ})');
 							malha.solverEq += ('(' + malhas[componente.meshCurrents[j]-1].currentSource.value*Math.cos(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)));
-							if(malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) != 0) malha.solverEq += (malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) + '*i)');
+							if(malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) != 0) malha.solverEq += ('+' + malhas[componente.meshCurrents[j]-1].currentSource.value*Math.sin(malhas[componente.meshCurrents[j]-1].currentSource.phase * (Math.PI / 180.0)) + '*i)');
 							else malha.solverEq += ')';
 						}
 						else{
