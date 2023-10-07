@@ -79,33 +79,23 @@ $(function(){
             }
         }
     }
-    function alterarCircuito(){
-        return{
-            Componentes: {
-                Resistência: $("#isResistênca")[0].checked,
-                Condensador: $("#isCondensador")[0].checked,
-                Bobine: $("#isBobine")[0].checked,
-                Massa: $("#isMassa")[0].checked,
-                Fonte_de_corrente: $("#isFonte de corrente")[0].checked,
-                Fonte_de_tensão: $("#isFonte de tensão")[0].checked 
-
-            }
-            
+    function alterarCircuito(circuitoEscolhido, escolhasDoUtilizador){
+        if (escolhasDoUtilizador.tipo){
+            circuitoEscolhido.tipo = escolhasDoUtilizador.tipo;
         }
 
-    }                             
-    function mostrarCircuito(){
-        return{
-            Circuitos: {
-                M1_R1: $("#isM1_R1")[0].checked,
-                M2_R3_ESTRELA: $("#isM2_R3_ESTRELA")[0].checked,
-                M2_R3: $("#isM2_R3")[0].checked,
-                M3_R4: $("#isM3_R4")[0].checked,
-                M3_R6_TRIANGULO: $("#isM3_R6_TRIANGULO")[0].checked,
-                M4_R5: $("#isM4_R5")[0].checked
-            }
-            
+        if (escolhasDoUtilizador.descricao){
+            circuitoEscolhido.descricao = escolhasDoUtilizador.descricao;
         }
+        return circuitoEscolhido;
 
-    } 
-});
+        const circuitoPersonalizado = PersonalizarCircuito(circuitoEscolhido,escolhasDoUtilizador);
+        console.log("Circuito Personalizado:", circuitoPersonalizado);
+    }
+                             
+    function mostrarCircuito(circuito){
+        const elementoSvg = document.getElementById('svgContainer')
+        
+    mostrarCircuito(circuito);
+ }
+}
