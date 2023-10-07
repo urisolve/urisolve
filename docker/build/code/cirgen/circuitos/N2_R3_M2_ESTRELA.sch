@@ -2,10 +2,10 @@
 <Properties>
   <View=0,0,800,800,1,0,0>
   <Grid=10,10,1>
-  <DataSet=M2_R3_ESTRELA.dat>
-  <DataDisplay=M2_R3_ESTRELA.dpl>
+  <DataSet=N2_R3_M2_ESTRELA.dat>
+  <DataDisplay=N2_R3_M2_ESTRELA.dpl>
   <OpenDisplay=1>
-  <Script=M2_R3_ESTRELA.m>
+  <Script=N2_R3_M2_ESTRELA.m>
   <RunScript=0>
   <showFrame=0>
   <FrameText0=Título>

@@ -2,10 +2,10 @@
 <Properties>
   <View=0,0,800,800,1,0,0>
   <Grid=10,10,1>
-  <DataSet=M3_R4.dat>
-  <DataDisplay=M3_R4.dpl>
+  <DataSet=N2_R4_M3.dat>
+  <DataDisplay=N2_R4_M3.dpl>
   <OpenDisplay=1>
-  <Script=M3_R4.m>
+  <Script=N2_R4_M3.m>
   <RunScript=0>
   <showFrame=0>
   <FrameText0=Título>
