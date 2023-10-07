@@ -18,10 +18,12 @@ $(function(){
                   }
                 }
     }
-    function escolherCircuito(infoutilizador){
+    function escolherCircuito(escolhasutilizador){
         return{
-            AC: {
-                Malhas: $("#isMalhas")[0].checked,
+            const listaDeNomes = ["NO_R1_M1.json","N2_R3_M2_ESTRELA.json","N2_R3_M2.json","N2_R4_M3.json","N2_R5_M4.json"."N4_R6_M3_TRIANGULO.json"];
+            const listaDeCircuitos = listaDeNomes.map(nome =>{
+                ["NO_R1_M1.json","N2_R3_M2_ESTRELA.json","N2_R3_M2.json","N2_R4_M3.json","N2_R5_M4.json"."N4_R6_M3_TRIANGULO.json"];
+                            Malhas: $("#isMalhas")[0].checked,
                 Ramos: $("#isRamos")[0].checked,
                 Nos: $("#isNos")[0].checked           
             },
