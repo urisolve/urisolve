@@ -1,0 +1,37 @@
+
+    {
+        "circuitos": [
+            {
+                "nome":"Circuito 1",
+                "descrição": "N0_R1_M1",
+                "tipo": "DC"
+            },
+
+            {
+                "nome":"Circuito 2",
+                "descrição": "N2_R3_M2_ESTRELA",
+                "tipo": "DC"
+            },
+            {
+                "nome":"Circuito 2",
+                "descrição": "N2_R3_M2",
+                "tipo": "DC"
+            },
+            {
+                "nome":"Circuito 3",
+                "descrição": "N2_R4_M3",
+                "tipo": "DC"
+            },
+            {
+                "nome":"Circuito 5",
+                "descrição": "N2_R5_M4",
+                "tipo": "DC"
+            },
+            {
+                "nome":"Circuito 6",
+                "descrição": "N4_R6_M3_TRIANGULO",
+                "tipo": "DC"
+            }
+            //Adicione mais circuitos, se necessário
+        ]
+    }
