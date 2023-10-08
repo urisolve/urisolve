@@ -682,7 +682,7 @@
                                 <h1>Geração automática de circuitos</h1>
                              </div> 
                              <div class="card-footer">       
-                                 <h2>Caracteristicas do circuito:</h2>
+                                 <h2>Caracteristicas do circuito</h2>
                                     <fieldset>
                                        <legend>
                                         <input type="checkbox" name="informação" value="Número de ramos"> Número de ramos
@@ -699,7 +699,7 @@
                                     </fieldset>
                               </div>
                               <div class="card-footer">                                   
-                                  <h2>Componentes a incluir:</h2>
+                                  <h2>Componentes a incluir</h2>
                                     <fieldset>
                                        <legend>
                                         <input type="checkbox" name="informação" value="Resistência"> Resistencia
@@ -716,17 +716,19 @@
                                     </fieldset>
                               </div>
                             </div> 
-                            <div class="col-sm-7"> 
-                              <div class="card-footer">
-                                <h2>Componentes a incluir:</h2> 
-                                    <input type="button" value="Exibir Informação" onclick="exibirInformação()">
-                                       <h3>Quantidade de componentes e tipo de circuito:</h3>
-                                       <div id="function recolherInformação" style="width: auto; background-color: #d7b01d"></div> 
+                            <div class="card-footer">
+                                <h2>Circuito gerado</h2> 
+                                <div class="col-md-4 d-flex justify-content-center" >
+                                  <button id="btnMTN" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light" type="button" onclick="analyseCircuit('MTN')"> <span data-translate="_btn_mtn_p1"></span> <br> <span data-translate="_btn_mtn_p2"></span> </button>
                                 </div>
-                                <div class="card-footer">
-                                  <input type="button" value="Mostrar Circuito" onclick="mostrarCircuito()">
-                                     <h3>Circuito selecionado:</h3>
-                                     <div id="circuito" style="width: auto"></div> 
+        
+                                <div class="col-md-4 d-flex justify-content-center" >
+                                  <button id="btnMCR" class ="btn btn-sm btn-primary btn-block btn-space shadow-md font-weight-light type="button" onclick="analyseCircuit('MCR')"> <span data-translate="_btn_mcr_p1"></span> <br> <span data-translate="_btn_mcr_p2"></span> </button>
+                                </div>
+                                <div class="col-12">
+                                  <a id="btnTest" class="nav-link js-scroll-trigger customNextBtn btn btn-sm btn-primary float-right examplesButton font-weight-normal" href="#drop_zone" onclick="localHandleFileSelect('D4')"><span data-translate="_buttonTry"></span></a>
+                                  </div>
+                                     
                               </div>
                               </div>
                            </div>
