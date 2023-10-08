@@ -1,0 +1,13 @@
+function filtrarCircuitosACSemFontes(jsonCircuitos) {
+  // Filtra circuitos AC com zero fontes de tensão e zero fontes de corrente alternada
+  const circuitosFiltrados = jsonCircuitos.filter(circuito => {
+    return (
+      circuito.tipo === "AC" &&
+      circuito.fontes_tensao === 0 &&
+      circuito.fontes_corrente === 0
+    );
+  });
+
+  return circuitosFiltrados;
+}
+

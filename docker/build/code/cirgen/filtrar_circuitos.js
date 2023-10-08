@@ -3,7 +3,7 @@ function filtrarCircuitos(circuitos) {
         return circuito.tipo === "Tipo desejado";
     
     });
-    if (circuitoFiltrados.length === 0) {
+    if (circuitosFiltrados.length === 0) {
         throw new Error("Nenhum circuito satisfaz os critérios de filtro.");
     }
     // Se ainda houver múltiplos após o filtro sequencial, escolha aleatoriamente um deles
@@ -14,7 +14,6 @@ function filtrarCircuitos(circuitos) {
     // Se apenas um circuito passar pelos critérios de filtro, retorne-o
     return circuitosFiltrados[0];
   
-
   try {
     const circuitoSelecionado = filtrarCircuitos(circuitos);
     console.log("Circuito selecionado:", circuitoSelecionado.nome);
