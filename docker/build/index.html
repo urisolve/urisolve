@@ -681,63 +681,44 @@
                              <div class="card-footer">
                                 <h1>Geração automática de circuitos</h1>
                              </div> 
-                             <div class="card-footer">                                   
-                                  <h2>Caracteristicas do circuito:</h2>
+                             <div class="card-footer">       
+                                 <h2>Caracteristicas do circuito:</h2>
                                     <fieldset>
                                        <legend>
-                                         <input type="checkbox" name="informação" value="Número de ramos"> Número de ramos
+                                        <input type="checkbox" name="informação" value="Número de ramos"> Número de ramos
                                             <input type="number" id="informação-Número de ramos" min="0" style="width: 15%; border: 3px solid green"><br>
                                          <input type="checkbox" name="informação" value="Número de nós"> Número de nós
                                             <input type="number" id="informação-Número de nós" min="1" style="width: 15%; border: 3px solid green"><br> 
-                                         <input type="checkbox" name="informação" value="Número de Malhas"> Número de Malhas
-                                            <input type="number" id="informação-Número de Malhas" min="1" style="width: 15%; border: 3px solid green"><br> 
+                                         <input type="checkbox" name="informação" value="Número de malhas"> Número de malhas
+                                            <input type="number" id="informação-Número de malhas" min="1" style="width: 15%; border: 3px solid green"><br> 
                                          <input type="checkbox" name="informação" value="Tipo AC"> Tipo AC
                                             <input id="informação-Tipo AC"><br> 
                                          <input type="checkbox" name="informação" value="Tipo DC"> Tipo DC 
-                                            <input id="informação-Tipo DC"><br>  
-                                        </legend>
+                                            <input id="informação-Tipo DC"><br> 
+                                       </legend> 
                                     </fieldset>
-                                </div>
-                             <div class="card-footer">       
-                                 <h2>Quantidade de Componentes:</h2>
+                              </div>
+                              <div class="card-footer">                                   
+                                  <h2>Componentes a incluir:</h2>
                                     <fieldset>
                                        <legend>
                                         <input type="checkbox" name="informação" value="Resistência"> Resistencia
                                            <input type="number" id="informação-Resistência" min="0" style="width: 15%; border: 3px solid green"><br>
-                                        <input type="checkbox" name="informação" value="Condensador"> Condensador
-                                           <input type="number" id="informação-Condensador" min="0" style="width:15%; border: 3px solid green"><br>
-                                        <input type="checkbox" name="informação" value="Bobine"> Bobine
-                                           <input type="number" id="informação-Bobine" min="0" style="width: 15%; border: 3px solid green"><br>
-                                        <input type="checkbox" name="informação" value="Massa"> Massa
-                                           <input type="number" id="informação-Massa" min="0" style="width: 15%; border: 3px solid green"><br>
-                                        <input type="checkbox" name="informação" value="Fonte de corrente">  Fonte de corrente
-                                           <input type="number" id="informação-Fonte de corrente" min="0" style="width: 15%; border: 3px solid green"><br>  
-                                        <input type="checkbox" name="informação" value="Fonte de tensão"> Fonte de tensão
-                                           <input type="number" id="informação-Fonte de tensão" min="0" style="width: 15%; border: 3px solid green"><br> 
-                                       </legend> 
+                                        <input type="checkbox" name="informação" value="Fonte tensão"> Fonte tensão
+                                           <input type="number" id="informação-Fonte tensão" min="0" style="width:15%; border: 3px solid green"><br>
+                                        <input type="checkbox" name="informação" value="Fonte corrente"> Fonte corrente
+                                           <input type="number" id="informação-Fonte corrente" min="0" style="width: 15%; border: 3px solid green"><br>
+                                       <input type="checkbox" name="informação" value="Condensador"> Condensador
+                                           <input type="number" id="informação-Condensador" min="0" style="width: 15%; border: 3px solid green"><br>
+                                       <input type="checkbox" name="informação" value="Bobina">  Bobina
+                                          <input type="number" id="informação-Bobina" min="0" style="width: 15%; border: 3px solid green"><br>  
+                                       </legend>
                                     </fieldset>
-                               </div>
-                              
-                               <div class="card-footer">                                   
-                                  <h2>Tipo de circuito:</h2>
-                                    <fieldset>
-                                       <legend>
-                                         <input type="checkbox" name="informação" value="Nós"> Nós
-                                            <input type="number" id="informação-Nós" min="0" style="width: 15%; border: 3px solid green"><br>
-                                         <input type="checkbox" name="informação" value="Ramos"> Ramos
-                                            <input type="number" id="informação-Ramos" min="1" style="width: 15%; border: 3px solid green"><br> 
-                                         <input type="checkbox" name="informação" value="Malhas"> Malhas
-                                            <input type="number" id="informação-Malhas" min="1" style="width: 15%; border: 3px solid green"><br> 
-                                         <input type="checkbox" name="informação" value="Tipo AC"> Tipo AC
-                                            <input id="informação-Tipo AC"><br> 
-                                         <input type="checkbox" name="informação" value="Tipo DC"> Tipo DC 
-                                            <input id="informação-Tipo DC"><br>  
-                                        </legend>
-                                    </fieldset>
-                                </div>
-                              </div> 
-                              <div class="col-sm-7"> 
-                                <div class="card-footer">
+                              </div>
+                            </div> 
+                            <div class="col-sm-7"> 
+                              <div class="card-footer">
+                                <h2>Componentes a incluir:</h2> 
                                     <input type="button" value="Exibir Informação" onclick="exibirInformação()">
                                        <h3>Quantidade de componentes e tipo de circuito:</h3>
                                        <div id="function recolherInformação" style="width: auto; background-color: #d7b01d"></div> 
